@@ -1,7 +1,21 @@
 import PensionDashboard from "@/components/PensionDashboard";
+import { Button } from "@/components/ui/button";
+import { ExternalLink } from "lucide-react";
 
 const Index = () => {
-  return <PensionDashboard />;
+  return (
+    <div>
+      <div className="fixed top-4 right-4 z-50">
+        <Button variant="outline" asChild>
+          <a href="/admin">
+            <ExternalLink className="w-4 h-4 mr-2" />
+            Admin Portal
+          </a>
+        </Button>
+      </div>
+      <PensionDashboard />
+    </div>
+  );
 };
 
 export default Index;

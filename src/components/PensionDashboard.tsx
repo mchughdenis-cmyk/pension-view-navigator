@@ -223,6 +223,29 @@ export default function PensionDashboard() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Quick Actions */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Quick Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button asChild className="w-full">
+                    <a href="/illustration">
+                      <Calculator className="w-4 h-4 mr-2" />
+                      Create Income Illustration
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <ArrowRightLeft className="w-4 h-4 mr-2" />
+                    Request Transfer
+                  </Button>
+                  <Button variant="outline" className="w-full">
+                    <FileText className="w-4 h-4 mr-2" />
+                    Download Statements
+                  </Button>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 

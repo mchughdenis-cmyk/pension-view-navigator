@@ -236,9 +236,11 @@ export default function PensionDashboard() {
                       Create Income Illustration
                     </a>
                   </Button>
-                  <Button variant="outline" className="w-full">
-                    <ArrowRightLeft className="w-4 h-4 mr-2" />
-                    Request Transfer
+                  <Button variant="outline" className="w-full" asChild>
+                    <a href="/transfer">
+                      <ArrowRightLeft className="w-4 h-4 mr-2" />
+                      Transfer Pensions
+                    </a>
                   </Button>
                   <Button variant="outline" className="w-full">
                     <FileText className="w-4 h-4 mr-2" />

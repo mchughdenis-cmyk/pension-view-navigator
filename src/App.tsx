@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
 import PensionTransferJourney from "./components/PensionTransferJourney";
+import PensionSystemPitch from "./components/PensionSystemPitch";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/illustration" element={<PensionIllustration />} />
           <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
           <Route path="/transfer" element={<PensionTransferJourney />} />
+          <Route path="/pitch" element={<PensionSystemPitch />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

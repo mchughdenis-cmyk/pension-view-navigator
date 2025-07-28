@@ -19,8 +19,10 @@ import {
   BarChart3,
   UserCheck,
   Calendar,
-  Clock
+  Clock,
+  UserPlus
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Mock data for admin dashboard
 const adminData = {
@@ -170,6 +172,8 @@ const getPriorityColor = (priority: string) => {
 };
 
 export default function PensionAdminDashboard() {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -183,6 +187,10 @@ export default function PensionAdminDashboard() {
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Export Report
+            </Button>
+            <Button variant="outline" onClick={() => navigate('/onboarding')}>
+              <UserPlus className="w-4 h-4 mr-2" />
+              Client Onboarding
             </Button>
             <Button className="bg-primary hover:bg-primary/90">
               <UserCheck className="w-4 h-4 mr-2" />

@@ -11,6 +11,7 @@ import DigitalWelcomePack from "./components/DigitalWelcomePack";
 import PensionTransferJourney from "./components/PensionTransferJourney";
 import PensionSystemPitch from "./components/PensionSystemPitch";
 import ClientOnboarding from "./components/ClientOnboarding";
+import DrawdownJourney from "./components/DrawdownJourney";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/transfer" element={<PensionTransferJourney />} />
           <Route path="/pitch" element={<PensionSystemPitch />} />
           <Route path="/onboarding" element={<ClientOnboarding />} />
+          <Route path="/drawdown" element={<DrawdownJourney />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

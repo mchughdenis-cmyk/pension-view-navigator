@@ -6,6 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { 
   PiggyBank, 
   TrendingUp, 
+  TrendingDown,
   ArrowDownRight, 
   DollarSign, 
   FileText, 
@@ -231,6 +232,12 @@ export default function PensionDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <Button asChild className="w-full">
+                    <a href="/drawdown">
+                      <TrendingDown className="w-4 h-4 mr-2" />
+                      Start Drawdown Journey
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="w-full" asChild>
                     <a href="/illustration">
                       <Calculator className="w-4 h-4 mr-2" />
                       Create Income Illustration

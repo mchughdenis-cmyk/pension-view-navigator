@@ -14,7 +14,7 @@ import {
   ArrowRightLeft,
   Calculator,
   BookOpen,
-  Info,
+  Info as InfoIcon,
   PieChart
 } from "lucide-react";
 
@@ -303,7 +303,7 @@ export default function PensionDashboard() {
                   <div className="border-t pt-4 mt-6">
                     <div className="bg-accent/30 p-4 rounded-lg">
                       <h4 className="font-semibold mb-2 flex items-center gap-2">
-                        <Info className="w-4 h-4" />
+                        <InfoIcon className="w-4 h-4" />
                         Investment Amendment Options
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">

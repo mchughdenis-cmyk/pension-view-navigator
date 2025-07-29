@@ -47,6 +47,42 @@ const pensionData = {
       growth: -1.2
     }
   ],
+  otherProducts: {
+    gia: [
+      {
+        id: 1,
+        provider: "Hargreaves Lansdown GIA",
+        value: 75000,
+        growth: 3.1,
+        monthlyContribution: 500
+      },
+      {
+        id: 2,
+        provider: "AJ Bell GIA",
+        value: 42000,
+        growth: 2.8,
+        monthlyContribution: 300
+      }
+    ],
+    isa: [
+      {
+        id: 1,
+        provider: "Vanguard S&S ISA",
+        value: 85000,
+        growth: 4.5,
+        contributionsThisYear: 18000,
+        remainingAllowance: 2000
+      },
+      {
+        id: 2,
+        provider: "Premium Bonds",
+        value: 15000,
+        growth: 1.4,
+        contributionsThisYear: 2000,
+        remainingAllowance: 0
+      }
+    ]
+  },
   allowances: {
     annualAllowance: 60000,
     usedThisYear: 40400,
@@ -150,12 +186,13 @@ export default function PensionDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="investments">Investments</TabsTrigger>
             <TabsTrigger value="contributions">Contributions</TabsTrigger>
             <TabsTrigger value="allowances">Allowances</TabsTrigger>
             <TabsTrigger value="transfers">Transfers</TabsTrigger>
+            <TabsTrigger value="other-products">Other Products</TabsTrigger>
             <TabsTrigger value="resources">Resources</TabsTrigger>
           </TabsList>
 
@@ -436,6 +473,91 @@ export default function PensionDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="other-products">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* GIA Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <DollarSign className="h-5 w-5" />
+                    General Investment Accounts (GIA)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {pensionData.otherProducts.gia.map((gia) => (
+                    <div key={gia.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{gia.provider}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Monthly contribution: {formatCurrency(gia.monthlyContribution)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{formatCurrency(gia.value)}</p>
+                        <p className={`text-sm ${gia.growth >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {gia.growth >= 0 ? '+' : ''}{gia.growth}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t pt-3 mt-3">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total GIA Value</span>
+                      <span className="font-bold text-primary">
+                        {formatCurrency(pensionData.otherProducts.gia.reduce((sum, gia) => sum + gia.value, 0))}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* ISA Section */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <PiggyBank className="h-5 w-5" />
+                    Individual Savings Accounts (ISA)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {pensionData.otherProducts.isa.map((isa) => (
+                    <div key={isa.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <h3 className="font-medium">{isa.provider}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          This year: {formatCurrency(isa.contributionsThisYear)}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Remaining allowance: {formatCurrency(isa.remainingAllowance)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">{formatCurrency(isa.value)}</p>
+                        <p className={`text-sm ${isa.growth >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {isa.growth >= 0 ? '+' : ''}{isa.growth}%
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="border-t pt-3 mt-3">
+                    <div className="flex justify-between">
+                      <span className="font-medium">Total ISA Value</span>
+                      <span className="font-bold text-primary">
+                        {formatCurrency(pensionData.otherProducts.isa.reduce((sum, isa) => sum + isa.value, 0))}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                      <span>Total ISA allowance remaining</span>
+                      <span>
+                        {formatCurrency(pensionData.otherProducts.isa.reduce((sum, isa) => sum + isa.remainingAllowance, 0))}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           <TabsContent value="resources">

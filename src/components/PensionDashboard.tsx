@@ -13,7 +13,9 @@ import {
   ExternalLink,
   ArrowRightLeft,
   Calculator,
-  BookOpen
+  BookOpen,
+  Info,
+  PieChart
 } from "lucide-react";
 
 // Mock data for pensions
@@ -267,12 +269,18 @@ export default function PensionDashboard() {
           <TabsContent value="investments">
             <Card>
               <CardHeader>
-                <CardTitle>Investment Allocation</CardTitle>
+                <div className="flex justify-between items-center">
+                  <CardTitle>Investment Allocation</CardTitle>
+                  <Button variant="outline" size="sm">
+                    <TrendingUp className="w-4 h-4 mr-2" />
+                    Amend Investments
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {pensionData.investments.map((investment, index) => (
-                    <div key={index} className="flex items-center justify-between">
+                    <div key={index} className="flex items-center justify-between p-3 border rounded-lg hover:bg-accent/50 transition-colors">
                       <div className="flex-1">
                         <p className="font-medium">{investment.name}</p>
                         <p className="text-sm text-muted-foreground">{investment.allocation}% allocation</p>
@@ -286,8 +294,41 @@ export default function PensionDashboard() {
                           ></div>
                         </div>
                       </div>
+                      <Button variant="ghost" size="sm" className="ml-4">
+                        <TrendingUp className="w-4 h-4" />
+                      </Button>
                     </div>
                   ))}
+                  
+                  <div className="border-t pt-4 mt-6">
+                    <div className="bg-accent/30 p-4 rounded-lg">
+                      <h4 className="font-semibold mb-2 flex items-center gap-2">
+                        <Info className="w-4 h-4" />
+                        Investment Amendment Options
+                      </h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                        <Button variant="outline" className="justify-start">
+                          <TrendingUp className="w-4 h-4 mr-2" />
+                          Rebalance Portfolio
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <PieChart className="w-4 h-4 mr-2" />
+                          Change Risk Level
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <Calculator className="w-4 h-4 mr-2" />
+                          Switch Funds
+                        </Button>
+                        <Button variant="outline" className="justify-start">
+                          <FileText className="w-4 h-4 mr-2" />
+                          View Fund Performance
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-3">
+                        Investment changes may take 3-5 working days to process. Switching charges may apply.
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>

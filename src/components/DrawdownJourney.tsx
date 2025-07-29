@@ -88,12 +88,74 @@ export default function DrawdownJourney() {
   const projectedDrawdownValue = drawdownPot * Math.pow(1 + annualGrowthRate - (annualIncome / drawdownPot), yearsToProject);
   const guaranteedAnnuityIncome = annuityPot * annuityRate;
   
+  const [riskAnswers, setRiskAnswers] = useState({
+    investmentExperience: "",
+    riskTolerance: "",
+    incomeNeeds: "",
+    marketVolatility: "",
+    longevityRisk: ""
+  });
+
   const steps = [
-    { id: 1, title: "Tax-Free Cash", description: "Choose your tax-free lump sum" },
-    { id: 2, title: "Income Options", description: "Select your preferred approach" },
-    { id: 3, title: "Customization", description: "Fine-tune your choices" },
-    { id: 4, title: "Projections", description: "Review long-term outlook" },
-    { id: 5, title: "Application", description: "Complete your application" }
+    { id: 1, title: "Risk Assessment", description: "Complete risk warning questions" },
+    { id: 2, title: "Tax-Free Cash", description: "Choose your tax-free lump sum" },
+    { id: 3, title: "Income Options", description: "Select your preferred approach" },
+    { id: 4, title: "Customization", description: "Fine-tune your choices" },
+    { id: 5, title: "Projections", description: "Review long-term outlook" },
+    { id: 6, title: "Application", description: "Complete your application" }
+  ];
+
+  const riskQuestions = [
+    {
+      id: "investmentExperience",
+      question: "How would you describe your investment experience?",
+      options: [
+        { value: "beginner", label: "Beginner - Little to no investment experience" },
+        { value: "some", label: "Some experience - Have made investments before" },
+        { value: "experienced", label: "Experienced - Regular investor with good knowledge" },
+        { value: "expert", label: "Expert - Extensive investment knowledge and experience" }
+      ]
+    },
+    {
+      id: "riskTolerance",
+      question: "How do you feel about investment risk and potential losses?",
+      options: [
+        { value: "low", label: "I prefer security and cannot afford any losses" },
+        { value: "moderate", label: "I can accept some risk for potentially higher returns" },
+        { value: "high", label: "I'm comfortable with significant risk for higher growth potential" },
+        { value: "very-high", label: "I'm willing to accept high risk including potential major losses" }
+      ]
+    },
+    {
+      id: "incomeNeeds",
+      question: "How important is guaranteed income to you?",
+      options: [
+        { value: "essential", label: "Essential - I need certainty of income" },
+        { value: "important", label: "Important - I prefer some guaranteed income" },
+        { value: "flexible", label: "Flexible - I can manage variable income" },
+        { value: "not-important", label: "Not important - I can manage without guarantees" }
+      ]
+    },
+    {
+      id: "marketVolatility",
+      question: "How would you react to a 20% drop in your pension value?",
+      options: [
+        { value: "panic", label: "Very concerned - I would want to switch to safer options" },
+        { value: "worried", label: "Worried - But would probably stay invested" },
+        { value: "concerned", label: "Concerned - But understand markets can recover" },
+        { value: "calm", label: "Calm - I understand this is normal market behavior" }
+      ]
+    },
+    {
+      id: "longevityRisk",
+      question: "Are you concerned about outliving your pension savings?",
+      options: [
+        { value: "very-concerned", label: "Very concerned - This is my main worry" },
+        { value: "somewhat", label: "Somewhat concerned - It's one of several worries" },
+        { value: "not-very", label: "Not very concerned - I have other income sources" },
+        { value: "not-concerned", label: "Not concerned - I'm confident in my planning" }
+      ]
+    }
   ];
 
   return (
@@ -188,16 +250,84 @@ export default function DrawdownJourney() {
 
         {/* Main Content */}
         <Tabs defaultValue="step1" value={`step${currentStep}`} onValueChange={(value) => setCurrentStep(parseInt(value.replace('step', '')))}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="step1" disabled={currentStep < 1}>Tax-Free Cash</TabsTrigger>
-            <TabsTrigger value="step2" disabled={currentStep < 2}>Income Options</TabsTrigger>
-            <TabsTrigger value="step3" disabled={currentStep < 3}>Customize</TabsTrigger>
-            <TabsTrigger value="step4" disabled={currentStep < 4}>Projections</TabsTrigger>
-            <TabsTrigger value="step5" disabled={currentStep < 5}>Application</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="step1" disabled={currentStep < 1}>Risk Assessment</TabsTrigger>
+            <TabsTrigger value="step2" disabled={currentStep < 2}>Tax-Free Cash</TabsTrigger>
+            <TabsTrigger value="step3" disabled={currentStep < 3}>Income Options</TabsTrigger>
+            <TabsTrigger value="step4" disabled={currentStep < 4}>Customize</TabsTrigger>
+            <TabsTrigger value="step5" disabled={currentStep < 5}>Projections</TabsTrigger>
+            <TabsTrigger value="step6" disabled={currentStep < 6}>Application</TabsTrigger>
           </TabsList>
 
-          {/* Step 1: Tax-Free Cash */}
+          {/* Step 1: Risk Assessment */}
           <TabsContent value="step1">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-warning" />
+                    Risk Warning Assessment
+                  </CardTitle>
+                  <p className="text-muted-foreground">
+                    Before proceeding with drawdown, we need to understand your risk profile and ensure this is suitable for you.
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                      <AlertTriangle className="h-5 w-5 text-warning mt-0.5" />
+                      <div>
+                        <h4 className="font-semibold text-warning">Important Risk Warnings</h4>
+                        <ul className="text-sm mt-2 space-y-1">
+                          <li>• Pension drawdown involves investment risk - your fund value can go down as well as up</li>
+                          <li>• You could run out of money in retirement if withdrawals are too high</li>
+                          <li>• Income is not guaranteed and will fluctuate with investment performance</li>
+                          <li>• Early withdrawals may impact long-term retirement security</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-6">
+                    {riskQuestions.map((q, index) => (
+                      <div key={q.id} className="space-y-3">
+                        <h4 className="font-medium">{index + 1}. {q.question}</h4>
+                        <div className="space-y-2">
+                          {q.options.map((option) => (
+                            <label key={option.value} className="flex items-start gap-3 p-3 border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors">
+                              <input
+                                type="radio"
+                                name={q.id}
+                                value={option.value}
+                                checked={riskAnswers[q.id] === option.value}
+                                onChange={(e) => setRiskAnswers(prev => ({ ...prev, [q.id]: e.target.value }))}
+                                className="mt-1"
+                              />
+                              <span className="text-sm">{option.label}</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8 flex justify-center">
+                    <Button 
+                      onClick={() => setCurrentStep(2)} 
+                      disabled={Object.values(riskAnswers).some(answer => !answer)}
+                      className="px-8"
+                    >
+                      Continue to Tax-Free Cash
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Step 2: Tax-Free Cash */}
+          <TabsContent value="step2">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -264,7 +394,7 @@ export default function DrawdownJourney() {
                   </div>
 
                   <div className="mt-6">
-                    <Button onClick={() => setCurrentStep(2)} className="w-full">
+                    <Button onClick={() => setCurrentStep(3)} className="w-full">
                       Next: Choose Income Options
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -274,8 +404,8 @@ export default function DrawdownJourney() {
             </div>
           </TabsContent>
 
-          {/* Step 2: Income Options */}
-          <TabsContent value="step2">
+          {/* Step 3: Income Options */}
+          <TabsContent value="step3">
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {Object.entries(drawdownOptions).map(([key, option]) => (
@@ -324,7 +454,7 @@ export default function DrawdownJourney() {
 
               <div className="flex justify-center">
                 <Button 
-                  onClick={() => setCurrentStep(3)} 
+                  onClick={() => setCurrentStep(4)} 
                   disabled={!selectedOption}
                   className="px-8"
                 >
@@ -335,8 +465,8 @@ export default function DrawdownJourney() {
             </div>
           </TabsContent>
 
-          {/* Step 3: Customization */}
-          <TabsContent value="step3">
+          {/* Step 4: Customization */}
+          <TabsContent value="step4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card>
                 <CardHeader>
@@ -450,7 +580,7 @@ export default function DrawdownJourney() {
                   </div>
 
                   <div className="mt-6">
-                    <Button onClick={() => setCurrentStep(4)} className="w-full">
+                    <Button onClick={() => setCurrentStep(5)} className="w-full">
                       Next: View Projections
                       <ArrowRight className="w-4 h-4 ml-2" />
                     </Button>
@@ -460,8 +590,8 @@ export default function DrawdownJourney() {
             </div>
           </TabsContent>
 
-          {/* Step 4: Projections */}
-          <TabsContent value="step4">
+          {/* Step 5: Projections */}
+          <TabsContent value="step5">
             <div className="space-y-6">
               <Card>
                 <CardHeader>
@@ -558,7 +688,7 @@ export default function DrawdownJourney() {
               </div>
 
               <div className="flex justify-center">
-                <Button onClick={() => setCurrentStep(5)} className="px-8">
+                <Button onClick={() => setCurrentStep(6)} className="px-8">
                   Next: Complete Application
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
@@ -566,8 +696,8 @@ export default function DrawdownJourney() {
             </div>
           </TabsContent>
 
-          {/* Step 5: Application */}
-          <TabsContent value="step5">
+          {/* Step 6: Application */}
+          <TabsContent value="step6">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">

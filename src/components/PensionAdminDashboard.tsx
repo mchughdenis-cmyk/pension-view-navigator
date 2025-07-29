@@ -20,7 +20,12 @@ import {
   UserCheck,
   Calendar,
   Clock,
-  UserPlus
+  UserPlus,
+  Upload,
+  FileUp,
+  Receipt,
+  Building2,
+  Shield
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -250,12 +255,13 @@ export default function PensionAdminDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="clients" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="clients">Client Management</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
             <TabsTrigger value="alerts">Alerts & Notifications</TabsTrigger>
             <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
+            <TabsTrigger value="regulatory">Tax & Regulatory</TabsTrigger>
           </TabsList>
 
           <TabsContent value="clients">
@@ -452,6 +458,10 @@ export default function PensionAdminDashboard() {
                     Transfer Documentation
                   </Button>
                   <Button variant="outline" className="w-full justify-start">
+                    <Receipt className="w-4 h-4 mr-2" />
+                    Tax Relief Report
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start">
                     <FileText className="w-4 h-4 mr-2" />
                     Compliance Audit Trail
                   </Button>
@@ -503,6 +513,147 @@ export default function PensionAdminDashboard() {
                     <div className="flex justify-between py-2">
                       <span>Next review</span>
                       <span className="font-medium">March 2024</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="regulatory">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="h-5 w-5" />
+                    Tax Relief Reporting
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-accent/30 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">Generate Tax Relief Report</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Create comprehensive tax relief reports for client contributions
+                    </p>
+                    <div className="space-y-3">
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select tax year" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="2024-25">2024-25</SelectItem>
+                          <SelectItem value="2023-24">2023-24</SelectItem>
+                          <SelectItem value="2022-23">2022-23</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Select>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client group" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Clients</SelectItem>
+                          <SelectItem value="high-earners">High Earners</SelectItem>
+                          <SelectItem value="basic-rate">Basic Rate Taxpayers</SelectItem>
+                          <SelectItem value="additional-rate">Additional Rate Taxpayers</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button className="w-full">
+                        <Receipt className="w-4 h-4 mr-2" />
+                        Generate Tax Relief Report
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-accent/30 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2">Upload Tax Documents</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload P60s, P45s, and other tax documentation
+                    </p>
+                    <div className="space-y-3">
+                      <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
+                        <FileUp className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
+                        <p className="text-sm text-muted-foreground">
+                          Drop files here or click to upload
+                        </p>
+                        <Button variant="outline" className="mt-2">
+                          <Upload className="w-4 h-4 mr-2" />
+                          Select Files
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Building2 className="h-5 w-5" />
+                    Regulatory Returns
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="bg-accent/30 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      FCA Reporting
+                    </h4>
+                    <div className="space-y-3">
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        RMAR Return (Quarterly)
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        SUP Return (Annual)
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Client Asset Return (CASS)
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Conduct Risk Return
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-accent/30 p-4 rounded-lg">
+                    <h4 className="font-semibold mb-2 flex items-center gap-2">
+                      <Receipt className="w-4 h-4" />
+                      HMRC Returns
+                    </h4>
+                    <div className="space-y-3">
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Event Report (Net Pay)
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Annual Return of Information
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Pension Scheme Return
+                      </Button>
+                      <Button variant="outline" className="w-full justify-start">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Accounting for Tax Return
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="bg-primary/10 p-4 rounded-lg border border-primary/20">
+                    <h4 className="font-semibold mb-2">Quick Actions</h4>
+                    <div className="flex gap-2">
+                      <Button size="sm" className="flex-1">
+                        <Download className="w-4 h-4 mr-2" />
+                        Export All
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Upload className="w-4 h-4 mr-2" />
+                        Bulk Upload
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

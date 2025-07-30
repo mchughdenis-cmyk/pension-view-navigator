@@ -723,24 +723,206 @@ const PensionSystemPitch = () => {
         </div>
 
         {/* Call to Action */}
-        <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-xl">
-          <CardContent className="text-center py-12">
-            <h2 className="text-3xl font-bold mb-4">Ready to Transform Your Pension Operations?</h2>
-            <p className="text-xl mb-8 text-blue-100">
-              Join leading pension providers who have already modernized their client experience
-            </p>
-            <div className="flex justify-center gap-4">
-              <Button size="lg" className="bg-white text-blue-600 hover:bg-blue-50">
-                <Calendar className="h-5 w-5 mr-2" />
-                Schedule Demo
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Calendar className="h-6 w-6" />
+                Schedule a Demo
+              </CardTitle>
+              <CardDescription className="text-blue-100">
+                See the platform in action with your specific requirements
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="demo-name" className="text-white">Name</Label>
+                  <Input id="demo-name" placeholder="Your name" className="bg-white/10 border-white/20 text-white placeholder:text-blue-200" />
+                </div>
+                <div>
+                  <Label htmlFor="demo-email" className="text-white">Email</Label>
+                  <Input id="demo-email" type="email" placeholder="your@email.com" className="bg-white/10 border-white/20 text-white placeholder:text-blue-200" />
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="demo-company" className="text-white">Company</Label>
+                <Input id="demo-company" placeholder="Company name" className="bg-white/10 border-white/20 text-white placeholder:text-blue-200" />
+              </div>
+              <Button className="w-full bg-white text-blue-600 hover:bg-blue-50">
+                Book Demo Call
               </Button>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white/10">
-                <Download className="h-5 w-5 mr-2" />
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-green-500 to-blue-500 text-white border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Download className="h-6 w-6" />
+                Platform Brochure
+              </CardTitle>
+              <CardDescription className="text-green-100">
+                Download our comprehensive platform guide with live portal access
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-green-100">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Complete feature overview</span>
+                </div>
+                <div className="flex items-center gap-2 text-green-100">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Implementation timeline</span>
+                </div>
+                <div className="flex items-center gap-2 text-green-100">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>Live portal access links</span>
+                </div>
+                <div className="flex items-center gap-2 text-green-100">
+                  <CheckCircle className="h-4 w-4" />
+                  <span>ROI case studies</span>
+                </div>
+              </div>
+              <Button 
+                className="w-full bg-white text-green-600 hover:bg-green-50"
+                onClick={() => {
+                  // Create downloadable brochure content
+                  const brochureContent = `
+PENSION PLATFORM BROCHURE
+=========================
+
+Next-Generation Pension Management System
+
+OVERVIEW
+--------
+Complete digital pension management solution designed for modern pension operators.
+Streamline operations, enhance client experience, and ensure regulatory compliance.
+
+KEY FEATURES
+-----------
+• Complete Client Management - Full lifecycle client portal with real-time portfolio tracking
+• Administrative Excellence - Comprehensive back-office tools with compliance monitoring
+• Advanced Illustrations - Side-by-side comparison tools for drawdown vs annuity options
+• Seamless Transfers - Digital transfer journey supporting all pension types
+• Digital Documentation - Comprehensive welcome packs and regulatory documentation
+• Automated Workflows - Streamlined contribution processing and compliance checks
+
+PROVEN RESULTS
+--------------
+• 75% Processing Time Reduction
+• 95% Client Satisfaction Rate
+• 99.9% Compliance Accuracy
+• 60% Cost Reduction
+
+LIVE PORTAL ACCESS
+------------------
+Experience the platform yourself:
+
+CLIENT PORTAL: ${window.location.origin}/
+- Portfolio tracking and management
+- Contribution management
+- Transfer capabilities
+- Digital documentation
+
+ADMIN PORTAL: ${window.location.origin}/admin
+- Client management dashboard
+- Compliance monitoring
+- Regulatory reporting
+- Tax relief management
+
+TECHNICAL SPECIFICATIONS
+------------------------
+• Cloud-native architecture
+• API-first design
+• Real-time data processing
+• Bank-grade security
+• Mobile responsive
+• Multi-tenant support
+
+INTEGRATION CAPABILITIES
+-----------------------
+• Pension providers
+• Investment platforms
+• Regulatory systems
+• CRM systems
+• Document management
+• Payment gateways
+
+IMPLEMENTATION
+--------------
+Standard implementation: 8-12 weeks
+- Requirements analysis (2 weeks)
+- System configuration (4-6 weeks)
+- Testing & validation (2 weeks)
+- Go-live support (1-2 weeks)
+
+CONTACT
+-------
+For more information or to schedule a demo:
+Email: info@pensionplatform.com
+Phone: +44 (0) 20 1234 5678
+
+© 2024 Pension Platform Solutions
+                  `;
+                  
+                  const blob = new Blob([brochureContent], { type: 'text/plain' });
+                  const url = window.URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'Pension-Platform-Brochure.txt';
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  window.URL.revokeObjectURL(url);
+                }}
+              >
+                <Download className="h-4 w-4 mr-2" />
                 Download Brochure
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0 shadow-xl">
+            <CardHeader>
+              <CardTitle className="text-2xl flex items-center gap-2">
+                <Eye className="h-6 w-6" />
+                Try Live Portals
+              </CardTitle>
+              <CardDescription className="text-purple-100">
+                Access live demonstrations of our client and admin portals
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <Button 
+                  className="w-full bg-white/20 text-white border border-white/30 hover:bg-white/30"
+                  asChild
+                >
+                  <a href="/" target="_blank" rel="noopener noreferrer">
+                    <Users className="h-4 w-4 mr-2" />
+                    Client Portal Demo
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </a>
+                </Button>
+                <Button 
+                  className="w-full bg-white/20 text-white border border-white/30 hover:bg-white/30"
+                  asChild
+                >
+                  <a href="/admin" target="_blank" rel="noopener noreferrer">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Admin Portal Demo
+                    <ExternalLink className="h-4 w-4 ml-2" />
+                  </a>
+                </Button>
+              </div>
+              <div className="text-center text-purple-100 text-sm">
+                <p>Full functionality with sample data</p>
+                <p>No registration required</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

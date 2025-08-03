@@ -294,9 +294,11 @@ export default function PensionDashboard() {
                       Transfer Out
                     </a>
                   </Button>
-                  <Button variant="outline" className="w-full">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Download Statements
+                  <Button variant="outline" className="w-full" asChild>
+                    <a href="/annual-summary">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Download Statements
+                    </a>
                   </Button>
                   <Button variant="outline" className="w-full" asChild>
                     <a href="/welcome-pack">

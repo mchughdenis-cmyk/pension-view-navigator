@@ -13,6 +13,7 @@ import PensionSystemPitch from "./components/PensionSystemPitch";
 import ClientOnboarding from "./components/ClientOnboarding";
 import DrawdownJourney from "./components/DrawdownJourney";
 import TransferOutJourney from "./components/TransferOutJourney";
+import AnnualSummary from "./components/AnnualSummary";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/onboarding" element={<ClientOnboarding />} />
           <Route path="/drawdown" element={<DrawdownJourney />} />
           <Route path="/transfer-out" element={<TransferOutJourney />} />
+          <Route path="/annual-summary" element={<AnnualSummary />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

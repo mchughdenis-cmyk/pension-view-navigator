@@ -3,6 +3,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { 
   PiggyBank, 
   TrendingUp, 
@@ -15,7 +21,12 @@ import {
   Calculator,
   BookOpen,
   Info as InfoIcon,
-  PieChart
+  PieChart,
+  Calendar,
+  Edit3,
+  Check,
+  X,
+  AlertTriangle
 } from "lucide-react";
 
 // Mock data for pensions
@@ -115,8 +126,53 @@ const formatCurrency = (amount: number) => {
 };
 
 export default function PensionDashboard() {
+  const { toast } = useToast();
+  const [editingDrawdown, setEditingDrawdown] = useState<number | null>(null);
+  const [newDrawdownAmount, setNewDrawdownAmount] = useState("");
+  
   const remainingAllowance = pensionData.allowances.annualAllowance - pensionData.allowances.usedThisYear;
   const allowanceUsedPercentage = (pensionData.allowances.usedThisYear / pensionData.allowances.annualAllowance) * 100;
+
+  const drawdownPensions = pensionData.pensions.filter(p => p.type === 'drawdown');
+  
+  const handleDrawdownEdit = (pensionId: number) => {
+    const pension = pensionData.pensions.find(p => p.id === pensionId);
+    if (pension && pension.annualDrawdown) {
+      setNewDrawdownAmount(pension.annualDrawdown.toString());
+      setEditingDrawdown(pensionId);
+    }
+  };
+
+  const handleDrawdownSave = (pensionId: number) => {
+    const amount = parseFloat(newDrawdownAmount);
+    if (isNaN(amount) || amount < 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid drawdown amount.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Update the pension data (in a real app, this would be an API call)
+    const pension = pensionData.pensions.find(p => p.id === pensionId);
+    if (pension) {
+      pension.annualDrawdown = amount;
+    }
+
+    setEditingDrawdown(null);
+    setNewDrawdownAmount("");
+    
+    toast({
+      title: "Drawdown Updated",
+      description: `Annual drawdown amount updated to ${formatCurrency(amount)}.`,
+    });
+  };
+
+  const handleDrawdownCancel = () => {
+    setEditingDrawdown(null);
+    setNewDrawdownAmount("");
+  };
 
   return (
     <div className="min-h-screen bg-background p-6">
@@ -186,8 +242,9 @@ export default function PensionDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="drawdown">Drawdown</TabsTrigger>
             <TabsTrigger value="investments">Investments</TabsTrigger>
             <TabsTrigger value="contributions">Contributions</TabsTrigger>
             <TabsTrigger value="allowances">Allowances</TabsTrigger>
@@ -306,6 +363,201 @@ export default function PensionDashboard() {
                       Digital Welcome Pack
                     </a>
                   </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="drawdown">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ArrowDownRight className="w-5 h-5 text-warning" />
+                    Drawdown Income Management
+                  </CardTitle>
+                  <p className="text-muted-foreground">
+                    Manage your pension income withdrawals
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  {drawdownPensions.length > 0 ? (
+                    <div className="space-y-4">
+                      {drawdownPensions.map((pension) => (
+                        <div key={pension.id} className="p-4 border rounded-lg">
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <h3 className="font-semibold">{pension.provider}</h3>
+                              <Badge variant="secondary">Drawdown Pension</Badge>
+                              <p className="text-sm text-muted-foreground mt-1">
+                                Current fund value: {formatCurrency(pension.value)}
+                              </p>
+                            </div>
+                            <div className={`text-right ${pension.growth >= 0 ? 'text-success' : 'text-destructive'}`}>
+                              <p className="text-sm">Growth this year</p>
+                              <p className="font-medium">
+                                {pension.growth >= 0 ? '+' : ''}{pension.growth}%
+                              </p>
+                            </div>
+                          </div>
+
+                          <Separator className="my-4" />
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Annual Drawdown</Label>
+                              {editingDrawdown === pension.id ? (
+                                <div className="flex gap-2">
+                                  <Input
+                                    type="number"
+                                    value={newDrawdownAmount}
+                                    onChange={(e) => setNewDrawdownAmount(e.target.value)}
+                                    placeholder="Enter amount"
+                                    className="flex-1"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleDrawdownSave(pension.id)}
+                                    className="bg-success hover:bg-success/90"
+                                  >
+                                    <Check className="w-4 h-4" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={handleDrawdownCancel}
+                                  >
+                                    <X className="w-4 h-4" />
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="flex items-center justify-between p-3 bg-accent/30 rounded-lg">
+                                  <span className="text-lg font-bold text-warning">
+                                    {formatCurrency(pension.annualDrawdown || 0)}
+                                  </span>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDrawdownEdit(pension.id)}
+                                  >
+                                    <Edit3 className="w-4 h-4 mr-1" />
+                                    Amend
+                                  </Button>
+                                </div>
+                              )}
+                              <p className="text-xs text-muted-foreground">
+                                Monthly: {formatCurrency((pension.annualDrawdown || 0) / 12)}
+                              </p>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Withdrawal Rate</Label>
+                              <div className="p-3 bg-accent/30 rounded-lg">
+                                <span className="text-lg font-bold">
+                                  {((pension.annualDrawdown || 0) / pension.value * 100).toFixed(1)}%
+                                </span>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Of fund value
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-sm font-medium">Next Payment</Label>
+                              <div className="p-3 bg-accent/30 rounded-lg">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                                  <span className="font-medium">15th Dec 2024</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatCurrency((pension.annualDrawdown || 0) / 12)} due
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          <Alert className="mt-4">
+                            <InfoIcon className="h-4 w-4" />
+                            <AlertDescription>
+                              Changes to your drawdown amount may take 5-10 working days to process. 
+                              Consider the sustainability of your withdrawal rate for long-term income.
+                            </AlertDescription>
+                          </Alert>
+                        </div>
+                      ))}
+
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="text-lg">Drawdown Options</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <Button variant="outline" className="justify-start h-auto p-4">
+                              <div className="text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar className="w-4 h-4" />
+                                  <span className="font-medium">Change Payment Frequency</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Switch between monthly, quarterly, or annual payments
+                                </p>
+                              </div>
+                            </Button>
+
+                            <Button variant="outline" className="justify-start h-auto p-4">
+                              <div className="text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <TrendingUp className="w-4 h-4" />
+                                  <span className="font-medium">Review Sustainability</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Check if your withdrawal rate is sustainable
+                                </p>
+                              </div>
+                            </Button>
+
+                            <Button variant="outline" className="justify-start h-auto p-4">
+                              <div className="text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <DollarSign className="w-4 h-4" />
+                                  <span className="font-medium">Tax Implications</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  Understand the tax on your drawdown income
+                                </p>
+                              </div>
+                            </Button>
+
+                            <Button variant="outline" className="justify-start h-auto p-4">
+                              <div className="text-left">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <FileText className="w-4 h-4" />
+                                  <span className="font-medium">Income History</span>
+                                </div>
+                                <p className="text-sm text-muted-foreground">
+                                  View past drawdown payments and statements
+                                </p>
+                              </div>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <ArrowDownRight className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium mb-2">No Drawdown Pensions</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You don't currently have any pensions in drawdown phase.
+                      </p>
+                      <Button asChild>
+                        <a href="/drawdown">
+                          <TrendingDown className="w-4 h-4 mr-2" />
+                          Start Drawdown Journey
+                        </a>
+                      </Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>

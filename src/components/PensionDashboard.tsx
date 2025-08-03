@@ -285,7 +285,13 @@ export default function PensionDashboard() {
                   <Button variant="outline" className="w-full" asChild>
                     <a href="/transfer">
                       <ArrowRightLeft className="w-4 h-4 mr-2" />
-                      Transfer Pensions
+                      Transfer In
+                    </a>
+                  </Button>
+                  <Button variant="outline" className="w-full" asChild>
+                    <a href="/transfer-out">
+                      <ArrowRightLeft className="w-4 h-4 mr-2" />
+                      Transfer Out
                     </a>
                   </Button>
                   <Button variant="outline" className="w-full">

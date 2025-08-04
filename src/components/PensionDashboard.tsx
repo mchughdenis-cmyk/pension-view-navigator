@@ -377,187 +377,367 @@ export default function PensionDashboard() {
                     Drawdown Income Management
                   </CardTitle>
                   <p className="text-muted-foreground">
-                    Manage your pension income withdrawals
+                    Manage your pension income withdrawals and inheritance tax implications
                   </p>
                 </CardHeader>
                 <CardContent>
-                  {drawdownPensions.length > 0 ? (
-                    <div className="space-y-4">
-                      {drawdownPensions.map((pension) => (
-                        <div key={pension.id} className="p-4 border rounded-lg">
-                          <div className="flex items-start justify-between mb-4">
-                            <div>
-                              <h3 className="font-semibold">{pension.provider}</h3>
-                              <Badge variant="secondary">Drawdown Pension</Badge>
-                              <p className="text-sm text-muted-foreground mt-1">
-                                Current fund value: {formatCurrency(pension.value)}
-                              </p>
-                            </div>
-                            <div className={`text-right ${pension.growth >= 0 ? 'text-success' : 'text-destructive'}`}>
-                              <p className="text-sm">Growth this year</p>
-                              <p className="font-medium">
-                                {pension.growth >= 0 ? '+' : ''}{pension.growth}%
-                              </p>
-                            </div>
-                          </div>
+                  <Tabs defaultValue="income" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="income">Income Management</TabsTrigger>
+                      <TabsTrigger value="iht">IHT Impact</TabsTrigger>
+                    </TabsList>
 
-                          <Separator className="my-4" />
-
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Annual Drawdown</Label>
-                              {editingDrawdown === pension.id ? (
-                                <div className="flex gap-2">
-                                  <Input
-                                    type="number"
-                                    value={newDrawdownAmount}
-                                    onChange={(e) => setNewDrawdownAmount(e.target.value)}
-                                    placeholder="Enter amount"
-                                    className="flex-1"
-                                  />
-                                  <Button
-                                    size="sm"
-                                    onClick={() => handleDrawdownSave(pension.id)}
-                                    className="bg-success hover:bg-success/90"
-                                  >
-                                    <Check className="w-4 h-4" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={handleDrawdownCancel}
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </Button>
+                    <TabsContent value="income" className="mt-6">
+                      {drawdownPensions.length > 0 ? (
+                        <div className="space-y-4">
+                          {drawdownPensions.map((pension) => (
+                            <div key={pension.id} className="p-4 border rounded-lg">
+                              <div className="flex items-start justify-between mb-4">
+                                <div>
+                                  <h3 className="font-semibold">{pension.provider}</h3>
+                                  <Badge variant="secondary">Drawdown Pension</Badge>
+                                  <p className="text-sm text-muted-foreground mt-1">
+                                    Current fund value: {formatCurrency(pension.value)}
+                                  </p>
                                 </div>
-                              ) : (
-                                <div className="flex items-center justify-between p-3 bg-accent/30 rounded-lg">
-                                  <span className="text-lg font-bold text-warning">
-                                    {formatCurrency(pension.annualDrawdown || 0)}
-                                  </span>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => handleDrawdownEdit(pension.id)}
-                                  >
-                                    <Edit3 className="w-4 h-4 mr-1" />
-                                    Amend
-                                  </Button>
+                                <div className={`text-right ${pension.growth >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                  <p className="text-sm">Growth this year</p>
+                                  <p className="font-medium">
+                                    {pension.growth >= 0 ? '+' : ''}{pension.growth}%
+                                  </p>
                                 </div>
-                              )}
-                              <p className="text-xs text-muted-foreground">
-                                Monthly: {formatCurrency((pension.annualDrawdown || 0) / 12)}
-                              </p>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Withdrawal Rate</Label>
-                              <div className="p-3 bg-accent/30 rounded-lg">
-                                <span className="text-lg font-bold">
-                                  {((pension.annualDrawdown || 0) / pension.value * 100).toFixed(1)}%
-                                </span>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Of fund value
-                                </p>
                               </div>
-                            </div>
 
-                            <div className="space-y-2">
-                              <Label className="text-sm font-medium">Next Payment</Label>
-                              <div className="p-3 bg-accent/30 rounded-lg">
-                                <div className="flex items-center gap-2">
-                                  <Calendar className="w-4 h-4 text-muted-foreground" />
-                                  <span className="font-medium">15th Dec 2024</span>
+                              <Separator className="my-4" />
+
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Annual Drawdown</Label>
+                                  {editingDrawdown === pension.id ? (
+                                    <div className="flex gap-2">
+                                      <Input
+                                        type="number"
+                                        value={newDrawdownAmount}
+                                        onChange={(e) => setNewDrawdownAmount(e.target.value)}
+                                        placeholder="Enter amount"
+                                        className="flex-1"
+                                      />
+                                      <Button
+                                        size="sm"
+                                        onClick={() => handleDrawdownSave(pension.id)}
+                                        className="bg-success hover:bg-success/90"
+                                      >
+                                        <Check className="w-4 h-4" />
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={handleDrawdownCancel}
+                                      >
+                                        <X className="w-4 h-4" />
+                                      </Button>
+                                    </div>
+                                  ) : (
+                                    <div className="flex items-center justify-between p-3 bg-accent/30 rounded-lg">
+                                      <span className="text-lg font-bold text-warning">
+                                        {formatCurrency(pension.annualDrawdown || 0)}
+                                      </span>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => handleDrawdownEdit(pension.id)}
+                                      >
+                                        <Edit3 className="w-4 h-4 mr-1" />
+                                        Amend
+                                      </Button>
+                                    </div>
+                                  )}
+                                  <p className="text-xs text-muted-foreground">
+                                    Monthly: {formatCurrency((pension.annualDrawdown || 0) / 12)}
+                                  </p>
                                 </div>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  {formatCurrency((pension.annualDrawdown || 0) / 12)} due
-                                </p>
-                              </div>
-                            </div>
-                          </div>
 
-                          <Alert className="mt-4">
-                            <InfoIcon className="h-4 w-4" />
-                            <AlertDescription>
-                              Changes to your drawdown amount may take 5-10 working days to process. 
-                              Consider the sustainability of your withdrawal rate for long-term income.
-                            </AlertDescription>
-                          </Alert>
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Withdrawal Rate</Label>
+                                  <div className="p-3 bg-accent/30 rounded-lg">
+                                    <span className="text-lg font-bold">
+                                      {((pension.annualDrawdown || 0) / pension.value * 100).toFixed(1)}%
+                                    </span>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      Of fund value
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-sm font-medium">Next Payment</Label>
+                                  <div className="p-3 bg-accent/30 rounded-lg">
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="w-4 h-4 text-muted-foreground" />
+                                      <span className="font-medium">15th Dec 2024</span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                      {formatCurrency((pension.annualDrawdown || 0) / 12)} due
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <Alert className="mt-4">
+                                <InfoIcon className="h-4 w-4" />
+                                <AlertDescription>
+                                  Changes to your drawdown amount may take 5-10 working days to process. 
+                                  Consider the sustainability of your withdrawal rate for long-term income.
+                                </AlertDescription>
+                              </Alert>
+                            </div>
+                          ))}
+
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">Drawdown Options</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <Button variant="outline" className="justify-start h-auto p-4">
+                                  <div className="text-left">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Calendar className="w-4 h-4" />
+                                      <span className="font-medium">Change Payment Frequency</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Switch between monthly, quarterly, or annual payments
+                                    </p>
+                                  </div>
+                                </Button>
+
+                                <Button variant="outline" className="justify-start h-auto p-4">
+                                  <div className="text-left">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <TrendingUp className="w-4 h-4" />
+                                      <span className="font-medium">Review Sustainability</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Check if your withdrawal rate is sustainable
+                                    </p>
+                                  </div>
+                                </Button>
+
+                                <Button variant="outline" className="justify-start h-auto p-4">
+                                  <div className="text-left">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <DollarSign className="w-4 h-4" />
+                                      <span className="font-medium">Tax Implications</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                      Understand the tax on your drawdown income
+                                    </p>
+                                  </div>
+                                </Button>
+
+                                <Button variant="outline" className="justify-start h-auto p-4">
+                                  <div className="text-left">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <FileText className="w-4 h-4" />
+                                      <span className="font-medium">Income History</span>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                      View past drawdown payments and statements
+                                    </p>
+                                  </div>
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
                         </div>
-                      ))}
+                      ) : (
+                        <div className="text-center py-8">
+                          <ArrowDownRight className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                          <h3 className="text-lg font-medium mb-2">No Drawdown Pensions</h3>
+                          <p className="text-muted-foreground mb-4">
+                            You don't currently have any pensions in drawdown phase.
+                          </p>
+                          <Button asChild>
+                            <a href="/drawdown">
+                              <TrendingDown className="w-4 h-4 mr-2" />
+                              Start Drawdown Journey
+                            </a>
+                          </Button>
+                        </div>
+                      )}
+                    </TabsContent>
 
-                      <Card>
-                        <CardHeader>
-                          <CardTitle className="text-lg">Drawdown Options</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Button variant="outline" className="justify-start h-auto p-4">
-                              <div className="text-left">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <Calendar className="w-4 h-4" />
-                                  <span className="font-medium">Change Payment Frequency</span>
+                    <TabsContent value="iht" className="mt-6">
+                      <div className="space-y-6">
+                        <Alert>
+                          <AlertTriangle className="h-4 w-4" />
+                          <AlertDescription>
+                            This information is for guidance only. Please consult with a financial adviser for personalised inheritance tax planning.
+                          </AlertDescription>
+                        </Alert>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">Current IHT Position</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              <div className="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
+                                <span className="font-medium">Total Pension Value</span>
+                                <span className="font-bold text-lg">{formatCurrency(pensionData.totalValue)}</span>
+                              </div>
+                              
+                              <div className="space-y-3">
+                                <div className="flex justify-between">
+                                  <span className="text-sm">IHT-free threshold (nil rate band)</span>
+                                  <span className="font-medium">{formatCurrency(325000)}</span>
                                 </div>
-                                <p className="text-sm text-muted-foreground">
-                                  Switch between monthly, quarterly, or annual payments
+                                <div className="flex justify-between">
+                                  <span className="text-sm">Residence nil rate band</span>
+                                  <span className="font-medium">{formatCurrency(175000)}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between">
+                                  <span className="font-medium">Total IHT allowance</span>
+                                  <span className="font-bold">{formatCurrency(500000)}</span>
+                                </div>
+                              </div>
+
+                              <div className="mt-4 p-3 border rounded-lg">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="font-medium">Potential IHT liability</span>
+                                  <span className={`font-bold ${pensionData.totalValue > 500000 ? 'text-destructive' : 'text-success'}`}>
+                                    {pensionData.totalValue > 500000 ? 
+                                      formatCurrency((pensionData.totalValue - 500000) * 0.4) : 
+                                      "£0"
+                                    }
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  {pensionData.totalValue > 500000 ? 
+                                    "Based on current pension value exceeding IHT threshold" :
+                                    "Your pension value is currently below the IHT threshold"
+                                  }
                                 </p>
                               </div>
-                            </Button>
+                            </CardContent>
+                          </Card>
 
-                            <Button variant="outline" className="justify-start h-auto p-4">
-                              <div className="text-left">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <TrendingUp className="w-4 h-4" />
-                                  <span className="font-medium">Review Sustainability</span>
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">Drawdown vs Death Benefits</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                              {drawdownPensions.map((pension) => (
+                                <div key={pension.id} className="p-3 border rounded-lg">
+                                  <h4 className="font-medium mb-3">{pension.provider}</h4>
+                                  
+                                  <div className="space-y-2 text-sm">
+                                    <div className="flex justify-between">
+                                      <span>Current fund value</span>
+                                      <span className="font-medium">{formatCurrency(pension.value)}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span>Annual drawdown</span>
+                                      <span className="font-medium text-warning">{formatCurrency(pension.annualDrawdown || 0)}</span>
+                                    </div>
+                                  </div>
+
+                                  <Separator className="my-3" />
+
+                                  <div className="space-y-2">
+                                    <h5 className="font-medium text-sm">Death before age 75:</h5>
+                                    <p className="text-xs text-muted-foreground">
+                                      Beneficiaries can draw tax-free. Remaining fund passes outside estate for IHT.
+                                    </p>
+                                    
+                                    <h5 className="font-medium text-sm mt-3">Death after age 75:</h5>
+                                    <p className="text-xs text-muted-foreground">
+                                      Beneficiaries pay income tax on withdrawals. Fund still outside estate for IHT.
+                                    </p>
+                                  </div>
                                 </div>
+                              ))}
+                            </CardContent>
+                          </Card>
+                        </div>
+
+                        <Card>
+                          <CardHeader>
+                            <CardTitle className="text-lg">IHT Planning Strategies</CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                  <TrendingDown className="w-4 h-4 text-primary" />
+                                  Minimize Drawdowns
+                                </h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Check if your withdrawal rate is sustainable
+                                  Consider drawing from other assets first to preserve pension funds, which pass outside your estate.
                                 </p>
                               </div>
-                            </Button>
 
-                            <Button variant="outline" className="justify-start h-auto p-4">
-                              <div className="text-left">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <DollarSign className="w-4 h-4" />
-                                  <span className="font-medium">Tax Implications</span>
-                                </div>
+                              <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                  <DollarSign className="w-4 h-4 text-primary" />
+                                  Spend Other Assets
+                                </h4>
                                 <p className="text-sm text-muted-foreground">
-                                  Understand the tax on your drawdown income
+                                  Use ISAs, GIAs, and other investments for income, keeping pension funds for beneficiaries.
                                 </p>
                               </div>
-                            </Button>
 
-                            <Button variant="outline" className="justify-start h-auto p-4">
-                              <div className="text-left">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <FileText className="w-4 h-4" />
-                                  <span className="font-medium">Income History</span>
-                                </div>
+                              <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                  <FileText className="w-4 h-4 text-primary" />
+                                  Nomination Forms
+                                </h4>
                                 <p className="text-sm text-muted-foreground">
-                                  View past drawdown payments and statements
+                                  Ensure beneficiary nominations are up to date to maintain pension fund flexibility.
                                 </p>
                               </div>
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  ) : (
-                    <div className="text-center py-8">
-                      <ArrowDownRight className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Drawdown Pensions</h3>
-                      <p className="text-muted-foreground mb-4">
-                        You don't currently have any pensions in drawdown phase.
-                      </p>
-                      <Button asChild>
-                        <a href="/drawdown">
-                          <TrendingDown className="w-4 h-4 mr-2" />
-                          Start Drawdown Journey
-                        </a>
-                      </Button>
-                    </div>
-                  )}
+
+                              <div className="p-4 border rounded-lg">
+                                <h4 className="font-medium mb-2 flex items-center gap-2">
+                                  <Calculator className="w-4 h-4 text-primary" />
+                                  Professional Advice
+                                </h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Consider holistic estate planning with qualified advisers for complex situations.
+                                </p>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+
+                        <Card className="border-warning">
+                          <CardHeader>
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              <AlertTriangle className="w-5 h-5 text-warning" />
+                              Important Considerations
+                            </CardTitle>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="space-y-3 text-sm">
+                              <p>
+                                <strong>Age 75 threshold:</strong> Death benefits change significantly at age 75. Consider timing of withdrawals around this age.
+                              </p>
+                              <p>
+                                <strong>Benefit crystallisation:</strong> Uncrystallised pension funds have more IHT advantages than those already in drawdown.
+                              </p>
+                              <p>
+                                <strong>Spouse considerations:</strong> Spousal bypass can preserve pension benefits for next generation while providing flexibility.
+                              </p>
+                              <p>
+                                <strong>Regular review:</strong> IHT rules and pension legislation can change. Review your strategy annually.
+                              </p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             </div>

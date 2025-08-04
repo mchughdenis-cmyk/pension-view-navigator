@@ -130,6 +130,11 @@ export default function PensionDashboard() {
   const [editingDrawdown, setEditingDrawdown] = useState<number | null>(null);
   const [newDrawdownAmount, setNewDrawdownAmount] = useState("");
   
+  // State for IHT calculations
+  const [otherAssets, setOtherAssets] = useState<number>(150000);
+  const [propertyValue, setPropertyValue] = useState<number>(400000);
+  const [editingIHT, setEditingIHT] = useState<boolean>(false);
+  
   const remainingAllowance = pensionData.allowances.annualAllowance - pensionData.allowances.usedThisYear;
   const allowanceUsedPercentage = (pensionData.allowances.usedThisYear / pensionData.allowances.annualAllowance) * 100;
 
@@ -172,6 +177,19 @@ export default function PensionDashboard() {
   const handleDrawdownCancel = () => {
     setEditingDrawdown(null);
     setNewDrawdownAmount("");
+  };
+
+  // IHT calculation functions
+  const totalEstateValue = pensionData.totalValue + otherAssets + propertyValue;
+  const ihtThreshold = 500000; // Combined nil rate band + residence nil rate band
+  const ihtLiability = totalEstateValue > ihtThreshold ? (totalEstateValue - ihtThreshold) * 0.4 : 0;
+
+  const handleIHTSave = () => {
+    setEditingIHT(false);
+    toast({
+      title: "Estate Values Updated",
+      description: `Total estate value is now ${formatCurrency(totalEstateValue)}.`,
+    });
   };
 
   return (
@@ -579,14 +597,77 @@ export default function PensionDashboard() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <Card>
                             <CardHeader>
-                              <CardTitle className="text-lg">Current IHT Position</CardTitle>
+                              <CardTitle className="text-lg flex items-center justify-between">
+                                Estate Value Calculator
+                                <Button
+                                  size="sm"
+                                  variant={editingIHT ? "default" : "outline"}
+                                  onClick={() => editingIHT ? handleIHTSave() : setEditingIHT(true)}
+                                >
+                                  {editingIHT ? (
+                                    <>
+                                      <Check className="w-4 h-4 mr-1" />
+                                      Save
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Edit3 className="w-4 h-4 mr-1" />
+                                      Edit
+                                    </>
+                                  )}
+                                </Button>
+                              </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                              <div className="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
-                                <span className="font-medium">Total Pension Value</span>
-                                <span className="font-bold text-lg">{formatCurrency(pensionData.totalValue)}</span>
+                              <div className="space-y-3">
+                                <div className="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
+                                  <span className="font-medium">Total Pension Value</span>
+                                  <span className="font-bold text-lg">{formatCurrency(pensionData.totalValue)}</span>
+                                </div>
+
+                                <div className="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
+                                  <span className="font-medium">Property Value</span>
+                                  {editingIHT ? (
+                                    <Input
+                                      type="number"
+                                      value={propertyValue}
+                                      onChange={(e) => setPropertyValue(Number(e.target.value) || 0)}
+                                      className="w-32 text-right font-bold"
+                                    />
+                                  ) : (
+                                    <span className="font-bold text-lg">{formatCurrency(propertyValue)}</span>
+                                  )}
+                                </div>
+
+                                <div className="flex justify-between items-center p-3 bg-accent/30 rounded-lg">
+                                  <span className="font-medium">Other Assets (ISAs, Savings, etc.)</span>
+                                  {editingIHT ? (
+                                    <Input
+                                      type="number"
+                                      value={otherAssets}
+                                      onChange={(e) => setOtherAssets(Number(e.target.value) || 0)}
+                                      className="w-32 text-right font-bold"
+                                    />
+                                  ) : (
+                                    <span className="font-bold text-lg">{formatCurrency(otherAssets)}</span>
+                                  )}
+                                </div>
+
+                                <Separator />
+                                
+                                <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
+                                  <span className="font-bold">Total Estate Value</span>
+                                  <span className="font-bold text-xl text-primary">{formatCurrency(totalEstateValue)}</span>
+                                </div>
                               </div>
-                              
+                            </CardContent>
+                          </Card>
+
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="text-lg">IHT Calculation</CardTitle>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
                               <div className="space-y-3">
                                 <div className="flex justify-between">
                                   <span className="text-sm">IHT-free threshold (nil rate band)</span>
@@ -599,27 +680,44 @@ export default function PensionDashboard() {
                                 <Separator />
                                 <div className="flex justify-between">
                                   <span className="font-medium">Total IHT allowance</span>
-                                  <span className="font-bold">{formatCurrency(500000)}</span>
+                                  <span className="font-bold">{formatCurrency(ihtThreshold)}</span>
                                 </div>
                               </div>
 
-                              <div className="mt-4 p-3 border rounded-lg">
+                              <div className="mt-4 p-4 border rounded-lg">
                                 <div className="flex justify-between items-center mb-2">
-                                  <span className="font-medium">Potential IHT liability</span>
-                                  <span className={`font-bold ${pensionData.totalValue > 500000 ? 'text-destructive' : 'text-success'}`}>
-                                    {pensionData.totalValue > 500000 ? 
-                                      formatCurrency((pensionData.totalValue - 500000) * 0.4) : 
-                                      "£0"
-                                    }
+                                  <span className="font-medium">Taxable Estate</span>
+                                  <span className="font-bold">
+                                    {formatCurrency(Math.max(0, totalEstateValue - ihtThreshold))}
                                   </span>
                                 </div>
-                                <p className="text-xs text-muted-foreground">
-                                  {pensionData.totalValue > 500000 ? 
-                                    "Based on current pension value exceeding IHT threshold" :
-                                    "Your pension value is currently below the IHT threshold"
+                                <div className="flex justify-between items-center mb-3">
+                                  <span className="font-medium">IHT Rate</span>
+                                  <span className="font-bold">40%</span>
+                                </div>
+                                <Separator className="my-3" />
+                                <div className="flex justify-between items-center">
+                                  <span className="font-bold text-lg">Total IHT Liability</span>
+                                  <span className={`font-bold text-xl ${ihtLiability > 0 ? 'text-destructive' : 'text-success'}`}>
+                                    {formatCurrency(ihtLiability)}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                  {ihtLiability > 0 ? 
+                                    `Your estate exceeds the IHT threshold by ${formatCurrency(totalEstateValue - ihtThreshold)}` :
+                                    "Your estate is currently below the IHT threshold"
                                   }
                                 </p>
                               </div>
+
+                              {ihtLiability > 0 && (
+                                <Alert className="border-warning">
+                                  <AlertTriangle className="h-4 w-4" />
+                                  <AlertDescription>
+                                    Consider IHT planning strategies to reduce your estate's tax liability.
+                                  </AlertDescription>
+                                </Alert>
+                              )}
                             </CardContent>
                           </Card>
 

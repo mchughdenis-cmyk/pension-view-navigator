@@ -26,8 +26,10 @@ import {
   Edit3,
   Check,
   X,
-  AlertTriangle
+  AlertTriangle,
+  Printer
 } from "lucide-react";
+import PrintablePortfolioReport from "./PrintablePortfolioReport";
 
 // Mock data for pensions
 const pensionData = {
@@ -381,6 +383,11 @@ export default function PensionDashboard() {
                       Digital Welcome Pack
                     </a>
                   </Button>
+                  <PrintablePortfolioReport 
+                    pensionData={pensionData}
+                    otherAssets={otherAssets}
+                    propertyValue={propertyValue}
+                  />
                 </CardContent>
               </Card>
             </div>

@@ -12,6 +12,7 @@ import PensionTransferJourney from "./components/PensionTransferJourney";
 import PensionSystemPitch from "./components/PensionSystemPitch";
 import ClientOnboarding from "./components/ClientOnboarding";
 import DrawdownJourney from "./components/DrawdownJourney";
+import DripFeedDrawdown from "./components/DripFeedDrawdown";
 import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
 
@@ -32,6 +33,7 @@ const App = () => (
           <Route path="/pitch" element={<PensionSystemPitch />} />
           <Route path="/onboarding" element={<ClientOnboarding />} />
           <Route path="/drawdown" element={<DrawdownJourney />} />
+          <Route path="/drip-feed" element={<DripFeedDrawdown />} />
           <Route path="/transfer-out" element={<TransferOutJourney />} />
           <Route path="/annual-summary" element={<AnnualSummary />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

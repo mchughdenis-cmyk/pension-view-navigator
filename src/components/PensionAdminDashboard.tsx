@@ -25,7 +25,10 @@ import {
   FileUp,
   Receipt,
   Building2,
-  Shield
+  Shield,
+  PiggyBank,
+  Banknote,
+  TrendingDown
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -35,7 +38,10 @@ const adminData = {
     totalClients: 1247,
     totalAUM: 42750000,
     pendingActions: 18,
-    overdueReviews: 5
+    overdueReviews: 5,
+    clientsInDrawdown: 187,
+    clientsInAccumulation: 1060,
+    clientsWithRegularIncome: 134
   },
   clients: [
     {
@@ -205,7 +211,7 @@ export default function PensionAdminDashboard() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
@@ -227,6 +233,39 @@ export default function PensionAdminDashboard() {
                 {formatCurrency(adminData.summary.totalAUM)}
               </div>
               <p className="text-xs text-muted-foreground">Total portfolio value</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Clients in Drawdown</CardTitle>
+              <TrendingDown className="h-4 w-4 text-warning" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-warning">{adminData.summary.clientsInDrawdown}</div>
+              <p className="text-xs text-muted-foreground">Taking withdrawals</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Clients in Accumulation</CardTitle>
+              <PiggyBank className="h-4 w-4 text-primary" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{adminData.summary.clientsInAccumulation}</div>
+              <p className="text-xs text-muted-foreground">Building wealth</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Regular Income</CardTitle>
+              <Banknote className="h-4 w-4 text-success" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-success">{adminData.summary.clientsWithRegularIncome}</div>
+              <p className="text-xs text-muted-foreground">Monthly payments</p>
             </CardContent>
           </Card>
 

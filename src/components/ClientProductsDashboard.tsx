@@ -1,7 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/hooks/useAuth'
+
 import { 
   Wallet, 
   TrendingUp, 
@@ -16,15 +16,11 @@ import {
 import { useNavigate } from 'react-router-dom'
 
 export default function ClientProductsDashboard() {
-  const { signOut, user } = useAuth()
   const navigate = useNavigate()
 
-  const handleSignOut = async () => {
-    try {
-      await signOut()
-    } catch (error) {
-      console.error('Error signing out:', error)
-    }
+  const handleSignOut = () => {
+    // Mock sign out - navigate back to login
+    window.location.href = '/'
   }
 
   const products = [
@@ -98,7 +94,7 @@ export default function ClientProductsDashboard() {
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Welcome back</h1>
-              <p className="text-muted-foreground">{user?.email}</p>
+              <p className="text-muted-foreground">demo@example.com</p>
             </div>
             <div className="flex items-center gap-3">
               <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>

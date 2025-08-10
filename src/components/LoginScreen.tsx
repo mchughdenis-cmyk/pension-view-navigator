@@ -3,48 +3,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useAuth } from '@/hooks/useAuth'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, Shield } from 'lucide-react'
-import { useToast } from '@/hooks/use-toast'
+import { Shield } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { signIn, signUp } = useAuth()
-  const { toast } = useToast()
+  const navigate = useNavigate()
 
-  const handleSubmit = async (type: 'signin' | 'signup') => {
-    if (!email || !password) {
-      toast({
-        title: "Error",
-        description: "Please fill in all fields",
-        variant: "destructive"
-      })
-      return
-    }
-
-    setLoading(true)
-    try {
-      if (type === 'signin') {
-        await signIn(email, password)
-      } else {
-        await signUp(email, password)
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link",
-        })
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "An error occurred",
-        variant: "destructive"
-      })
-    } finally {
-      setLoading(false)
-    }
+  const handleSubmit = () => {
+    // Mock login - just navigate to dashboard
+    navigate('/dashboard')
   }
 
   return (
@@ -83,7 +53,6 @@ export default function LoginScreen() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -94,15 +63,12 @@ export default function LoginScreen() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
                   />
                 </div>
                 <Button 
                   className="w-full" 
-                  onClick={() => handleSubmit('signin')}
-                  disabled={loading}
+                  onClick={handleSubmit}
                 >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
               </TabsContent>
@@ -116,7 +82,6 @@ export default function LoginScreen() {
                     placeholder="Enter your email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    disabled={loading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -127,15 +92,12 @@ export default function LoginScreen() {
                     placeholder="Create a password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    disabled={loading}
                   />
                 </div>
                 <Button 
                   className="w-full" 
-                  onClick={() => handleSubmit('signup')}
-                  disabled={loading}
+                  onClick={handleSubmit}
                 >
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create Account
                 </Button>
               </TabsContent>

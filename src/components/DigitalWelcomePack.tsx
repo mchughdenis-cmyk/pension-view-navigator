@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,8 +15,7 @@ import {
   DollarSign,
   Calendar,
   AlertCircle,
-  BookOpen,
-  Home
+  BookOpen
 } from "lucide-react";
 
 // Mock data for welcome pack
@@ -66,15 +66,12 @@ export default function DigitalWelcomePack() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-6xl mx-auto space-y-6">
+        <BackButton label="Back to Products" />
+        
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex justify-between items-start">
-            <Button variant="outline" asChild>
-              <a href="/">
-                <Home className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </a>
-            </Button>
+            <div></div>
             <Button variant="outline">
               <Download className="w-4 h-4 mr-2" />
               Download Pack

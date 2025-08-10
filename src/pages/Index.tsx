@@ -1,11 +1,15 @@
 import PensionDashboard from "@/components/PensionDashboard";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/back-button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ExternalLink, Menu, TrendingDown } from "lucide-react";
 
 const Index = () => {
   return (
     <div>
+      <div className="p-4">
+        <BackButton label="Back to Products" />
+      </div>
       {/* Desktop Navigation */}
       <div className="hidden md:flex fixed top-4 right-4 z-50 gap-2">
         <Button variant="outline" asChild>

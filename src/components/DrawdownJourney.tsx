@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
+import { BackButton } from "@/components/ui/back-button";
 import { 
   PiggyBank, 
   TrendingDown, 
@@ -161,6 +162,8 @@ export default function DrawdownJourney() {
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
+        <BackButton label="Back to Products" />
+        
         {/* Header */}
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-foreground">Pension Drawdown Journey</h1>

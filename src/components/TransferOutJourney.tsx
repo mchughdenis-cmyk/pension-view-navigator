@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BackButton } from "@/components/ui/back-button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,14 +107,8 @@ export default function TransferOutJourney() {
       {/* Header */}
       <div className="border-b bg-card">
         <div className="max-w-4xl mx-auto p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <a href="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Dashboard
-              </a>
-            </Button>
-          </div>
+          <BackButton label="Back to Products" />
+          
           <div>
             <h1 className="text-3xl font-bold text-foreground">Transfer Out Request</h1>
             <p className="text-muted-foreground mt-1">Transfer your pension to another provider</p>

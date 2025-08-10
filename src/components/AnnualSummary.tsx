@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -194,6 +195,8 @@ export default function AnnualSummary({ onDownload }: AnnualSummaryProps) {
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">
+      <BackButton label="Back to Products" />
+      
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>

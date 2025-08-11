@@ -97,7 +97,7 @@ export default function ClientProductsDashboard() {
               <p className="text-muted-foreground">demo@example.com</p>
             </div>
             <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => navigate('/admin')}>
+              <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
                 <Settings className="w-4 h-4 mr-2" />
                 Settings
               </Button>

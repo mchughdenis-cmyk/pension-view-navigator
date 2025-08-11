@@ -17,6 +17,7 @@ import DrawdownJourney from "./components/DrawdownJourney";
 import DripFeedDrawdown from "./components/DripFeedDrawdown";
 import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
+import Settings from "./components/Settings";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ const AppContent = () => {
         <Route path="/drip-feed" element={<DripFeedDrawdown />} />
         <Route path="/transfer-out" element={<TransferOutJourney />} />
         <Route path="/annual-summary" element={<AnnualSummary />} />
+        <Route path="/settings" element={<Settings />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

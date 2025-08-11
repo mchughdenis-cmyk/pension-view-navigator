@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BackButton } from '@/components/ui/back-button'
-import { Upload, Palette, Save, RotateCcw } from 'lucide-react'
+import { Badge } from '@/components/ui/badge'
+import { Upload, Palette, Save, RotateCcw, User, Shield, Users } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
+import { useRole } from '@/contexts/RoleContext'
 
 const colorThemes = [
   {
@@ -54,6 +56,7 @@ export default function Settings() {
   const [logo, setLogo] = useState<string | null>(null)
   const [selectedTheme, setSelectedTheme] = useState(0)
   const { toast } = useToast()
+  const { user, switchRole } = useRole()
 
   useEffect(() => {
     // Load saved settings from localStorage
@@ -154,11 +157,59 @@ export default function Settings() {
         </div>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
-          <p className="text-muted-foreground">Customize your application appearance and branding</p>
+          <div className="flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Settings</h1>
+              <p className="text-muted-foreground">Customize your application appearance and branding</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline">{user?.role} View</Badge>
+            </div>
+          </div>
         </div>
 
         <div className="grid gap-6">
+          {/* Role Switching Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                View Switching
+              </CardTitle>
+              <CardDescription>
+                Switch between different user perspectives to test functionality
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-wrap gap-3">
+                <Button 
+                  variant={user?.role === 'client' ? 'default' : 'outline'}
+                  onClick={() => switchRole('client')}
+                >
+                  <User className="w-4 h-4 mr-2" />
+                  Client View
+                </Button>
+                <Button 
+                  variant={user?.role === 'adviser' ? 'default' : 'outline'}
+                  onClick={() => switchRole('adviser')}
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  Adviser View
+                </Button>
+                <Button 
+                  variant={user?.role === 'admin' ? 'default' : 'outline'}
+                  onClick={() => switchRole('admin')}
+                >
+                  <Users className="w-4 h-4 mr-2" />
+                  Admin View
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Current role: <strong>{user?.role}</strong> - {user?.name} ({user?.email})
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Company Logo Section */}
           <Card>
             <CardHeader>

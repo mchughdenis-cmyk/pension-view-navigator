@@ -18,6 +18,7 @@ import DripFeedDrawdown from "./components/DripFeedDrawdown";
 import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
 import Settings from "./components/Settings";
+import InstantWithdrawal from "./components/InstantWithdrawal";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const AppContent = () => {
         <Route path="/transfer-out" element={<TransferOutJourney />} />
         <Route path="/annual-summary" element={<AnnualSummary />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -11,7 +11,8 @@ import {
   LogOut,
   Shield,
   ArrowRight,
-  User
+  User,
+  Banknote
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -54,6 +55,16 @@ export default function ClientView() {
       icon: TrendingUp,
       route: '/drawdown',
       color: 'bg-success text-success-foreground'
+    },
+    {
+      id: 'instant-withdrawal',
+      title: 'Instant Withdrawal',
+      description: 'Withdraw funds directly to your bank account',
+      value: 'Available',
+      status: 'Ready',
+      icon: Banknote,
+      route: '/instant-withdrawal',
+      color: 'bg-primary text-primary-foreground'
     },
     {
       id: 'drip-feed',

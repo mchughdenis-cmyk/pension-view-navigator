@@ -19,7 +19,7 @@ import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
 import Settings from "./components/Settings";
 import InstantWithdrawal from "./components/InstantWithdrawal";
-import LearningCenter from "./components/LearningCenter";
+import LearningCentre from "./components/LearningCentre";
 
 const queryClient = new QueryClient();
 
@@ -42,7 +42,7 @@ const AppContent = () => {
         <Route path="/annual-summary" element={<AnnualSummary />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
-        <Route path="/learning" element={<LearningCenter />} />
+        <Route path="/learning" element={<LearningCentre />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

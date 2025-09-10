@@ -26,7 +26,7 @@ interface Lesson {
   content?: string;
 }
 
-export default function LearningCenter() {
+export default function LearningCentre() {
   const [completedLessons, setCompletedLessons] = useState<Set<string>>(new Set());
 
   const sippModules: Module[] = [
@@ -344,7 +344,7 @@ export default function LearningCenter() {
         <BackButton />
         
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Learning Center</h1>
+          <h1 className="text-3xl font-bold mb-2">Learning Centre</h1>
           <p className="text-muted-foreground">Build your knowledge of pensions and long-term investing</p>
         </div>
 
@@ -482,7 +482,7 @@ export default function LearningCenter() {
               <CardHeader>
                 <CardTitle className="text-lg">Need Personal Advice?</CardTitle>
                 <CardDescription>
-                  While our learning center provides general education, your personal circumstances are unique.
+                  While our learning centre provides general education, your personal circumstances are unique.
                 </CardDescription>
               </CardHeader>
               <CardContent>

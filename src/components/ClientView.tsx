@@ -109,7 +109,7 @@ export default function ClientView() {
     },
     {
       id: 'learning',
-      title: 'Learning Center',
+      title: 'Learning Centre',
       description: 'Build your pension & investment knowledge',
       value: '12 Modules',
       status: 'Active',

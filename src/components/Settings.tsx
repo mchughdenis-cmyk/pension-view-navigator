@@ -5,9 +5,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { BackButton } from '@/components/ui/back-button'
 import { Badge } from '@/components/ui/badge'
-import { Upload, Palette, Save, RotateCcw, User, Shield, Users } from 'lucide-react'
+import { Upload, Palette, Save, RotateCcw, User, Shield, Users, GitBranch, ArrowRight, CheckCircle, AlertCircle, Clock, TrendingUp, PiggyBank, Wallet, FileText, Calculator, UserCheck, Building, CreditCard, Banknote } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import { useRole } from '@/contexts/RoleContext'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 const colorThemes = [
   {
@@ -304,6 +305,225 @@ export default function Settings() {
                   </div>
                 ))}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Workflow Journey Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GitBranch className="w-5 h-5" />
+                Workflow Journeys
+              </CardTitle>
+              <CardDescription>
+                Visual representation of the accumulation and drawdown processes
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="accumulation" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="accumulation">
+                    <PiggyBank className="w-4 h-4 mr-2" />
+                    Accumulation Phase
+                  </TabsTrigger>
+                  <TabsTrigger value="drawdown">
+                    <Wallet className="w-4 h-4 mr-2" />
+                    Drawdown Phase
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="accumulation" className="space-y-4 mt-6">
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg mb-4">Accumulation Journey</h3>
+                    
+                    {/* Accumulation Steps */}
+                    <div className="relative">
+                      <div className="absolute left-5 top-8 bottom-0 w-0.5 bg-border"></div>
+                      
+                      <div className="space-y-6">
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <UserCheck className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">1. Client Onboarding</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Initial registration and KYC verification</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Identity Verification</Badge>
+                              <Badge variant="outline">Risk Assessment</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <Calculator className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">2. Pension Planning</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Setting retirement goals and contribution strategies</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Goal Setting</Badge>
+                              <Badge variant="outline">Projection Models</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <TrendingUp className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">3. Regular Contributions</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Monthly deposits and employer matching</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Auto-deposits</Badge>
+                              <Badge variant="outline">Tax Relief</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <FileText className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">4. Annual Reviews</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Performance tracking and portfolio rebalancing</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Performance Reports</Badge>
+                              <Badge variant="outline">Adjustments</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">5. Retirement Ready</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Transition to drawdown phase when eligible</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="secondary">Age 55+</Badge>
+                              <Badge variant="secondary">Full Benefits</Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="drawdown" className="space-y-4 mt-6">
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg mb-4">Drawdown Journey</h3>
+                    
+                    {/* Drawdown Steps */}
+                    <div className="relative">
+                      <div className="absolute left-5 top-8 bottom-0 w-0.5 bg-border"></div>
+                      
+                      <div className="space-y-6">
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <AlertCircle className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">1. Drawdown Request</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Client initiates withdrawal request</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Eligibility Check</Badge>
+                              <Badge variant="outline">Options Review</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <Calculator className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">2. Tax-Free Cash</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Option to take 25% tax-free lump sum</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">25% Tax-Free</Badge>
+                              <Badge variant="outline">Calculation</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <Building className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">3. Bank Account Setup</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Nominate and verify bank details</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Account Verification</Badge>
+                              <Badge variant="outline">Security Checks</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                            <Clock className="w-5 h-5 text-primary-foreground" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">4. Regular Income</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Set up regular or ad-hoc withdrawals</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="outline">Monthly Income</Badge>
+                              <Badge variant="outline">Instant Access</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-orange-600 flex items-center justify-center">
+                            <CreditCard className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">5. Instant Withdrawal</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Quick access to funds already in drawdown</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">Fast Track</Badge>
+                              <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-200">Same Day</Badge>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                          <div className="relative z-10 w-10 h-10 rounded-full bg-green-600 flex items-center justify-center">
+                            <Banknote className="w-5 h-5 text-white" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium">6. Payment Complete</h4>
+                            <p className="text-sm text-muted-foreground mt-1">Funds transferred to nominated account</p>
+                            <div className="flex gap-2 mt-2">
+                              <Badge variant="secondary">Confirmation</Badge>
+                              <Badge variant="secondary">Tax Statement</Badge>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6 p-4 bg-orange-50 dark:bg-orange-950 rounded-lg border border-orange-200 dark:border-orange-800">
+                      <div className="flex gap-3">
+                        <AlertCircle className="w-5 h-5 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium text-orange-900 dark:text-orange-200">Fast Track Option Available</p>
+                          <p className="text-sm text-orange-700 dark:text-orange-300 mt-1">
+                            Clients with funds already in drawdown can use the instant withdrawal feature for same-day transfers to their nominated bank account, bypassing the full drawdown journey.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
 

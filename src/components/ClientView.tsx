@@ -12,7 +12,8 @@ import {
   Shield,
   ArrowRight,
   User,
-  Banknote
+  Banknote,
+  BookOpen
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -105,6 +106,16 @@ export default function ClientView() {
       icon: Shield,
       route: '/welcome-pack',
       color: 'bg-warning text-warning-foreground'
+    },
+    {
+      id: 'learning',
+      title: 'Learning Center',
+      description: 'Build your pension & investment knowledge',
+      value: '12 Modules',
+      status: 'Active',
+      icon: BookOpen,
+      route: '/learning',
+      color: 'bg-success text-success-foreground'
     }
   ]
 

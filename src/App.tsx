@@ -21,6 +21,7 @@ import Settings from "./components/Settings";
 import InstantWithdrawal from "./components/InstantWithdrawal";
 import LearningCentre from "./components/LearningCentre";
 import InstrumentTransfer from "./components/InstrumentTransfer";
+import SystemDemo from "./components/SystemDemo";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const AppContent = () => {
         <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
         <Route path="/learning" element={<LearningCentre />} />
         <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
+        <Route path="/demo" element={<SystemDemo />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

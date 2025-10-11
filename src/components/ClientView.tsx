@@ -133,7 +133,7 @@ export default function ClientView() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       {/* Header */}
-      <div className="bg-card border-b border-border">
+      <div className="bg-card border-b border-border shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div>
@@ -160,6 +160,36 @@ export default function ClientView() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Demo Banner */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <Card className="bg-gradient-to-r from-primary to-secondary text-primary-foreground border-none shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-background/10 rounded-full">
+                  <Shield className="w-8 h-8" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold">Experience the Full System</h3>
+                  <p className="text-primary-foreground/90">
+                    Take an interactive tour from onboarding through drawdown
+                  </p>
+                </div>
+              </div>
+              <Button 
+                size="lg" 
+                variant="secondary"
+                onClick={() => navigate('/demo')}
+                className="whitespace-nowrap"
+              >
+                <ArrowRight className="w-5 h-5 mr-2" />
+                Launch System Demo
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Portfolio Summary */}

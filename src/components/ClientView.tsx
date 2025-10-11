@@ -13,7 +13,8 @@ import {
   ArrowRight,
   User,
   Banknote,
-  BookOpen
+  BookOpen,
+  ArrowLeftRight
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -116,6 +117,16 @@ export default function ClientView() {
       icon: BookOpen,
       route: '/learning',
       color: 'bg-success text-success-foreground'
+    },
+    {
+      id: 'instrument-transfer',
+      title: 'Instrument Transfers',
+      description: 'Track individual stock and fund transfers',
+      value: '5 Lines',
+      status: 'In Progress',
+      icon: ArrowLeftRight,
+      route: '/instrument-transfer',
+      color: 'bg-primary text-primary-foreground'
     }
   ]
 

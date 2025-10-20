@@ -14,7 +14,8 @@ import {
   User,
   Banknote,
   BookOpen,
-  ArrowLeftRight
+  ArrowLeftRight,
+  CreditCard
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -137,6 +138,16 @@ export default function ClientView() {
       icon: ArrowLeftRight,
       route: '/instrument-transfer',
       color: 'bg-primary text-primary-foreground'
+    },
+    {
+      id: 'payments',
+      title: 'Payment Provider',
+      description: 'Manage contributions and withdrawals',
+      value: '2 Methods',
+      status: 'Active',
+      icon: CreditCard,
+      route: '/payments',
+      color: 'bg-secondary text-secondary-foreground'
     }
   ]
 

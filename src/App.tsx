@@ -22,6 +22,7 @@ import InstantWithdrawal from "./components/InstantWithdrawal";
 import LearningCentre from "./components/LearningCentre";
 import InstrumentTransfer from "./components/InstrumentTransfer";
 import SystemDemo from "./components/SystemDemo";
+import KYCVerification from "./components/KYCVerification";
 
 const queryClient = new QueryClient();
 
@@ -47,6 +48,7 @@ const AppContent = () => {
         <Route path="/learning" element={<LearningCentre />} />
         <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
         <Route path="/demo" element={<SystemDemo />} />
+        <Route path="/kyc" element={<KYCVerification />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

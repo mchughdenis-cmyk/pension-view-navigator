@@ -109,6 +109,16 @@ export default function ClientView() {
       color: 'bg-warning text-warning-foreground'
     },
     {
+      id: 'kyc-verification',
+      title: 'KYC/AML Verification',
+      description: 'Complete your identity and compliance checks',
+      value: 'In Review',
+      status: 'Pending',
+      icon: Shield,
+      route: '/kyc',
+      color: 'bg-primary text-primary-foreground'
+    },
+    {
       id: 'learning',
       title: 'Learning Centre',
       description: 'Build your pension & investment knowledge',

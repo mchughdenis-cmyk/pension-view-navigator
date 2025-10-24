@@ -29,6 +29,50 @@ const SystemDocumentation = () => {
     window.print();
   };
 
+  const handleExportWord = async () => {
+    try {
+      const htmlDocx = await import('html-docx-js/dist/html-docx');
+      
+      const content = document.getElementById('documentation-content');
+      if (!content) return;
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Pension Navigator - System Documentation</title>
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; }
+              h1 { color: #1a1a1a; font-size: 24pt; margin-bottom: 12pt; }
+              h2 { color: #2a2a2a; font-size: 18pt; margin-top: 18pt; margin-bottom: 10pt; }
+              h3 { color: #3a3a3a; font-size: 14pt; margin-top: 14pt; margin-bottom: 8pt; }
+              p { margin-bottom: 10pt; }
+              ul { margin-bottom: 12pt; }
+              li { margin-bottom: 6pt; }
+              .feature-list { margin-left: 20pt; }
+            </style>
+          </head>
+          <body>
+            ${content.innerHTML}
+          </body>
+        </html>
+      `;
+
+      const converted = htmlDocx.asBlob(htmlContent);
+      const url = URL.createObjectURL(converted);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'Pension-Navigator-Documentation.docx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting to Word:', error);
+    }
+  };
+
   const features = [
     {
       category: "Authentication & Access",
@@ -492,15 +536,21 @@ const SystemDocumentation = () => {
                 <p className="text-lg opacity-90">Complete System Documentation</p>
               </div>
             </div>
-            <Button onClick={handlePrint} className="print:hidden">
-              <Download className="w-4 h-4 mr-2" />
-              Print / Save PDF
-            </Button>
+            <div className="flex gap-2 print:hidden">
+              <Button onClick={handleExportWord} variant="secondary">
+                <FileText className="w-4 h-4 mr-2" />
+                Export as Word
+              </Button>
+              <Button onClick={handlePrint}>
+                <Download className="w-4 h-4 mr-2" />
+                Print / Save PDF
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-8 space-y-12">
+      <div id="documentation-content" className="max-w-7xl mx-auto p-8 space-y-12">
         {/* Introduction */}
         <Card>
           <CardHeader>

@@ -31,43 +31,94 @@ const SystemDocumentation = () => {
 
   const handleExportWord = async () => {
     try {
-      const htmlDocx = await import('html-docx-js/dist/html-docx');
-      
-      const content = document.getElementById('documentation-content');
-      if (!content) return;
+      const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip } = await import('docx');
+      const { saveAs } = await import('file-saver');
 
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <meta charset="UTF-8">
-            <title>Pension Navigator - System Documentation</title>
-            <style>
-              body { font-family: Arial, sans-serif; line-height: 1.6; }
-              h1 { color: #1a1a1a; font-size: 24pt; margin-bottom: 12pt; }
-              h2 { color: #2a2a2a; font-size: 18pt; margin-top: 18pt; margin-bottom: 10pt; }
-              h3 { color: #3a3a3a; font-size: 14pt; margin-top: 14pt; margin-bottom: 8pt; }
-              p { margin-bottom: 10pt; }
-              ul { margin-bottom: 12pt; }
-              li { margin-bottom: 6pt; }
-              .feature-list { margin-left: 20pt; }
-            </style>
-          </head>
-          <body>
-            ${content.innerHTML}
-          </body>
-        </html>
-      `;
+      const children: any[] = [
+        new Paragraph({
+          text: "Pension Navigator",
+          heading: HeadingLevel.TITLE,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 200 }
+        }),
+        new Paragraph({
+          text: "Complete System Documentation",
+          heading: HeadingLevel.HEADING_2,
+          alignment: AlignmentType.CENTER,
+          spacing: { after: 400 }
+        }),
+        new Paragraph({
+          text: "System Overview",
+          heading: HeadingLevel.HEADING_1,
+          spacing: { before: 400, after: 200 }
+        }),
+        new Paragraph({
+          text: "Pension Navigator is a comprehensive pension management platform designed to streamline the entire pension lifecycle from client onboarding through to retirement income drawdown.",
+          spacing: { after: 200 }
+        })
+      ];
 
-      const converted = htmlDocx.asBlob(htmlContent);
-      const url = URL.createObjectURL(converted);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Pension-Navigator-Documentation.docx';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
+      features.forEach(category => {
+        children.push(
+          new Paragraph({
+            text: category.category,
+            heading: HeadingLevel.HEADING_1,
+            spacing: { before: 400, after: 200 }
+          })
+        );
+
+        category.items.forEach(item => {
+          children.push(
+            new Paragraph({
+              text: item.name,
+              heading: HeadingLevel.HEADING_2,
+              spacing: { before: 300, after: 100 }
+            }),
+            new Paragraph({
+              text: item.description,
+              spacing: { after: 200 }
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: "Key Features:",
+                  bold: true
+                })
+              ],
+              spacing: { after: 100 }
+            })
+          );
+
+          item.features.forEach(feature => {
+            children.push(
+              new Paragraph({
+                text: feature,
+                bullet: { level: 0 },
+                spacing: { after: 100 }
+              })
+            );
+          });
+        });
+      });
+
+      const doc = new Document({
+        sections: [{
+          properties: {
+            page: {
+              margin: {
+                top: convertInchesToTwip(1),
+                right: convertInchesToTwip(1),
+                bottom: convertInchesToTwip(1),
+                left: convertInchesToTwip(1)
+              }
+            }
+          },
+          children
+        }]
+      });
+
+      const blob = await import('docx').then(m => m.Packer.toBlob(doc));
+      saveAs(blob, 'Pension-Navigator-Documentation.docx');
     } catch (error) {
       console.error('Error exporting to Word:', error);
     }

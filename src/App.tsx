@@ -24,6 +24,7 @@ import InstrumentTransfer from "./components/InstrumentTransfer";
 import SystemDemo from "./components/SystemDemo";
 import KYCVerification from "./components/KYCVerification";
 import PaymentProvider from "./components/PaymentProvider";
+import SystemDocumentation from "./components/SystemDocumentation";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +52,7 @@ const AppContent = () => {
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/kyc" element={<KYCVerification />} />
         <Route path="/payments" element={<PaymentProvider />} />
+        <Route path="/documentation" element={<SystemDocumentation />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

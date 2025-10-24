@@ -15,7 +15,8 @@ import {
   Banknote,
   BookOpen,
   ArrowLeftRight,
-  CreditCard
+  CreditCard,
+  Book
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -148,6 +149,16 @@ export default function ClientView() {
       icon: CreditCard,
       route: '/payments',
       color: 'bg-secondary text-secondary-foreground'
+    },
+    {
+      id: 'documentation',
+      title: 'System Documentation',
+      description: 'Complete guide to all features and functionality',
+      value: 'View Guide',
+      status: 'Available',
+      icon: Book,
+      route: '/documentation',
+      color: 'bg-accent text-accent-foreground'
     }
   ]
 

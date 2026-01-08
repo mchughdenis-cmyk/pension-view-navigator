@@ -37,6 +37,72 @@ interface DripFeedSchedule {
   remainingPayments?: number;
 }
 
+interface TaxBreakdown {
+  gross: number;
+  tax: number;
+  nationalInsurance: number;
+  net: number;
+}
+
+// UK Tax calculations for 2024/25 tax year
+const calculateTax = (annualGross: number, taxCode: string): TaxBreakdown => {
+  // Extract personal allowance from tax code (e.g., 1257L = £12,570)
+  const codeNumber = parseInt(taxCode.replace(/[^0-9]/g, '')) || 1257;
+  const personalAllowance = codeNumber * 10;
+  
+  // Calculate taxable income
+  const taxableIncome = Math.max(0, annualGross - personalAllowance);
+  
+  // UK Income Tax bands 2024/25
+  let tax = 0;
+  if (taxableIncome > 0) {
+    // Basic rate (20%) - £0 to £37,700
+    const basicRateBand = Math.min(taxableIncome, 37700);
+    tax += basicRateBand * 0.20;
+    
+    // Higher rate (40%) - £37,701 to £125,140
+    if (taxableIncome > 37700) {
+      const higherRateBand = Math.min(taxableIncome - 37700, 87440);
+      tax += higherRateBand * 0.40;
+    }
+    
+    // Additional rate (45%) - over £125,140
+    if (taxableIncome > 125140) {
+      tax += (taxableIncome - 125140) * 0.45;
+    }
+  }
+  
+  // National Insurance (Class 1) - pensioners typically don't pay NI on pension income
+  // But we'll show it as £0 with a note
+  const nationalInsurance = 0;
+  
+  return {
+    gross: annualGross,
+    tax: tax,
+    nationalInsurance: nationalInsurance,
+    net: annualGross - tax - nationalInsurance
+  };
+};
+
+const calculatePaymentTax = (paymentAmount: number, frequency: 'monthly' | 'quarterly' | 'annually', taxCode: string): TaxBreakdown => {
+  // Convert to annual for tax calculation
+  const annualAmount = frequency === 'monthly' ? paymentAmount * 12 
+    : frequency === 'quarterly' ? paymentAmount * 4 
+    : paymentAmount;
+  
+  const annualTax = calculateTax(annualAmount, taxCode);
+  
+  // Convert back to payment frequency
+  const divisor = frequency === 'monthly' ? 12 : frequency === 'quarterly' ? 4 : 1;
+  
+  return {
+    gross: paymentAmount,
+    tax: annualTax.tax / divisor,
+    nationalInsurance: annualTax.nationalInsurance / divisor,
+    net: paymentAmount - (annualTax.tax / divisor) - (annualTax.nationalInsurance / divisor)
+  };
+};
+
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
@@ -56,6 +122,7 @@ const formatDate = (dateString: string) => {
 
 export default function DripFeedDrawdown() {
   const [availableBalance] = useState(364313); // Remaining after tax-free cash
+  const [taxCode, setTaxCode] = useState('1257L'); // Default UK personal allowance
   const [newSchedule, setNewSchedule] = useState<{
     name: string;
     amount: number;
@@ -204,7 +271,7 @@ export default function DripFeedDrawdown() {
         </div>
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Available Balance</CardTitle>
@@ -218,12 +285,28 @@ export default function DripFeedDrawdown() {
 
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tax Code</CardTitle>
+              <Calculator className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <Input
+                value={taxCode}
+                onChange={(e) => setTaxCode(e.target.value.toUpperCase())}
+                className="text-lg font-bold h-9 w-24"
+                maxLength={6}
+              />
+              <p className="text-xs text-muted-foreground mt-1">Current HMRC code</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Monthly Income</CardTitle>
               <Calendar className="h-4 w-4 text-success" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold text-success">{formatCurrency(totalMonthlyIncome)}</div>
-              <p className="text-xs text-muted-foreground">From active schedules</p>
+              <p className="text-xs text-muted-foreground">Gross from active schedules</p>
             </CardContent>
           </Card>
 
@@ -289,31 +372,56 @@ export default function DripFeedDrawdown() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Amount</Label>
-                        <p className="font-semibold">{formatCurrency(schedule.amount)}</p>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Frequency</Label>
-                        <p className="font-semibold">{getFrequencyLabel(schedule.frequency)}</p>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Next Payment</Label>
-                        <p className="font-semibold">{formatDate(schedule.nextPayment)}</p>
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Total Paid</Label>
-                        <p className="font-semibold">{formatCurrency(schedule.totalPaid)}</p>
-                      </div>
-                    </div>
+                    {(() => {
+                      const taxBreakdown = calculatePaymentTax(schedule.amount, schedule.frequency, taxCode);
+                      return (
+                        <>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Gross Amount</Label>
+                              <p className="font-semibold">{formatCurrency(taxBreakdown.gross)}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Income Tax</Label>
+                              <p className="font-semibold text-destructive">-{formatCurrency(taxBreakdown.tax)}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">National Insurance</Label>
+                              <p className="font-semibold text-muted-foreground">£0*</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Net Amount</Label>
+                              <p className="font-semibold text-success">{formatCurrency(taxBreakdown.net)}</p>
+                            </div>
+                          </div>
 
-                    {schedule.remainingPayments && (
-                      <div className="mb-4">
-                        <Label className="text-xs text-muted-foreground">Remaining Payments</Label>
-                        <p className="font-semibold">{schedule.remainingPayments}</p>
-                      </div>
-                    )}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 pt-2 border-t">
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Frequency</Label>
+                              <p className="font-semibold">{getFrequencyLabel(schedule.frequency)}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Next Payment</Label>
+                              <p className="font-semibold">{formatDate(schedule.nextPayment)}</p>
+                            </div>
+                            <div>
+                              <Label className="text-xs text-muted-foreground">Total Paid (Gross)</Label>
+                              <p className="font-semibold">{formatCurrency(schedule.totalPaid)}</p>
+                            </div>
+                            {schedule.remainingPayments && (
+                              <div>
+                                <Label className="text-xs text-muted-foreground">Remaining Payments</Label>
+                                <p className="font-semibold">{schedule.remainingPayments}</p>
+                              </div>
+                            )}
+                          </div>
+
+                          <p className="text-xs text-muted-foreground mb-4">
+                            *Pension income is not subject to National Insurance contributions
+                          </p>
+                        </>
+                      );
+                    })()}
 
                     <div className="flex gap-2">
                       <Button

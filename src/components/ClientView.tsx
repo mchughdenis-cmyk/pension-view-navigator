@@ -16,9 +16,13 @@ import {
   BookOpen,
   ArrowLeftRight,
   CreditCard,
-  Book
+  Book,
+  Briefcase,
+  RefreshCw,
+  GraduationCap
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { useRole } from '@/contexts/RoleContext'
 
 export default function ClientView() {
@@ -39,126 +43,161 @@ export default function ClientView() {
     adviser: 'Sarah Johnson'
   }
 
-  const products = [
+  const productCategories = [
     {
-      id: 'pension-portfolio',
-      title: 'My Pension Portfolio',
-      description: 'View your pension investments and performance',
-      value: `£${clientData.portfolioValue.toLocaleString()}`,
-      status: 'Active',
-      icon: Wallet,
-      route: '/portfolio',
-      color: 'bg-primary text-primary-foreground'
+      id: 'portfolio',
+      title: 'Portfolio & Investments',
+      icon: Briefcase,
+      items: [
+        {
+          id: 'pension-portfolio',
+          title: 'My Pension Portfolio',
+          description: 'View your pension investments and performance',
+          value: `£${clientData.portfolioValue.toLocaleString()}`,
+          status: 'Active',
+          icon: Wallet,
+          route: '/portfolio',
+          color: 'bg-primary text-primary-foreground'
+        },
+        {
+          id: 'instrument-transfer',
+          title: 'Instrument Transfers',
+          description: 'Track individual stock and fund transfers',
+          value: '5 Lines',
+          status: 'In Progress',
+          icon: ArrowLeftRight,
+          route: '/instrument-transfer',
+          color: 'bg-primary text-primary-foreground'
+        }
+      ]
     },
     {
-      id: 'drawdown',
-      title: 'Drawdown Planning',
-      description: 'Manage your pension withdrawals',
-      value: `£${clientData.monthlyIncome}/month`,
-      status: 'Active',
-      icon: TrendingUp,
-      route: '/drawdown',
-      color: 'bg-success text-success-foreground'
-    },
-    {
-      id: 'instant-withdrawal',
-      title: 'Instant Withdrawal',
-      description: 'Withdraw funds directly to your bank account',
-      value: 'Available',
-      status: 'Ready',
+      id: 'income',
+      title: 'Income & Withdrawals',
       icon: Banknote,
-      route: '/instant-withdrawal',
-      color: 'bg-primary text-primary-foreground'
-    },
-    {
-      id: 'drip-feed',
-      title: 'Regular Income',
-      description: 'Your automatic regular payments',
-      value: `£${clientData.regularPayments}/month`,
-      status: 'Scheduled',
-      icon: PiggyBank,
-      route: '/drip-feed',
-      color: 'bg-secondary text-secondary-foreground'
+      items: [
+        {
+          id: 'drawdown',
+          title: 'Drawdown Planning',
+          description: 'Manage your pension withdrawals',
+          value: `£${clientData.monthlyIncome}/month`,
+          status: 'Active',
+          icon: TrendingUp,
+          route: '/drawdown',
+          color: 'bg-success text-success-foreground'
+        },
+        {
+          id: 'instant-withdrawal',
+          title: 'Instant Withdrawal',
+          description: 'Withdraw funds directly to your bank account',
+          value: 'Available',
+          status: 'Ready',
+          icon: Banknote,
+          route: '/instant-withdrawal',
+          color: 'bg-primary text-primary-foreground'
+        },
+        {
+          id: 'drip-feed',
+          title: 'Regular Income',
+          description: 'Your automatic regular payments',
+          value: `£${clientData.regularPayments}/month`,
+          status: 'Scheduled',
+          icon: PiggyBank,
+          route: '/drip-feed',
+          color: 'bg-secondary text-secondary-foreground'
+        }
+      ]
     },
     {
       id: 'transfers',
-      title: 'Transfers',
-      description: 'Move funds between pension schemes',
-      value: 'Available',
-      status: 'Ready',
-      icon: DollarSign,
-      route: '/transfer',
-      color: 'bg-accent text-accent-foreground'
+      title: 'Transfers & Payments',
+      icon: RefreshCw,
+      items: [
+        {
+          id: 'transfers',
+          title: 'Pension Transfers',
+          description: 'Move funds between pension schemes',
+          value: 'Available',
+          status: 'Ready',
+          icon: DollarSign,
+          route: '/transfer',
+          color: 'bg-accent text-accent-foreground'
+        },
+        {
+          id: 'payments',
+          title: 'Payment Provider',
+          description: 'Manage contributions and withdrawals',
+          value: '2 Methods',
+          status: 'Active',
+          icon: CreditCard,
+          route: '/payments',
+          color: 'bg-secondary text-secondary-foreground'
+        }
+      ]
     },
     {
       id: 'documents',
-      title: 'Annual Summary',
-      description: 'View your yearly pension statements',
-      value: '2024 Report',
-      status: 'Available',
+      title: 'Documents & Reports',
       icon: FileText,
-      route: '/annual-summary',
-      color: 'bg-muted text-muted-foreground'
+      items: [
+        {
+          id: 'annual-summary',
+          title: 'Annual Summary',
+          description: 'View your yearly pension statements',
+          value: '2024 Report',
+          status: 'Available',
+          icon: FileText,
+          route: '/annual-summary',
+          color: 'bg-muted text-muted-foreground'
+        },
+        {
+          id: 'documentation',
+          title: 'System Documentation',
+          description: 'Complete guide to all features and functionality',
+          value: 'View Guide',
+          status: 'Available',
+          icon: Book,
+          route: '/documentation',
+          color: 'bg-accent text-accent-foreground'
+        }
+      ]
     },
     {
-      id: 'welcome-pack',
-      title: 'Welcome Pack',
-      description: 'Get started with your pension journey',
-      value: 'Complete',
-      status: 'Available',
-      icon: Shield,
-      route: '/welcome-pack',
-      color: 'bg-warning text-warning-foreground'
-    },
-    {
-      id: 'kyc-verification',
-      title: 'KYC/AML Verification',
-      description: 'Complete your identity and compliance checks',
-      value: 'In Review',
-      status: 'Pending',
-      icon: Shield,
-      route: '/kyc',
-      color: 'bg-primary text-primary-foreground'
-    },
-    {
-      id: 'learning',
-      title: 'Learning Centre',
-      description: 'Build your pension & investment knowledge',
-      value: '12 Modules',
-      status: 'Active',
-      icon: BookOpen,
-      route: '/learning',
-      color: 'bg-success text-success-foreground'
-    },
-    {
-      id: 'instrument-transfer',
-      title: 'Instrument Transfers',
-      description: 'Track individual stock and fund transfers',
-      value: '5 Lines',
-      status: 'In Progress',
-      icon: ArrowLeftRight,
-      route: '/instrument-transfer',
-      color: 'bg-primary text-primary-foreground'
-    },
-    {
-      id: 'payments',
-      title: 'Payment Provider',
-      description: 'Manage contributions and withdrawals',
-      value: '2 Methods',
-      status: 'Active',
-      icon: CreditCard,
-      route: '/payments',
-      color: 'bg-secondary text-secondary-foreground'
-    },
-    {
-      id: 'documentation',
-      title: 'System Documentation',
-      description: 'Complete guide to all features and functionality',
-      value: 'View Guide',
-      status: 'Available',
-      icon: Book,
-      route: '/documentation',
-      color: 'bg-accent text-accent-foreground'
+      id: 'onboarding',
+      title: 'Getting Started',
+      icon: GraduationCap,
+      items: [
+        {
+          id: 'welcome-pack',
+          title: 'Welcome Pack',
+          description: 'Get started with your pension journey',
+          value: 'Complete',
+          status: 'Available',
+          icon: Shield,
+          route: '/welcome-pack',
+          color: 'bg-warning text-warning-foreground'
+        },
+        {
+          id: 'kyc-verification',
+          title: 'KYC/AML Verification',
+          description: 'Complete your identity and compliance checks',
+          value: 'In Review',
+          status: 'Pending',
+          icon: Shield,
+          route: '/kyc',
+          color: 'bg-primary text-primary-foreground'
+        },
+        {
+          id: 'learning',
+          title: 'Learning Centre',
+          description: 'Build your pension & investment knowledge',
+          value: '12 Modules',
+          status: 'Active',
+          icon: BookOpen,
+          route: '/learning',
+          color: 'bg-success text-success-foreground'
+        }
+      ]
     }
   ]
 
@@ -265,48 +304,76 @@ export default function ClientView() {
         </div>
 
         {/* Products & Services */}
-        <div className="mb-8">
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-foreground mb-2">My Products & Services</h2>
-          <p className="text-muted-foreground mb-6">Access your pension products and manage your investments</p>
+          <p className="text-muted-foreground">Access your pension products and manage your investments</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {products.map((product) => {
-            const IconComponent = product.icon
+        <Accordion type="multiple" defaultValue={['portfolio', 'income']} className="space-y-4">
+          {productCategories.map((category) => {
+            const CategoryIcon = category.icon
             return (
-              <Card 
-                key={product.id} 
-                className="hover:shadow-lg transition-all duration-200 cursor-pointer group border"
-                onClick={() => navigate(product.route)}
+              <AccordionItem 
+                key={category.id} 
+                value={category.id}
+                className="bg-card border rounded-lg px-4 data-[state=open]:shadow-md transition-shadow"
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className={`p-2 rounded-lg ${product.color}`}>
-                      <IconComponent className="w-5 h-5" />
+                <AccordionTrigger className="hover:no-underline py-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <CategoryIcon className="w-5 h-5 text-primary" />
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      {product.status}
-                    </Badge>
-                  </div>
-                  <CardTitle className="text-lg group-hover:text-primary transition-colors">
-                    {product.title}
-                  </CardTitle>
-                  <CardDescription className="text-sm">
-                    {product.description}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-2xl font-bold text-foreground">
-                      {product.value}
+                    <div className="text-left">
+                      <span className="text-lg font-semibold">{category.title}</span>
+                      <span className="text-sm text-muted-foreground ml-2">
+                        ({category.items.length} items)
+                      </span>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                   </div>
-                </CardContent>
-              </Card>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 pb-2">
+                    {category.items.map((product) => {
+                      const IconComponent = product.icon
+                      return (
+                        <Card 
+                          key={product.id} 
+                          className="hover:shadow-lg transition-all duration-200 cursor-pointer group border"
+                          onClick={() => navigate(product.route)}
+                        >
+                          <CardHeader className="pb-3">
+                            <div className="flex items-start justify-between">
+                              <div className={`p-2 rounded-lg ${product.color}`}>
+                                <IconComponent className="w-5 h-5" />
+                              </div>
+                              <Badge variant="secondary" className="text-xs">
+                                {product.status}
+                              </Badge>
+                            </div>
+                            <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                              {product.title}
+                            </CardTitle>
+                            <CardDescription className="text-sm">
+                              {product.description}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <div className="flex items-center justify-between">
+                              <div className="text-xl font-bold text-foreground">
+                                {product.value}
+                              </div>
+                              <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
             )
           })}
-        </div>
+        </Accordion>
 
         {/* Quick Actions */}
         <div className="mt-12">

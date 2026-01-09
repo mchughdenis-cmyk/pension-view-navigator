@@ -28,9 +28,12 @@ import {
   Shield,
   PiggyBank,
   Banknote,
-  TrendingDown
+  TrendingDown,
+  Landmark,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import BankUpload from "./BankUpload";
+import PooledAccount from "./PooledAccount";
 
 // Mock data for admin dashboard
 const adminData = {
@@ -294,11 +297,13 @@ export default function PensionAdminDashboard() {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="clients" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="clients">Client Management</TabsTrigger>
             <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts & Notifications</TabsTrigger>
-            <TabsTrigger value="reports">Reports & Analytics</TabsTrigger>
+            <TabsTrigger value="bankupload">Bank Upload</TabsTrigger>
+            <TabsTrigger value="pooledaccount">Pooled Account</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
             <TabsTrigger value="compliance">Compliance</TabsTrigger>
             <TabsTrigger value="regulatory">Tax & Regulatory</TabsTrigger>
           </TabsList>
@@ -407,6 +412,14 @@ export default function PensionAdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="bankupload">
+            <BankUpload />
+          </TabsContent>
+
+          <TabsContent value="pooledaccount">
+            <PooledAccount />
           </TabsContent>
 
           <TabsContent value="alerts">

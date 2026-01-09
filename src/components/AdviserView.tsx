@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { MobileHeader } from '@/components/ui/mobile-header'
 import { 
   Users, 
   TrendingUp, 
@@ -22,10 +23,12 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 export default function AdviserView() {
   const navigate = useNavigate()
   const { user, switchRole } = useRole()
+  const isMobile = useIsMobile()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
@@ -118,42 +121,40 @@ export default function AdviserView() {
     return matchesSearch && matchesStatus
   })
 
+  const headerActions = (
+    <>
+      <Button variant="outline" size="sm" onClick={() => switchRole('client')} className="w-full sm:w-auto justify-start">
+        <User className="w-4 h-4 mr-2" />
+        Switch to Client
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => switchRole('admin')} className="w-full sm:w-auto justify-start">
+        <Shield className="w-4 h-4 mr-2" />
+        Admin Portal
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => navigate('/settings')} className="w-full sm:w-auto justify-start">
+        <Settings className="w-4 h-4 mr-2" />
+        Settings
+      </Button>
+      <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full sm:w-auto justify-start">
+        <LogOut className="w-4 h-4 mr-2" />
+        Sign Out
+      </Button>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       {/* Header */}
-      <div className="bg-card border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Adviser Dashboard</h1>
-              <p className="text-muted-foreground">{user?.name} - {user?.email}</p>
-              <Badge variant="outline" className="mt-1">Adviser View</Badge>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => switchRole('client')}>
-                <User className="w-4 h-4 mr-2" />
-                Switch to Client
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => switchRole('admin')}>
-                <Shield className="w-4 h-4 mr-2" />
-                Admin Portal
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MobileHeader
+        title="Adviser Dashboard"
+        subtitle={`${user?.name} - ${user?.email}`}
+        badge={<Badge variant="outline">Adviser View</Badge>}
+        actions={headerActions}
+      />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4 mb-6 sm:mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">My Clients</CardTitle>
@@ -214,85 +215,143 @@ export default function AdviserView() {
 
         {/* Client Management */}
         <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
+          <CardHeader className="pb-3">
+            <div className="flex flex-col md:flex-row justify-between gap-4">
               <CardTitle>My Client Portfolio</CardTitle>
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
                     placeholder="Search clients..." 
-                    className="pl-10 w-64"
+                    className="pl-10 w-full sm:w-48 md:w-64"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-40">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Status</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="review_required">Review Required</SelectItem>
-                    <SelectItem value="onboarding">Onboarding</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button>
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add Client
-                </Button>
+                <div className="flex gap-2">
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-full sm:w-36">
+                      <SelectValue placeholder="Filter" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="review_required">Review Required</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button className="flex-shrink-0">
+                    <UserPlus className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Add Client</span>
+                  </Button>
+                </div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {filteredClients.map((client) => (
-                <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                  <div className="flex-1 grid grid-cols-6 gap-4 items-center">
-                    <div>
-                      <p className="font-medium">{client.name}</p>
-                      <p className="text-sm text-muted-foreground">{client.email}</p>
-                    </div>
-                    <div className="text-center">
-                      <p className="font-semibold">{formatCurrency(client.portfolioValue)}</p>
-                      <p className="text-xs text-muted-foreground">Portfolio Value</p>
-                    </div>
-                    <div className="text-center">
+                <div key={client.id} className="p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                  {/* Mobile Layout */}
+                  <div className="md:hidden space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">{client.name}</p>
+                        <p className="text-sm text-muted-foreground">{client.email}</p>
+                      </div>
                       <Badge variant={getStatusColor(client.status)}>
                         {client.status.replace('_', ' ')}
                       </Badge>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm">{client.riskProfile}</p>
-                      <p className="text-xs text-muted-foreground">Risk Profile</p>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-muted-foreground">Portfolio</p>
+                        <p className="font-semibold">{formatCurrency(client.portfolioValue)}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Risk Profile</p>
+                        <p className="font-medium">{client.riskProfile}</p>
+                      </div>
+                      <div>
+                        <p className="text-muted-foreground">Next Review</p>
+                        <p className="font-medium">{client.nextReview}</p>
+                      </div>
+                      <div>
+                        {client.monthlyDrawdown > 0 && (
+                          <>
+                            <p className="text-muted-foreground">Drawdown</p>
+                            <p className="font-medium">{formatCurrency(client.monthlyDrawdown)}/mo</p>
+                          </>
+                        )}
+                        {client.pendingActions > 0 && (
+                          <Badge variant="secondary" className="mt-1">{client.pendingActions} pending</Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-center">
-                      <p className="text-sm">{client.nextReview}</p>
-                      <p className="text-xs text-muted-foreground">Next Review</p>
-                    </div>
-                    <div className="text-center">
-                      {client.pendingActions > 0 && (
-                        <Badge variant="secondary">{client.pendingActions} pending</Badge>
-                      )}
-                      {client.monthlyDrawdown > 0 && (
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {formatCurrency(client.monthlyDrawdown)}/month
-                        </p>
-                      )}
+                    <div className="flex gap-2 pt-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}
+                      >
+                        <Eye className="w-4 h-4 mr-2" />
+                        View
+                      </Button>
+                      <Button variant="outline" size="sm" className="flex-1">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-2 ml-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                    <Button variant="outline" size="sm">
-                      <Edit className="w-4 h-4" />
-                    </Button>
+
+                  {/* Desktop Layout */}
+                  <div className="hidden md:flex items-center justify-between">
+                    <div className="flex-1 grid grid-cols-6 gap-4 items-center">
+                      <div>
+                        <p className="font-medium">{client.name}</p>
+                        <p className="text-sm text-muted-foreground">{client.email}</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-semibold">{formatCurrency(client.portfolioValue)}</p>
+                        <p className="text-xs text-muted-foreground">Portfolio Value</p>
+                      </div>
+                      <div className="text-center">
+                        <Badge variant={getStatusColor(client.status)}>
+                          {client.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm">{client.riskProfile}</p>
+                        <p className="text-xs text-muted-foreground">Risk Profile</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="text-sm">{client.nextReview}</p>
+                        <p className="text-xs text-muted-foreground">Next Review</p>
+                      </div>
+                      <div className="text-center">
+                        {client.pendingActions > 0 && (
+                          <Badge variant="secondary">{client.pendingActions} pending</Badge>
+                        )}
+                        {client.monthlyDrawdown > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {formatCurrency(client.monthlyDrawdown)}/month
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -301,16 +360,16 @@ export default function AdviserView() {
         </Card>
 
         {/* Quick Actions */}
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold text-foreground mb-4">Quick Actions</h3>
-          <div className="flex flex-wrap gap-3">
-            <Button variant="outline" onClick={() => navigate('/onboarding')}>
+        <div className="mt-6 sm:mt-8">
+          <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-3 sm:mb-4">Quick Actions</h3>
+          <div className="flex flex-wrap gap-2 sm:gap-3">
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={() => navigate('/onboarding')}>
               Client Onboarding
             </Button>
-            <Button variant="outline" onClick={() => navigate('/illustration')}>
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={() => navigate('/illustration')}>
               Generate Illustrations
             </Button>
-            <Button variant="outline" onClick={() => navigate('/annual-summary')}>
+            <Button variant="outline" size="sm" className="text-xs sm:text-sm" onClick={() => navigate('/annual-summary')}>
               Generate Reports
             </Button>
           </div>

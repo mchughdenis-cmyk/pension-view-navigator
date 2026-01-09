@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { MobileTabs, TabsContent } from "@/components/ui/mobile-tabs";
+import { MobileHeader } from "@/components/ui/mobile-header";
 import { 
   Users, 
   TrendingUp, 
@@ -30,10 +31,27 @@ import {
   Banknote,
   TrendingDown,
   Landmark,
+  ClipboardList,
+  Activity,
+  FileBarChart,
+  Scale,
+  Gavel,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BankUpload from "./BankUpload";
 import PooledAccount from "./PooledAccount";
+
+// Tab configuration for mobile-friendly navigation
+const adminTabs = [
+  { value: "clients", label: "Clients", icon: Users },
+  { value: "activity", label: "Activity", icon: Activity },
+  { value: "bankupload", label: "Bank Upload", icon: Upload },
+  { value: "pooledaccount", label: "Pooled Account", icon: Building2 },
+  { value: "alerts", label: "Alerts", icon: Bell },
+  { value: "reports", label: "Reports", icon: FileBarChart },
+  { value: "compliance", label: "Compliance", icon: Scale },
+  { value: "regulatory", label: "Regulatory", icon: Gavel },
+];
 
 // Mock data for admin dashboard
 const adminData = {
@@ -188,125 +206,117 @@ const getPriorityColor = (priority: string) => {
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
 
+  const headerActions = (
+    <>
+      <Button variant="outline" className="w-full sm:w-auto justify-start">
+        <Download className="w-4 h-4 mr-2" />
+        Export Report
+      </Button>
+      <Button variant="outline" onClick={() => navigate('/onboarding')} className="w-full sm:w-auto justify-start">
+        <UserPlus className="w-4 h-4 mr-2" />
+        Client Onboarding
+      </Button>
+      <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto justify-start">
+        <UserCheck className="w-4 h-4 mr-2" />
+        Add Client
+      </Button>
+    </>
+  );
+
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Pension Administration</h1>
-            <p className="text-muted-foreground mt-1">Manage client portfolios and administrative tasks</p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Export Report
-            </Button>
-            <Button variant="outline" onClick={() => navigate('/onboarding')}>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Client Onboarding
-            </Button>
-            <Button className="bg-primary hover:bg-primary/90">
-              <UserCheck className="w-4 h-4 mr-2" />
-              Add Client
-            </Button>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background">
+      <MobileHeader
+        title="Pension Administration"
+        subtitle="Manage client portfolios and administrative tasks"
+        actions={headerActions}
+      />
+
+      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Total Clients</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{adminData.summary.totalClients.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">Active accounts</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-primary">{adminData.summary.totalClients.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Active accounts</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Assets Under Management</CardTitle>
-              <TrendingUp className="h-4 w-4 text-success" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">AUM</CardTitle>
+              <TrendingUp className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-success">
                 {formatCurrency(adminData.summary.totalAUM)}
               </div>
-              <p className="text-xs text-muted-foreground">Total portfolio value</p>
+              <p className="text-xs text-muted-foreground hidden sm:block">Total portfolio value</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Clients in Drawdown</CardTitle>
-              <TrendingDown className="h-4 w-4 text-warning" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Drawdown</CardTitle>
+              <TrendingDown className="h-4 w-4 text-warning hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-warning">{adminData.summary.clientsInDrawdown}</div>
-              <p className="text-xs text-muted-foreground">Taking withdrawals</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-warning">{adminData.summary.clientsInDrawdown}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Taking withdrawals</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Clients in Accumulation</CardTitle>
-              <PiggyBank className="h-4 w-4 text-primary" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Accumulation</CardTitle>
+              <PiggyBank className="h-4 w-4 text-primary hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-primary">{adminData.summary.clientsInAccumulation}</div>
-              <p className="text-xs text-muted-foreground">Building wealth</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-primary">{adminData.summary.clientsInAccumulation}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Building wealth</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Regular Income</CardTitle>
-              <Banknote className="h-4 w-4 text-success" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Regular Income</CardTitle>
+              <Banknote className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-success">{adminData.summary.clientsWithRegularIncome}</div>
-              <p className="text-xs text-muted-foreground">Monthly payments</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-success">{adminData.summary.clientsWithRegularIncome}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Monthly payments</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending Actions</CardTitle>
-              <Clock className="h-4 w-4 text-warning" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <Clock className="h-4 w-4 text-warning hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-warning">{adminData.summary.pendingActions}</div>
-              <p className="text-xs text-muted-foreground">Require attention</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-warning">{adminData.summary.pendingActions}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Require attention</p>
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Overdue Reviews</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-destructive" />
+          <Card className="col-span-1">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
+              <CardTitle className="text-xs sm:text-sm font-medium">Overdue</CardTitle>
+              <AlertTriangle className="h-4 w-4 text-destructive hidden sm:block" />
             </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-destructive">{adminData.summary.overdueReviews}</div>
-              <p className="text-xs text-muted-foreground">Need immediate action</p>
+            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
+              <div className="text-xl sm:text-2xl font-bold text-destructive">{adminData.summary.overdueReviews}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Need immediate action</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="clients" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-8">
-            <TabsTrigger value="clients">Client Management</TabsTrigger>
-            <TabsTrigger value="activity">Recent Activity</TabsTrigger>
-            <TabsTrigger value="bankupload">Bank Upload</TabsTrigger>
-            <TabsTrigger value="pooledaccount">Pooled Account</TabsTrigger>
-            <TabsTrigger value="alerts">Alerts</TabsTrigger>
-            <TabsTrigger value="reports">Reports</TabsTrigger>
-            <TabsTrigger value="compliance">Compliance</TabsTrigger>
-            <TabsTrigger value="regulatory">Tax & Regulatory</TabsTrigger>
-          </TabsList>
+        <MobileTabs tabs={adminTabs} defaultValue="clients">
 
           <TabsContent value="clients">
             <Card>
@@ -712,7 +722,7 @@ export default function PensionAdminDashboard() {
               </Card>
             </div>
           </TabsContent>
-        </Tabs>
+        </MobileTabs>
       </div>
     </div>
   );

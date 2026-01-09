@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { MobileHeader } from '@/components/ui/mobile-header'
 import { 
   Wallet, 
   TrendingUp, 
@@ -201,37 +202,37 @@ export default function ClientView() {
     }
   ]
 
+  const headerActions = (
+    <>
+      <Button variant="outline" size="sm" onClick={() => switchRole('adviser')} className="w-full sm:w-auto justify-start">
+        <User className="w-4 h-4 mr-2" />
+        Switch to Adviser
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => navigate('/settings')} className="w-full sm:w-auto justify-start">
+        <Settings className="w-4 h-4 mr-2" />
+        Settings
+      </Button>
+      <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full sm:w-auto justify-start">
+        <LogOut className="w-4 h-4 mr-2" />
+        Sign Out
+      </Button>
+    </>
+  )
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       {/* Header */}
-      <div className="bg-card border-b border-border shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-foreground">Welcome back, {user?.name}</h1>
-              <p className="text-muted-foreground">{user?.email}</p>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant="outline">Client View</Badge>
-                <span className="text-sm text-muted-foreground">Adviser: {clientData.adviser}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={() => switchRole('adviser')}>
-                <User className="w-4 h-4 mr-2" />
-                Switch to Adviser
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => navigate('/settings')}>
-                <Settings className="w-4 h-4 mr-2" />
-                Settings
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleSignOut}>
-                <LogOut className="w-4 h-4 mr-2" />
-                Sign Out
-              </Button>
-            </div>
+      <MobileHeader
+        title={`Welcome back, ${user?.name}`}
+        subtitle={user?.email}
+        badge={
+          <div className="flex items-center gap-2 flex-wrap">
+            <Badge variant="outline">Client View</Badge>
+            <span className="text-sm text-muted-foreground">Adviser: {clientData.adviser}</span>
           </div>
-        </div>
-      </div>
+        }
+        actions={headerActions}
+      />
 
       {/* Demo Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

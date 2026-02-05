@@ -36,15 +36,24 @@ import {
   FileBarChart,
   Scale,
   Gavel,
+  Link2,
+  Package,
+  ArrowRightLeft,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BankUpload from "./BankUpload";
 import PooledAccount from "./PooledAccount";
+import IntegrationsHub from "./IntegrationsHub";
+import InvestmentProducts from "./InvestmentProducts";
+import OrigoTransfers from "./OrigoTransfers";
 
 // Tab configuration for mobile-friendly navigation
 const adminTabs = [
   { value: "clients", label: "Clients", icon: Users },
   { value: "activity", label: "Activity", icon: Activity },
+  { value: "integrations", label: "Integrations", icon: Link2 },
+  { value: "products", label: "Products", icon: Package },
+  { value: "origo", label: "Origo Transfers", icon: ArrowRightLeft },
   { value: "bankupload", label: "Bank Upload", icon: Upload },
   { value: "pooledaccount", label: "Pooled Account", icon: Building2 },
   { value: "alerts", label: "Alerts", icon: Bell },
@@ -422,6 +431,18 @@ export default function PensionAdminDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="integrations">
+            <IntegrationsHub />
+          </TabsContent>
+
+          <TabsContent value="products">
+            <InvestmentProducts />
+          </TabsContent>
+
+          <TabsContent value="origo">
+            <OrigoTransfers />
           </TabsContent>
 
           <TabsContent value="bankupload">

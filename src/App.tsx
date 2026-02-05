@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import LoginScreen from "./components/LoginScreen";
+import AdminLogin from "./components/AdminLogin";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -33,6 +34,7 @@ const AppContent = () => {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<LoginScreen />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/dashboard" element={<ClientProductsDashboard />} />
         <Route path="/portfolio" element={<Index />} />
         <Route path="/admin" element={<Admin />} />

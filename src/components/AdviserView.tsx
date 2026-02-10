@@ -51,48 +51,60 @@ export default function AdviserView() {
       name: "John Smith",
       email: "john.smith@email.com",
       portfolioValue: 287450,
+      isaValue: 87650,
+      giaValue: 145200,
       lastContact: "2024-01-15",
       status: "active",
       riskProfile: "balanced",
       nextReview: "2024-03-15",
       pendingActions: 0,
-      monthlyDrawdown: 2850
+      monthlyDrawdown: 2850,
+      accounts: ['SIPP', 'ISA', 'GIA']
     },
     {
       id: 2,
       name: "Emma Wilson",
       email: "emma.wilson@email.com", 
       portfolioValue: 325000,
+      isaValue: 42000,
+      giaValue: 0,
       lastContact: "2024-01-14",
       status: "active",
       riskProfile: "conservative",
       nextReview: "2024-02-28",
       pendingActions: 1,
-      monthlyDrawdown: 0
+      monthlyDrawdown: 0,
+      accounts: ['SIPP', 'ISA']
     },
     {
       id: 3,
       name: "David Thompson",
       email: "david.thompson@email.com",
       portfolioValue: 750000,
+      isaValue: 120000,
+      giaValue: 350000,
       lastContact: "2024-01-10",
       status: "review_required",
       riskProfile: "aggressive",
       nextReview: "2024-01-20",
       pendingActions: 2,
-      monthlyDrawdown: 4200
+      monthlyDrawdown: 4200,
+      accounts: ['SIPP', 'ISA', 'GIA']
     },
     {
       id: 4,
       name: "Lisa Anderson",
       email: "lisa.anderson@email.com",
       portfolioValue: 195000,
+      isaValue: 0,
+      giaValue: 28000,
       lastContact: "2024-01-08",
       status: "onboarding",
       riskProfile: "balanced",
       nextReview: "2024-02-01",
       pendingActions: 1,
-      monthlyDrawdown: 0
+      monthlyDrawdown: 0,
+      accounts: ['SIPP', 'GIA']
     }
   ]
 
@@ -257,16 +269,21 @@ export default function AdviserView() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">{client.name}</p>
-                        <p className="text-sm text-muted-foreground">{client.email}</p>
+                       <p className="text-sm text-muted-foreground">{client.email}</p>
                       </div>
                       <Badge variant={getStatusColor(client.status)}>
                         {client.status.replace('_', ' ')}
                       </Badge>
                     </div>
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {client.accounts.map(acc => (
+                        <Badge key={acc} variant="outline" className="text-xs">{acc}</Badge>
+                      ))}
+                    </div>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>
-                        <p className="text-muted-foreground">Portfolio</p>
-                        <p className="font-semibold">{formatCurrency(client.portfolioValue)}</p>
+                        <p className="text-muted-foreground">Total Value</p>
+                        <p className="font-semibold">{formatCurrency(client.portfolioValue + client.isaValue + client.giaValue)}</p>
                       </div>
                       <div>
                         <p className="text-muted-foreground">Risk Profile</p>
@@ -313,8 +330,13 @@ export default function AdviserView() {
                         <p className="text-sm text-muted-foreground">{client.email}</p>
                       </div>
                       <div className="text-center">
-                        <p className="font-semibold">{formatCurrency(client.portfolioValue)}</p>
-                        <p className="text-xs text-muted-foreground">Portfolio Value</p>
+                        <p className="font-semibold">{formatCurrency(client.portfolioValue + client.isaValue + client.giaValue)}</p>
+                        <p className="text-xs text-muted-foreground">Total Value</p>
+                        <div className="flex justify-center gap-1 mt-1">
+                          {client.accounts.map(acc => (
+                            <Badge key={acc} variant="outline" className="text-[10px] px-1 py-0">{acc}</Badge>
+                          ))}
+                        </div>
                       </div>
                       <div className="text-center">
                         <Badge variant={getStatusColor(client.status)}>

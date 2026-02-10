@@ -61,6 +61,26 @@ export default function ClientView() {
           color: 'bg-primary text-primary-foreground'
         },
         {
+          id: 'isa-portfolio',
+          title: 'Stocks & Shares ISA',
+          description: 'Tax-free investment account',
+          value: '£87,650',
+          status: 'Active',
+          icon: Shield,
+          route: '/isa',
+          color: 'bg-success text-success-foreground'
+        },
+        {
+          id: 'gia-portfolio',
+          title: 'General Investment Account',
+          description: 'Flexible investment account',
+          value: '£145,200',
+          status: 'Active',
+          icon: Briefcase,
+          route: '/gia',
+          color: 'bg-accent text-accent-foreground'
+        },
+        {
           id: 'instrument-transfer',
           title: 'Instrument Transfers',
           description: 'Track individual stock and fund transfers',
@@ -266,40 +286,54 @@ export default function ClientView() {
 
       {/* Portfolio Summary */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Total Portfolio Value</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Pension</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">
+              <div className="text-2xl font-bold text-primary">
                 £{clientData.portfolioValue.toLocaleString()}
               </div>
-              <p className="text-sm text-muted-foreground mt-1">
-                +£{clientData.lastContribution.toLocaleString()} this month
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">SIPP Portfolio</p>
             </CardContent>
           </Card>
-          
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Monthly Drawdown</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">ISA</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-success">
-                £{clientData.monthlyIncome.toLocaleString()}
+              <div className="text-2xl font-bold text-success">£87,650</div>
+              <p className="text-xs text-muted-foreground mt-1">S&S ISA</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">GIA</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-accent-foreground">£145,200</div>
+              <p className="text-xs text-muted-foreground mt-1">General Investment</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Drawdown</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-success">
+                £{clientData.monthlyIncome.toLocaleString()}/mo
               </div>
-              <p className="text-sm text-muted-foreground mt-1">Next payment: Feb 1st</p>
+              <p className="text-xs text-muted-foreground mt-1">Next: Feb 1st</p>
             </CardContent>
           </Card>
-          
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Risk Profile</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Value</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-foreground">{clientData.riskProfile}</div>
-              <p className="text-sm text-muted-foreground mt-1">Last reviewed: Dec 2023</p>
+              <div className="text-2xl font-bold text-primary">£520,300</div>
+              <p className="text-xs text-muted-foreground mt-1">All accounts</p>
             </CardContent>
           </Card>
         </div>

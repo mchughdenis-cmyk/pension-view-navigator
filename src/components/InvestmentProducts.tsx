@@ -32,7 +32,8 @@ interface InvestmentProduct {
   name: string
   isin: string
   sedol: string
-  type: 'fund' | 'etf' | 'bond' | 'cash' | 'pension'
+  type: 'fund' | 'etf' | 'bond' | 'cash' | 'pension' | 'isa' | 'gia'
+  wrapper: 'pension' | 'isa' | 'gia' | 'all'
   provider: string
   sector: string
   riskLevel: number
@@ -60,6 +61,7 @@ export default function InvestmentProducts() {
       isin: 'GB00B4PQW151',
       sedol: 'B4PQW15',
       type: 'fund',
+      wrapper: 'all',
       provider: 'Vanguard',
       sector: 'Mixed Investment 40-85% Shares',
       riskLevel: 5,
@@ -78,6 +80,7 @@ export default function InvestmentProducts() {
       isin: 'GB00BG0QPL70',
       sedol: 'BG0QPL7',
       type: 'fund',
+      wrapper: 'isa',
       provider: 'Legal & General',
       sector: 'Technology & Technology Innovation',
       riskLevel: 6,
@@ -96,6 +99,7 @@ export default function InvestmentProducts() {
       isin: 'GB0002426810',
       sedol: '0242681',
       type: 'bond',
+      wrapper: 'pension',
       provider: 'BlackRock',
       sector: 'Sterling Corporate Bond',
       riskLevel: 3,
@@ -114,6 +118,7 @@ export default function InvestmentProducts() {
       isin: 'GB00BMJJJF91',
       sedol: 'BMJJJF9',
       type: 'fund',
+      wrapper: 'all',
       provider: 'HSBC',
       sector: 'Global',
       riskLevel: 5,
@@ -132,6 +137,7 @@ export default function InvestmentProducts() {
       isin: 'GB00B8C3GD78',
       sedol: 'B8C3GD7',
       type: 'cash',
+      wrapper: 'gia',
       provider: 'Scottish Widows',
       sector: 'Money Market',
       riskLevel: 1,
@@ -289,6 +295,20 @@ export default function InvestmentProducts() {
                   </Select>
                 </div>
                 <div className="space-y-2">
+                  <Label>Account Wrapper</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select wrapper" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Wrappers</SelectItem>
+                      <SelectItem value="pension">Pension (SIPP)</SelectItem>
+                      <SelectItem value="isa">Stocks & Shares ISA</SelectItem>
+                      <SelectItem value="gia">General Investment Account</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
                   <Label>Sector</Label>
                   <Input placeholder="e.g., Global Equity" />
                 </div>
@@ -422,6 +442,8 @@ export default function InvestmentProducts() {
                 <SelectItem value="bond">Bonds</SelectItem>
                 <SelectItem value="cash">Cash</SelectItem>
                 <SelectItem value="pension">Pension</SelectItem>
+                <SelectItem value="isa">ISA Only</SelectItem>
+                <SelectItem value="gia">GIA Only</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -463,7 +485,10 @@ export default function InvestmentProducts() {
                       </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
-                      <Badge variant="secondary">{product.type}</Badge>
+                      <div className="flex items-center gap-1">
+                        <Badge variant="secondary">{product.type}</Badge>
+                        <Badge variant="outline" className="text-[10px]">{product.wrapper === 'all' ? 'All' : product.wrapper.toUpperCase()}</Badge>
+                      </div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       <Badge className={getRiskColor(product.riskLevel)}>

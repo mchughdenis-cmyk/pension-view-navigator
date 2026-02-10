@@ -26,6 +26,8 @@ import SystemDemo from "./components/SystemDemo";
 import KYCVerification from "./components/KYCVerification";
 import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
+import ISAPortfolio from "./components/ISAPortfolio";
+import GIAPortfolio from "./components/GIAPortfolio";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const AppContent = () => {
         <Route path="/kyc" element={<KYCVerification />} />
         <Route path="/payments" element={<PaymentProvider />} />
         <Route path="/documentation" element={<SystemDocumentation />} />
+        <Route path="/isa" element={<ISAPortfolio />} />
+        <Route path="/gia" element={<GIAPortfolio />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

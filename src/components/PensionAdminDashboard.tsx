@@ -5,11 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MobileHeader } from "@/components/ui/mobile-header";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+import { SidebarNavLayout, type NavGroup } from "@/components/ui/sidebar-nav";
 import { 
   Users, 
   TrendingUp, 
@@ -41,9 +37,6 @@ import {
   Link2,
   Package,
   ArrowRightLeft,
-  ChevronDown,
-  ChevronRight,
-  Menu,
   LayoutDashboard,
   Briefcase,
   Settings2,
@@ -191,69 +184,12 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
-// Sidebar navigation component
-function AdminSidebar({ activeTab, onTabChange, className }: { activeTab: string; onTabChange: (v: string) => void; className?: string }) {
-  // Determine which groups should be open based on active tab
-  const activeGroup = navGroups.find(g => g.items.some(i => i.value === activeTab));
-
-  return (
-    <ScrollArea className={cn("h-full", className)}>
-      <nav className="space-y-1 p-3">
-        {navGroups.map((group) => {
-          const isActive = activeGroup?.label === group.label;
-          const GroupIcon = group.icon;
-          return (
-            <Collapsible key={group.label} defaultOpen={isActive}>
-              <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors group">
-                <div className="flex items-center gap-2">
-                  <GroupIcon className="w-4 h-4" />
-                  <span>{group.label}</span>
-                </div>
-                <ChevronDown className="w-4 h-4 transition-transform group-data-[state=closed]:rotate-[-90deg]" />
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className="ml-2 mt-1 space-y-0.5 border-l border-border pl-3">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isItemActive = activeTab === item.value;
-                    return (
-                      <button
-                        key={item.value}
-                        onClick={() => onTabChange(item.value)}
-                        className={cn(
-                          "flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md transition-colors text-left",
-                          isItemActive
-                            ? "bg-primary text-primary-foreground font-medium"
-                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
-                        )}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-          );
-        })}
-      </nav>
-    </ScrollArea>
-  );
-}
-
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState("scheme");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const activeLabel = navGroups.flatMap(g => g.items).find(i => i.value === activeTab)?.label || "Scheme Overview";
-  const ActiveIcon = navGroups.flatMap(g => g.items).find(i => i.value === activeTab)?.icon || BarChart3;
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setSidebarOpen(false);
   };
 
   const headerActions = (
@@ -524,49 +460,9 @@ export default function PensionAdminDashboard() {
           </Card>
         </div>
 
-        {/* Main Layout: Sidebar + Content */}
-        <div className="flex gap-6">
-          {/* Desktop Sidebar */}
-          {!isMobile && (
-            <Card className="w-64 shrink-0 self-start sticky top-6">
-              <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} className="max-h-[calc(100vh-14rem)]" />
-            </Card>
-          )}
-
-          {/* Content Area */}
-          <div className="flex-1 min-w-0">
-            {/* Mobile nav trigger + breadcrumb */}
-            {isMobile && (
-              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-                <SheetTrigger asChild>
-                  <Button variant="outline" className="w-full justify-between h-12 text-base font-medium mb-4">
-                    <div className="flex items-center gap-2">
-                      <ActiveIcon className="w-5 h-5" />
-                      <span>{activeLabel}</span>
-                    </div>
-                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
-                  </Button>
-                </SheetTrigger>
-                <SheetContent side="bottom" className="h-[70vh]">
-                  <SheetHeader className="pb-2">
-                    <SheetTitle>Navigate to</SheetTitle>
-                  </SheetHeader>
-                  <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
-                </SheetContent>
-              </Sheet>
-            )}
-
-            {/* Desktop breadcrumb */}
-            {!isMobile && (
-              <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-                <ActiveIcon className="w-4 h-4" />
-                <span className="font-medium text-foreground">{activeLabel}</span>
-              </div>
-            )}
-
-            {renderContent()}
-          </div>
-        </div>
+        <SidebarNavLayout groups={navGroups} activeTab={activeTab} onTabChange={handleTabChange}>
+          {renderContent()}
+        </SidebarNavLayout>
       </div>
     </div>
   );

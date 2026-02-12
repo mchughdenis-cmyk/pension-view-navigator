@@ -194,15 +194,19 @@ export default function PensionAdminDashboard() {
 
   const headerActions = (
     <>
-      <Button variant="outline" className="w-full sm:w-auto justify-start">
+      <Button variant="outline" size="sm" onClick={() => navigate('/dashboard')} className="w-full sm:w-auto justify-start">
+        <Users className="w-4 h-4 mr-2" />
+        Dashboard
+      </Button>
+      <Button variant="outline" size="sm" className="w-full sm:w-auto justify-start">
         <Download className="w-4 h-4 mr-2" />
         Export Report
       </Button>
-      <Button variant="outline" onClick={() => navigate('/onboarding')} className="w-full sm:w-auto justify-start">
+      <Button variant="outline" size="sm" onClick={() => navigate('/onboarding')} className="w-full sm:w-auto justify-start">
         <UserPlus className="w-4 h-4 mr-2" />
         Client Onboarding
       </Button>
-      <Button className="bg-primary hover:bg-primary/90 w-full sm:w-auto justify-start">
+      <Button size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto justify-start">
         <UserCheck className="w-4 h-4 mr-2" />
         Add Client
       </Button>

@@ -20,7 +20,8 @@ import {
   Book,
   Briefcase,
   RefreshCw,
-  GraduationCap
+  GraduationCap,
+  Building2
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
@@ -227,6 +228,14 @@ export default function ClientView() {
       <Button variant="outline" size="sm" onClick={() => switchRole('adviser')} className="w-full sm:w-auto justify-start">
         <User className="w-4 h-4 mr-2" />
         Switch to Adviser
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => switchRole('admin')} className="w-full sm:w-auto justify-start">
+        <Shield className="w-4 h-4 mr-2" />
+        Switch to Admin
+      </Button>
+      <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="w-full sm:w-auto justify-start">
+        <Building2 className="w-4 h-4 mr-2" />
+        Admin Dashboard
       </Button>
       <Button variant="outline" size="sm" onClick={() => navigate('/settings')} className="w-full sm:w-auto justify-start">
         <Settings className="w-4 h-4 mr-2" />

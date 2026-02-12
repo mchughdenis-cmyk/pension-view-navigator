@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export interface NavItem {
   value: string;
@@ -89,6 +89,7 @@ export function SidebarNavLayout({ groups, activeTab, onTabChange, children, sid
 
   const allItems = groups.flatMap(g => g.items);
   const activeItem = allItems.find(i => i.value === activeTab);
+  const activeGroup = groups.find(g => g.items.some(i => i.value === activeTab));
   const activeLabel = activeItem?.label || "Navigate";
   const ActiveIcon = activeItem?.icon || ChevronDown;
 
@@ -128,11 +129,24 @@ export function SidebarNavLayout({ groups, activeTab, onTabChange, children, sid
           </Sheet>
         )}
 
-        {!isMobile && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-            <ActiveIcon className="w-4 h-4" />
-            <span className="font-medium text-foreground">{activeLabel}</span>
-          </div>
+        {!isMobile && activeGroup && (
+          <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 mb-4 text-sm">
+            <activeGroup.icon className="w-4 h-4 text-muted-foreground" />
+            <button
+              onClick={() => {
+                const first = activeGroup.items[0];
+                if (first) onTabChange(first.value);
+              }}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {activeGroup.label}
+            </button>
+            <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/60" />
+            <span className="font-medium text-foreground flex items-center gap-1.5">
+              <ActiveIcon className="w-4 h-4" />
+              {activeLabel}
+            </span>
+          </nav>
         )}
 
         {children}

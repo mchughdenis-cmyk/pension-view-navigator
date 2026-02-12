@@ -89,6 +89,7 @@ export default function ShowcaseWebsite() {
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
             <a href="#platform" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Platform</a>
             <a href="#capabilities" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Capabilities</a>
+            <a href="/api-directory" className="text-sm text-muted-foreground hover:text-foreground transition-colors">APIs</a>
           </nav>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>

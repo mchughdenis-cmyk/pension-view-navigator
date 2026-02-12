@@ -354,7 +354,11 @@ export default function PensionAdminDashboard() {
               <CardContent>
                 <div className="space-y-4">
                   {adminData.clients.map((client) => (
-                    <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors">
+                    <div 
+                      key={client.id} 
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
+                      onClick={() => navigate('/dashboard')}
+                    >
                       <div className="flex-1 grid grid-cols-6 gap-4 items-center">
                         <div>
                           <p className="font-medium">{client.name}</p>
@@ -384,10 +388,10 @@ export default function PensionAdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate('/dashboard'); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
                           <Edit className="w-4 h-4" />
                         </Button>
                       </div>

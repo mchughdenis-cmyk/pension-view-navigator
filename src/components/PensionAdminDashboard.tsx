@@ -357,7 +357,7 @@ export default function PensionAdminDashboard() {
                     <div 
                       key={client.id} 
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => navigate('/dashboard')}
+                      onClick={() => navigate(`/client-admin/${client.id}`)}
                     >
                       <div className="flex-1 grid grid-cols-6 gap-4 items-center">
                         <div>
@@ -388,7 +388,7 @@ export default function PensionAdminDashboard() {
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate('/dashboard'); }}>
+                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/client-admin/${client.id}`); }}>
                           <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>

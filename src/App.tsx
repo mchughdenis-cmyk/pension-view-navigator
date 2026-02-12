@@ -31,6 +31,7 @@ import SystemDocumentation from "./components/SystemDocumentation";
 import ISAPortfolio from "./components/ISAPortfolio";
 import GIAPortfolio from "./components/GIAPortfolio";
 import ClientAdminView from "./components/ClientAdminView";
+import APIDirectory from "./components/APIDirectory";
 
 const queryClient = new QueryClient();
 
@@ -64,6 +65,7 @@ const AppContent = () => {
         <Route path="/documentation" element={<SystemDocumentation />} />
         <Route path="/isa" element={<ISAPortfolio />} />
         <Route path="/gia" element={<GIAPortfolio />} />
+        <Route path="/api-directory" element={<APIDirectory />} />
         <Route path="/client-admin/:clientId" element={<ClientAdminView />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

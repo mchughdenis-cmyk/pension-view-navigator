@@ -9,7 +9,7 @@ import { SidebarNavLayout, type NavGroup } from '@/components/ui/sidebar-nav'
 import { 
   Users, TrendingUp, PiggyBank, DollarSign, FileText, Settings, LogOut,
   Search, Eye, Edit, UserPlus, Calendar, User, Shield, BarChart3,
-  Bell, ClipboardList, Briefcase, LayoutDashboard,
+  Bell, ClipboardList, Briefcase, LayoutDashboard, Building2,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
@@ -84,7 +84,8 @@ export default function AdviserView() {
   const headerActions = (
     <>
       <Button variant="outline" size="sm" onClick={() => switchRole('client')} className="w-full sm:w-auto justify-start"><User className="w-4 h-4 mr-2" /> Switch to Client</Button>
-      <Button variant="outline" size="sm" onClick={() => switchRole('admin')} className="w-full sm:w-auto justify-start"><Shield className="w-4 h-4 mr-2" /> Admin Portal</Button>
+      <Button variant="outline" size="sm" onClick={() => switchRole('admin')} className="w-full sm:w-auto justify-start"><Shield className="w-4 h-4 mr-2" /> Switch to Admin</Button>
+      <Button variant="outline" size="sm" onClick={() => navigate('/admin')} className="w-full sm:w-auto justify-start"><Building2 className="w-4 h-4 mr-2" /> Admin Dashboard</Button>
       <Button variant="outline" size="sm" onClick={() => navigate('/settings')} className="w-full sm:w-auto justify-start"><Settings className="w-4 h-4 mr-2" /> Settings</Button>
       <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full sm:w-auto justify-start"><LogOut className="w-4 h-4 mr-2" /> Sign Out</Button>
     </>

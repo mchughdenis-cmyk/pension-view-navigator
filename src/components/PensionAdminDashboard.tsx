@@ -1,10 +1,15 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MobileTabs, TabsContent } from "@/components/ui/mobile-tabs";
 import { MobileHeader } from "@/components/ui/mobile-header";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 import { 
   Users, 
   TrendingUp, 
@@ -12,7 +17,6 @@ import {
   DollarSign, 
   FileText, 
   Search,
-  Filter,
   Download,
   Eye,
   Edit,
@@ -23,14 +27,12 @@ import {
   Clock,
   UserPlus,
   Upload,
-  FileUp,
   Receipt,
   Building2,
   Shield,
   PiggyBank,
   Banknote,
   TrendingDown,
-  Landmark,
   ClipboardList,
   Activity,
   FileBarChart,
@@ -39,6 +41,13 @@ import {
   Link2,
   Package,
   ArrowRightLeft,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+  LayoutDashboard,
+  Briefcase,
+  Settings2,
+  LineChart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import BankUpload from "./BankUpload";
@@ -59,30 +68,72 @@ import WorkflowEngine from "./admin/WorkflowEngine";
 import SchemeDashboard from "./admin/SchemeDashboard";
 import BulkOperations from "./admin/BulkOperations";
 
-// Tab configuration for mobile-friendly navigation
-const adminTabs = [
-  { value: "scheme", label: "Scheme Overview", icon: BarChart3 },
-  { value: "clients", label: "Clients", icon: Users },
-  { value: "transactions", label: "Transactions", icon: ClipboardList },
-  { value: "trading", label: "Trading", icon: TrendingUp },
-  { value: "rebalancing", label: "Rebalancing", icon: Activity },
-  { value: "custody", label: "Custody & Rec", icon: Shield },
-  { value: "fees", label: "Platform Fees", icon: Receipt },
-  { value: "adviser-fees", label: "Adviser Fees", icon: UserCheck },
-  { value: "documents", label: "Documents", icon: FileText },
-  { value: "workflows", label: "Workflows", icon: Activity },
-  { value: "bulk-ops", label: "Bulk Operations", icon: Package },
-  { value: "audit", label: "Audit Trail", icon: Clock },
-  { value: "activity", label: "Activity", icon: Activity },
-  { value: "integrations", label: "Integrations", icon: Link2 },
-  { value: "products", label: "Products", icon: Package },
-  { value: "origo", label: "Origo Transfers", icon: ArrowRightLeft },
-  { value: "bankupload", label: "Bank Upload", icon: Upload },
-  { value: "pooledaccount", label: "Pooled Account", icon: Building2 },
-  { value: "alerts", label: "Alerts", icon: Bell },
-  { value: "reports", label: "Reports", icon: FileBarChart },
-  { value: "compliance", label: "Compliance", icon: Scale },
-  { value: "regulatory", label: "Regulatory", icon: Gavel },
+// Grouped navigation structure
+const navGroups = [
+  {
+    label: "Overview",
+    icon: LayoutDashboard,
+    items: [
+      { value: "scheme", label: "Scheme Overview", icon: BarChart3 },
+      { value: "activity", label: "Activity", icon: Activity },
+      { value: "alerts", label: "Alerts", icon: Bell },
+    ],
+  },
+  {
+    label: "Client Management",
+    icon: Users,
+    items: [
+      { value: "clients", label: "Clients", icon: Users },
+    ],
+  },
+  {
+    label: "Operations",
+    icon: Briefcase,
+    items: [
+      { value: "transactions", label: "Transactions", icon: ClipboardList },
+      { value: "trading", label: "Trading", icon: TrendingUp },
+      { value: "rebalancing", label: "Rebalancing", icon: Activity },
+      { value: "custody", label: "Custody & Reconciliation", icon: Shield },
+    ],
+  },
+  {
+    label: "Fees & Billing",
+    icon: Receipt,
+    items: [
+      { value: "fees", label: "Platform Fees", icon: Receipt },
+      { value: "adviser-fees", label: "Adviser Fees", icon: UserCheck },
+    ],
+  },
+  {
+    label: "Administration",
+    icon: Settings2,
+    items: [
+      { value: "documents", label: "Documents", icon: FileText },
+      { value: "workflows", label: "Workflows", icon: Activity },
+      { value: "bulk-ops", label: "Bulk Operations", icon: Package },
+      { value: "audit", label: "Audit Trail", icon: Clock },
+    ],
+  },
+  {
+    label: "Integrations & Products",
+    icon: Link2,
+    items: [
+      { value: "integrations", label: "Integrations", icon: Link2 },
+      { value: "products", label: "Products", icon: Package },
+      { value: "origo", label: "Origo Transfers", icon: ArrowRightLeft },
+      { value: "bankupload", label: "Bank Upload", icon: Upload },
+      { value: "pooledaccount", label: "Pooled Account", icon: Building2 },
+    ],
+  },
+  {
+    label: "Reporting & Compliance",
+    icon: LineChart,
+    items: [
+      { value: "reports", label: "Reports", icon: FileBarChart },
+      { value: "compliance", label: "Compliance", icon: Scale },
+      { value: "regulatory", label: "Regulatory", icon: Gavel },
+    ],
+  },
 ];
 
 // Mock data for admin dashboard
@@ -97,121 +148,26 @@ const adminData = {
     clientsWithRegularIncome: 134
   },
   clients: [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@email.com",
-      totalValue: 485750,
-      lastLogin: "2024-01-15",
-      status: "active",
-      riskProfile: "balanced",
-      advisor: "Sarah Johnson",
-      pendingActions: 2,
-      allowanceUsage: 67
-    },
-    {
-      id: 2,
-      name: "Emma Wilson",
-      email: "emma.wilson@email.com", 
-      totalValue: 325000,
-      lastLogin: "2024-01-14",
-      status: "active",
-      riskProfile: "conservative",
-      advisor: "Michael Brown",
-      pendingActions: 0,
-      allowanceUsage: 45
-    },
-    {
-      id: 3,
-      name: "David Thompson",
-      email: "david.thompson@email.com",
-      totalValue: 750000,
-      lastLogin: "2024-01-10",
-      status: "review_required",
-      riskProfile: "aggressive",
-      advisor: "Sarah Johnson",
-      pendingActions: 3,
-      allowanceUsage: 89
-    },
-    {
-      id: 4,
-      name: "Lisa Anderson",
-      email: "lisa.anderson@email.com",
-      totalValue: 195000,
-      lastLogin: "2024-01-08",
-      status: "onboarding",
-      riskProfile: "balanced",
-      advisor: "Michael Brown",
-      pendingActions: 1,
-      allowanceUsage: 23
-    }
+    { id: 1, name: "John Smith", email: "john.smith@email.com", totalValue: 485750, lastLogin: "2024-01-15", status: "active", riskProfile: "balanced", advisor: "Sarah Johnson", pendingActions: 2, allowanceUsage: 67 },
+    { id: 2, name: "Emma Wilson", email: "emma.wilson@email.com", totalValue: 325000, lastLogin: "2024-01-14", status: "active", riskProfile: "conservative", advisor: "Michael Brown", pendingActions: 0, allowanceUsage: 45 },
+    { id: 3, name: "David Thompson", email: "david.thompson@email.com", totalValue: 750000, lastLogin: "2024-01-10", status: "review_required", riskProfile: "aggressive", advisor: "Sarah Johnson", pendingActions: 3, allowanceUsage: 89 },
+    { id: 4, name: "Lisa Anderson", email: "lisa.anderson@email.com", totalValue: 195000, lastLogin: "2024-01-08", status: "onboarding", riskProfile: "balanced", advisor: "Michael Brown", pendingActions: 1, allowanceUsage: 23 },
   ],
   recentActivity: [
-    {
-      type: "contribution",
-      client: "John Smith",
-      amount: 5000,
-      timestamp: "2024-01-15 14:30",
-      status: "processed"
-    },
-    {
-      type: "transfer_in",
-      client: "Emma Wilson", 
-      amount: 25000,
-      timestamp: "2024-01-15 11:15",
-      status: "pending"
-    },
-    {
-      type: "drawdown",
-      client: "David Thompson",
-      amount: 3000,
-      timestamp: "2024-01-15 09:45",
-      status: "approved"
-    },
-    {
-      type: "risk_review",
-      client: "Lisa Anderson",
-      amount: 0,
-      timestamp: "2024-01-14 16:20",
-      status: "overdue"
-    }
+    { type: "contribution", client: "John Smith", amount: 5000, timestamp: "2024-01-15 14:30", status: "processed" },
+    { type: "transfer_in", client: "Emma Wilson", amount: 25000, timestamp: "2024-01-15 11:15", status: "pending" },
+    { type: "drawdown", client: "David Thompson", amount: 3000, timestamp: "2024-01-15 09:45", status: "approved" },
+    { type: "risk_review", client: "Lisa Anderson", amount: 0, timestamp: "2024-01-14 16:20", status: "overdue" },
   ],
   alerts: [
-    {
-      id: 1,
-      type: "allowance_exceeded",
-      client: "David Thompson",
-      message: "Client approaching annual allowance limit",
-      priority: "high",
-      timestamp: "2024-01-15"
-    },
-    {
-      id: 2,
-      type: "review_due",
-      client: "Lisa Anderson",
-      message: "Annual review overdue by 15 days",
-      priority: "medium",
-      timestamp: "2024-01-14"
-    },
-    {
-      id: 3,
-      type: "document_required",
-      client: "Emma Wilson",
-      message: "Transfer documentation pending",
-      priority: "low",
-      timestamp: "2024-01-13"
-    }
+    { id: 1, type: "allowance_exceeded", client: "David Thompson", message: "Client approaching annual allowance limit", priority: "high", timestamp: "2024-01-15" },
+    { id: 2, type: "review_due", client: "Lisa Anderson", message: "Annual review overdue by 15 days", priority: "medium", timestamp: "2024-01-14" },
+    { id: 3, type: "document_required", client: "Emma Wilson", message: "Transfer documentation pending", priority: "low", timestamp: "2024-01-13" },
   ]
 };
 
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
+const formatCurrency = (amount: number) =>
+  new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -235,8 +191,70 @@ const getPriorityColor = (priority: string) => {
   }
 };
 
+// Sidebar navigation component
+function AdminSidebar({ activeTab, onTabChange, className }: { activeTab: string; onTabChange: (v: string) => void; className?: string }) {
+  // Determine which groups should be open based on active tab
+  const activeGroup = navGroups.find(g => g.items.some(i => i.value === activeTab));
+
+  return (
+    <ScrollArea className={cn("h-full", className)}>
+      <nav className="space-y-1 p-3">
+        {navGroups.map((group) => {
+          const isActive = activeGroup?.label === group.label;
+          const GroupIcon = group.icon;
+          return (
+            <Collapsible key={group.label} defaultOpen={isActive}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors group">
+                <div className="flex items-center gap-2">
+                  <GroupIcon className="w-4 h-4" />
+                  <span>{group.label}</span>
+                </div>
+                <ChevronDown className="w-4 h-4 transition-transform group-data-[state=closed]:rotate-[-90deg]" />
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="ml-2 mt-1 space-y-0.5 border-l border-border pl-3">
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isItemActive = activeTab === item.value;
+                    return (
+                      <button
+                        key={item.value}
+                        onClick={() => onTabChange(item.value)}
+                        className={cn(
+                          "flex items-center gap-2 w-full px-3 py-2 text-sm rounded-md transition-colors text-left",
+                          isItemActive
+                            ? "bg-primary text-primary-foreground font-medium"
+                            : "text-muted-foreground hover:text-foreground hover:bg-accent"
+                        )}
+                      >
+                        <Icon className="w-4 h-4 shrink-0" />
+                        <span className="truncate">{item.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+          );
+        })}
+      </nav>
+    </ScrollArea>
+  );
+}
+
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const [activeTab, setActiveTab] = useState("scheme");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const activeLabel = navGroups.flatMap(g => g.items).find(i => i.value === activeTab)?.label || "Scheme Overview";
+  const ActiveIcon = navGroups.flatMap(g => g.items).find(i => i.value === activeTab)?.icon || BarChart3;
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value);
+    setSidebarOpen(false);
+  };
 
   const headerActions = (
     <>
@@ -255,6 +273,174 @@ export default function PensionAdminDashboard() {
     </>
   );
 
+  const renderContent = () => {
+    switch (activeTab) {
+      case "scheme": return <SchemeDashboard />;
+      case "clients": return (
+        <Card>
+          <CardHeader>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <CardTitle>Client Portfolio Management</CardTitle>
+              <div className="flex gap-2 flex-wrap">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input placeholder="Search clients..." className="pl-10 w-64" />
+                </div>
+                <Select>
+                  <SelectTrigger className="w-40"><SelectValue placeholder="Filter by status" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="review_required">Review Required</SelectItem>
+                    <SelectItem value="onboarding">Onboarding</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {adminData.clients.map((client) => (
+                <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate(`/client-admin/${client.id}`)}>
+                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-6 gap-4 items-center">
+                    <div>
+                      <p className="font-medium">{client.name}</p>
+                      <p className="text-sm text-muted-foreground">{client.email}</p>
+                    </div>
+                    <div className="text-center"><p className="font-semibold">{formatCurrency(client.totalValue)}</p><p className="text-xs text-muted-foreground">Portfolio Value</p></div>
+                    <div className="text-center hidden sm:block"><Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge></div>
+                    <div className="text-center hidden sm:block"><p className="text-sm">{client.advisor}</p><p className="text-xs text-muted-foreground">Advisor</p></div>
+                    <div className="text-center hidden sm:block"><p className="text-sm">{client.allowanceUsage}%</p><p className="text-xs text-muted-foreground">Allowance Used</p></div>
+                    <div className="text-center hidden sm:block">{client.pendingActions > 0 && <Badge variant="secondary">{client.pendingActions} pending</Badge>}</div>
+                  </div>
+                  <div className="flex gap-2 ml-4">
+                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/client-admin/${client.id}`); }}><Eye className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}><Edit className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      );
+      case "transactions": return <TransactionLedger />;
+      case "trading": return <TradeOrderManagement />;
+      case "rebalancing": return <PortfolioRebalancing />;
+      case "custody": return <CustodyReconciliation />;
+      case "fees": return <FeeEngine />;
+      case "adviser-fees": return <AdviserCharging />;
+      case "documents": return <DocumentGeneration />;
+      case "workflows": return <WorkflowEngine />;
+      case "bulk-ops": return <BulkOperations />;
+      case "audit": return <AuditTrail />;
+      case "activity": return (
+        <Card>
+          <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {adminData.recentActivity.map((activity, index) => (
+                <div key={index} className="flex items-center justify-between p-3 border-l-4 border-primary bg-accent/20 rounded-r-lg">
+                  <div className="flex items-center gap-3">
+                    {activity.type === 'contribution' && <DollarSign className="h-5 w-5 text-success" />}
+                    {activity.type === 'transfer_in' && <TrendingUp className="h-5 w-5 text-primary" />}
+                    {activity.type === 'drawdown' && <DollarSign className="h-5 w-5 text-warning" />}
+                    {activity.type === 'risk_review' && <FileText className="h-5 w-5 text-muted-foreground" />}
+                    <div>
+                      <p className="font-medium">{activity.client}</p>
+                      <p className="text-sm text-muted-foreground">{activity.type.replace('_', ' ').toUpperCase()}{activity.amount > 0 && ` - ${formatCurrency(activity.amount)}`}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <Badge variant={getStatusColor(activity.status)}>{activity.status}</Badge>
+                    <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      );
+      case "integrations": return <IntegrationsHub />;
+      case "products": return <InvestmentProducts />;
+      case "origo": return <OrigoTransfers />;
+      case "bankupload": return <BankUpload />;
+      case "pooledaccount": return <PooledAccount />;
+      case "alerts": return (
+        <Card>
+          <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" /> Alerts & Notifications</CardTitle></CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {adminData.alerts.map((alert) => (
+                <div key={alert.id} className="flex items-start justify-between p-4 border rounded-lg">
+                  <div className="flex items-start gap-3 flex-1">
+                    <AlertTriangle className={`h-5 w-5 mt-0.5 ${alert.priority === 'high' ? 'text-destructive' : alert.priority === 'medium' ? 'text-warning' : 'text-muted-foreground'}`} />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium">{alert.client}</p>
+                        <Badge variant={getPriorityColor(alert.priority)} className="text-xs">{alert.priority}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">{alert.message}</p>
+                      <p className="text-xs text-muted-foreground mt-1">{alert.timestamp}</p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" className="ml-4">Resolve</Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      );
+      case "reports": return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><BarChart3 className="h-5 w-5" /> Portfolio Analytics</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Monthly Portfolio Summary</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Asset Allocation Report</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Performance Analytics</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Risk Assessment Summary</Button>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="h-5 w-5" /> Regulatory Reports</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Annual Allowance Report</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Contribution Summary</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Transfer Documentation</Button>
+              <Button variant="outline" className="w-full justify-start"><Receipt className="w-4 h-4 mr-2" /> Tax Relief Report</Button>
+              <Button variant="outline" className="w-full justify-start"><FileText className="w-4 h-4 mr-2" /> Compliance Audit Trail</Button>
+            </CardContent>
+          </Card>
+        </div>
+      );
+      case "compliance": return (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader><CardTitle>Compliance Monitoring</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-3 bg-success/10 border border-success/20 rounded-lg"><p className="font-medium text-success">Annual Allowance Monitoring</p><p className="text-sm text-muted-foreground">All clients within limits</p></div>
+              <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg"><p className="font-medium text-warning">Know Your Customer (KYC)</p><p className="text-sm text-muted-foreground">3 reviews pending</p></div>
+              <div className="p-3 bg-success/10 border border-success/20 rounded-lg"><p className="font-medium text-success">Anti-Money Laundering</p><p className="text-sm text-muted-foreground">All checks complete</p></div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader><CardTitle>Audit Trail</CardTitle></CardHeader>
+            <CardContent className="space-y-3">
+              <div className="text-sm space-y-2">
+                <div className="flex justify-between py-2 border-b"><span>Last full audit</span><span className="font-medium">December 2023</span></div>
+                <div className="flex justify-between py-2 border-b"><span>Compliance score</span><span className="font-medium text-success">98.5%</span></div>
+                <div className="flex justify-between py-2 border-b"><span>Outstanding issues</span><span className="font-medium">2</span></div>
+                <div className="flex justify-between py-2"><span>Next review</span><span className="font-medium">March 2024</span></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+      case "regulatory": return <RegulatoryReporting />;
+      default: return <SchemeDashboard />;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <MobileHeader
@@ -263,8 +449,7 @@ export default function PensionAdminDashboard() {
         actions={headerActions}
       />
 
-      <div className="max-w-7xl mx-auto p-4 sm:p-6 space-y-6">
-
+      <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
         {/* Summary Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
           <Card className="col-span-1">
@@ -277,20 +462,16 @@ export default function PensionAdminDashboard() {
               <p className="text-xs text-muted-foreground hidden sm:block">Active accounts</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">AUM</CardTitle>
               <TrendingUp className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-success">
-                {formatCurrency(adminData.summary.totalAUM)}
-              </div>
+              <div className="text-xl sm:text-2xl font-bold text-success">{formatCurrency(adminData.summary.totalAUM)}</div>
               <p className="text-xs text-muted-foreground hidden sm:block">Total portfolio value</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Drawdown</CardTitle>
@@ -301,7 +482,6 @@ export default function PensionAdminDashboard() {
               <p className="text-xs text-muted-foreground hidden sm:block">Taking withdrawals</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Accumulation</CardTitle>
@@ -312,7 +492,6 @@ export default function PensionAdminDashboard() {
               <p className="text-xs text-muted-foreground hidden sm:block">Building wealth</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Regular Income</CardTitle>
@@ -323,7 +502,6 @@ export default function PensionAdminDashboard() {
               <p className="text-xs text-muted-foreground hidden sm:block">Monthly payments</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
@@ -334,7 +512,6 @@ export default function PensionAdminDashboard() {
               <p className="text-xs text-muted-foreground hidden sm:block">Require attention</p>
             </CardContent>
           </Card>
-
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Overdue</CardTitle>
@@ -347,337 +524,49 @@ export default function PensionAdminDashboard() {
           </Card>
         </div>
 
-        {/* Main Content Tabs */}
-        <MobileTabs tabs={adminTabs} defaultValue="scheme">
-
-          <TabsContent value="scheme">
-            <SchemeDashboard />
-          </TabsContent>
-
-          <TabsContent value="clients">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <CardTitle>Client Portfolio Management</CardTitle>
-                  <div className="flex gap-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input placeholder="Search clients..." className="pl-10 w-64" />
-                    </div>
-                    <Select>
-                      <SelectTrigger className="w-40">
-                        <SelectValue placeholder="Filter by status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="review_required">Review Required</SelectItem>
-                        <SelectItem value="onboarding">Onboarding</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {adminData.clients.map((client) => (
-                    <div 
-                      key={client.id} 
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer"
-                      onClick={() => navigate(`/client-admin/${client.id}`)}
-                    >
-                      <div className="flex-1 grid grid-cols-6 gap-4 items-center">
-                        <div>
-                          <p className="font-medium">{client.name}</p>
-                          <p className="text-sm text-muted-foreground">{client.email}</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="font-semibold">{formatCurrency(client.totalValue)}</p>
-                          <p className="text-xs text-muted-foreground">Portfolio Value</p>
-                        </div>
-                        <div className="text-center">
-                          <Badge variant={getStatusColor(client.status)}>
-                            {client.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm">{client.advisor}</p>
-                          <p className="text-xs text-muted-foreground">Advisor</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm">{client.allowanceUsage}%</p>
-                          <p className="text-xs text-muted-foreground">Allowance Used</p>
-                        </div>
-                        <div className="text-center">
-                          {client.pendingActions > 0 && (
-                            <Badge variant="secondary">{client.pendingActions} pending</Badge>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/client-admin/${client.id}`); }}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
+        {/* Main Layout: Sidebar + Content */}
+        <div className="flex gap-6">
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <Card className="w-64 shrink-0 self-start sticky top-6">
+              <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} className="max-h-[calc(100vh-14rem)]" />
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="transactions">
-            <TransactionLedger />
-          </TabsContent>
-
-          <TabsContent value="trading">
-            <TradeOrderManagement />
-          </TabsContent>
-
-          <TabsContent value="rebalancing">
-            <PortfolioRebalancing />
-          </TabsContent>
-
-          <TabsContent value="fees">
-            <FeeEngine />
-          </TabsContent>
-
-          <TabsContent value="custody">
-            <CustodyReconciliation />
-          </TabsContent>
-
-          <TabsContent value="adviser-fees">
-            <AdviserCharging />
-          </TabsContent>
-
-          <TabsContent value="documents">
-            <DocumentGeneration />
-          </TabsContent>
-
-          <TabsContent value="workflows">
-            <WorkflowEngine />
-          </TabsContent>
-
-          <TabsContent value="bulk-ops">
-            <BulkOperations />
-          </TabsContent>
-
-          <TabsContent value="audit">
-            <AuditTrail />
-          </TabsContent>
-
-          <TabsContent value="activity">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {adminData.recentActivity.map((activity, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 border-l-4 border-primary bg-accent/20 rounded-r-lg">
-                      <div className="flex items-center gap-3">
-                        {activity.type === 'contribution' && <DollarSign className="h-5 w-5 text-success" />}
-                        {activity.type === 'transfer_in' && <TrendingUp className="h-5 w-5 text-primary" />}
-                        {activity.type === 'drawdown' && <DollarSign className="h-5 w-5 text-warning" />}
-                        {activity.type === 'risk_review' && <FileText className="h-5 w-5 text-muted-foreground" />}
-                        <div>
-                          <p className="font-medium">{activity.client}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {activity.type.replace('_', ' ').toUpperCase()}
-                            {activity.amount > 0 && ` - ${formatCurrency(activity.amount)}`}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <Badge variant={getStatusColor(activity.status)}>
-                          {activity.status}
-                        </Badge>
-                        <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-                      </div>
+          {/* Content Area */}
+          <div className="flex-1 min-w-0">
+            {/* Mobile nav trigger + breadcrumb */}
+            {isMobile && (
+              <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full justify-between h-12 text-base font-medium mb-4">
+                    <div className="flex items-center gap-2">
+                      <ActiveIcon className="w-5 h-5" />
+                      <span>{activeLabel}</span>
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="integrations">
-            <IntegrationsHub />
-          </TabsContent>
-
-          <TabsContent value="products">
-            <InvestmentProducts />
-          </TabsContent>
-
-          <TabsContent value="origo">
-            <OrigoTransfers />
-          </TabsContent>
-
-          <TabsContent value="bankupload">
-            <BankUpload />
-          </TabsContent>
-
-          <TabsContent value="pooledaccount">
-            <PooledAccount />
-          </TabsContent>
-
-          <TabsContent value="alerts">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bell className="h-5 w-5" />
-                  Alerts & Notifications
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {adminData.alerts.map((alert) => (
-                    <div key={alert.id} className="flex items-start justify-between p-4 border rounded-lg">
-                      <div className="flex items-start gap-3 flex-1">
-                        <AlertTriangle className={`h-5 w-5 mt-0.5 ${
-                          alert.priority === 'high' ? 'text-destructive' : 
-                          alert.priority === 'medium' ? 'text-warning' : 'text-muted-foreground'
-                        }`} />
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <p className="font-medium">{alert.client}</p>
-                            <Badge variant={getPriorityColor(alert.priority)} className="text-xs">
-                              {alert.priority}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground">{alert.message}</p>
-                          <p className="text-xs text-muted-foreground mt-1">{alert.timestamp}</p>
-                        </div>
-                      </div>
-                      <Button variant="outline" size="sm" className="ml-4">
-                        Resolve
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="reports">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Portfolio Analytics
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Monthly Portfolio Summary
+                    <ChevronDown className="w-5 h-5 text-muted-foreground" />
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Asset Allocation Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Performance Analytics
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Risk Assessment Summary
-                  </Button>
-                </CardContent>
-              </Card>
+                </SheetTrigger>
+                <SheetContent side="bottom" className="h-[70vh]">
+                  <SheetHeader className="pb-2">
+                    <SheetTitle>Navigate to</SheetTitle>
+                  </SheetHeader>
+                  <AdminSidebar activeTab={activeTab} onTabChange={handleTabChange} />
+                </SheetContent>
+              </Sheet>
+            )}
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5" />
-                    Regulatory Reports
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Annual Allowance Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Contribution Summary
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Transfer Documentation
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Receipt className="w-4 h-4 mr-2" />
-                    Tax Relief Report
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <FileText className="w-4 h-4 mr-2" />
-                    Compliance Audit Trail
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+            {/* Desktop breadcrumb */}
+            {!isMobile && (
+              <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
+                <ActiveIcon className="w-4 h-4" />
+                <span className="font-medium text-foreground">{activeLabel}</span>
+              </div>
+            )}
 
-          <TabsContent value="compliance">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Compliance Monitoring</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
-                    <p className="font-medium text-success">Annual Allowance Monitoring</p>
-                    <p className="text-sm text-muted-foreground">All clients within limits</p>
-                  </div>
-                  <div className="p-3 bg-warning/10 border border-warning/20 rounded-lg">
-                    <p className="font-medium text-warning">Know Your Customer (KYC)</p>
-                    <p className="text-sm text-muted-foreground">3 reviews pending</p>
-                  </div>
-                  <div className="p-3 bg-success/10 border border-success/20 rounded-lg">
-                    <p className="font-medium text-success">Anti-Money Laundering</p>
-                    <p className="text-sm text-muted-foreground">All checks complete</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Audit Trail</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between py-2 border-b">
-                      <span>Last full audit</span>
-                      <span className="font-medium">December 2023</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span>Compliance score</span>
-                      <span className="font-medium text-success">98.5%</span>
-                    </div>
-                    <div className="flex justify-between py-2 border-b">
-                      <span>Outstanding issues</span>
-                      <span className="font-medium">2</span>
-                    </div>
-                    <div className="flex justify-between py-2">
-                      <span>Next review</span>
-                      <span className="font-medium">March 2024</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="regulatory">
-            <RegulatoryReporting />
-          </TabsContent>
-        </MobileTabs>
+            {renderContent()}
+          </div>
+        </div>
       </div>
     </div>
   );

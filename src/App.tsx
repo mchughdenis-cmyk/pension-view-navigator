@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ShowcaseWebsite from "./components/ShowcaseWebsite";
+import { FloatingBackButton } from "./components/ui/floating-back-button";
 import LoginScreen from "./components/LoginScreen";
 import AdminLogin from "./components/AdminLogin";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
@@ -36,6 +37,7 @@ const queryClient = new QueryClient();
 const AppContent = () => {
   return (
     <BrowserRouter>
+      <FloatingBackButton />
       <Routes>
         <Route path="/" element={<ShowcaseWebsite />} />
         <Route path="/login" element={<LoginScreen />} />

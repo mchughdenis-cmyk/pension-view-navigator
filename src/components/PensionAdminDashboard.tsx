@@ -51,14 +51,28 @@ import FeeEngine from "./admin/FeeEngine";
 import TradeOrderManagement from "./admin/TradeOrderManagement";
 import PortfolioRebalancing from "./admin/PortfolioRebalancing";
 import RegulatoryReporting from "./admin/RegulatoryReporting";
+import CustodyReconciliation from "./admin/CustodyReconciliation";
+import AdviserCharging from "./admin/AdviserCharging";
+import DocumentGeneration from "./admin/DocumentGeneration";
+import AuditTrail from "./admin/AuditTrail";
+import WorkflowEngine from "./admin/WorkflowEngine";
+import SchemeDashboard from "./admin/SchemeDashboard";
+import BulkOperations from "./admin/BulkOperations";
 
 // Tab configuration for mobile-friendly navigation
 const adminTabs = [
+  { value: "scheme", label: "Scheme Overview", icon: BarChart3 },
   { value: "clients", label: "Clients", icon: Users },
   { value: "transactions", label: "Transactions", icon: ClipboardList },
   { value: "trading", label: "Trading", icon: TrendingUp },
   { value: "rebalancing", label: "Rebalancing", icon: Activity },
-  { value: "fees", label: "Fees & Billing", icon: Receipt },
+  { value: "custody", label: "Custody & Rec", icon: Shield },
+  { value: "fees", label: "Platform Fees", icon: Receipt },
+  { value: "adviser-fees", label: "Adviser Fees", icon: UserCheck },
+  { value: "documents", label: "Documents", icon: FileText },
+  { value: "workflows", label: "Workflows", icon: Activity },
+  { value: "bulk-ops", label: "Bulk Operations", icon: Package },
+  { value: "audit", label: "Audit Trail", icon: Clock },
   { value: "activity", label: "Activity", icon: Activity },
   { value: "integrations", label: "Integrations", icon: Link2 },
   { value: "products", label: "Products", icon: Package },
@@ -334,7 +348,11 @@ export default function PensionAdminDashboard() {
         </div>
 
         {/* Main Content Tabs */}
-        <MobileTabs tabs={adminTabs} defaultValue="clients">
+        <MobileTabs tabs={adminTabs} defaultValue="scheme">
+
+          <TabsContent value="scheme">
+            <SchemeDashboard />
+          </TabsContent>
 
           <TabsContent value="clients">
             <Card>
@@ -425,6 +443,30 @@ export default function PensionAdminDashboard() {
 
           <TabsContent value="fees">
             <FeeEngine />
+          </TabsContent>
+
+          <TabsContent value="custody">
+            <CustodyReconciliation />
+          </TabsContent>
+
+          <TabsContent value="adviser-fees">
+            <AdviserCharging />
+          </TabsContent>
+
+          <TabsContent value="documents">
+            <DocumentGeneration />
+          </TabsContent>
+
+          <TabsContent value="workflows">
+            <WorkflowEngine />
+          </TabsContent>
+
+          <TabsContent value="bulk-ops">
+            <BulkOperations />
+          </TabsContent>
+
+          <TabsContent value="audit">
+            <AuditTrail />
           </TabsContent>
 
           <TabsContent value="activity">

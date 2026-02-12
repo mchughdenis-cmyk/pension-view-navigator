@@ -37,12 +37,24 @@ import {
   Lock,
   Unlock,
   Download,
+  Heart,
+  DollarSign,
+  Receipt,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Banknote,
+  PiggyBank,
+  Target,
 } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 const clientTabs = [
   { value: 'overview', label: 'Overview', icon: User },
   { value: 'accounts', label: 'Accounts', icon: Wallet },
+  { value: 'transactions', label: 'Transactions', icon: ClipboardList },
+  { value: 'contributions', label: 'Contributions', icon: PiggyBank },
+  { value: 'beneficiaries', label: 'Beneficiaries', icon: Heart },
+  { value: 'crystallisation', label: 'BCE', icon: Target },
   { value: 'compliance', label: 'Compliance', icon: Shield },
   { value: 'communications', label: 'Communications', icon: Mail },
   { value: 'notes', label: 'Notes & Tasks', icon: ClipboardList },
@@ -99,6 +111,34 @@ const clientDetail = {
     { date: '2024-01-08 10:00', action: 'Drawdown', detail: 'Monthly drawdown of £2,850 paid to bank', user: 'System' },
   ],
 }
+
+const clientTransactions = [
+  { id: 1, date: '2024-01-15', type: 'contribution', description: 'Monthly contribution', account: 'SIPP', amount: 1000, status: 'settled' },
+  { id: 2, date: '2024-01-14', type: 'buy', description: 'Buy Vanguard FTSE All-World ETF', account: 'ISA', amount: -5000, status: 'settled' },
+  { id: 3, date: '2024-01-12', type: 'sell', description: 'Sell Fundsmith Equity Fund', account: 'SIPP', amount: 8500, status: 'settled' },
+  { id: 4, date: '2024-01-08', type: 'drawdown', description: 'Monthly drawdown payment', account: 'SIPP', amount: -2850, status: 'settled' },
+  { id: 5, date: '2024-01-01', type: 'fee', description: 'Platform fee Q4 2023', account: 'SIPP', amount: -179.66, status: 'settled' },
+  { id: 6, date: '2024-01-01', type: 'fee', description: 'Platform fee Q4 2023', account: 'ISA', amount: -54.78, status: 'settled' },
+]
+
+const clientBeneficiaries = [
+  { id: 1, name: 'Jane Smith', relationship: 'Spouse', dob: '1977-08-22', share: 75, type: 'Expression of Wish', dateSet: '2022-03-15', status: 'active' },
+  { id: 2, name: 'Tom Smith', relationship: 'Son', dob: '2005-04-10', share: 12.5, type: 'Expression of Wish', dateSet: '2022-03-15', status: 'active' },
+  { id: 3, name: 'Emily Smith', relationship: 'Daughter', dob: '2008-11-30', share: 12.5, type: 'Expression of Wish', dateSet: '2022-03-15', status: 'active' },
+]
+
+const clientContributions = [
+  { id: 1, taxYear: '2023-24', type: 'Employee', gross: 12000, net: 9600, taxRelief: 2400, method: 'Relief at Source', frequency: 'Monthly' },
+  { id: 2, taxYear: '2023-24', type: 'Employer', gross: 6000, net: 6000, taxRelief: 0, method: 'Net Pay', frequency: 'Monthly' },
+  { id: 3, taxYear: '2023-24', type: 'Single', gross: 25000, net: 20000, taxRelief: 5000, method: 'Relief at Source', frequency: 'One-off' },
+  { id: 4, taxYear: '2022-23', type: 'Employee', gross: 10000, net: 8000, taxRelief: 2000, method: 'Relief at Source', frequency: 'Monthly' },
+  { id: 5, taxYear: '2022-23', type: 'Employer', gross: 5000, net: 5000, taxRelief: 0, method: 'Net Pay', frequency: 'Monthly' },
+]
+
+const crystallisationEvents = [
+  { id: 1, date: '2023-06-12', type: 'BCE 1', description: 'Drawdown designation', amount: 150000, lta_used: 13.9, cumulative_lta: 13.9, status: 'registered' },
+  { id: 2, date: '2022-01-15', type: 'BCE 6', description: 'Tax-free cash (PCLS)', amount: 50000, lta_used: 4.6, cumulative_lta: 18.5, status: 'registered' },
+]
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
@@ -326,6 +366,253 @@ export default function ClientAdminView() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Client Transactions Tab */}
+          <TabsContent value="transactions">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Client Transactions</CardTitle>
+                  <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> Export</Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Type</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead>Account</TableHead>
+                      <TableHead className="text-right">Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {clientTransactions.map(txn => (
+                      <TableRow key={txn.id}>
+                        <TableCell className="text-sm">{txn.date}</TableCell>
+                        <TableCell><Badge variant="outline" className="capitalize">{txn.type}</Badge></TableCell>
+                        <TableCell className="font-medium">{txn.description}</TableCell>
+                        <TableCell><Badge variant="secondary">{txn.account}</Badge></TableCell>
+                        <TableCell className={`text-right font-semibold ${txn.amount >= 0 ? 'text-success' : 'text-destructive'}`}>
+                          {txn.amount >= 0 ? '+' : ''}£{Math.abs(txn.amount).toLocaleString('en-GB', { minimumFractionDigits: 2 })}
+                        </TableCell>
+                        <TableCell><Badge variant="default">{txn.status}</Badge></TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Contributions Tab */}
+          <TabsContent value="contributions">
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Contributions (2023-24)</p><p className="text-2xl font-bold text-primary">£43,000</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Tax Relief Claimed</p><p className="text-2xl font-bold text-success">£7,400</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Annual Allowance Used</p><p className="text-2xl font-bold text-warning">71.7%</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Carry Forward Available</p><p className="text-2xl font-bold text-foreground">£77,000</p><p className="text-xs text-muted-foreground">3 prior years</p></CardContent></Card>
+              </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Contribution History</CardTitle>
+                    <Button size="sm"><Plus className="w-4 h-4 mr-2" /> Record Contribution</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Tax Year</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead className="text-right">Gross</TableHead>
+                        <TableHead className="text-right">Net Paid</TableHead>
+                        <TableHead className="text-right">Tax Relief</TableHead>
+                        <TableHead>Method</TableHead>
+                        <TableHead>Frequency</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {clientContributions.map(c => (
+                        <TableRow key={c.id}>
+                          <TableCell className="font-medium">{c.taxYear}</TableCell>
+                          <TableCell><Badge variant="outline">{c.type}</Badge></TableCell>
+                          <TableCell className="text-right font-semibold">{formatCurrency(c.gross)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(c.net)}</TableCell>
+                          <TableCell className="text-right text-success">{c.taxRelief > 0 ? formatCurrency(c.taxRelief) : '—'}</TableCell>
+                          <TableCell className="text-sm">{c.method}</TableCell>
+                          <TableCell><Badge variant="secondary">{c.frequency}</Badge></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Annual Allowance Carry Forward</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {[
+                      { year: '2023-24', allowance: 60000, used: 43000, remaining: 17000 },
+                      { year: '2022-23', allowance: 60000, used: 15000, remaining: 45000 },
+                      { year: '2021-22', allowance: 40000, used: 25000, remaining: 15000 },
+                      { year: '2020-21', allowance: 40000, used: 23000, remaining: 17000 },
+                    ].map(y => (
+                      <div key={y.year} className="flex items-center justify-between p-3 border rounded-lg">
+                        <span className="font-medium">{y.year}</span>
+                        <div className="flex items-center gap-4 text-sm">
+                          <span>Allowance: {formatCurrency(y.allowance)}</span>
+                          <span>Used: {formatCurrency(y.used)}</span>
+                          <span className="font-semibold text-success">Remaining: {formatCurrency(y.remaining)}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Beneficiaries Tab */}
+          <TabsContent value="beneficiaries">
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2"><Heart className="w-5 h-5" /> Beneficiary Nominations</CardTitle>
+                      <CardDescription>Expression of wish and death benefit nominations</CardDescription>
+                    </div>
+                    <Button size="sm"><Plus className="w-4 h-4 mr-2" /> Add Beneficiary</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {clientBeneficiaries.map(b => (
+                      <div key={b.id} className="p-4 border rounded-lg">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="p-2 rounded-full bg-primary/10"><Heart className="w-5 h-5 text-primary" /></div>
+                            <div>
+                              <h4 className="font-semibold">{b.name}</h4>
+                              <p className="text-sm text-muted-foreground">{b.relationship} • DOB: {b.dob}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant="default">{b.status}</Badge>
+                            <Button variant="outline" size="sm"><Edit className="w-4 h-4" /></Button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-3 gap-4 text-sm">
+                          <div><span className="text-muted-foreground">Share:</span> <strong>{b.share}%</strong></div>
+                          <div><span className="text-muted-foreground">Type:</span> <strong>{b.type}</strong></div>
+                          <div><span className="text-muted-foreground">Set:</span> <strong>{b.dateSet}</strong></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-4 p-3 bg-accent/30 rounded-lg">
+                    <p className="text-sm"><strong>Total allocation:</strong> {clientBeneficiaries.reduce((s, b) => s + b.share, 0)}%</p>
+                    <p className="text-xs text-muted-foreground mt-1">Last reviewed: 2022-03-15 • Next review due: 2024-03-15</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Death Benefit Options</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 border rounded-lg flex items-center justify-between">
+                    <div><p className="font-medium">Lump Sum Death Benefit</p><p className="text-xs text-muted-foreground">Paid to nominated beneficiaries</p></div>
+                    <Badge variant="default">Nominated</Badge>
+                  </div>
+                  <div className="p-3 border rounded-lg flex items-center justify-between">
+                    <div><p className="font-medium">Beneficiary Drawdown</p><p className="text-xs text-muted-foreground">Continue pension for spouse/dependant</p></div>
+                    <Badge variant="secondary">Available</Badge>
+                  </div>
+                  <div className="p-3 border rounded-lg flex items-center justify-between">
+                    <div><p className="font-medium">Annuity Purchase</p><p className="text-xs text-muted-foreground">Buy guaranteed income for beneficiary</p></div>
+                    <Badge variant="secondary">Available</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Crystallisation Events Tab */}
+          <TabsContent value="crystallisation">
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Crystallised</p><p className="text-2xl font-bold text-primary">£200,000</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">LTA Used (Pre-April 2024)</p><p className="text-2xl font-bold text-warning">18.5%</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Transitional Protection</p><p className="text-2xl font-bold text-success">None</p></CardContent></Card>
+                <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Lump Sum Allowance</p><p className="text-2xl font-bold text-foreground">£218,325</p><p className="text-xs text-muted-foreground">remaining of £268,275</p></CardContent></Card>
+              </div>
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2"><Target className="w-5 h-5" /> Benefit Crystallisation Events</CardTitle>
+                      <CardDescription>Record of all pension crystallisation events (BCE 1-9)</CardDescription>
+                    </div>
+                    <Button size="sm"><Plus className="w-4 h-4 mr-2" /> Record BCE</Button>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>BCE Type</TableHead>
+                        <TableHead>Description</TableHead>
+                        <TableHead className="text-right">Amount</TableHead>
+                        <TableHead className="text-right">LTA Used</TableHead>
+                        <TableHead className="text-right">Cumulative</TableHead>
+                        <TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {crystallisationEvents.map(bce => (
+                        <TableRow key={bce.id}>
+                          <TableCell className="text-sm">{bce.date}</TableCell>
+                          <TableCell><Badge variant="outline">{bce.type}</Badge></TableCell>
+                          <TableCell className="font-medium">{bce.description}</TableCell>
+                          <TableCell className="text-right font-semibold">{formatCurrency(bce.amount)}</TableCell>
+                          <TableCell className="text-right">{bce.lta_used}%</TableCell>
+                          <TableCell className="text-right font-semibold text-warning">{bce.cumulative_lta}%</TableCell>
+                          <TableCell><Badge variant="default">{bce.status}</Badge></TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Transitional Arrangements (Post April 2024)</CardTitle></CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="p-3 bg-accent/30 rounded-lg">
+                    <p className="text-sm"><strong>Lump Sum Allowance (LSA):</strong> £268,275</p>
+                    <p className="text-xs text-muted-foreground mt-1">Maximum tax-free lump sums from all registered pension schemes</p>
+                  </div>
+                  <div className="p-3 bg-accent/30 rounded-lg">
+                    <p className="text-sm"><strong>Lump Sum & Death Benefit Allowance (LSDBA):</strong> £1,073,100</p>
+                    <p className="text-xs text-muted-foreground mt-1">Combined limit for tax-free lump sums and death benefits</p>
+                  </div>
+                  <div className="p-3 border rounded-lg">
+                    <p className="text-sm font-medium">Protection Status</p>
+                    <div className="grid grid-cols-2 gap-2 mt-2 text-sm">
+                      <div className="flex justify-between"><span className="text-muted-foreground">Fixed Protection 2016</span><Badge variant="secondary">Not held</Badge></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Individual Protection 2016</span><Badge variant="secondary">Not held</Badge></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Enhanced Protection</span><Badge variant="secondary">Not held</Badge></div>
+                      <div className="flex justify-between"><span className="text-muted-foreground">Primary Protection</span><Badge variant="secondary">Not held</Badge></div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
           {/* Compliance Tab */}

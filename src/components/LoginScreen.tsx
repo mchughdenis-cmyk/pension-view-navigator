@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Shield } from 'lucide-react'
+import { Shield, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export default function LoginScreen() {
@@ -102,6 +102,17 @@ export default function LoginScreen() {
                 </Button>
               </TabsContent>
             </Tabs>
+
+            <div className="mt-6 pt-4 border-t">
+              <Button 
+                variant="ghost" 
+                className="w-full text-muted-foreground hover:text-foreground gap-2"
+                onClick={() => navigate('/admin-login')}
+              >
+                <Lock className="w-4 h-4" />
+                Admin System Login
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>

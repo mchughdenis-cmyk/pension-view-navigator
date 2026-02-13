@@ -2,6 +2,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useNavigate } from 'react-router-dom'
+import airgeadLogo from '@/assets/airgead-logo.png'
 import {
   Shield, Users, TrendingUp, Wallet, PiggyBank, FileText,
   ArrowRight, CheckCircle, BarChart3, Settings, Lock,
@@ -80,10 +81,11 @@ export default function ShowcaseWebsite() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-              <Shield className="w-5 h-5" />
+            <img src={airgeadLogo} alt="Airgead" className="w-9 h-9 rounded-lg" />
+            <div className="flex flex-col leading-tight">
+              <span className="text-xl font-bold text-foreground">Pension Navigator</span>
+              <span className="text-[10px] text-muted-foreground tracking-wider uppercase">by Airgead</span>
             </div>
-            <span className="text-xl font-bold text-foreground">Pension Navigator</span>
           </div>
           <nav className="hidden md:flex items-center gap-8">
             <a href="#features" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Features</a>
@@ -296,10 +298,11 @@ export default function ShowcaseWebsite() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-3">
-              <div className="bg-primary text-primary-foreground p-2 rounded-lg">
-                <Shield className="w-4 h-4" />
+              <img src={airgeadLogo} alt="Airgead" className="w-8 h-8 rounded-lg" />
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold text-foreground">Pension Navigator</span>
+                <span className="text-[9px] text-muted-foreground tracking-wider uppercase">by Airgead</span>
               </div>
-              <span className="font-semibold text-foreground">Pension Navigator</span>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
               <button onClick={() => navigate('/login')} className="hover:text-foreground transition-colors">Client Login</button>
@@ -309,7 +312,7 @@ export default function ShowcaseWebsite() {
             </div>
           </div>
           <div className="mt-8 pt-6 border-t text-center text-sm text-muted-foreground">
-            © 2026 Pension Navigator. Enterprise Pension Administration Platform.
+            © 2026 Airgead. Pension Navigator — Enterprise Pension Administration Platform.
           </div>
         </div>
       </footer>

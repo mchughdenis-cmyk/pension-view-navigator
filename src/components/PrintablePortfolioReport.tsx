@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Printer, Eye, Download } from "lucide-react";
+import { downloadAirgeadHtml } from "@/lib/documentUtils";
 
 interface PrintSection {
   id: string;
@@ -59,9 +60,27 @@ export default function PrintablePortfolioReport({
   };
 
   const handleDownloadPDF = () => {
-    // In a real app, this would generate and download a PDF
-    console.log('Downloading PDF...');
-    alert('PDF download functionality would be implemented here');
+    const bodyContent = `
+      <h2>Portfolio Overview</h2>
+      <p><strong>Total Portfolio Value:</strong> ${formatCurrency(pensionData.totalValue)}</p>
+      <p><strong>Generated:</strong> ${new Date().toLocaleDateString('en-GB')}</p>
+      <h2>Pension Schemes</h2>
+      ${pensionData.pensions.map((p: any) => `
+        <div class="detail-card">
+          <h3>${p.provider} (${p.type})</h3>
+          <p><strong>Value:</strong> ${formatCurrency(p.value)} | <strong>Growth:</strong> ${p.growth >= 0 ? '+' : ''}${p.growth}%</p>
+        </div>
+      `).join('')}
+      <h2>Investment Allocation</h2>
+      <table>
+        <thead><tr><th>Fund</th><th>Allocation</th><th>Value</th></tr></thead>
+        <tbody>${pensionData.investments.map((inv: any) => `<tr><td>${inv.name}</td><td>${inv.allocation}%</td><td>${formatCurrency(inv.value)}</td></tr>`).join('')}</tbody>
+      </table>
+      <h2>IHT Analysis</h2>
+      <p><strong>Total Estate:</strong> ${formatCurrency(totalEstateValue)}</p>
+      <p><strong>IHT Liability:</strong> ${formatCurrency(ihtLiability)}</p>
+    `;
+    downloadAirgeadHtml('Portfolio Report', 'Portfolio-Report.html', bodyContent);
   };
 
   // Calculate IHT data
@@ -74,7 +93,8 @@ export default function PrintablePortfolioReport({
     <div className="print:text-black print:bg-white space-y-6">
       {/* Header */}
       <div className="text-center border-b pb-4 print:border-black">
-        <h1 className="text-2xl font-bold">Pension Portfolio Report</h1>
+        <h1 className="text-2xl font-bold">Pension Navigator by Airgead</h1>
+        <p className="text-lg font-semibold mt-1">Portfolio Report</p>
         <p className="text-muted-foreground print:text-gray-600">
           Generated on {new Date().toLocaleDateString('en-GB')}
         </p>
@@ -366,8 +386,8 @@ export default function PrintablePortfolioReport({
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground print:text-gray-500 border-t pt-4 print:border-black">
+        <p>© {new Date().getFullYear()} Airgead. Pension Navigator — Enterprise Pension Administration Platform.</p>
         <p>This report is for informational purposes only and should not be considered as financial advice.</p>
-        <p>Please consult with a qualified financial advisor for personalized guidance.</p>
       </div>
     </div>
   );

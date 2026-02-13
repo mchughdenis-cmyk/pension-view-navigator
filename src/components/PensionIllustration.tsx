@@ -15,9 +15,11 @@ import {
   BarChart3,
   ArrowRight,
   RefreshCw,
-  FileText
+  FileText,
+  Download
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { downloadAirgeadHtml } from "@/lib/documentUtils";
 
 interface IllustrationInputs {
   potValue: number;
@@ -89,9 +91,18 @@ const PensionIllustration = () => {
           <h1 className="text-3xl font-bold text-foreground">Pension Illustration</h1>
           <p className="text-muted-foreground">Compare drawdown vs annuity options</p>
         </div>
-        <Button variant="outline" onClick={() => window.print()}>
-          <FileText className="w-4 h-4 mr-2" />
-          Export PDF
+        <Button variant="outline" onClick={() => {
+          const rows = projections.map(p => `<tr><td>${p.age}</td><td>£${p.drawdownIncome.toLocaleString()}</td><td>£${p.annuityIncome.toLocaleString()}</td><td>£${p.drawdownPot.toLocaleString()}</td></tr>`).join('');
+          const bodyContent = `
+            <h2>Pension Illustration Summary</h2>
+            <p><strong>Pot Value:</strong> £${inputs.potValue.toLocaleString()} | <strong>Retirement Age:</strong> ${inputs.retirementAge} | <strong>Growth Rate:</strong> ${inputs.annualGrowth}%</p>
+            <p><strong>Total Drawdown Income:</strong> £${totalDrawdownIncome.toLocaleString()} | <strong>Total Annuity Income:</strong> £${totalAnnuityIncome.toLocaleString()}</p>
+            <h2>Year-by-Year Projection</h2>
+            <table><thead><tr><th>Age</th><th>Drawdown Income</th><th>Annuity Income</th><th>Remaining Pot</th></tr></thead><tbody>${rows}</tbody></table>`;
+          downloadAirgeadHtml('Pension Illustration', 'Pension-Illustration.html', bodyContent);
+        }}>
+          <Download className="w-4 h-4 mr-2" />
+          Export Illustration
         </Button>
       </div>
 

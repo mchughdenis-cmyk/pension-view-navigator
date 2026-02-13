@@ -1,7 +1,7 @@
 {
-  "name": "Pension View Navigator",
-  "short_name": "PensionNav",
-  "description": "Comprehensive pension management and analysis platform",
+  "name": "Pension Navigator by Airgead",
+  "short_name": "Airgead",
+  "description": "Enterprise pension and investment administration platform by Airgead",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

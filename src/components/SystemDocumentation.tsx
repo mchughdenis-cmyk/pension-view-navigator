@@ -2,6 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import airgeadLogo from '@/assets/airgead-logo.png';
+import { downloadAirgeadDocx } from '@/lib/documentUtils';
 import { 
   FileText, 
   Home, 
@@ -31,35 +33,12 @@ const SystemDocumentation = () => {
 
   const handleExportWord = async () => {
     try {
-      const { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip } = await import('docx');
-      const { saveAs } = await import('file-saver');
+      const { Paragraph, TextRun, HeadingLevel } = await import('docx');
 
-      const children: any[] = [
-        new Paragraph({
-          text: "Pension Navigator",
-          heading: HeadingLevel.TITLE,
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 200 }
-        }),
-        new Paragraph({
-          text: "Complete System Documentation",
-          heading: HeadingLevel.HEADING_2,
-          alignment: AlignmentType.CENTER,
-          spacing: { after: 400 }
-        }),
-        new Paragraph({
-          text: "System Overview",
-          heading: HeadingLevel.HEADING_1,
-          spacing: { before: 400, after: 200 }
-        }),
-        new Paragraph({
-          text: "Pension Navigator is a comprehensive pension management platform designed to streamline the entire pension lifecycle from client onboarding through to retirement income drawdown.",
-          spacing: { after: 200 }
-        })
-      ];
+      const contentParagraphs: any[] = [];
 
       features.forEach(category => {
-        children.push(
+        contentParagraphs.push(
           new Paragraph({
             text: category.category,
             heading: HeadingLevel.HEADING_1,
@@ -68,7 +47,7 @@ const SystemDocumentation = () => {
         );
 
         category.items.forEach(item => {
-          children.push(
+          contentParagraphs.push(
             new Paragraph({
               text: item.name,
               heading: HeadingLevel.HEADING_2,
@@ -79,18 +58,13 @@ const SystemDocumentation = () => {
               spacing: { after: 200 }
             }),
             new Paragraph({
-              children: [
-                new TextRun({
-                  text: "Key Features:",
-                  bold: true
-                })
-              ],
+              children: [new TextRun({ text: "Key Features:", bold: true })],
               spacing: { after: 100 }
             })
           );
 
           item.features.forEach(feature => {
-            children.push(
+            contentParagraphs.push(
               new Paragraph({
                 text: feature,
                 bullet: { level: 0 },
@@ -101,24 +75,11 @@ const SystemDocumentation = () => {
         });
       });
 
-      const doc = new Document({
-        sections: [{
-          properties: {
-            page: {
-              margin: {
-                top: convertInchesToTwip(1),
-                right: convertInchesToTwip(1),
-                bottom: convertInchesToTwip(1),
-                left: convertInchesToTwip(1)
-              }
-            }
-          },
-          children
-        }]
-      });
-
-      const blob = await import('docx').then(m => m.Packer.toBlob(doc));
-      saveAs(blob, 'Pension-Navigator-Documentation.docx');
+      await downloadAirgeadDocx(
+        'Complete System Documentation',
+        'Pension-Navigator-Documentation.docx',
+        contentParagraphs
+      );
     } catch (error) {
       console.error('Error exporting to Word:', error);
     }
@@ -581,10 +542,11 @@ const SystemDocumentation = () => {
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between print:flex-col print:items-start">
             <div className="flex items-center gap-4">
-              <Shield className="w-12 h-12" />
+              <img src={airgeadLogo} alt="Airgead" className="w-12 h-12 rounded-lg" />
               <div>
-                <h1 className="text-4xl font-bold mb-2">Pension Navigator</h1>
-                <p className="text-lg opacity-90">Complete System Documentation</p>
+                <h1 className="text-4xl font-bold mb-1">Pension Navigator</h1>
+                <p className="text-[10px] uppercase tracking-widest opacity-70">by Airgead</p>
+                <p className="text-lg opacity-90 mt-1">Complete System Documentation</p>
               </div>
             </div>
             <div className="flex gap-2 print:hidden">
@@ -738,7 +700,7 @@ const SystemDocumentation = () => {
 
         {/* Footer */}
         <div className="text-center text-muted-foreground text-sm pt-8 border-t">
-          <p>© 2024 Pension Navigator. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Airgead. Pension Navigator — Enterprise Pension Administration Platform.</p>
           <p className="mt-2">This documentation is current as of {new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
         </div>
       </div>

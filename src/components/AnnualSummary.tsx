@@ -14,6 +14,7 @@ import {
   FileText,
   Building2
 } from "lucide-react";
+import { downloadAirgeadHtml, airgeadHtmlHeader, airgeadHtmlFooter } from "@/lib/documentUtils";
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat('en-GB', {
@@ -103,95 +104,56 @@ interface AnnualSummaryProps {
 
 export default function AnnualSummary({ onDownload }: AnnualSummaryProps) {
   const handleDownload = () => {
-    // Create downloadable content
-    const content = generateSummaryContent();
-    const blob = new Blob([content], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `Annual-Summary-${annualSummaryData.taxYear.replace('/', '-')}.html`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-    
-    if (onDownload) onDownload();
-  };
+    const bodyContent = `
+      <h2>Annual Pension Summary</h2>
+      <p><strong>Tax Year:</strong> ${annualSummaryData.taxYear}</p>
+      <p><strong>Client:</strong> ${annualSummaryData.client.name} (${annualSummaryData.client.clientRef})</p>
+      <p><strong>Generated:</strong> ${formatDate(annualSummaryData.generatedDate)}</p>
 
-  const generateSummaryContent = () => {
-    return `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Annual Pension Summary ${annualSummaryData.taxYear}</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; color: #333; }
-        .header { border-bottom: 2px solid #0066cc; padding-bottom: 20px; margin-bottom: 30px; }
-        .summary-card { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 8px; }
-        .pension-detail { border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #f1f1f1; }
-        .positive { color: #16a34a; }
-        .negative { color: #dc2626; }
-        .currency { font-weight: bold; }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <h1>Annual Pension Summary</h1>
-        <p><strong>Tax Year:</strong> ${annualSummaryData.taxYear}</p>
-        <p><strong>Client:</strong> ${annualSummaryData.client.name} (${annualSummaryData.client.clientRef})</p>
-        <p><strong>Generated:</strong> ${formatDate(annualSummaryData.generatedDate)}</p>
-    </div>
-
-    <div class="summary-card">
+      <div class="summary-card">
         <h2>Portfolio Summary</h2>
         <p><strong>Start of Year Value:</strong> <span class="currency">${formatCurrency(annualSummaryData.summary.startValue)}</span></p>
         <p><strong>End of Year Value:</strong> <span class="currency">${formatCurrency(annualSummaryData.summary.endValue)}</span></p>
         <p><strong>Total Growth:</strong> <span class="currency positive">${formatCurrency(annualSummaryData.summary.totalGrowth)}</span> (${annualSummaryData.summary.growthPercentage}%)</p>
         <p><strong>Total Contributions:</strong> <span class="currency">${formatCurrency(annualSummaryData.summary.totalContributions)}</span></p>
         <p><strong>Total Withdrawals:</strong> <span class="currency">${formatCurrency(annualSummaryData.summary.totalWithdrawals)}</span></p>
-    </div>
+      </div>
 
-    <h2>Individual Pension Performance</h2>
-    ${annualSummaryData.pensions.map(pension => `
-        <div class="pension-detail">
-            <h3>${pension.provider}</h3>
-            <p><strong>Type:</strong> ${pension.type}</p>
-            <p><strong>Start Value:</strong> ${formatCurrency(pension.startValue)}</p>
-            <p><strong>End Value:</strong> ${formatCurrency(pension.endValue)}</p>
-            <p><strong>Contributions:</strong> ${formatCurrency(pension.contributions)}</p>
-            <p><strong>Withdrawals:</strong> ${formatCurrency(pension.withdrawals)}</p>
-            <p><strong>Growth:</strong> ${formatCurrency(pension.growth)} (${pension.growthPercentage}%)</p>
+      <h2>Individual Pension Performance</h2>
+      ${annualSummaryData.pensions.map(pension => `
+        <div class="detail-card">
+          <h3>${pension.provider}</h3>
+          <p><strong>Type:</strong> ${pension.type}</p>
+          <p><strong>Start Value:</strong> ${formatCurrency(pension.startValue)} → <strong>End Value:</strong> ${formatCurrency(pension.endValue)}</p>
+          <p><strong>Growth:</strong> ${formatCurrency(pension.growth)} (${pension.growthPercentage}%)</p>
         </div>
-    `).join('')}
+      `).join('')}
 
-    <h2>Transaction History</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Type</th>
-                <th>Provider</th>
-                <th>Amount</th>
-            </tr>
-        </thead>
+      <h2>Transaction History</h2>
+      <table>
+        <thead><tr><th>Date</th><th>Type</th><th>Provider</th><th>Amount</th></tr></thead>
         <tbody>
-            ${annualSummaryData.transactions.map(transaction => `
-                <tr>
-                    <td>${formatDate(transaction.date)}</td>
-                    <td>${transaction.type}</td>
-                    <td>${transaction.provider}</td>
-                    <td class="${transaction.amount >= 0 ? 'positive' : 'negative'}">${formatCurrency(Math.abs(transaction.amount))}</td>
-                </tr>
-            `).join('')}
+          ${annualSummaryData.transactions.map(t => `
+            <tr>
+              <td>${formatDate(t.date)}</td>
+              <td>${t.type}</td>
+              <td>${t.provider}</td>
+              <td class="${t.amount >= 0 ? 'positive' : 'negative'}">${formatCurrency(Math.abs(t.amount))}</td>
+            </tr>
+          `).join('')}
         </tbody>
-    </table>
-</body>
-</html>
-    `;
+      </table>`;
+
+    downloadAirgeadHtml(
+      `Annual Summary ${annualSummaryData.taxYear}`,
+      `Annual-Summary-${annualSummaryData.taxYear.replace('/', '-')}.html`,
+      bodyContent
+    );
+    
+    if (onDownload) onDownload();
   };
+
+
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-6">

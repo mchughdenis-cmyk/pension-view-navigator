@@ -19,6 +19,15 @@ import {
   Calendar,
   Search,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import {
+  downloadWelcomeLetter,
+  downloadBenefitStatement,
+  downloadTransferConfirmation,
+  downloadDrawdownConfirmation,
+  downloadFeeSchedule,
+  downloadAirgeadDocx,
+} from '@/lib/documentUtils'
 
 const templates = [
   { id: 1, name: 'Annual Benefit Statement', category: 'statutory', format: 'PDF', lastUsed: '2024-01-10', usageCount: 1247, status: 'active' },
@@ -41,6 +50,14 @@ const recentDocuments = [
   { id: 5, date: '2024-01-08', template: 'KYC Reminder', client: '89 clients', format: 'Email', sentVia: 'Email', status: 'sent' },
 ]
 
+const templateDownloadMap: Record<string, () => Promise<void>> = {
+  'Annual Benefit Statement': () => downloadBenefitStatement(),
+  'Welcome Letter': () => downloadWelcomeLetter(),
+  'Transfer Confirmation': () => downloadTransferConfirmation(),
+  'Drawdown Confirmation': () => downloadDrawdownConfirmation(),
+  'Fee Schedule Notification': () => downloadFeeSchedule(),
+}
+
 export default function DocumentGeneration() {
   const [searchTerm, setSearchTerm] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('all')
@@ -50,6 +67,17 @@ export default function DocumentGeneration() {
     const matchesCat = categoryFilter === 'all' || t.category === categoryFilter
     return matchesSearch && matchesCat
   })
+
+  const handleDownloadTemplate = async (name: string) => {
+    const downloadFn = templateDownloadMap[name]
+    if (downloadFn) {
+      toast.info(`Generating ${name}...`)
+      await downloadFn()
+      toast.success(`${name} downloaded successfully`)
+    } else {
+      toast.info(`${name} — template preview coming soon`)
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -105,9 +133,9 @@ export default function DocumentGeneration() {
                   </div>
                 </div>
                 <div className="flex gap-1">
+                  <Button variant="outline" size="sm" onClick={() => handleDownloadTemplate(t.name)}><Download className="w-3 h-3" /></Button>
                   <Button variant="outline" size="sm"><Eye className="w-3 h-3" /></Button>
                   <Button variant="outline" size="sm"><Edit className="w-3 h-3" /></Button>
-                  <Button variant="outline" size="sm"><Copy className="w-3 h-3" /></Button>
                 </div>
               </div>
             ))}

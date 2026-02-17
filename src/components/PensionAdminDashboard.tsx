@@ -41,8 +41,11 @@ import {
   Briefcase,
   Settings2,
   LineChart,
+  Cog,
+  KeyRound,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import BankUpload from "./BankUpload";
 import PooledAccount from "./PooledAccount";
 import IntegrationsHub from "./IntegrationsHub";
@@ -60,6 +63,10 @@ import AuditTrail from "./admin/AuditTrail";
 import WorkflowEngine from "./admin/WorkflowEngine";
 import SchemeDashboard from "./admin/SchemeDashboard";
 import BulkOperations from "./admin/BulkOperations";
+import UserManagement from "./admin/UserManagement";
+import SystemConfiguration from "./admin/SystemConfiguration";
+import { ClientDialog, ConfirmDialog, type ClientFormData } from "./admin/AdminDialogs";
+import { downloadCSV } from "@/lib/adminExportUtils";
 
 // Grouped navigation structure
 const navGroups = [
@@ -105,6 +112,8 @@ const navGroups = [
       { value: "workflows", label: "Workflows", icon: Activity },
       { value: "bulk-ops", label: "Bulk Operations", icon: Package },
       { value: "audit", label: "Audit Trail", icon: Clock },
+      { value: "users", label: "User Management", icon: KeyRound },
+      { value: "system-config", label: "System Config", icon: Cog },
     ],
   },
   {
@@ -187,10 +196,42 @@ const getPriorityColor = (priority: string) => {
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("scheme");
+  const [clients, setClients] = useState(adminData.clients);
+  const [clientDialogOpen, setClientDialogOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<(typeof adminData.clients[0]) | null>(null);
+  const [clientSearch, setClientSearch] = useState('');
+  const [clientStatusFilter, setClientStatusFilter] = useState('all');
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
   };
+
+  const handleAddClient = (data: ClientFormData) => {
+    const newId = Math.max(...clients.map(c => c.id)) + 1;
+    setClients(prev => [...prev, { id: newId, name: data.name, email: data.email, totalValue: 0, lastLogin: 'Never', status: data.status, riskProfile: data.riskProfile, advisor: data.advisor, pendingActions: 0, allowanceUsage: 0 }]);
+    toast.success(`Client "${data.name}" added successfully`);
+  };
+
+  const handleEditClient = (data: ClientFormData) => {
+    if (!editingClient) return;
+    setClients(prev => prev.map(c => c.id === editingClient.id ? { ...c, name: data.name, email: data.email, advisor: data.advisor, riskProfile: data.riskProfile, status: data.status } : c));
+    toast.success(`Client "${data.name}" updated`);
+    setEditingClient(null);
+  };
+
+  const handleExportReport = () => {
+    downloadCSV('admin-report',
+      ['Name', 'Email', 'Portfolio Value', 'Status', 'Adviser', 'Allowance Usage'],
+      clients.map(c => [c.name, c.email, c.totalValue, c.status, c.advisor, `${c.allowanceUsage}%`])
+    );
+    toast.success('Admin report exported as CSV');
+  };
+
+  const filteredClients = clients.filter(c => {
+    const matchSearch = c.name.toLowerCase().includes(clientSearch.toLowerCase()) || c.email.toLowerCase().includes(clientSearch.toLowerCase());
+    const matchStatus = clientStatusFilter === 'all' || c.status === clientStatusFilter;
+    return matchSearch && matchStatus;
+  });
 
   const headerActions = (
     <>
@@ -198,7 +239,7 @@ export default function PensionAdminDashboard() {
         <Users className="w-4 h-4 mr-2" />
         Dashboard
       </Button>
-      <Button variant="outline" size="sm" className="w-full sm:w-auto justify-start">
+      <Button variant="outline" size="sm" onClick={handleExportReport} className="w-full sm:w-auto justify-start">
         <Download className="w-4 h-4 mr-2" />
         Export Report
       </Button>
@@ -206,7 +247,7 @@ export default function PensionAdminDashboard() {
         <UserPlus className="w-4 h-4 mr-2" />
         Client Onboarding
       </Button>
-      <Button size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto justify-start">
+      <Button size="sm" className="bg-primary hover:bg-primary/90 w-full sm:w-auto justify-start" onClick={() => setClientDialogOpen(true)}>
         <UserCheck className="w-4 h-4 mr-2" />
         Add Client
       </Button>
@@ -224,9 +265,9 @@ export default function PensionAdminDashboard() {
               <div className="flex gap-2 flex-wrap">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input placeholder="Search clients..." className="pl-10 w-64" />
+                  <Input placeholder="Search clients..." className="pl-10 w-64" value={clientSearch} onChange={e => setClientSearch(e.target.value)} />
                 </div>
-                <Select>
+                <Select value={clientStatusFilter} onValueChange={setClientStatusFilter}>
                   <SelectTrigger className="w-40"><SelectValue placeholder="Filter by status" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Status</SelectItem>
@@ -235,12 +276,13 @@ export default function PensionAdminDashboard() {
                     <SelectItem value="onboarding">Onboarding</SelectItem>
                   </SelectContent>
                 </Select>
+                <Button size="sm" onClick={() => setClientDialogOpen(true)}><UserPlus className="w-4 h-4 mr-2" /> Add Client</Button>
               </div>
             </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {adminData.clients.map((client) => (
+              {filteredClients.map((client) => (
                 <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate(`/client-admin/${client.id}`)}>
                   <div className="flex-1 grid grid-cols-2 sm:grid-cols-6 gap-4 items-center">
                     <div>
@@ -255,7 +297,7 @@ export default function PensionAdminDashboard() {
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/client-admin/${client.id}`); }}><Eye className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" onClick={(e) => e.stopPropagation()}><Edit className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); setEditingClient(client); }}><Edit className="w-4 h-4" /></Button>
                   </div>
                 </div>
               ))}
@@ -273,6 +315,8 @@ export default function PensionAdminDashboard() {
       case "workflows": return <WorkflowEngine />;
       case "bulk-ops": return <BulkOperations />;
       case "audit": return <AuditTrail />;
+      case "users": return <UserManagement />;
+      case "system-config": return <SystemConfiguration />;
       case "activity": return (
         <Card>
           <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
@@ -468,6 +512,9 @@ export default function PensionAdminDashboard() {
           {renderContent()}
         </SidebarNavLayout>
       </div>
+
+      <ClientDialog open={clientDialogOpen} onClose={() => setClientDialogOpen(false)} onSave={handleAddClient} mode="add" />
+      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: editingClient.name, email: editingClient.email, advisor: editingClient.advisor, riskProfile: editingClient.riskProfile, status: editingClient.status } : undefined} />
     </div>
   );
 }

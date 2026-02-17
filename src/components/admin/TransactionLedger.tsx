@@ -8,7 +8,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import {
   Search,
   Download,
-  Filter,
   ArrowUpRight,
   ArrowDownLeft,
   RefreshCw,
@@ -17,6 +16,8 @@ import {
   DollarSign,
   Banknote,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/adminExportUtils'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
@@ -61,46 +62,27 @@ export default function TransactionLedger() {
   const totalIn = filtered.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
   const totalOut = filtered.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
 
+  const handleExport = () => {
+    downloadCSV('transaction-ledger',
+      ['Date', 'Reference', 'Client', 'Account', 'Type', 'Description', 'Amount', 'Balance', 'Status'],
+      filtered.map(t => [t.date, t.reference, t.client, t.account, typeConfig[t.type]?.label || t.type, t.description, t.amount, t.balance, t.status])
+    )
+    toast.success('Transaction ledger exported as CSV')
+  }
+
   return (
     <div className="space-y-6">
-      {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Transactions</p>
-            <p className="text-2xl font-bold text-foreground">{filtered.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Inflows</p>
-            <p className="text-2xl font-bold text-success">{formatCurrency(totalIn)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Outflows</p>
-            <p className="text-2xl font-bold text-destructive">{formatCurrency(totalOut)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Net Flow</p>
-            <p className={`text-2xl font-bold ${totalIn - totalOut >= 0 ? 'text-success' : 'text-destructive'}`}>
-              {formatCurrency(totalIn - totalOut)}
-            </p>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Transactions</p><p className="text-2xl font-bold text-foreground">{filtered.length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Inflows</p><p className="text-2xl font-bold text-success">{formatCurrency(totalIn)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Outflows</p><p className="text-2xl font-bold text-destructive">{formatCurrency(totalOut)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Net Flow</p><p className={`text-2xl font-bold ${totalIn - totalOut >= 0 ? 'text-success' : 'text-destructive'}`}>{formatCurrency(totalIn - totalOut)}</p></CardContent></Card>
       </div>
 
-      {/* Filters */}
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between gap-4">
-            <CardTitle className="flex items-center gap-2">
-              <Receipt className="w-5 h-5" />
-              Transaction Ledger
-            </CardTitle>
+            <CardTitle className="flex items-center gap-2"><Receipt className="w-5 h-5" /> Transaction Ledger</CardTitle>
             <div className="flex flex-wrap gap-2">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -130,7 +112,7 @@ export default function TransactionLedger() {
                   <SelectItem value="GIA">GIA</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download className="w-4 h-4 mr-2" /> Export CSV
               </Button>
             </div>
@@ -173,9 +155,7 @@ export default function TransactionLedger() {
                       </TableCell>
                       <TableCell className="text-right text-sm">{formatCurrency(txn.balance)}</TableCell>
                       <TableCell>
-                        <Badge variant={txn.status === 'settled' ? 'default' : 'secondary'}>
-                          {txn.status}
-                        </Badge>
+                        <Badge variant={txn.status === 'settled' ? 'default' : 'secondary'}>{txn.status}</Badge>
                       </TableCell>
                     </TableRow>
                   )

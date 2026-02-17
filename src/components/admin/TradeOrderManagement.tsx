@@ -17,13 +17,15 @@ import {
   RefreshCw,
   Download,
   ShoppingCart,
-  BarChart3,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { OrderDialog, type OrderFormData } from './AdminDialogs'
+import { downloadCSV } from '@/lib/adminExportUtils'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
 
-const orders = [
+const initialOrders = [
   { id: 'ORD-2024-001', date: '2024-01-15 14:30', client: 'John Smith', account: 'ISA', side: 'buy', instrument: 'Vanguard FTSE All-World ETF (VWRL)', quantity: 45, price: 111.11, value: 5000, status: 'executed', settlement: '2024-01-17' },
   { id: 'ORD-2024-002', date: '2024-01-15 11:00', client: 'Emma Wilson', account: 'SIPP', side: 'buy', instrument: 'iShares Core MSCI World (SWDA)', quantity: 60, price: 83.33, value: 5000, status: 'pending', settlement: null },
   { id: 'ORD-2024-003', date: '2024-01-14 16:45', client: 'David Thompson', account: 'SIPP', side: 'sell', instrument: 'Fundsmith Equity Fund (T)', quantity: 1500, price: 5.67, value: 8500, status: 'executed', settlement: '2024-01-16' },
@@ -44,8 +46,10 @@ const statusConfig: Record<string, { color: string; icon: React.ElementType }> =
 }
 
 export default function TradeOrderManagement() {
+  const [orders, setOrders] = useState(initialOrders)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const filtered = orders.filter(o => {
     const matchesSearch = o.client.toLowerCase().includes(searchTerm.toLowerCase()) || o.instrument.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toLowerCase().includes(searchTerm.toLowerCase())
@@ -57,44 +61,46 @@ export default function TradeOrderManagement() {
   const totalSellValue = orders.filter(o => o.side === 'sell' && o.status !== 'cancelled').reduce((s, o) => s + o.value, 0)
   const pendingCount = orders.filter(o => ['pending', 'routed', 'settling'].includes(o.status)).length
 
+  const handleNewOrder = (data: OrderFormData) => {
+    const newOrder = {
+      id: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
+      date: new Date().toISOString().slice(0, 16).replace('T', ' '),
+      client: data.client,
+      account: data.account,
+      side: data.side,
+      instrument: data.instrument,
+      quantity: data.quantity,
+      price: data.price,
+      value: data.quantity * data.price,
+      status: 'pending',
+      settlement: null,
+    }
+    setOrders(prev => [newOrder, ...prev])
+    toast.success(`${data.side.toUpperCase()} order placed for ${data.instrument}`, { description: `${data.quantity} units @ ${formatCurrency(data.price)}` })
+  }
+
+  const handleExport = () => {
+    downloadCSV('trade-orders',
+      ['Order ID', 'Date', 'Client', 'Account', 'Side', 'Instrument', 'Qty', 'Price', 'Value', 'Status', 'Settlement'],
+      filtered.map(o => [o.id, o.date, o.client, o.account, o.side, o.instrument, o.quantity, o.price, o.value, o.status, o.settlement || ''])
+    )
+    toast.success('Trade orders exported')
+  }
+
   return (
     <div className="space-y-6">
-      {/* Summary */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Total Orders</p>
-            <p className="text-2xl font-bold text-foreground">{orders.length}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Buy Orders Value</p>
-            <p className="text-2xl font-bold text-success">{formatCurrency(totalBuyValue)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Sell Orders Value</p>
-            <p className="text-2xl font-bold text-warning">{formatCurrency(totalSellValue)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Pending / In Flight</p>
-            <p className="text-2xl font-bold text-primary">{pendingCount}</p>
-          </CardContent>
-        </Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Orders</p><p className="text-2xl font-bold text-foreground">{orders.length}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Buy Orders Value</p><p className="text-2xl font-bold text-success">{formatCurrency(totalBuyValue)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Sell Orders Value</p><p className="text-2xl font-bold text-warning">{formatCurrency(totalSellValue)}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Pending / In Flight</p><p className="text-2xl font-bold text-primary">{pendingCount}</p></CardContent></Card>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Trade Order Book
-              </CardTitle>
+              <CardTitle className="flex items-center gap-2"><ShoppingCart className="w-5 h-5" /> Trade Order Book</CardTitle>
               <CardDescription>Manage the full trade lifecycle from creation to settlement</CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -113,8 +119,8 @@ export default function TradeOrderManagement() {
                   <SelectItem value="cancelled">Cancelled</SelectItem>
                 </SelectContent>
               </Select>
-              <Button size="sm"><Plus className="w-4 h-4 mr-2" /> New Order</Button>
-              <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> Export</Button>
+              <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Order</Button>
+              <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" /> Export</Button>
             </div>
           </div>
         </CardHeader>
@@ -157,9 +163,7 @@ export default function TradeOrderManagement() {
                       <TableCell className="text-right">{formatCurrency(order.price)}</TableCell>
                       <TableCell className="text-right font-semibold">{formatCurrency(order.value)}</TableCell>
                       <TableCell>
-                        <Badge variant={config.color as any}>
-                          <StatusIcon className="w-3 h-3 mr-1" />{order.status}
-                        </Badge>
+                        <Badge variant={config.color as any}><StatusIcon className="w-3 h-3 mr-1" />{order.status}</Badge>
                       </TableCell>
                       <TableCell className="text-xs">{order.settlement || '-'}</TableCell>
                     </TableRow>
@@ -170,6 +174,8 @@ export default function TradeOrderManagement() {
           </div>
         </CardContent>
       </Card>
+
+      <OrderDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSave={handleNewOrder} />
     </div>
   )
 }

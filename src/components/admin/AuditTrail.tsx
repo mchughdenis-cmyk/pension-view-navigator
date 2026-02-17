@@ -8,18 +8,15 @@ import { useState } from 'react'
 import {
   Search,
   Download,
-  Filter,
   Clock,
-  User,
-  Settings,
   Shield,
   FileText,
   LogIn,
   Edit,
   Eye,
-  Trash2,
-  AlertTriangle,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { downloadCSV } from '@/lib/adminExportUtils'
 
 const auditEntries = [
   { id: 1, timestamp: '2024-01-15 14:32:15', user: 'John Smith', userType: 'client', action: 'View Portfolio', category: 'access', detail: 'Viewed SIPP portfolio SIPP-001247', ip: '192.168.1.45', sessionId: 'sess_abc123' },
@@ -54,6 +51,14 @@ export default function AuditTrail() {
     const matchUser = userTypeFilter === 'all' || e.userType === userTypeFilter
     return matchSearch && matchCat && matchUser
   })
+
+  const handleExport = () => {
+    downloadCSV('audit-trail',
+      ['Timestamp', 'User', 'User Type', 'Action', 'Category', 'Detail', 'IP Address', 'Session ID'],
+      filtered.map(e => [e.timestamp, e.user, e.userType, e.action, e.category, e.detail, e.ip, e.sessionId])
+    )
+    toast.success('Audit trail exported as CSV')
+  }
 
   return (
     <div className="space-y-6">
@@ -95,7 +100,7 @@ export default function AuditTrail() {
                   <SelectItem value="system">System</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm"><Download className="w-4 h-4 mr-2" /> Export</Button>
+              <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" /> Export</Button>
             </div>
           </div>
         </CardHeader>

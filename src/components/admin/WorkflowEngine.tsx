@@ -3,27 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Switch } from '@/components/ui/switch'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
 import {
   Plus,
   Edit,
-  Play,
-  Pause,
-  Clock,
   CheckCircle,
   AlertTriangle,
-  RefreshCw,
-  Calendar,
-  Mail,
-  Bell,
-  ClipboardList,
-  Settings,
   Zap,
-  Eye,
+  Trash2,
 } from 'lucide-react'
+import { toast } from 'sonner'
+import { WorkflowDialog, ConfirmDialog, type WorkflowFormData } from './AdminDialogs'
 
-const workflows = [
+const initialWorkflows = [
   { id: 1, name: 'Annual Review Reminder', trigger: 'Anniversary date', action: 'Create task + Send email', frequency: 'Annual', daysBeforeDue: 30, assignTo: 'Adviser', active: true, lastTriggered: '2024-01-10', timesTriggered: 245 },
   { id: 2, name: 'KYC Expiry Reminder', trigger: 'KYC expiry date', action: 'Create task + Send email + Flag account', frequency: 'One-off', daysBeforeDue: 60, assignTo: 'Compliance', active: true, lastTriggered: '2024-01-08', timesTriggered: 89 },
   { id: 3, name: 'Drawdown Birthday Trigger', trigger: 'Client turns 55', action: 'Create task + Send welcome pack', frequency: 'One-off', daysBeforeDue: 90, assignTo: 'Adviser', active: true, lastTriggered: '2024-01-05', timesTriggered: 34 },
@@ -34,15 +25,46 @@ const workflows = [
   { id: 8, name: 'Inactive Client Alert', trigger: 'No login for 180 days', action: 'Create task + Send re-engagement email', frequency: 'Per event', daysBeforeDue: 0, assignTo: 'Adviser', active: false, lastTriggered: '2023-12-01', timesTriggered: 67 },
 ]
 
-const recentExecutions = [
-  { id: 1, workflow: 'Contribution Receipt', client: 'John Smith', date: '2024-01-15 11:00', result: 'success', detail: 'Email sent to john.smith@email.com' },
-  { id: 2, workflow: 'Large Transaction Alert', client: 'David Thompson', date: '2024-01-14 16:00', result: 'success', detail: 'Alert sent to compliance team' },
-  { id: 3, workflow: 'Failed Payment Retry', client: 'Lisa Anderson', date: '2024-01-12 09:00', result: 'success', detail: 'Retry scheduled for 2024-01-15' },
-  { id: 4, workflow: 'Annual Review Reminder', client: 'Emma Wilson', date: '2024-01-10 08:00', result: 'success', detail: 'Task created, email sent to adviser' },
-  { id: 5, workflow: 'KYC Expiry Reminder', client: '15 clients', date: '2024-01-08 07:00', result: 'partial', detail: '14 emails sent, 1 bounced' },
+const initialExecutions = [
+  { id: 1, workflow: 'Contribution Receipt', client: 'John Smith', date: '2024-01-15 11:00', result: 'success' as const, detail: 'Email sent to john.smith@email.com' },
+  { id: 2, workflow: 'Large Transaction Alert', client: 'David Thompson', date: '2024-01-14 16:00', result: 'success' as const, detail: 'Alert sent to compliance team' },
+  { id: 3, workflow: 'Failed Payment Retry', client: 'Lisa Anderson', date: '2024-01-12 09:00', result: 'success' as const, detail: 'Retry scheduled for 2024-01-15' },
+  { id: 4, workflow: 'Annual Review Reminder', client: 'Emma Wilson', date: '2024-01-10 08:00', result: 'success' as const, detail: 'Task created, email sent to adviser' },
+  { id: 5, workflow: 'KYC Expiry Reminder', client: '15 clients', date: '2024-01-08 07:00', result: 'partial' as const, detail: '14 emails sent, 1 bounced' },
 ]
 
 export default function WorkflowEngine() {
+  const [workflows, setWorkflows] = useState(initialWorkflows)
+  const [executions] = useState(initialExecutions)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingWorkflow, setEditingWorkflow] = useState<(typeof initialWorkflows[0]) | null>(null)
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null)
+
+  const handleToggle = (id: number) => {
+    setWorkflows(prev => prev.map(w => w.id === id ? { ...w, active: !w.active } : w))
+    const wf = workflows.find(w => w.id === id)
+    toast.success(`${wf?.name} ${wf?.active ? 'paused' : 'activated'}`)
+  }
+
+  const handleAdd = (data: WorkflowFormData) => {
+    const newId = Math.max(...workflows.map(w => w.id)) + 1
+    setWorkflows(prev => [...prev, { id: newId, ...data, lastTriggered: 'Never', timesTriggered: 0 }])
+    toast.success(`Workflow "${data.name}" created`)
+  }
+
+  const handleEdit = (data: WorkflowFormData) => {
+    if (!editingWorkflow) return
+    setWorkflows(prev => prev.map(w => w.id === editingWorkflow.id ? { ...w, ...data } : w))
+    toast.success(`Workflow "${data.name}" updated`)
+    setEditingWorkflow(null)
+  }
+
+  const handleDelete = (id: number) => {
+    const wf = workflows.find(w => w.id === id)
+    setWorkflows(prev => prev.filter(w => w.id !== id))
+    toast.success(`Workflow "${wf?.name}" deleted`)
+  }
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -52,12 +74,11 @@ export default function WorkflowEngine() {
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Paused Workflows</p><p className="text-2xl font-bold text-muted-foreground">{workflows.filter(w => !w.active).length}</p></CardContent></Card>
       </div>
 
-      {/* Workflows */}
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
             <div><CardTitle className="flex items-center gap-2"><Zap className="w-5 h-5" /> Automated Workflows</CardTitle><CardDescription>Configure event-driven tasks, notifications, and automations</CardDescription></div>
-            <Button size="sm"><Plus className="w-4 h-4 mr-2" /> New Workflow</Button>
+            <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Workflow</Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -86,8 +107,9 @@ export default function WorkflowEngine() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Switch checked={w.active} />
-                    <Button variant="outline" size="sm"><Edit className="w-4 h-4" /></Button>
+                    <Switch checked={w.active} onCheckedChange={() => handleToggle(w.id)} />
+                    <Button variant="outline" size="sm" onClick={() => { setEditingWorkflow(w); }}><Edit className="w-4 h-4" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => setDeleteConfirm(w.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </div>
                 </div>
               </div>
@@ -96,12 +118,11 @@ export default function WorkflowEngine() {
         </CardContent>
       </Card>
 
-      {/* Recent Executions */}
       <Card>
         <CardHeader><CardTitle>Recent Executions</CardTitle></CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {recentExecutions.map(exec => (
+            {executions.map(exec => (
               <div key={exec.id} className="flex items-center justify-between p-3 border rounded-lg">
                 <div className="flex items-center gap-3">
                   {exec.result === 'success' ? <CheckCircle className="w-4 h-4 text-success" /> : <AlertTriangle className="w-4 h-4 text-warning" />}
@@ -119,6 +140,10 @@ export default function WorkflowEngine() {
           </div>
         </CardContent>
       </Card>
+
+      <WorkflowDialog open={dialogOpen} onClose={() => setDialogOpen(false)} onSave={handleAdd} mode="add" />
+      <WorkflowDialog open={!!editingWorkflow} onClose={() => setEditingWorkflow(null)} onSave={handleEdit} mode="edit" initial={editingWorkflow || undefined} />
+      <ConfirmDialog open={deleteConfirm !== null} onClose={() => setDeleteConfirm(null)} onConfirm={() => deleteConfirm !== null && handleDelete(deleteConfirm)} title="Delete Workflow" description="Are you sure you want to delete this workflow? This action cannot be undone." variant="destructive" />
     </div>
   )
 }

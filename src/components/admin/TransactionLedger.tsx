@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   Search,
   Download,
@@ -15,6 +17,9 @@ import {
   TrendingUp,
   DollarSign,
   Banknote,
+  Plus,
+  Edit,
+  Trash2,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
@@ -51,8 +56,11 @@ export default function TransactionLedger() {
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [accountFilter, setAccountFilter] = useState('all')
+  const [txnData, setTxnData] = useState(transactions)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [txnForm, setTxnForm] = useState({ client: 'John Smith', account: 'SIPP', type: 'contribution', description: '', amount: 0 })
 
-  const filtered = transactions.filter(t => {
+  const filtered = txnData.filter(t => {
     const matchesSearch = t.client.toLowerCase().includes(searchTerm.toLowerCase()) || t.description.toLowerCase().includes(searchTerm.toLowerCase()) || t.reference.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesType = typeFilter === 'all' || t.type === typeFilter
     const matchesAccount = accountFilter === 'all' || t.account === accountFilter
@@ -115,6 +123,9 @@ export default function TransactionLedger() {
               <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download className="w-4 h-4 mr-2" /> Export CSV
               </Button>
+              <Button size="sm" onClick={() => { setTxnForm({ client: 'John Smith', account: 'SIPP', type: 'contribution', description: '', amount: 0 }); setAddDialogOpen(true) }}>
+                <Plus className="w-4 h-4 mr-2" /> Add Transaction
+              </Button>
             </div>
           </div>
         </CardHeader>
@@ -132,6 +143,7 @@ export default function TransactionLedger() {
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="text-right">Balance</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -155,7 +167,24 @@ export default function TransactionLedger() {
                       </TableCell>
                       <TableCell className="text-right text-sm">{formatCurrency(txn.balance)}</TableCell>
                       <TableCell>
-                        <Badge variant={txn.status === 'settled' ? 'default' : 'secondary'}>{txn.status}</Badge>
+                        <Select value={txn.status} onValueChange={(v) => {
+                          setTxnData(prev => prev.map(t => t.id === txn.id ? { ...t, status: v } : t))
+                          toast.success(`Transaction ${txn.reference} status updated to ${v}`)
+                        }}>
+                          <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="settled">Settled</SelectItem>
+                            <SelectItem value="reversed">Reversed</SelectItem>
+                            <SelectItem value="failed">Failed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => {
+                          setTxnData(prev => prev.filter(t => t.id !== txn.id))
+                          toast.success('Transaction reversed and removed')
+                        }}><Trash2 className="w-3 h-3" /></Button>
                       </TableCell>
                     </TableRow>
                   )
@@ -165,6 +194,75 @@ export default function TransactionLedger() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Add Transaction Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Add Manual Transaction</DialogTitle>
+            <DialogDescription>Process a contribution, transfer, drawdown, or other transaction</DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-2">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1"><Label>Client</Label>
+                <Select value={txnForm.client} onValueChange={v => setTxnForm(p => ({ ...p, client: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="John Smith">John Smith</SelectItem>
+                    <SelectItem value="Emma Wilson">Emma Wilson</SelectItem>
+                    <SelectItem value="David Thompson">David Thompson</SelectItem>
+                    <SelectItem value="Lisa Anderson">Lisa Anderson</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1"><Label>Account</Label>
+                <Select value={txnForm.account} onValueChange={v => setTxnForm(p => ({ ...p, account: v }))}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="SIPP">SIPP</SelectItem>
+                    <SelectItem value="ISA">ISA</SelectItem>
+                    <SelectItem value="GIA">GIA</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-1"><Label>Transaction Type</Label>
+              <Select value={txnForm.type} onValueChange={v => setTxnForm(p => ({ ...p, type: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="contribution">Contribution</SelectItem>
+                  <SelectItem value="transfer_in">Transfer In</SelectItem>
+                  <SelectItem value="drawdown">Drawdown</SelectItem>
+                  <SelectItem value="buy">Buy</SelectItem>
+                  <SelectItem value="sell">Sell</SelectItem>
+                  <SelectItem value="dividend">Dividend</SelectItem>
+                  <SelectItem value="fee">Fee</SelectItem>
+                  <SelectItem value="tax_relief">Tax Relief</SelectItem>
+                  <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1"><Label>Description</Label><Input value={txnForm.description} onChange={e => setTxnForm(p => ({ ...p, description: e.target.value }))} placeholder="e.g. Monthly contribution" /></div>
+            <div className="space-y-1"><Label>Amount (£)</Label><Input type="number" step="0.01" value={txnForm.amount || ''} onChange={e => setTxnForm(p => ({ ...p, amount: parseFloat(e.target.value) || 0 }))} /></div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
+            <Button disabled={!txnForm.description || !txnForm.amount} onClick={() => {
+              const sign = ['contribution', 'transfer_in', 'dividend', 'sell', 'tax_relief'].includes(txnForm.type) ? 1 : -1
+              const newId = `TXN-${String(txnData.length + 1).padStart(3, '0')}`
+              const ref = `${txnForm.type.toUpperCase().slice(0, 4)}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`
+              setTxnData(prev => [{
+                id: newId, date: new Date().toISOString().replace('T', ' ').slice(0, 16),
+                client: txnForm.client, account: txnForm.account, type: txnForm.type,
+                description: txnForm.description, amount: txnForm.amount * sign,
+                balance: 0, status: 'pending', reference: ref,
+              }, ...prev])
+              toast.success('Transaction processed')
+              setAddDialogOpen(false)
+            }}>Process Transaction</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

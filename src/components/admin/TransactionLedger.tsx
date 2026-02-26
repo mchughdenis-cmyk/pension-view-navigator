@@ -7,42 +7,19 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import {
-  Search,
-  Download,
-  ArrowUpRight,
-  ArrowDownLeft,
-  RefreshCw,
-  Receipt,
-  TrendingUp,
-  DollarSign,
-  Banknote,
-  Plus,
-  Edit,
-  Trash2,
-} from 'lucide-react'
+import { Search, Download, ArrowUpRight, ArrowDownLeft, RefreshCw, Receipt, TrendingUp, DollarSign, Banknote, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
+import { useAllTransactions, useClients } from '@/hooks/useClientData'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
 
-const transactions = [
-  { id: 'TXN-001', date: '2024-01-15 14:30', client: 'John Smith', account: 'SIPP', type: 'contribution', description: 'Monthly contribution', amount: 1000, balance: 287450, status: 'settled', reference: 'CONT-2024-0115' },
-  { id: 'TXN-002', date: '2024-01-15 11:15', client: 'Emma Wilson', account: 'SIPP', type: 'transfer_in', description: 'Pension transfer from Aviva', amount: 25000, balance: 325000, status: 'pending', reference: 'TRF-2024-0115' },
-  { id: 'TXN-003', date: '2024-01-15 09:45', client: 'David Thompson', account: 'SIPP', type: 'drawdown', description: 'Monthly drawdown payment', amount: -3000, balance: 747000, status: 'settled', reference: 'DWN-2024-0115' },
-  { id: 'TXN-004', date: '2024-01-14 16:00', client: 'John Smith', account: 'ISA', type: 'buy', description: 'Buy Vanguard FTSE All-World ETF', amount: -5000, balance: 82650, status: 'settled', reference: 'BUY-2024-0114' },
-  { id: 'TXN-005', date: '2024-01-14 10:30', client: 'Lisa Anderson', account: 'GIA', type: 'dividend', description: 'Dividend - iShares UK Equity', amount: 342.50, balance: 195342, status: 'settled', reference: 'DIV-2024-0114' },
-  { id: 'TXN-006', date: '2024-01-13 15:20', client: 'David Thompson', account: 'SIPP', type: 'fee', description: 'Platform fee Q4 2023', amount: -187.50, balance: 750000, status: 'settled', reference: 'FEE-2024-0113' },
-  { id: 'TXN-007', date: '2024-01-13 09:00', client: 'Emma Wilson', account: 'ISA', type: 'contribution', description: 'ISA subscription 2023/24', amount: 10000, balance: 85000, status: 'settled', reference: 'CONT-2024-0113' },
-  { id: 'TXN-008', date: '2024-01-12 14:15', client: 'John Smith', account: 'SIPP', type: 'sell', description: 'Sell Fundsmith Equity Fund', amount: 8500, balance: 286450, status: 'settled', reference: 'SEL-2024-0112' },
-  { id: 'TXN-009', date: '2024-01-12 11:00', client: 'Lisa Anderson', account: 'SIPP', type: 'tax_relief', description: 'HMRC basic rate tax relief', amount: 250, balance: 195000, status: 'pending', reference: 'TAX-2024-0112' },
-  { id: 'TXN-010', date: '2024-01-11 16:30', client: 'David Thompson', account: 'GIA', type: 'withdrawal', description: 'Ad-hoc withdrawal to bank', amount: -15000, balance: 135200, status: 'settled', reference: 'WDR-2024-0111' },
-]
-
 const typeConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
   contribution: { label: 'Contribution', color: 'bg-success/10 text-success border-success/20', icon: ArrowDownLeft },
+  employer_contribution: { label: 'Employer', color: 'bg-success/10 text-success border-success/20', icon: ArrowDownLeft },
   transfer_in: { label: 'Transfer In', color: 'bg-primary/10 text-primary border-primary/20', icon: RefreshCw },
+  transfer_out: { label: 'Transfer Out', color: 'bg-warning/10 text-warning border-warning/20', icon: ArrowUpRight },
   drawdown: { label: 'Drawdown', color: 'bg-warning/10 text-warning border-warning/20', icon: ArrowUpRight },
   buy: { label: 'Buy', color: 'bg-primary/10 text-primary border-primary/20', icon: TrendingUp },
   sell: { label: 'Sell', color: 'bg-accent/10 text-accent-foreground border-accent/20', icon: DollarSign },
@@ -56,27 +33,41 @@ export default function TransactionLedger() {
   const [searchTerm, setSearchTerm] = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const [accountFilter, setAccountFilter] = useState('all')
-  const [txnData, setTxnData] = useState(transactions)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [txnForm, setTxnForm] = useState({ client: 'John Smith', account: 'SIPP', type: 'contribution', description: '', amount: 0 })
+  const [txnForm, setTxnForm] = useState({ client_id: '', account_id: '', type: 'contribution', description: '', amount: 0 })
 
-  const filtered = txnData.filter(t => {
-    const matchesSearch = t.client.toLowerCase().includes(searchTerm.toLowerCase()) || t.description.toLowerCase().includes(searchTerm.toLowerCase()) || t.reference.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesType = typeFilter === 'all' || t.type === typeFilter
-    const matchesAccount = accountFilter === 'all' || t.account === accountFilter
+  const { transactions, loading, addTransaction, updateTransactionStatus, deleteTransaction } = useAllTransactions()
+  const { clients } = useClients()
+
+  // Get accounts for selected client
+  const [clientAccounts, setClientAccounts] = useState<any[]>([])
+  const loadClientAccounts = async (clientId: string) => {
+    const { supabase } = await import('@/integrations/supabase/client')
+    const { data } = await supabase.from('client_accounts').select('id, account_type, account_number').eq('client_id', clientId)
+    setClientAccounts(data || [])
+  }
+
+  const filtered = transactions.filter(t => {
+    const matchesSearch = (t.client_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.description || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (t.reference || '').toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesType = typeFilter === 'all' || t.transaction_type === typeFilter
+    const matchesAccount = accountFilter === 'all' || t.account_type === accountFilter
     return matchesSearch && matchesType && matchesAccount
   })
 
-  const totalIn = filtered.filter(t => t.amount > 0).reduce((s, t) => s + t.amount, 0)
-  const totalOut = filtered.filter(t => t.amount < 0).reduce((s, t) => s + Math.abs(t.amount), 0)
+  const totalIn = filtered.filter(t => Number(t.amount) > 0).reduce((s, t) => s + Number(t.amount), 0)
+  const totalOut = filtered.filter(t => Number(t.amount) < 0).reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
 
   const handleExport = () => {
     downloadCSV('transaction-ledger',
       ['Date', 'Reference', 'Client', 'Account', 'Type', 'Description', 'Amount', 'Balance', 'Status'],
-      filtered.map(t => [t.date, t.reference, t.client, t.account, typeConfig[t.type]?.label || t.type, t.description, t.amount, t.balance, t.status])
+      filtered.map(t => [t.effective_date || '', t.reference || '', t.client_name || '', t.account_type || '', typeConfig[t.transaction_type]?.label || t.transaction_type, t.description || '', t.amount, t.running_balance, t.status])
     )
     toast.success('Transaction ledger exported as CSV')
   }
+
+  if (loading) return <div className="flex items-center justify-center py-12"><RefreshCw className="w-6 h-6 animate-spin text-primary" /></div>
 
   return (
     <div className="space-y-6">
@@ -100,15 +91,7 @@ export default function TransactionLedger() {
                 <SelectTrigger className="w-40"><SelectValue placeholder="Type" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="contribution">Contributions</SelectItem>
-                  <SelectItem value="drawdown">Drawdowns</SelectItem>
-                  <SelectItem value="buy">Buys</SelectItem>
-                  <SelectItem value="sell">Sells</SelectItem>
-                  <SelectItem value="dividend">Dividends</SelectItem>
-                  <SelectItem value="fee">Fees</SelectItem>
-                  <SelectItem value="transfer_in">Transfers In</SelectItem>
-                  <SelectItem value="withdrawal">Withdrawals</SelectItem>
-                  <SelectItem value="tax_relief">Tax Relief</SelectItem>
+                  {Object.entries(typeConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={accountFilter} onValueChange={setAccountFilter}>
@@ -120,10 +103,8 @@ export default function TransactionLedger() {
                   <SelectItem value="GIA">GIA</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="w-4 h-4 mr-2" /> Export CSV
-              </Button>
-              <Button size="sm" onClick={() => { setTxnForm({ client: 'John Smith', account: 'SIPP', type: 'contribution', description: '', amount: 0 }); setAddDialogOpen(true) }}>
+              <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" /> Export CSV</Button>
+              <Button size="sm" onClick={() => { setTxnForm({ client_id: '', account_id: '', type: 'contribution', description: '', amount: 0 }); setClientAccounts([]); setAddDialogOpen(true) }}>
                 <Plus className="w-4 h-4 mr-2" /> Add Transaction
               </Button>
             </div>
@@ -134,42 +115,33 @@ export default function TransactionLedger() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Reference</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Account</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Amount</TableHead>
-                  <TableHead className="text-right">Balance</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>Date</TableHead><TableHead>Reference</TableHead><TableHead>Client</TableHead>
+                  <TableHead>Account</TableHead><TableHead>Type</TableHead><TableHead>Description</TableHead>
+                  <TableHead className="text-right">Amount</TableHead><TableHead>Status</TableHead><TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map(txn => {
-                  const config = typeConfig[txn.type] || typeConfig.contribution
+                  const config = typeConfig[txn.transaction_type] || typeConfig.contribution
                   const Icon = config.icon
+                  const amt = Number(txn.amount)
                   return (
                     <TableRow key={txn.id} className="cursor-pointer hover:bg-accent/50">
-                      <TableCell className="text-xs whitespace-nowrap">{txn.date}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{txn.effective_date || txn.created_at?.slice(0, 10)}</TableCell>
                       <TableCell className="text-xs font-mono">{txn.reference}</TableCell>
-                      <TableCell className="font-medium">{txn.client}</TableCell>
-                      <TableCell><Badge variant="outline">{txn.account}</Badge></TableCell>
+                      <TableCell className="font-medium">{txn.client_name}</TableCell>
+                      <TableCell><Badge variant="outline">{txn.account_type}</Badge></TableCell>
                       <TableCell>
-                        <Badge className={config.color} variant="outline">
-                          <Icon className="w-3 h-3 mr-1" />{config.label}
-                        </Badge>
+                        <Badge className={config.color} variant="outline"><Icon className="w-3 h-3 mr-1" />{config.label}</Badge>
                       </TableCell>
                       <TableCell className="text-sm">{txn.description}</TableCell>
-                      <TableCell className={`text-right font-semibold ${txn.amount >= 0 ? 'text-success' : 'text-destructive'}`}>
-                        {txn.amount >= 0 ? '+' : ''}{formatCurrency(txn.amount)}
+                      <TableCell className={`text-right font-semibold ${amt >= 0 ? 'text-success' : 'text-destructive'}`}>
+                        {amt >= 0 ? '+' : ''}{formatCurrency(amt)}
                       </TableCell>
-                      <TableCell className="text-right text-sm">{formatCurrency(txn.balance)}</TableCell>
                       <TableCell>
-                        <Select value={txn.status} onValueChange={(v) => {
-                          setTxnData(prev => prev.map(t => t.id === txn.id ? { ...t, status: v } : t))
-                          toast.success(`Transaction ${txn.reference} status updated to ${v}`)
+                        <Select value={txn.status} onValueChange={async (v) => {
+                          await updateTransactionStatus(txn.id, v)
+                          toast.success(`Status updated to ${v}`)
                         }}>
                           <SelectTrigger className="w-24 h-7 text-xs"><SelectValue /></SelectTrigger>
                           <SelectContent>
@@ -181,9 +153,9 @@ export default function TransactionLedger() {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        <Button variant="ghost" size="sm" className="text-destructive" onClick={() => {
-                          setTxnData(prev => prev.filter(t => t.id !== txn.id))
-                          toast.success('Transaction reversed and removed')
+                        <Button variant="ghost" size="sm" className="text-destructive" onClick={async () => {
+                          await deleteTransaction(txn.id)
+                          toast.success('Transaction reversed')
                         }}><Trash2 className="w-3 h-3" /></Button>
                       </TableCell>
                     </TableRow>
@@ -192,6 +164,7 @@ export default function TransactionLedger() {
               </TableBody>
             </Table>
           </div>
+          {filtered.length === 0 && <p className="text-center py-8 text-muted-foreground">No transactions found</p>}
         </CardContent>
       </Card>
 
@@ -203,42 +176,27 @@ export default function TransactionLedger() {
             <DialogDescription>Process a contribution, transfer, drawdown, or other transaction</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-2">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-1"><Label>Client</Label>
-                <Select value={txnForm.client} onValueChange={v => setTxnForm(p => ({ ...p, client: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="John Smith">John Smith</SelectItem>
-                    <SelectItem value="Emma Wilson">Emma Wilson</SelectItem>
-                    <SelectItem value="David Thompson">David Thompson</SelectItem>
-                    <SelectItem value="Lisa Anderson">Lisa Anderson</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1"><Label>Account</Label>
-                <Select value={txnForm.account} onValueChange={v => setTxnForm(p => ({ ...p, account: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="SIPP">SIPP</SelectItem>
-                    <SelectItem value="ISA">ISA</SelectItem>
-                    <SelectItem value="GIA">GIA</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-1"><Label>Client</Label>
+              <Select value={txnForm.client_id} onValueChange={v => { setTxnForm(p => ({ ...p, client_id: v, account_id: '' })); loadClientAccounts(v) }}>
+                <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
+                <SelectContent>
+                  {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1"><Label>Account</Label>
+              <Select value={txnForm.account_id} onValueChange={v => setTxnForm(p => ({ ...p, account_id: v }))}>
+                <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+                <SelectContent>
+                  {clientAccounts.map((a: any) => <SelectItem key={a.id} value={a.id}>{a.account_type} ({a.account_number})</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1"><Label>Transaction Type</Label>
               <Select value={txnForm.type} onValueChange={v => setTxnForm(p => ({ ...p, type: v }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="contribution">Contribution</SelectItem>
-                  <SelectItem value="transfer_in">Transfer In</SelectItem>
-                  <SelectItem value="drawdown">Drawdown</SelectItem>
-                  <SelectItem value="buy">Buy</SelectItem>
-                  <SelectItem value="sell">Sell</SelectItem>
-                  <SelectItem value="dividend">Dividend</SelectItem>
-                  <SelectItem value="fee">Fee</SelectItem>
-                  <SelectItem value="tax_relief">Tax Relief</SelectItem>
-                  <SelectItem value="withdrawal">Withdrawal</SelectItem>
+                  {Object.entries(typeConfig).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -247,16 +205,19 @@ export default function TransactionLedger() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAddDialogOpen(false)}>Cancel</Button>
-            <Button disabled={!txnForm.description || !txnForm.amount} onClick={() => {
-              const sign = ['contribution', 'transfer_in', 'dividend', 'sell', 'tax_relief'].includes(txnForm.type) ? 1 : -1
-              const newId = `TXN-${String(txnData.length + 1).padStart(3, '0')}`
+            <Button disabled={!txnForm.description || !txnForm.amount || !txnForm.client_id || !txnForm.account_id} onClick={async () => {
+              const sign = ['contribution', 'employer_contribution', 'transfer_in', 'dividend', 'sell', 'tax_relief'].includes(txnForm.type) ? 1 : -1
               const ref = `${txnForm.type.toUpperCase().slice(0, 4)}-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`
-              setTxnData(prev => [{
-                id: newId, date: new Date().toISOString().replace('T', ' ').slice(0, 16),
-                client: txnForm.client, account: txnForm.account, type: txnForm.type,
-                description: txnForm.description, amount: txnForm.amount * sign,
-                balance: 0, status: 'pending', reference: ref,
-              }, ...prev])
+              await addTransaction({
+                client_id: txnForm.client_id,
+                account_id: txnForm.account_id,
+                transaction_type: txnForm.type,
+                description: txnForm.description,
+                amount: txnForm.amount * sign,
+                reference: ref,
+                status: 'pending',
+                effective_date: new Date().toISOString().split('T')[0],
+              })
               toast.success('Transaction processed')
               setAddDialogOpen(false)
             }}>Process Transaction</Button>

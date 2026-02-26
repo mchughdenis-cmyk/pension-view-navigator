@@ -7,14 +7,497 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.4"
+    PostgrestVersion: "14.1"
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          description: string
+          entity_id: string | null
+          entity_type: string
+          id: string
+          new_values: Json | null
+          old_values: Json | null
+          performed_by: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          description: string
+          entity_id?: string | null
+          entity_type: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          description?: string
+          entity_id?: string | null
+          entity_type?: string
+          id?: string
+          new_values?: Json | null
+          old_values?: Json | null
+          performed_by?: string | null
+        }
+        Relationships: []
+      }
+      bank_file_entries: {
+        Row: {
+          amount: number
+          bank_file_id: string
+          created_at: string
+          description: string | null
+          entry_date: string
+          id: string
+          matched_account_id: string | null
+          matched_client_id: string | null
+          reference: string | null
+          status: string
+          transaction_type: string | null
+        }
+        Insert: {
+          amount: number
+          bank_file_id: string
+          created_at?: string
+          description?: string | null
+          entry_date: string
+          id?: string
+          matched_account_id?: string | null
+          matched_client_id?: string | null
+          reference?: string | null
+          status?: string
+          transaction_type?: string | null
+        }
+        Update: {
+          amount?: number
+          bank_file_id?: string
+          created_at?: string
+          description?: string | null
+          entry_date?: string
+          id?: string
+          matched_account_id?: string | null
+          matched_client_id?: string | null
+          reference?: string | null
+          status?: string
+          transaction_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_file_entries_bank_file_id_fkey"
+            columns: ["bank_file_id"]
+            isOneToOne: false
+            referencedRelation: "bank_files"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_file_entries_matched_account_id_fkey"
+            columns: ["matched_account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_file_entries_matched_client_id_fkey"
+            columns: ["matched_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_files: {
+        Row: {
+          created_at: string
+          filename: string
+          id: string
+          matched_count: number | null
+          status: string
+          total_amount: number | null
+          total_entries: number | null
+          unmatched_count: number | null
+          upload_date: string
+        }
+        Insert: {
+          created_at?: string
+          filename: string
+          id?: string
+          matched_count?: number | null
+          status?: string
+          total_amount?: number | null
+          total_entries?: number | null
+          unmatched_count?: number | null
+          upload_date?: string
+        }
+        Update: {
+          created_at?: string
+          filename?: string
+          id?: string
+          matched_count?: number | null
+          status?: string
+          total_amount?: number | null
+          total_entries?: number | null
+          unmatched_count?: number | null
+          upload_date?: string
+        }
+        Relationships: []
+      }
+      bce_events: {
+        Row: {
+          bce_type: string
+          client_id: string
+          created_at: string
+          crystallised_amount: number
+          event_date: string
+          id: string
+          lta_percentage: number | null
+          notes: string | null
+          tax_free_lump_sum: number | null
+        }
+        Insert: {
+          bce_type: string
+          client_id: string
+          created_at?: string
+          crystallised_amount?: number
+          event_date?: string
+          id?: string
+          lta_percentage?: number | null
+          notes?: string | null
+          tax_free_lump_sum?: number | null
+        }
+        Update: {
+          bce_type?: string
+          client_id?: string
+          created_at?: string
+          crystallised_amount?: number
+          event_date?: string
+          id?: string
+          lta_percentage?: number | null
+          notes?: string | null
+          tax_free_lump_sum?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bce_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      beneficiaries: {
+        Row: {
+          allocation_pct: number
+          client_id: string
+          contact_details: string | null
+          created_at: string
+          date_of_birth: string | null
+          id: string
+          name: string
+          notes: string | null
+          relationship: string
+          updated_at: string
+        }
+        Insert: {
+          allocation_pct?: number
+          client_id: string
+          contact_details?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          relationship: string
+          updated_at?: string
+        }
+        Update: {
+          allocation_pct?: number
+          client_id?: string
+          contact_details?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          relationship?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "beneficiaries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_accounts: {
+        Row: {
+          account_number: string | null
+          account_type: string
+          cash_balance: number | null
+          client_id: string
+          created_at: string
+          id: string
+          opened_date: string | null
+          status: string
+          total_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type: string
+          cash_balance?: number | null
+          client_id: string
+          created_at?: string
+          id?: string
+          opened_date?: string | null
+          status?: string
+          total_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string
+          cash_balance?: number | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          opened_date?: string | null
+          status?: string
+          total_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_accounts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          adviser: string | null
+          city: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          employment_status: string | null
+          first_name: string
+          id: string
+          last_name: string
+          marital_status: string | null
+          nationality: string | null
+          ni_number: string | null
+          notes: string | null
+          phone: string | null
+          postcode: string | null
+          risk_profile: string | null
+          status: string
+          tax_residency: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          adviser?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          marital_status?: string | null
+          nationality?: string | null
+          ni_number?: string | null
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          risk_profile?: string | null
+          status?: string
+          tax_residency?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          adviser?: string | null
+          city?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employment_status?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          marital_status?: string | null
+          nationality?: string | null
+          ni_number?: string | null
+          notes?: string | null
+          phone?: string | null
+          postcode?: string | null
+          risk_profile?: string | null
+          status?: string
+          tax_residency?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      investments: {
+        Row: {
+          account_id: string
+          allocation_pct: number | null
+          client_id: string
+          cost_basis: number | null
+          created_at: string
+          current_value: number | null
+          fund_name: string
+          id: string
+          isin: string | null
+          sedol: string | null
+          status: string | null
+          unit_price: number | null
+          units: number | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          allocation_pct?: number | null
+          client_id: string
+          cost_basis?: number | null
+          created_at?: string
+          current_value?: number | null
+          fund_name: string
+          id?: string
+          isin?: string | null
+          sedol?: string | null
+          status?: string | null
+          unit_price?: number | null
+          units?: number | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          allocation_pct?: number | null
+          client_id?: string
+          cost_basis?: number | null
+          created_at?: string
+          current_value?: number | null
+          fund_name?: string
+          id?: string
+          isin?: string | null
+          sedol?: string | null
+          status?: string | null
+          unit_price?: number | null
+          units?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          account_id: string
+          amount: number
+          client_id: string
+          created_at: string
+          description: string | null
+          effective_date: string | null
+          id: string
+          notes: string | null
+          reference: string | null
+          running_balance: number | null
+          status: string
+          tax_relief_amount: number | null
+          tax_year: string | null
+          transaction_type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          amount: number
+          client_id: string
+          created_at?: string
+          description?: string | null
+          effective_date?: string | null
+          id?: string
+          notes?: string | null
+          reference?: string | null
+          running_balance?: number | null
+          status?: string
+          tax_relief_amount?: number | null
+          tax_year?: string | null
+          transaction_type: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          effective_date?: string | null
+          id?: string
+          notes?: string | null
+          reference?: string | null
+          running_balance?: number | null
+          status?: string
+          tax_relief_amount?: number | null
+          tax_year?: string | null
+          transaction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

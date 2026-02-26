@@ -67,6 +67,7 @@ import UserManagement from "./admin/UserManagement";
 import SystemConfiguration from "./admin/SystemConfiguration";
 import { ClientDialog, ConfirmDialog, type ClientFormData } from "./admin/AdminDialogs";
 import { downloadCSV } from "@/lib/adminExportUtils";
+import { useClients, type Client } from "@/hooks/useClientData";
 
 // Grouped navigation structure
 const navGroups = [
@@ -196,9 +197,9 @@ const getPriorityColor = (priority: string) => {
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("scheme");
-  const [clients, setClients] = useState(adminData.clients);
+  const { clients: dbClients, loading: clientsLoading, addClient: addDbClient, updateClient: updateDbClient } = useClients();
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
-  const [editingClient, setEditingClient] = useState<(typeof adminData.clients[0]) | null>(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientSearch, setClientSearch] = useState('');
   const [clientStatusFilter, setClientStatusFilter] = useState('all');
 
@@ -206,29 +207,33 @@ export default function PensionAdminDashboard() {
     setActiveTab(value);
   };
 
-  const handleAddClient = (data: ClientFormData) => {
-    const newId = Math.max(...clients.map(c => c.id)) + 1;
-    setClients(prev => [...prev, { id: newId, name: data.name, email: data.email, totalValue: 0, lastLogin: 'Never', status: data.status, riskProfile: data.riskProfile, advisor: data.advisor, pendingActions: 0, allowanceUsage: 0 }]);
+  const handleAddClient = async (data: ClientFormData) => {
+    const [firstName, ...rest] = data.name.split(' ');
+    const lastName = rest.join(' ') || firstName;
+    await addDbClient({ first_name: firstName, last_name: lastName, email: data.email, status: data.status, risk_profile: data.riskProfile, adviser: data.advisor });
     toast.success(`Client "${data.name}" added successfully`);
   };
 
-  const handleEditClient = (data: ClientFormData) => {
+  const handleEditClient = async (data: ClientFormData) => {
     if (!editingClient) return;
-    setClients(prev => prev.map(c => c.id === editingClient.id ? { ...c, name: data.name, email: data.email, advisor: data.advisor, riskProfile: data.riskProfile, status: data.status } : c));
+    const [firstName, ...rest] = data.name.split(' ');
+    const lastName = rest.join(' ') || firstName;
+    await updateDbClient(editingClient.id, { first_name: firstName, last_name: lastName, email: data.email, adviser: data.advisor, risk_profile: data.riskProfile, status: data.status });
     toast.success(`Client "${data.name}" updated`);
     setEditingClient(null);
   };
 
   const handleExportReport = () => {
     downloadCSV('admin-report',
-      ['Name', 'Email', 'Portfolio Value', 'Status', 'Adviser', 'Allowance Usage'],
-      clients.map(c => [c.name, c.email, c.totalValue, c.status, c.advisor, `${c.allowanceUsage}%`])
+      ['Name', 'Email', 'Status', 'Adviser', 'Risk Profile'],
+      dbClients.map(c => [`${c.first_name} ${c.last_name}`, c.email || '', c.status, c.adviser || '', c.risk_profile || ''])
     );
     toast.success('Admin report exported as CSV');
   };
 
-  const filteredClients = clients.filter(c => {
-    const matchSearch = c.name.toLowerCase().includes(clientSearch.toLowerCase()) || c.email.toLowerCase().includes(clientSearch.toLowerCase());
+  const filteredClients = dbClients.filter(c => {
+    const fullName = `${c.first_name} ${c.last_name}`.toLowerCase();
+    const matchSearch = fullName.includes(clientSearch.toLowerCase()) || (c.email || '').toLowerCase().includes(clientSearch.toLowerCase());
     const matchStatus = clientStatusFilter === 'all' || c.status === clientStatusFilter;
     return matchSearch && matchStatus;
   });
@@ -284,16 +289,15 @@ export default function PensionAdminDashboard() {
             <div className="space-y-4">
               {filteredClients.map((client) => (
                 <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer" onClick={() => navigate(`/client-admin/${client.id}`)}>
-                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-6 gap-4 items-center">
+                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-5 gap-4 items-center">
                     <div>
-                      <p className="font-medium">{client.name}</p>
+                      <p className="font-medium">{client.first_name} {client.last_name}</p>
                       <p className="text-sm text-muted-foreground">{client.email}</p>
                     </div>
-                    <div className="text-center"><p className="font-semibold">{formatCurrency(client.totalValue)}</p><p className="text-xs text-muted-foreground">Portfolio Value</p></div>
                     <div className="text-center hidden sm:block"><Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge></div>
-                    <div className="text-center hidden sm:block"><p className="text-sm">{client.advisor}</p><p className="text-xs text-muted-foreground">Advisor</p></div>
-                    <div className="text-center hidden sm:block"><p className="text-sm">{client.allowanceUsage}%</p><p className="text-xs text-muted-foreground">Allowance Used</p></div>
-                    <div className="text-center hidden sm:block">{client.pendingActions > 0 && <Badge variant="secondary">{client.pendingActions} pending</Badge>}</div>
+                    <div className="text-center hidden sm:block"><p className="text-sm">{client.adviser}</p><p className="text-xs text-muted-foreground">Adviser</p></div>
+                    <div className="text-center hidden sm:block"><p className="text-sm">{client.risk_profile}</p><p className="text-xs text-muted-foreground">Risk Profile</p></div>
+                    <div className="text-center hidden sm:block"><p className="text-xs text-muted-foreground">{new Date(client.created_at).toLocaleDateString()}</p></div>
                   </div>
                   <div className="flex gap-2 ml-4">
                     <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); navigate(`/client-admin/${client.id}`); }}><Eye className="w-4 h-4" /></Button>
@@ -514,7 +518,7 @@ export default function PensionAdminDashboard() {
       </div>
 
       <ClientDialog open={clientDialogOpen} onClose={() => setClientDialogOpen(false)} onSave={handleAddClient} mode="add" />
-      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: editingClient.name, email: editingClient.email, advisor: editingClient.advisor, riskProfile: editingClient.riskProfile, status: editingClient.status } : undefined} />
+      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: `${editingClient.first_name} ${editingClient.last_name}`, email: editingClient.email || '', advisor: editingClient.adviser || '', riskProfile: editingClient.risk_profile || '', status: editingClient.status } : undefined} />
     </div>
   );
 }

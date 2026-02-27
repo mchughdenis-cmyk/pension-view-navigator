@@ -1,53 +1,59 @@
 
 
-## Admin Portal Review: Database vs Mock Data Audit
+## Benefits & Crystallisation Domain — Build Plan
 
-### Current State Summary (Updated)
+### Current State
+- `bce_events` table exists with basic fields (crystallised_amount, tax_free_lump_sum, lta_percentage)
+- Drawdown tab shows transaction history filtered by `transaction_type = 'drawdown'`
+- No crystallisation segment tracking, no PCLS auto-calculator, no UFPLS support, no death benefit rules
 
-Phase 1 and Phase 2 have been implemented. The following modules are now database-backed:
+### What Needs Building
 
-### Database-Connected (Working)
+**1. New `crystallisation_segments` database table**
+- Columns: `id`, `client_id` (FK), `account_id` (FK), `bce_event_id` (FK to bce_events), `segment_type` (designated/undesignated), `crystallised_amount`, `pcls_amount`, `residual_fund`, `drawdown_type` (FAD/UFPLS/none), `status` (active/exhausted/transferred), `created_at`, `updated_at`
+- Each BCE event creates one or more segments
 
-| Module | Status | Notes |
-|--------|--------|-------|
-| **Clients** | ✅ Live DB | CRUD via `useClients()` |
-| **Transaction Ledger** | ✅ Live DB | `useAllTransactions()` with client/account joins |
-| **Bank Upload** | ✅ Live DB | `useBankFiles()` with auto-matching |
-| **Client Admin View** | ✅ Live DB | Full detail view per client |
-| **Activity Log** | ✅ Live DB | `logActivity()` writes audit entries |
-| **Audit Trail** | ✅ Live DB | Now queries `activity_log` table via `useAuditTrail()` |
-| **Scheme Dashboard** | ✅ Live DB | Aggregates from `clients`, `client_accounts`, `transactions` via `useSchemeStats()` |
-| **Activity Tab** | ✅ Live DB | Shows real `activity_log` entries |
-| **Summary Cards** | ✅ Live DB | Real client count, AUM, accounts, transactions |
-| **Fee Engine** | ✅ Live DB | `fee_schedules` table with full CRUD via `useFeeSchedules()` |
-| **Trade Order Management** | ✅ Live DB | `trade_orders` table with full CRUD via `useTradeOrders()` |
+**2. PCLS Calculator**
+- Auto-calculate 25% tax-free cash entitlement from uncrystallised fund value
+- Show max PCLS available, amount to designate for drawdown, and residual fund
+- Validate against available uncrystallised funds
 
-### New Database Tables Created
+**3. UFPLS Processing**
+- Add UFPLS as a transaction type option in the drawdown tab
+- UFPLS = 25% tax-free + 75% taxable from uncrystallised funds (no separate PCLS)
+- Record as a BCE event + transaction in one flow
 
-- `fee_schedules` — fee configuration with CRUD
-- `trade_orders` — trade lifecycle with client/account FKs
-- `adviser_fees` — adviser charging agreements (table created, component wiring pending)
+**4. Enhanced Crystallisation Tab**
+- Show segments table: each crystallised tranche with PCLS taken, residual fund, drawdown type
+- Summary cards: total crystallised, total uncrystallised, total PCLS taken
+- "Crystallise" button that runs the PCLS calculator and creates segment + BCE event
 
-### Still Mock Data (Phase 3)
+**5. Death Benefit Rules Display**
+- Info card showing applicable rules based on client age vs 75
+- Pre-75: lump sum or drawdown to nominees, typically tax-free if within 2 years of death
+- Post-75: lump sum or drawdown taxed at recipient's marginal rate
+- Display based on client's `date_of_birth`
 
-| Module | Notes |
-|--------|-------|
-| **Portfolio Rebalancing** | Mock model portfolios |
-| **Custody & Reconciliation** | Mock reconciliation entries |
-| **Document Generation** | Mock document list |
-| **Bulk Operations** | Mock bulk tasks |
-| **User Management** | Mock user/adviser list |
-| **System Configuration** | Mock config values |
-| **Regulatory Reporting** | Mock reports |
-| **Pooled Account** | Mock pooled account data |
+**6. Hook additions in `useClientData.ts`**
+- `useCrystallisationSegments(clientId)` — CRUD for segments
+- Extend `useClientDetail` to expose a `crystallise` function that creates BCE event + segment atomically
 
-### Recently Completed (This Session)
+### Implementation Steps
 
-| Module | Status | Notes |
-|--------|--------|-------|
-| **Adviser Charging** | ✅ Live DB | `useAdviserFees()` with full CRUD, client FK joins |
-| **Workflow Engine** | ✅ Live DB | `useWorkflows()` with full CRUD via `workflow_definitions` table |
-| **Alerts Engine** | ✅ Live DB | `useAdminAlerts()` computes from real client/transaction data |
-| **GDPR Consent** | ✅ Live DB | `useConsentRecords()` with `consent_records` table per client |
-| **MPAA Flag** | ✅ Live DB | `mpaa_triggered` column on clients, toggle in compliance tab |
-| **Annual Allowance** | ✅ Live DB | `annual_allowance_used` column with progress bar in compliance |
+1. Create migration: `crystallisation_segments` table with RLS + updated_at trigger
+2. Add `useCrystallisationSegments` hook with fetch/create/update
+3. Rewrite the `crystallisation` tab in `ClientAdminView.tsx`:
+   - Summary cards (uncrystallised vs crystallised totals)
+   - PCLS calculator with "Crystallise Now" flow
+   - Segments table showing all tranches
+   - Death benefit rules info panel based on age
+4. Enhance the `drawdown` tab:
+   - Add UFPLS processing option alongside FAD
+   - Link drawdown payments to segments
+5. Wire BCE creation to also create a crystallisation segment record
+
+### Files to Change
+- New migration SQL
+- `src/hooks/useClientData.ts` — new hook + extend types
+- `src/components/ClientAdminView.tsx` — rewrite crystallisation tab, enhance drawdown tab
+

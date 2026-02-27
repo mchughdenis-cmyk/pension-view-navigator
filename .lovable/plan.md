@@ -34,7 +34,7 @@ Phase 1 and Phase 2 have been implemented. The following modules are now databas
 |--------|-------|
 | **Portfolio Rebalancing** | Mock model portfolios |
 | **Custody & Reconciliation** | Mock reconciliation entries |
-| **Adviser Charging** | Table created, component not yet wired |
+| **Adviser Charging** | ✅ Live DB | `useAdviserFees()` with full CRUD, client FK joins |
 | **Document Generation** | Mock document list |
 | **Workflow Engine** | Mock workflow definitions |
 | **Bulk Operations** | Mock bulk tasks |

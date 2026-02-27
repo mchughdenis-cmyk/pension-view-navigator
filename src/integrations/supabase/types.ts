@@ -349,6 +349,7 @@ export type Database = {
           address_line1: string | null
           address_line2: string | null
           adviser: string | null
+          annual_allowance_used: number
           city: string | null
           created_at: string
           date_of_birth: string | null
@@ -358,6 +359,7 @@ export type Database = {
           id: string
           last_name: string
           marital_status: string | null
+          mpaa_triggered: boolean
           nationality: string | null
           ni_number: string | null
           notes: string | null
@@ -373,6 +375,7 @@ export type Database = {
           address_line1?: string | null
           address_line2?: string | null
           adviser?: string | null
+          annual_allowance_used?: number
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -382,6 +385,7 @@ export type Database = {
           id?: string
           last_name: string
           marital_status?: string | null
+          mpaa_triggered?: boolean
           nationality?: string | null
           ni_number?: string | null
           notes?: string | null
@@ -397,6 +401,7 @@ export type Database = {
           address_line1?: string | null
           address_line2?: string | null
           adviser?: string | null
+          annual_allowance_used?: number
           city?: string | null
           created_at?: string
           date_of_birth?: string | null
@@ -406,6 +411,7 @@ export type Database = {
           id?: string
           last_name?: string
           marital_status?: string | null
+          mpaa_triggered?: boolean
           nationality?: string | null
           ni_number?: string | null
           notes?: string | null

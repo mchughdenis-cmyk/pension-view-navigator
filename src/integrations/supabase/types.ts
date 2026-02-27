@@ -425,6 +425,50 @@ export type Database = {
         }
         Relationships: []
       }
+      consent_records: {
+        Row: {
+          client_id: string
+          consent_type: string
+          created_at: string
+          granted: boolean
+          granted_at: string | null
+          id: string
+          notes: string | null
+          updated_at: string
+          withdrawn_at: string | null
+        }
+        Insert: {
+          client_id: string
+          consent_type: string
+          created_at?: string
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          withdrawn_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          consent_type?: string
+          created_at?: string
+          granted?: boolean
+          granted_at?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string
+          withdrawn_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consent_records_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_schedules: {
         Row: {
           active: boolean
@@ -667,6 +711,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      workflow_definitions: {
+        Row: {
+          action: string
+          active: boolean
+          assign_to: string
+          created_at: string
+          days_before_due: number
+          frequency: string
+          id: string
+          last_triggered: string | null
+          name: string
+          times_triggered: number
+          trigger: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          active?: boolean
+          assign_to?: string
+          created_at?: string
+          days_before_due?: number
+          frequency?: string
+          id?: string
+          last_triggered?: string | null
+          name: string
+          times_triggered?: number
+          trigger: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          active?: boolean
+          assign_to?: string
+          created_at?: string
+          days_before_due?: number
+          frequency?: string
+          id?: string
+          last_triggered?: string | null
+          name?: string
+          times_triggered?: number
+          trigger?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
     }
     Views: {

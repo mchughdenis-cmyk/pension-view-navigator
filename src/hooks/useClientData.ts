@@ -835,6 +835,59 @@ export function useConsentRecords(clientId: string | undefined) {
   return { records, loading, fetchRecords, setConsent }
 }
 
+// Crystallisation segments CRUD
+export interface CrystallisationSegment {
+  id: string
+  client_id: string
+  account_id: string
+  bce_event_id: string
+  segment_type: string
+  crystallised_amount: number
+  pcls_amount: number
+  residual_fund: number
+  drawdown_type: string
+  status: string
+  created_at: string
+  updated_at: string
+}
+
+export function useCrystallisationSegments(clientId: string | undefined) {
+  const [segments, setSegments] = useState<CrystallisationSegment[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSegments = useCallback(async () => {
+    if (!clientId) return
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('crystallisation_segments')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+    if (error) console.error(error)
+    setSegments((data || []) as CrystallisationSegment[])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetchSegments() }, [fetchSegments])
+
+  const addSegment = async (segment: Partial<CrystallisationSegment>) => {
+    const payload = { ...segment, client_id: clientId }
+    const { data, error } = await supabase.from('crystallisation_segments').insert(payload as any).select().single()
+    if (error) { toast.error('Failed to add segment'); return null }
+    setSegments(prev => [data as CrystallisationSegment, ...prev])
+    return data as CrystallisationSegment
+  }
+
+  const updateSegment = async (id: string, updates: Partial<CrystallisationSegment>) => {
+    const { error } = await supabase.from('crystallisation_segments').update(updates as any).eq('id', id)
+    if (error) { toast.error('Failed to update segment'); return false }
+    setSegments(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s))
+    return true
+  }
+
+  return { segments, loading, fetchSegments, addSegment, updateSegment }
+}
+
 // Alerts engine - computed from real data
 export function useAdminAlerts() {
   const [alerts, setAlerts] = useState<any[]>([])

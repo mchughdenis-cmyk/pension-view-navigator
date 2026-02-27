@@ -469,6 +469,73 @@ export type Database = {
           },
         ]
       }
+      crystallisation_segments: {
+        Row: {
+          account_id: string
+          bce_event_id: string
+          client_id: string
+          created_at: string
+          crystallised_amount: number
+          drawdown_type: string
+          id: string
+          pcls_amount: number
+          residual_fund: number
+          segment_type: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          bce_event_id: string
+          client_id: string
+          created_at?: string
+          crystallised_amount?: number
+          drawdown_type?: string
+          id?: string
+          pcls_amount?: number
+          residual_fund?: number
+          segment_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          bce_event_id?: string
+          client_id?: string
+          created_at?: string
+          crystallised_amount?: number
+          drawdown_type?: string
+          id?: string
+          pcls_amount?: number
+          residual_fund?: number
+          segment_type?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crystallisation_segments_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crystallisation_segments_bce_event_id_fkey"
+            columns: ["bce_event_id"]
+            isOneToOne: false
+            referencedRelation: "bce_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crystallisation_segments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fee_schedules: {
         Row: {
           active: boolean

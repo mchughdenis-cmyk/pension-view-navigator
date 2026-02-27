@@ -50,6 +50,62 @@ export type Database = {
         }
         Relationships: []
       }
+      adviser_fees: {
+        Row: {
+          adviser_name: string
+          client_id: string
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          fee_type: string
+          frequency: string
+          id: string
+          notes: string | null
+          rate: number
+          status: string
+          updated_at: string
+          wrapper: string
+        }
+        Insert: {
+          adviser_name: string
+          client_id: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          fee_type?: string
+          frequency?: string
+          id?: string
+          notes?: string | null
+          rate?: number
+          status?: string
+          updated_at?: string
+          wrapper?: string
+        }
+        Update: {
+          adviser_name?: string
+          client_id?: string
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          fee_type?: string
+          frequency?: string
+          id?: string
+          notes?: string | null
+          rate?: number
+          status?: string
+          updated_at?: string
+          wrapper?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "adviser_fees_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bank_file_entries: {
         Row: {
           amount: number
@@ -363,6 +419,48 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_schedules: {
+        Row: {
+          active: boolean
+          created_at: string
+          frequency: string
+          id: string
+          max_fee: number | null
+          min_fee: number | null
+          name: string
+          rate: number
+          type: string
+          updated_at: string
+          wrapper: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          frequency?: string
+          id?: string
+          max_fee?: number | null
+          min_fee?: number | null
+          name: string
+          rate?: number
+          type?: string
+          updated_at?: string
+          wrapper?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          frequency?: string
+          id?: string
+          max_fee?: number | null
+          min_fee?: number | null
+          name?: string
+          rate?: number
+          type?: string
+          updated_at?: string
+          wrapper?: string
+        }
+        Relationships: []
+      }
       investments: {
         Row: {
           account_id: string
@@ -422,6 +520,72 @@ export type Database = {
           },
           {
             foreignKeyName: "investments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_orders: {
+        Row: {
+          account_id: string | null
+          account_type: string | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string
+          id: string
+          instrument: string
+          price: number
+          quantity: number
+          settlement_date: string | null
+          side: string
+          status: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          account_id?: string | null
+          account_type?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          instrument: string
+          price?: number
+          quantity?: number
+          settlement_date?: string | null
+          side?: string
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          account_id?: string | null
+          account_type?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string
+          id?: string
+          instrument?: string
+          price?: number
+          quantity?: number
+          settlement_date?: string | null
+          side?: string
+          status?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_orders_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_orders_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"

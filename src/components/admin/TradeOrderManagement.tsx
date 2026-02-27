@@ -21,19 +21,10 @@ import {
 import { toast } from 'sonner'
 import { OrderDialog, type OrderFormData } from './AdminDialogs'
 import { downloadCSV } from '@/lib/adminExportUtils'
+import { useTradeOrders } from '@/hooks/useClientData'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
-
-const initialOrders = [
-  { id: 'ORD-2024-001', date: '2024-01-15 14:30', client: 'John Smith', account: 'ISA', side: 'buy', instrument: 'Vanguard FTSE All-World ETF (VWRL)', quantity: 45, price: 111.11, value: 5000, status: 'executed', settlement: '2024-01-17' },
-  { id: 'ORD-2024-002', date: '2024-01-15 11:00', client: 'Emma Wilson', account: 'SIPP', side: 'buy', instrument: 'iShares Core MSCI World (SWDA)', quantity: 60, price: 83.33, value: 5000, status: 'pending', settlement: null },
-  { id: 'ORD-2024-003', date: '2024-01-14 16:45', client: 'David Thompson', account: 'SIPP', side: 'sell', instrument: 'Fundsmith Equity Fund (T)', quantity: 1500, price: 5.67, value: 8500, status: 'executed', settlement: '2024-01-16' },
-  { id: 'ORD-2024-004', date: '2024-01-14 10:15', client: 'John Smith', account: 'GIA', side: 'buy', instrument: 'Legal & General UK Index (I)', quantity: 2800, price: 3.57, value: 10000, status: 'routed', settlement: null },
-  { id: 'ORD-2024-005', date: '2024-01-13 15:30', client: 'Lisa Anderson', account: 'SIPP', side: 'buy', instrument: 'Vanguard LifeStrategy 60 (A)', quantity: 30, price: 233.33, value: 7000, status: 'executed', settlement: '2024-01-15' },
-  { id: 'ORD-2024-006', date: '2024-01-13 09:00', client: 'Emma Wilson', account: 'ISA', side: 'sell', instrument: 'HSBC FTSE 250 Index (C)', quantity: 800, price: 6.25, value: 5000, status: 'cancelled', settlement: null },
-  { id: 'ORD-2024-007', date: '2024-01-12 14:00', client: 'David Thompson', account: 'GIA', side: 'buy', instrument: 'iShares UK Equity Index (D)', quantity: 4200, price: 2.38, value: 10000, status: 'settling', settlement: '2024-01-14' },
-]
 
 const statusConfig: Record<string, { color: string; icon: React.ElementType }> = {
   pending: { color: 'secondary', icon: Clock },
@@ -46,46 +37,45 @@ const statusConfig: Record<string, { color: string; icon: React.ElementType }> =
 }
 
 export default function TradeOrderManagement() {
-  const [orders, setOrders] = useState(initialOrders)
+  const { orders, loading, fetchOrders, addOrder } = useTradeOrders()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dialogOpen, setDialogOpen] = useState(false)
 
   const filtered = orders.filter(o => {
-    const matchesSearch = o.client.toLowerCase().includes(searchTerm.toLowerCase()) || o.instrument.toLowerCase().includes(searchTerm.toLowerCase()) || o.id.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesSearch = (o.client_name || '').toLowerCase().includes(searchTerm.toLowerCase()) || (o.instrument || '').toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || o.status === statusFilter
     return matchesSearch && matchesStatus
   })
 
-  const totalBuyValue = orders.filter(o => o.side === 'buy' && o.status !== 'cancelled').reduce((s, o) => s + o.value, 0)
-  const totalSellValue = orders.filter(o => o.side === 'sell' && o.status !== 'cancelled').reduce((s, o) => s + o.value, 0)
+  const totalBuyValue = orders.filter(o => o.side === 'buy' && o.status !== 'cancelled').reduce((s: number, o: any) => s + Number(o.value), 0)
+  const totalSellValue = orders.filter(o => o.side === 'sell' && o.status !== 'cancelled').reduce((s: number, o: any) => s + Number(o.value), 0)
   const pendingCount = orders.filter(o => ['pending', 'routed', 'settling'].includes(o.status)).length
 
-  const handleNewOrder = (data: OrderFormData) => {
-    const newOrder = {
-      id: `ORD-2024-${String(orders.length + 1).padStart(3, '0')}`,
-      date: new Date().toISOString().slice(0, 16).replace('T', ' '),
-      client: data.client,
-      account: data.account,
+  const handleNewOrder = async (data: OrderFormData) => {
+    const value = data.quantity * data.price
+    await addOrder({
+      client_name: data.client,
+      account_type: data.account,
       side: data.side,
       instrument: data.instrument,
       quantity: data.quantity,
       price: data.price,
-      value: data.quantity * data.price,
+      value,
       status: 'pending',
-      settlement: null,
-    }
-    setOrders(prev => [newOrder, ...prev])
+    })
     toast.success(`${data.side.toUpperCase()} order placed for ${data.instrument}`, { description: `${data.quantity} units @ ${formatCurrency(data.price)}` })
   }
 
   const handleExport = () => {
     downloadCSV('trade-orders',
-      ['Order ID', 'Date', 'Client', 'Account', 'Side', 'Instrument', 'Qty', 'Price', 'Value', 'Status', 'Settlement'],
-      filtered.map(o => [o.id, o.date, o.client, o.account, o.side, o.instrument, o.quantity, o.price, o.value, o.status, o.settlement || ''])
+      ['Date', 'Client', 'Account', 'Side', 'Instrument', 'Qty', 'Price', 'Value', 'Status'],
+      filtered.map(o => [o.created_at, o.client_name, o.account_type, o.side, o.instrument, o.quantity, o.price, o.value, o.status])
     )
     toast.success('Trade orders exported')
   }
+
+  if (loading) return <p className="text-center text-muted-foreground py-8">Loading trade orders...</p>
 
   return (
     <div className="space-y-6">
@@ -101,7 +91,7 @@ export default function TradeOrderManagement() {
           <div className="flex flex-col sm:flex-row justify-between gap-4">
             <div>
               <CardTitle className="flex items-center gap-2"><ShoppingCart className="w-5 h-5" /> Trade Order Book</CardTitle>
-              <CardDescription>Manage the full trade lifecycle from creation to settlement</CardDescription>
+              <CardDescription>Orders are persisted to the database</CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
               <div className="relative">
@@ -120,58 +110,59 @@ export default function TradeOrderManagement() {
                 </SelectContent>
               </Select>
               <Button size="sm" onClick={() => setDialogOpen(true)}><Plus className="w-4 h-4 mr-2" /> New Order</Button>
+              <Button variant="outline" size="sm" onClick={fetchOrders}><RefreshCw className="w-4 h-4 mr-2" /> Refresh</Button>
               <Button variant="outline" size="sm" onClick={handleExport}><Download className="w-4 h-4 mr-2" /> Export</Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Order ID</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Client</TableHead>
-                  <TableHead>Account</TableHead>
-                  <TableHead>Side</TableHead>
-                  <TableHead>Instrument</TableHead>
-                  <TableHead className="text-right">Qty</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Value</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Settlement</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map(order => {
-                  const config = statusConfig[order.status] || statusConfig.pending
-                  const StatusIcon = config.icon
-                  return (
-                    <TableRow key={order.id} className="cursor-pointer hover:bg-accent/50">
-                      <TableCell className="font-mono text-xs">{order.id}</TableCell>
-                      <TableCell className="text-xs whitespace-nowrap">{order.date}</TableCell>
-                      <TableCell className="font-medium">{order.client}</TableCell>
-                      <TableCell><Badge variant="outline">{order.account}</Badge></TableCell>
-                      <TableCell>
-                        <Badge className={order.side === 'buy' ? 'bg-success/10 text-success border-success/20' : 'bg-warning/10 text-warning border-warning/20'} variant="outline">
-                          {order.side === 'buy' ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
-                          {order.side.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-sm max-w-[200px] truncate">{order.instrument}</TableCell>
-                      <TableCell className="text-right">{order.quantity.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">{formatCurrency(order.price)}</TableCell>
-                      <TableCell className="text-right font-semibold">{formatCurrency(order.value)}</TableCell>
-                      <TableCell>
-                        <Badge variant={config.color as any}><StatusIcon className="w-3 h-3 mr-1" />{order.status}</Badge>
-                      </TableCell>
-                      <TableCell className="text-xs">{order.settlement || '-'}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          {orders.length === 0 ? (
+            <p className="text-center text-muted-foreground py-8">No trade orders yet. Place an order to get started.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Client</TableHead>
+                    <TableHead>Account</TableHead>
+                    <TableHead>Side</TableHead>
+                    <TableHead>Instrument</TableHead>
+                    <TableHead className="text-right">Qty</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="text-right">Value</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map(order => {
+                    const config = statusConfig[order.status] || statusConfig.pending
+                    const StatusIcon = config.icon
+                    return (
+                      <TableRow key={order.id} className="cursor-pointer hover:bg-accent/50">
+                        <TableCell className="text-xs whitespace-nowrap">{new Date(order.created_at).toLocaleString()}</TableCell>
+                        <TableCell className="font-medium">{order.client_name || '-'}</TableCell>
+                        <TableCell><Badge variant="outline">{order.account_type || '-'}</Badge></TableCell>
+                        <TableCell>
+                          <Badge className={order.side === 'buy' ? 'bg-success/10 text-success border-success/20' : 'bg-warning/10 text-warning border-warning/20'} variant="outline">
+                            {order.side === 'buy' ? <TrendingUp className="w-3 h-3 mr-1" /> : <TrendingDown className="w-3 h-3 mr-1" />}
+                            {order.side.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[200px] truncate">{order.instrument}</TableCell>
+                        <TableCell className="text-right">{Number(order.quantity).toLocaleString()}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(Number(order.price))}</TableCell>
+                        <TableCell className="text-right font-semibold">{formatCurrency(Number(order.value))}</TableCell>
+                        <TableCell>
+                          <Badge variant={config.color as any}><StatusIcon className="w-3 h-3 mr-1" />{order.status}</Badge>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

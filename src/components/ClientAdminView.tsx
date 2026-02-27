@@ -21,7 +21,8 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
-import { useClientDetail, useActivityLog, useConsentRecords, type Client } from '@/hooks/useClientData'
+import { useClientDetail, useActivityLog, useConsentRecords, useCrystallisationSegments, type Client, type CrystallisationSegment } from '@/hooks/useClientData'
+import { Progress } from '@/components/ui/progress'
 
 const navGroups: NavGroup[] = [
   {
@@ -104,6 +105,7 @@ export default function ClientAdminView() {
 
   const { logs: activityLog, fetchLogs } = useActivityLog(clientId)
   const { records: consentRecords, setConsent } = useConsentRecords(clientId)
+  const { segments, addSegment, updateSegment, fetchSegments } = useCrystallisationSegments(clientId)
 
   // Dialog states
   const [editingPersonal, setEditingPersonal] = useState(false)
@@ -122,6 +124,10 @@ export default function ClientAdminView() {
   const [bceForm, setBceForm] = useState({ bce_type: 'BCE 1', crystallised_amount: 0, lta_percentage: 0, tax_free_lump_sum: 0 })
   const [transferDialogOpen, setTransferDialogOpen] = useState(false)
   const [transferForm, setTransferForm] = useState({ direction: 'in', cedingScheme: '', amount: 0, type: 'full', account_id: '' })
+  const [crystalliseDialogOpen, setCrystalliseDialogOpen] = useState(false)
+  const [crystalliseForm, setCrystalliseForm] = useState({ amount: 0, account_id: '', drawdown_type: 'FAD' })
+  const [ufplsDialogOpen, setUfplsDialogOpen] = useState(false)
+  const [ufplsForm, setUfplsForm] = useState({ amount: 0, account_id: '', description: 'UFPLS payment' })
 
   if (loading) return <div className="flex items-center justify-center min-h-screen"><div className="text-center"><RefreshCw className="w-8 h-8 animate-spin mx-auto text-primary" /><p className="mt-2 text-muted-foreground">Loading client data...</p></div></div>
   if (!client) return <div className="flex items-center justify-center min-h-screen"><p className="text-destructive">Client not found</p></div>
@@ -455,30 +461,37 @@ export default function ClientAdminView() {
         )
 
       case 'drawdown':
-        const drawdownTxns = transactions.filter(t => t.transaction_type === 'drawdown')
+        const drawdownTxns = transactions.filter(t => t.transaction_type === 'drawdown' || t.transaction_type === 'ufpls')
         const totalDrawn = drawdownTxns.reduce((s, t) => s + Math.abs(Number(t.amount)), 0)
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Drawn Down</p><p className="text-2xl font-bold text-primary">{formatCurrency(totalDrawn)}</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Payments Made</p><p className="text-2xl font-bold text-foreground">{drawdownTxns.length}</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">FAD Payments</p><p className="text-2xl font-bold text-foreground">{drawdownTxns.filter(t => t.transaction_type === 'drawdown').length}</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">UFPLS Payments</p><p className="text-2xl font-bold text-foreground">{drawdownTxns.filter(t => t.transaction_type === 'ufpls').length}</p></CardContent></Card>
               <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Avg Payment</p><p className="text-2xl font-bold text-warning">{drawdownTxns.length > 0 ? formatCurrency(totalDrawn / drawdownTxns.length) : '£0.00'}</p></CardContent></Card>
             </div>
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2"><Banknote className="w-5 h-5" /> Drawdown History</CardTitle>
-                  <Button size="sm" onClick={() => {
-                    setTxnForm({ type: 'drawdown', description: 'Drawdown payment', account_id: accounts.find(a => a.account_type === 'SIPP')?.id || '', amount: 0 })
-                    setTxnDialogOpen(true)
-                  }}><Plus className="w-4 h-4 mr-2" /> Process Drawdown</Button>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="outline" onClick={() => {
+                      setUfplsForm({ amount: 0, account_id: accounts.find(a => a.account_type === 'SIPP')?.id || '', description: 'UFPLS payment' })
+                      setUfplsDialogOpen(true)
+                    }}><Plus className="w-4 h-4 mr-2" /> UFPLS</Button>
+                    <Button size="sm" onClick={() => {
+                      setTxnForm({ type: 'drawdown', description: 'FAD drawdown payment', account_id: accounts.find(a => a.account_type === 'SIPP')?.id || '', amount: 0 })
+                      setTxnDialogOpen(true)
+                    }}><Plus className="w-4 h-4 mr-2" /> FAD Drawdown</Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead><TableHead>Description</TableHead>
+                      <TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Description</TableHead>
                       <TableHead className="text-right">Amount</TableHead><TableHead>Reference</TableHead><TableHead>Status</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -486,6 +499,7 @@ export default function ClientAdminView() {
                     {drawdownTxns.map(t => (
                       <TableRow key={t.id}>
                         <TableCell>{t.effective_date}</TableCell>
+                        <TableCell><Badge variant="outline" className={t.transaction_type === 'ufpls' ? 'border-warning text-warning' : ''}>{t.transaction_type === 'ufpls' ? 'UFPLS' : 'FAD'}</Badge></TableCell>
                         <TableCell className="font-medium">{t.description}</TableCell>
                         <TableCell className="text-right font-semibold text-destructive">{formatCurrency(Math.abs(Number(t.amount)))}</TableCell>
                         <TableCell className="font-mono text-xs">{t.reference}</TableCell>
@@ -501,14 +515,154 @@ export default function ClientAdminView() {
         )
 
       case 'crystallisation':
+        const totalCrystallised = bceEvents.reduce((s, e) => s + Number(e.crystallised_amount), 0)
+        const totalPCLS = segments.reduce((s, seg) => s + Number(seg.pcls_amount), 0) || bceEvents.reduce((s, e) => s + Number(e.tax_free_lump_sum), 0)
         const totalLTA = bceEvents.reduce((s, e) => s + Number(e.lta_percentage), 0)
+        const uncrystallised = totalValue - totalCrystallised
+
+        // Death benefit rules
+        const clientAge = client.date_of_birth
+          ? Math.floor((new Date().getTime() - new Date(client.date_of_birth).getTime()) / (365.25 * 24 * 60 * 60 * 1000))
+          : null
+        const isOver75 = clientAge !== null && clientAge >= 75
+
+        // PCLS calculator values
+        const maxPCLS = Math.max(0, uncrystallised * 0.25)
+
         return (
           <div className="space-y-6">
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Crystallised</p><p className="text-2xl font-bold text-primary">{formatCurrency(bceEvents.reduce((s, e) => s + Number(e.crystallised_amount), 0))}</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">LTA Used</p><p className="text-2xl font-bold text-warning">{totalLTA.toFixed(2)}%</p></CardContent></Card>
-              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">BCE Events</p><p className="text-2xl font-bold text-foreground">{bceEvents.length}</p></CardContent></Card>
+            {/* Summary cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Total Crystallised</p><p className="text-2xl font-bold text-primary">{formatCurrency(totalCrystallised)}</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">Uncrystallised</p><p className="text-2xl font-bold text-success">{formatCurrency(uncrystallised)}</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">PCLS Taken</p><p className="text-2xl font-bold text-warning">{formatCurrency(totalPCLS)}</p></CardContent></Card>
+              <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground">LTA Used</p><p className="text-2xl font-bold text-foreground">{totalLTA.toFixed(2)}%</p></CardContent></Card>
             </div>
+
+            {/* Crystallisation progress */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">Crystallisation Progress</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm"><span>Crystallised</span><span>{totalValue > 0 ? ((totalCrystallised / totalValue) * 100).toFixed(1) : 0}%</span></div>
+                  <Progress value={totalValue > 0 ? (totalCrystallised / totalValue) * 100 : 0} className="h-3" />
+                  <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>Crystallised: {formatCurrency(totalCrystallised)}</span>
+                    <span>Uncrystallised: {formatCurrency(uncrystallised)}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* PCLS Calculator + Crystallise button */}
+            {uncrystallised > 0 && (
+              <Card className="border-primary/30 bg-primary/5">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2"><Target className="w-5 h-5 text-primary" /> PCLS Calculator</CardTitle>
+                  <CardDescription>Calculate tax-free cash entitlement from uncrystallised funds</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="p-4 rounded-lg border bg-background">
+                      <p className="text-xs text-muted-foreground">Uncrystallised Fund</p>
+                      <p className="text-xl font-bold">{formatCurrency(uncrystallised)}</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-background">
+                      <p className="text-xs text-muted-foreground">Max PCLS (25%)</p>
+                      <p className="text-xl font-bold text-success">{formatCurrency(maxPCLS)}</p>
+                    </div>
+                    <div className="p-4 rounded-lg border bg-background">
+                      <p className="text-xs text-muted-foreground">Residual for Drawdown</p>
+                      <p className="text-xl font-bold text-primary">{formatCurrency(uncrystallised - maxPCLS)}</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => {
+                    setCrystalliseForm({ amount: uncrystallised, account_id: accounts.find(a => a.account_type === 'SIPP')?.id || '', drawdown_type: 'FAD' })
+                    setCrystalliseDialogOpen(true)
+                  }}><Target className="w-4 h-4 mr-2" /> Crystallise Now</Button>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Death Benefit Rules */}
+            <Card className={isOver75 ? 'border-warning/30 bg-warning/5' : 'border-success/30 bg-success/5'}>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Heart className="w-5 h-5" /> Death Benefit Rules
+                  {clientAge !== null && <Badge variant="outline">{isOver75 ? 'Post-75' : 'Pre-75'} (Age {clientAge})</Badge>}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {clientAge === null ? (
+                  <p className="text-muted-foreground">Date of birth required to determine applicable rules.</p>
+                ) : isOver75 ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Post-75 Rules Apply</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>Lump sum death benefits taxed at recipient's marginal income tax rate</li>
+                      <li>Beneficiary drawdown also taxed at marginal rate</li>
+                      <li>No 2-year window for tax-free treatment</li>
+                      <li>Nominee/successor can inherit drawdown pot</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Pre-75 Rules Apply</p>
+                    <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                      <li>Lump sum to nominees typically <strong>tax-free</strong> if paid within 2 years of death</li>
+                      <li>Beneficiary drawdown: tax-free if within 2 years</li>
+                      <li>After 2 years: taxed at recipient's marginal rate</li>
+                      <li>Uncrystallised funds can be paid as lump sum or used for drawdown</li>
+                    </ul>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Segments table */}
+            {segments.length > 0 && (
+              <Card>
+                <CardHeader><CardTitle className="flex items-center gap-2"><Target className="w-5 h-5" /> Crystallised Segments</CardTitle></CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Drawdown</TableHead>
+                        <TableHead className="text-right">Crystallised</TableHead><TableHead className="text-right">PCLS</TableHead>
+                        <TableHead className="text-right">Residual Fund</TableHead><TableHead>Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {segments.map(seg => (
+                        <TableRow key={seg.id}>
+                          <TableCell className="text-sm">{new Date(seg.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell><Badge variant="outline" className="capitalize">{seg.segment_type}</Badge></TableCell>
+                          <TableCell><Badge variant={seg.drawdown_type === 'UFPLS' ? 'secondary' : 'default'}>{seg.drawdown_type}</Badge></TableCell>
+                          <TableCell className="text-right font-semibold">{formatCurrency(Number(seg.crystallised_amount))}</TableCell>
+                          <TableCell className="text-right text-success">{formatCurrency(Number(seg.pcls_amount))}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(Number(seg.residual_fund))}</TableCell>
+                          <TableCell>
+                            <Select value={seg.status} onValueChange={async v => {
+                              await updateSegment(seg.id, { status: v })
+                              toast.success('Segment status updated')
+                            }}>
+                              <SelectTrigger className="w-28 h-7 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="active">Active</SelectItem>
+                                <SelectItem value="exhausted">Exhausted</SelectItem>
+                                <SelectItem value="transferred">Transferred</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* BCE Events */}
             <Card>
               <CardHeader>
                 <div className="flex items-center justify-between">
@@ -1086,6 +1240,122 @@ export default function ClientAdminView() {
               <SelectContent><SelectItem value="full">Full Transfer</SelectItem><SelectItem value="partial">Partial Transfer</SelectItem></SelectContent>
             </Select>
           </div>
+        </div>
+      </FormDialog>
+
+      {/* Crystallise Now */}
+      <FormDialog open={crystalliseDialogOpen} onClose={() => setCrystalliseDialogOpen(false)} title="Crystallise Funds" description="Designate funds for drawdown with 25% PCLS"
+        onSave={async () => {
+          const pcls = crystalliseForm.amount * 0.25
+          const residual = crystalliseForm.amount * 0.75
+          // Create BCE event
+          const bce = await addBCE({
+            bce_type: 'BCE 1',
+            crystallised_amount: crystalliseForm.amount,
+            tax_free_lump_sum: pcls,
+            lta_percentage: 0,
+            event_date: new Date().toISOString().split('T')[0],
+            notes: `${crystalliseForm.drawdown_type} crystallisation — PCLS: £${pcls.toFixed(2)}, Residual: £${residual.toFixed(2)}`,
+          })
+          if (bce) {
+            await addSegment({
+              account_id: crystalliseForm.account_id,
+              bce_event_id: bce.id,
+              segment_type: 'designated',
+              crystallised_amount: crystalliseForm.amount,
+              pcls_amount: pcls,
+              residual_fund: residual,
+              drawdown_type: crystalliseForm.drawdown_type,
+              status: 'active',
+            })
+            toast.success(`£${crystalliseForm.amount.toLocaleString()} crystallised — PCLS: £${pcls.toLocaleString()}`)
+          }
+        }} saveLabel="Crystallise" saveDisabled={!crystalliseForm.amount || !crystalliseForm.account_id}>
+        <div className="space-y-1"><Label>Account</Label>
+          <Select value={crystalliseForm.account_id} onValueChange={v => setCrystalliseForm(p => ({ ...p, account_id: v }))}>
+            <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+            <SelectContent>
+              {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.account_type} ({a.account_number})</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1"><Label>Amount to Crystallise (£)</Label><Input type="number" step="0.01" value={crystalliseForm.amount || ''} onChange={e => setCrystalliseForm(p => ({ ...p, amount: parseFloat(e.target.value) || 0 }))} /></div>
+        {crystalliseForm.amount > 0 && (
+          <div className="grid grid-cols-2 gap-4 p-3 rounded-lg border bg-muted/50">
+            <div><p className="text-xs text-muted-foreground">PCLS (25%)</p><p className="font-bold text-success">{formatCurrency(crystalliseForm.amount * 0.25)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Residual Fund (75%)</p><p className="font-bold text-primary">{formatCurrency(crystalliseForm.amount * 0.75)}</p></div>
+          </div>
+        )}
+        <div className="space-y-1"><Label>Drawdown Type</Label>
+          <Select value={crystalliseForm.drawdown_type} onValueChange={v => setCrystalliseForm(p => ({ ...p, drawdown_type: v }))}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FAD">Flexi-Access Drawdown (FAD)</SelectItem>
+              <SelectItem value="none">No Drawdown (PCLS only)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </FormDialog>
+
+      {/* UFPLS Processing */}
+      <FormDialog open={ufplsDialogOpen} onClose={() => setUfplsDialogOpen(false)} title="Process UFPLS" description="Uncrystallised Funds Pension Lump Sum — 25% tax-free, 75% taxable"
+        onSave={async () => {
+          const taxFree = ufplsForm.amount * 0.25
+          const taxable = ufplsForm.amount * 0.75
+          // Create BCE event
+          const bce = await addBCE({
+            bce_type: 'BCE 1',
+            crystallised_amount: ufplsForm.amount,
+            tax_free_lump_sum: taxFree,
+            lta_percentage: 0,
+            event_date: new Date().toISOString().split('T')[0],
+            notes: `UFPLS: £${ufplsForm.amount.toFixed(2)} (Tax-free: £${taxFree.toFixed(2)}, Taxable: £${taxable.toFixed(2)})`,
+          })
+          if (bce) {
+            // Create segment
+            await addSegment({
+              account_id: ufplsForm.account_id,
+              bce_event_id: bce.id,
+              segment_type: 'undesignated',
+              crystallised_amount: ufplsForm.amount,
+              pcls_amount: taxFree,
+              residual_fund: 0,
+              drawdown_type: 'UFPLS',
+              status: 'exhausted',
+            })
+            // Create transaction
+            await addTransaction({
+              account_id: ufplsForm.account_id,
+              transaction_type: 'ufpls',
+              description: ufplsForm.description,
+              amount: -ufplsForm.amount,
+              reference: `UFPLS-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}`,
+              status: 'pending',
+              effective_date: new Date().toISOString().split('T')[0],
+              notes: `Tax-free: £${taxFree.toFixed(2)} | Taxable: £${taxable.toFixed(2)}`,
+            })
+            toast.success(`UFPLS of £${ufplsForm.amount.toLocaleString()} processed`)
+          }
+        }} saveLabel="Process UFPLS" saveDisabled={!ufplsForm.amount || !ufplsForm.account_id}>
+        <div className="space-y-1"><Label>Account</Label>
+          <Select value={ufplsForm.account_id} onValueChange={v => setUfplsForm(p => ({ ...p, account_id: v }))}>
+            <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
+            <SelectContent>
+              {accounts.map(a => <SelectItem key={a.id} value={a.id}>{a.account_type} ({a.account_number})</SelectItem>)}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1"><Label>UFPLS Amount (£)</Label><Input type="number" step="0.01" value={ufplsForm.amount || ''} onChange={e => setUfplsForm(p => ({ ...p, amount: parseFloat(e.target.value) || 0 }))} /></div>
+        {ufplsForm.amount > 0 && (
+          <div className="grid grid-cols-2 gap-4 p-3 rounded-lg border bg-warning/10">
+            <div><p className="text-xs text-muted-foreground">Tax-Free (25%)</p><p className="font-bold text-success">{formatCurrency(ufplsForm.amount * 0.25)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Taxable (75%)</p><p className="font-bold text-destructive">{formatCurrency(ufplsForm.amount * 0.75)}</p></div>
+          </div>
+        )}
+        <div className="space-y-1"><Label>Description</Label><Input value={ufplsForm.description} onChange={e => setUfplsForm(p => ({ ...p, description: e.target.value }))} /></div>
+        <div className="p-3 rounded-lg border bg-muted/50 text-sm text-muted-foreground">
+          <p className="font-medium text-foreground mb-1">⚠️ UFPLS triggers MPAA</p>
+          <p>Taking a UFPLS will trigger the Money Purchase Annual Allowance, reducing the client's annual allowance to £10,000 for future contributions.</p>
         </div>
       </FormDialog>
     </div>

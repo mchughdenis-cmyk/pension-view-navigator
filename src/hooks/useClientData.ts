@@ -559,3 +559,139 @@ export function useBankFiles() {
     addBankFile, matchEntry, allocateEntry, applyAllocated, rejectEntry, deleteEntry, addManualEntry, fetchAll,
   }
 }
+
+// Audit trail (all activity_log entries)
+export function useAuditTrail() {
+  const [entries, setEntries] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchEntries = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('activity_log')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(200)
+    if (error) { console.error(error) }
+    setEntries(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchEntries() }, [fetchEntries])
+  return { entries, loading, fetchEntries }
+}
+
+// Scheme dashboard aggregates
+export function useSchemeStats() {
+  const [stats, setStats] = useState<{
+    totalClients: number; totalAUM: number; totalAccounts: number;
+    recentTransactions: any[]; accountsByType: Record<string, { count: number; aum: number }>;
+  }>({ totalClients: 0, totalAUM: 0, totalAccounts: 0, recentTransactions: [], accountsByType: {} })
+  const [loading, setLoading] = useState(true)
+
+  const fetchStats = useCallback(async () => {
+    setLoading(true)
+    const [clientsRes, accountsRes, txnRes] = await Promise.all([
+      supabase.from('clients').select('id', { count: 'exact', head: true }),
+      supabase.from('client_accounts').select('account_type, total_value, status'),
+      supabase.from('transactions').select('transaction_type, amount, status, created_at').order('created_at', { ascending: false }).limit(100),
+    ])
+
+    const accounts = accountsRes.data || []
+    const totalAUM = accounts.reduce((s: number, a: any) => s + (Number(a.total_value) || 0), 0)
+    const byType: Record<string, { count: number; aum: number }> = {}
+    accounts.forEach((a: any) => {
+      if (!byType[a.account_type]) byType[a.account_type] = { count: 0, aum: 0 }
+      byType[a.account_type].count++
+      byType[a.account_type].aum += Number(a.total_value) || 0
+    })
+
+    setStats({
+      totalClients: clientsRes.count || 0,
+      totalAUM,
+      totalAccounts: accounts.length,
+      recentTransactions: txnRes.data || [],
+      accountsByType: byType,
+    })
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchStats() }, [fetchStats])
+  return { stats, loading, fetchStats }
+}
+
+// Fee schedules CRUD
+export function useFeeSchedules() {
+  const [schedules, setSchedules] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchSchedules = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('fee_schedules').select('*').order('name')
+    if (error) { toast.error('Failed to load fee schedules'); console.error(error) }
+    setSchedules(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchSchedules() }, [fetchSchedules])
+
+  const addSchedule = async (schedule: any) => {
+    const { data, error } = await supabase.from('fee_schedules').insert(schedule).select().single()
+    if (error) { toast.error('Failed to add fee schedule'); return null }
+    setSchedules(prev => [...prev, data])
+    await logActivity('fee_schedule', data.id, 'created', `Fee schedule "${schedule.name}" created`)
+    return data
+  }
+
+  const updateSchedule = async (id: string, updates: any) => {
+    const { error } = await supabase.from('fee_schedules').update(updates).eq('id', id)
+    if (error) { toast.error('Failed to update'); return false }
+    setSchedules(prev => prev.map(s => s.id === id ? { ...s, ...updates } : s))
+    await logActivity('fee_schedule', id, 'updated', `Fee schedule updated`)
+    return true
+  }
+
+  const deleteSchedule = async (id: string) => {
+    const name = schedules.find(s => s.id === id)?.name
+    const { error } = await supabase.from('fee_schedules').delete().eq('id', id)
+    if (error) { toast.error('Failed to delete'); return false }
+    setSchedules(prev => prev.filter(s => s.id !== id))
+    await logActivity('fee_schedule', id, 'deleted', `Fee schedule "${name}" deleted`)
+    return true
+  }
+
+  return { schedules, loading, fetchSchedules, addSchedule, updateSchedule, deleteSchedule }
+}
+
+// Trade orders CRUD
+export function useTradeOrders() {
+  const [orders, setOrders] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('trade_orders').select('*').order('created_at', { ascending: false })
+    if (error) { toast.error('Failed to load trade orders'); console.error(error) }
+    setOrders(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchOrders() }, [fetchOrders])
+
+  const addOrder = async (order: any) => {
+    const { data, error } = await supabase.from('trade_orders').insert(order).select().single()
+    if (error) { toast.error('Failed to place order'); return null }
+    setOrders(prev => [data, ...prev])
+    await logActivity('trade_order', data.id, 'created', `${order.side} order: ${order.instrument}`)
+    return data
+  }
+
+  const updateOrder = async (id: string, updates: any) => {
+    const { error } = await supabase.from('trade_orders').update(updates).eq('id', id)
+    if (error) { toast.error('Failed to update order'); return false }
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, ...updates } : o))
+    return true
+  }
+
+  return { orders, loading, fetchOrders, addOrder, updateOrder }
+}

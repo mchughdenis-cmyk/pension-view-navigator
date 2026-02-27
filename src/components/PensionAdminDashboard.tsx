@@ -67,7 +67,7 @@ import UserManagement from "./admin/UserManagement";
 import SystemConfiguration from "./admin/SystemConfiguration";
 import { ClientDialog, ConfirmDialog, type ClientFormData } from "./admin/AdminDialogs";
 import { downloadCSV } from "@/lib/adminExportUtils";
-import { useClients, type Client } from "@/hooks/useClientData";
+import { useClients, useAuditTrail, useSchemeStats, type Client } from "@/hooks/useClientData";
 
 // Grouped navigation structure
 const navGroups = [
@@ -139,35 +139,12 @@ const navGroups = [
   },
 ];
 
-// Mock data for admin dashboard
-const adminData = {
-  summary: {
-    totalClients: 1247,
-    totalAUM: 42750000,
-    pendingActions: 18,
-    overdueReviews: 5,
-    clientsInDrawdown: 187,
-    clientsInAccumulation: 1060,
-    clientsWithRegularIncome: 134
-  },
-  clients: [
-    { id: 1, name: "John Smith", email: "john.smith@email.com", totalValue: 485750, lastLogin: "2024-01-15", status: "active", riskProfile: "balanced", advisor: "Sarah Johnson", pendingActions: 2, allowanceUsage: 67 },
-    { id: 2, name: "Emma Wilson", email: "emma.wilson@email.com", totalValue: 325000, lastLogin: "2024-01-14", status: "active", riskProfile: "conservative", advisor: "Michael Brown", pendingActions: 0, allowanceUsage: 45 },
-    { id: 3, name: "David Thompson", email: "david.thompson@email.com", totalValue: 750000, lastLogin: "2024-01-10", status: "review_required", riskProfile: "aggressive", advisor: "Sarah Johnson", pendingActions: 3, allowanceUsage: 89 },
-    { id: 4, name: "Lisa Anderson", email: "lisa.anderson@email.com", totalValue: 195000, lastLogin: "2024-01-08", status: "onboarding", riskProfile: "balanced", advisor: "Michael Brown", pendingActions: 1, allowanceUsage: 23 },
-  ],
-  recentActivity: [
-    { type: "contribution", client: "John Smith", amount: 5000, timestamp: "2024-01-15 14:30", status: "processed" },
-    { type: "transfer_in", client: "Emma Wilson", amount: 25000, timestamp: "2024-01-15 11:15", status: "pending" },
-    { type: "drawdown", client: "David Thompson", amount: 3000, timestamp: "2024-01-15 09:45", status: "approved" },
-    { type: "risk_review", client: "Lisa Anderson", amount: 0, timestamp: "2024-01-14 16:20", status: "overdue" },
-  ],
-  alerts: [
-    { id: 1, type: "allowance_exceeded", client: "David Thompson", message: "Client approaching annual allowance limit", priority: "high", timestamp: "2024-01-15" },
-    { id: 2, type: "review_due", client: "Lisa Anderson", message: "Annual review overdue by 15 days", priority: "medium", timestamp: "2024-01-14" },
-    { id: 3, type: "document_required", client: "Emma Wilson", message: "Transfer documentation pending", priority: "low", timestamp: "2024-01-13" },
-  ]
-};
+// Alerts kept as mock for now (Phase 3)
+const adminAlerts = [
+  { id: 1, type: "allowance_exceeded", client: "David Thompson", message: "Client approaching annual allowance limit", priority: "high", timestamp: "2024-01-15" },
+  { id: 2, type: "review_due", client: "Lisa Anderson", message: "Annual review overdue by 15 days", priority: "medium", timestamp: "2024-01-14" },
+  { id: 3, type: "document_required", client: "Emma Wilson", message: "Transfer documentation pending", priority: "low", timestamp: "2024-01-13" },
+];
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
@@ -198,6 +175,8 @@ export default function PensionAdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("clients");
   const { clients: dbClients, loading: clientsLoading, addClient: addDbClient, updateClient: updateDbClient } = useClients();
+  const { entries: activityEntries } = useAuditTrail();
+  const { stats: schemeStats } = useSchemeStats();
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientSearch, setClientSearch] = useState('');
@@ -325,26 +304,27 @@ export default function PensionAdminDashboard() {
         <Card>
           <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {adminData.recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border-l-4 border-primary bg-accent/20 rounded-r-lg">
-                  <div className="flex items-center gap-3">
-                    {activity.type === 'contribution' && <DollarSign className="h-5 w-5 text-success" />}
-                    {activity.type === 'transfer_in' && <TrendingUp className="h-5 w-5 text-primary" />}
-                    {activity.type === 'drawdown' && <DollarSign className="h-5 w-5 text-warning" />}
-                    {activity.type === 'risk_review' && <FileText className="h-5 w-5 text-muted-foreground" />}
-                    <div>
-                      <p className="font-medium">{activity.client}</p>
-                      <p className="text-sm text-muted-foreground">{activity.type.replace('_', ' ').toUpperCase()}{activity.amount > 0 && ` - ${formatCurrency(activity.amount)}`}</p>
+            {activityEntries.length === 0 ? (
+              <p className="text-center text-muted-foreground py-8">No activity recorded yet. Actions taken in the admin portal will appear here.</p>
+            ) : (
+              <div className="space-y-4">
+                {activityEntries.slice(0, 20).map((entry) => (
+                  <div key={entry.id} className="flex items-center justify-between p-3 border-l-4 border-primary bg-accent/20 rounded-r-lg">
+                    <div className="flex items-center gap-3">
+                      <Activity className="h-5 w-5 text-primary" />
+                      <div>
+                        <p className="font-medium">{entry.performed_by || 'System'}</p>
+                        <p className="text-sm text-muted-foreground">{entry.action.toUpperCase()} — {entry.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <Badge variant="outline" className="text-xs capitalize">{entry.entity_type}</Badge>
+                      <p className="text-xs text-muted-foreground mt-1">{new Date(entry.created_at).toLocaleString()}</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <Badge variant={getStatusColor(activity.status)}>{activity.status}</Badge>
-                    <p className="text-xs text-muted-foreground mt-1">{activity.timestamp}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       );
@@ -358,7 +338,7 @@ export default function PensionAdminDashboard() {
           <CardHeader><CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5" /> Alerts & Notifications</CardTitle></CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {adminData.alerts.map((alert) => (
+              {adminAlerts.map((alert) => (
                 <div key={alert.id} className="flex items-start justify-between p-4 border rounded-lg">
                   <div className="flex items-start gap-3 flex-1">
                     <AlertTriangle className={`h-5 w-5 mt-0.5 ${alert.priority === 'high' ? 'text-destructive' : alert.priority === 'medium' ? 'text-warning' : 'text-muted-foreground'}`} />
@@ -439,15 +419,15 @@ export default function PensionAdminDashboard() {
 
       <div className="max-w-[1600px] mx-auto p-4 sm:p-6 space-y-6">
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
               <CardTitle className="text-xs sm:text-sm font-medium">Total Clients</CardTitle>
               <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-primary">{adminData.summary.totalClients.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Active accounts</p>
+              <div className="text-xl sm:text-2xl font-bold text-primary">{schemeStats.totalClients}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Active members</p>
             </CardContent>
           </Card>
           <Card className="col-span-1">
@@ -456,58 +436,38 @@ export default function PensionAdminDashboard() {
               <TrendingUp className="h-4 w-4 text-success hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-success">{formatCurrency(adminData.summary.totalAUM)}</div>
+              <div className="text-xl sm:text-2xl font-bold text-success">{formatCurrency(schemeStats.totalAUM)}</div>
               <p className="text-xs text-muted-foreground hidden sm:block">Total portfolio value</p>
             </CardContent>
           </Card>
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Drawdown</CardTitle>
-              <TrendingDown className="h-4 w-4 text-warning hidden sm:block" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-warning">{adminData.summary.clientsInDrawdown}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Taking withdrawals</p>
-            </CardContent>
-          </Card>
-          <Card className="col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Accumulation</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Accounts</CardTitle>
               <PiggyBank className="h-4 w-4 text-primary hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-primary">{adminData.summary.clientsInAccumulation}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Building wealth</p>
+              <div className="text-xl sm:text-2xl font-bold text-primary">{schemeStats.totalAccounts}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Active accounts</p>
             </CardContent>
           </Card>
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Regular Income</CardTitle>
-              <Banknote className="h-4 w-4 text-success hidden sm:block" />
-            </CardHeader>
-            <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-success">{adminData.summary.clientsWithRegularIncome}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Monthly payments</p>
-            </CardContent>
-          </Card>
-          <Card className="col-span-1">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Pending</CardTitle>
+              <CardTitle className="text-xs sm:text-sm font-medium">Recent Txns</CardTitle>
               <Clock className="h-4 w-4 text-warning hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-warning">{adminData.summary.pendingActions}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Require attention</p>
+              <div className="text-xl sm:text-2xl font-bold text-warning">{schemeStats.recentTransactions.length}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Recent transactions</p>
             </CardContent>
           </Card>
           <Card className="col-span-1">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-3 sm:p-6 sm:pb-2">
-              <CardTitle className="text-xs sm:text-sm font-medium">Overdue</CardTitle>
-              <AlertTriangle className="h-4 w-4 text-destructive hidden sm:block" />
+              <CardTitle className="text-xs sm:text-sm font-medium">Activity</CardTitle>
+              <Activity className="h-4 w-4 text-muted-foreground hidden sm:block" />
             </CardHeader>
             <CardContent className="p-3 pt-0 sm:p-6 sm:pt-0">
-              <div className="text-xl sm:text-2xl font-bold text-destructive">{adminData.summary.overdueReviews}</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Need immediate action</p>
+              <div className="text-xl sm:text-2xl font-bold text-foreground">{activityEntries.length}</div>
+              <p className="text-xs text-muted-foreground hidden sm:block">Audit entries</p>
             </CardContent>
           </Card>
         </div>

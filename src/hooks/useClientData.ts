@@ -749,3 +749,132 @@ export function useAdviserFees() {
 
   return { fees, clients, loading, fetchFees, addFee, updateFee, deleteFee }
 }
+
+// Workflow definitions CRUD
+export function useWorkflows() {
+  const [workflows, setWorkflows] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchWorkflows = useCallback(async () => {
+    setLoading(true)
+    const { data, error } = await supabase.from('workflow_definitions').select('*').order('name')
+    if (error) { toast.error('Failed to load workflows'); console.error(error) }
+    setWorkflows(data || [])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchWorkflows() }, [fetchWorkflows])
+
+  const addWorkflow = async (wf: any) => {
+    const { data, error } = await supabase.from('workflow_definitions').insert(wf).select().single()
+    if (error) { toast.error('Failed to create workflow'); return null }
+    setWorkflows(prev => [...prev, data])
+    await logActivity('workflow', data.id, 'created', `Workflow "${wf.name}" created`)
+    return data
+  }
+
+  const updateWorkflow = async (id: string, updates: any) => {
+    const { error } = await supabase.from('workflow_definitions').update(updates).eq('id', id)
+    if (error) { toast.error('Failed to update workflow'); return false }
+    setWorkflows(prev => prev.map(w => w.id === id ? { ...w, ...updates } : w))
+    await logActivity('workflow', id, 'updated', `Workflow updated`)
+    return true
+  }
+
+  const deleteWorkflow = async (id: string) => {
+    const name = workflows.find(w => w.id === id)?.name
+    const { error } = await supabase.from('workflow_definitions').delete().eq('id', id)
+    if (error) { toast.error('Failed to delete workflow'); return false }
+    setWorkflows(prev => prev.filter(w => w.id !== id))
+    await logActivity('workflow', id, 'deleted', `Workflow "${name}" deleted`)
+    return true
+  }
+
+  return { workflows, loading, fetchWorkflows, addWorkflow, updateWorkflow, deleteWorkflow }
+}
+
+// Consent records CRUD
+export function useConsentRecords(clientId: string | undefined) {
+  const [records, setRecords] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchRecords = useCallback(async () => {
+    if (!clientId) return
+    setLoading(true)
+    const { data, error } = await supabase.from('consent_records').select('*').eq('client_id', clientId).order('consent_type')
+    if (error) console.error(error)
+    setRecords(data || [])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetchRecords() }, [fetchRecords])
+
+  const setConsent = async (consentType: string, granted: boolean) => {
+    const existing = records.find(r => r.consent_type === consentType)
+    if (existing) {
+      const updates = granted
+        ? { granted: true, granted_at: new Date().toISOString(), withdrawn_at: null }
+        : { granted: false, withdrawn_at: new Date().toISOString() }
+      const { error } = await supabase.from('consent_records').update(updates).eq('id', existing.id)
+      if (error) { toast.error('Failed to update consent'); return false }
+      setRecords(prev => prev.map(r => r.id === existing.id ? { ...r, ...updates } : r))
+    } else {
+      const { data, error } = await supabase.from('consent_records').insert({
+        client_id: clientId,
+        consent_type: consentType,
+        granted,
+        granted_at: granted ? new Date().toISOString() : null,
+      }).select().single()
+      if (error) { toast.error('Failed to record consent'); return false }
+      setRecords(prev => [...prev, data])
+    }
+    await logActivity('consent', clientId!, granted ? 'granted' : 'withdrawn', `${consentType} consent ${granted ? 'granted' : 'withdrawn'}`)
+    return true
+  }
+
+  return { records, loading, fetchRecords, setConsent }
+}
+
+// Alerts engine - computed from real data
+export function useAdminAlerts() {
+  const [alerts, setAlerts] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchAlerts = useCallback(async () => {
+    setLoading(true)
+    const computed: any[] = []
+
+    // 1. Clients with no activity in 90+ days
+    const { data: clients } = await supabase.from('clients').select('id, first_name, last_name, updated_at, status, annual_allowance_used')
+    const now = new Date()
+    ;(clients || []).forEach((c: any) => {
+      const lastUpdate = new Date(c.updated_at)
+      const daysSince = Math.floor((now.getTime() - lastUpdate.getTime()) / (1000 * 60 * 60 * 24))
+      if (daysSince > 90 && c.status === 'active') {
+        computed.push({ id: `review-${c.id}`, type: 'review_due', client: `${c.first_name} ${c.last_name}`, message: `No updates for ${daysSince} days — review may be overdue`, priority: daysSince > 180 ? 'high' : 'medium', timestamp: c.updated_at })
+      }
+      // 2. Annual allowance approaching limit
+      const used = Number(c.annual_allowance_used) || 0
+      if (used > 48000) {
+        const pct = ((used / 60000) * 100).toFixed(0)
+        computed.push({ id: `aa-${c.id}`, type: 'allowance_warning', client: `${c.first_name} ${c.last_name}`, message: `Annual allowance ${pct}% used (£${used.toLocaleString()} of £60,000)`, priority: used > 57000 ? 'high' : 'medium', timestamp: now.toISOString() })
+      }
+    })
+
+    // 3. Pending transactions older than 7 days
+    const { data: pendingTxns } = await supabase.from('transactions').select('id, description, created_at, status, clients(first_name, last_name)').eq('status', 'pending')
+    ;(pendingTxns || []).forEach((t: any) => {
+      const age = Math.floor((now.getTime() - new Date(t.created_at).getTime()) / (1000 * 60 * 60 * 24))
+      if (age > 7) {
+        const name = t.clients ? `${t.clients.first_name} ${t.clients.last_name}` : 'Unknown'
+        computed.push({ id: `txn-${t.id}`, type: 'stale_transaction', client: name, message: `Transaction "${t.description}" pending for ${age} days`, priority: age > 14 ? 'high' : 'medium', timestamp: t.created_at })
+      }
+    })
+
+    setAlerts(computed.sort((a, b) => (a.priority === 'high' ? -1 : 1) - (b.priority === 'high' ? -1 : 1)))
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchAlerts() }, [fetchAlerts])
+  return { alerts, loading, fetchAlerts }
+}

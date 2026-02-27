@@ -34,12 +34,20 @@ Phase 1 and Phase 2 have been implemented. The following modules are now databas
 |--------|-------|
 | **Portfolio Rebalancing** | Mock model portfolios |
 | **Custody & Reconciliation** | Mock reconciliation entries |
-| **Adviser Charging** | ✅ Live DB | `useAdviserFees()` with full CRUD, client FK joins |
 | **Document Generation** | Mock document list |
-| **Workflow Engine** | Mock workflow definitions |
 | **Bulk Operations** | Mock bulk tasks |
 | **User Management** | Mock user/adviser list |
 | **System Configuration** | Mock config values |
 | **Regulatory Reporting** | Mock reports |
-| **Alerts tab** | Still hardcoded alerts |
 | **Pooled Account** | Mock pooled account data |
+
+### Recently Completed (This Session)
+
+| Module | Status | Notes |
+|--------|--------|-------|
+| **Adviser Charging** | ✅ Live DB | `useAdviserFees()` with full CRUD, client FK joins |
+| **Workflow Engine** | ✅ Live DB | `useWorkflows()` with full CRUD via `workflow_definitions` table |
+| **Alerts Engine** | ✅ Live DB | `useAdminAlerts()` computes from real client/transaction data |
+| **GDPR Consent** | ✅ Live DB | `useConsentRecords()` with `consent_records` table per client |
+| **MPAA Flag** | ✅ Live DB | `mpaa_triggered` column on clients, toggle in compliance tab |
+| **Annual Allowance** | ✅ Live DB | `annual_allowance_used` column with progress bar in compliance |

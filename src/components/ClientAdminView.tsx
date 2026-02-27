@@ -21,7 +21,7 @@ import {
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
-import { useClientDetail, useActivityLog, type Client } from '@/hooks/useClientData'
+import { useClientDetail, useActivityLog, useConsentRecords, type Client } from '@/hooks/useClientData'
 
 const navGroups: NavGroup[] = [
   {
@@ -103,6 +103,7 @@ export default function ClientAdminView() {
   } = useClientDetail(clientId)
 
   const { logs: activityLog, fetchLogs } = useActivityLog(clientId)
+  const { records: consentRecords, setConsent } = useConsentRecords(clientId)
 
   // Dialog states
   const [editingPersonal, setEditingPersonal] = useState(false)
@@ -545,40 +546,111 @@ export default function ClientAdminView() {
         )
 
       case 'compliance':
+        const consentTypes = ['Marketing Communications', 'Data Processing', 'Third Party Sharing', 'Electronic Statements']
         return (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader><CardTitle className="text-lg">KYC / AML Status</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-success" /><div><p className="font-medium">Identity Verified</p><p className="text-xs text-muted-foreground">Passport verified via electronic check</p></div></div>
-                  <Badge className="bg-success/10 text-success border-success/20">Verified</Badge>
-                </div>
-                <div className="flex items-center justify-between p-3 border rounded-lg">
-                  <div className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-success" /><div><p className="font-medium">AML Screening</p><p className="text-xs text-muted-foreground">PEP & sanctions check clear</p></div></div>
-                  <Badge className="bg-success/10 text-success border-success/20">Clear</Badge>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader><CardTitle className="text-lg">Risk & Suitability</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2"><p className="font-medium">Current Risk Profile</p>
-                    <Select value={client.risk_profile || 'Moderate'} onValueChange={async v => {
-                      await updateClient({ risk_profile: v })
-                      toast.success(`Risk profile updated to ${v}`)
-                    }}>
-                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Cautious">Cautious</SelectItem>
-                        <SelectItem value="Moderate">Moderate</SelectItem>
-                        <SelectItem value="Balanced">Balanced</SelectItem>
-                        <SelectItem value="Adventurous">Adventurous</SelectItem>
-                        <SelectItem value="Aggressive">Aggressive</SelectItem>
-                      </SelectContent>
-                    </Select>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader><CardTitle className="text-lg">KYC / AML Status</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-success" /><div><p className="font-medium">Identity Verified</p><p className="text-xs text-muted-foreground">Passport verified via electronic check</p></div></div>
+                    <Badge className="bg-success/10 text-success border-success/20">Verified</Badge>
                   </div>
+                  <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center gap-3"><CheckCircle className="w-5 h-5 text-success" /><div><p className="font-medium">AML Screening</p><p className="text-xs text-muted-foreground">PEP & sanctions check clear</p></div></div>
+                    <Badge className="bg-success/10 text-success border-success/20">Clear</Badge>
+                  </div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Risk & Suitability</CardTitle></CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-2"><p className="font-medium">Current Risk Profile</p>
+                      <Select value={client.risk_profile || 'Moderate'} onValueChange={async v => {
+                        await updateClient({ risk_profile: v })
+                        toast.success(`Risk profile updated to ${v}`)
+                      }}>
+                        <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Cautious">Cautious</SelectItem>
+                          <SelectItem value="Moderate">Moderate</SelectItem>
+                          <SelectItem value="Balanced">Balanced</SelectItem>
+                          <SelectItem value="Adventurous">Adventurous</SelectItem>
+                          <SelectItem value="Aggressive">Aggressive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* MPAA & Annual Allowance */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader><CardTitle className="text-lg">MPAA Status</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <p className="font-medium">Money Purchase Annual Allowance</p>
+                      <p className="text-xs text-muted-foreground">Triggered when flexi-access drawdown is taken. Reduces AA to £10,000.</p>
+                    </div>
+                    <Switch checked={client.mpaa_triggered} onCheckedChange={async (checked) => {
+                      await updateClient({ mpaa_triggered: checked } as any)
+                      toast.success(`MPAA ${checked ? 'triggered' : 'cleared'}`)
+                    }} />
+                  </div>
+                  {client.mpaa_triggered && (
+                    <div className="mt-3 p-3 bg-warning/10 border border-warning/20 rounded-lg">
+                      <p className="text-sm text-warning font-medium">⚠ MPAA Active — Annual allowance reduced to £10,000</p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader><CardTitle className="text-lg">Annual Allowance</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span>Used this tax year</span>
+                      <span className="font-semibold">{formatCurrency(Number(client.annual_allowance_used) || 0)} / {formatCurrency(client.mpaa_triggered ? 10000 : 60000)}</span>
+                    </div>
+                    <div className="w-full bg-muted rounded-full h-3">
+                      <div className={`h-3 rounded-full transition-all ${((Number(client.annual_allowance_used) || 0) / (client.mpaa_triggered ? 10000 : 60000)) > 0.8 ? 'bg-destructive' : 'bg-primary'}`}
+                        style={{ width: `${Math.min(100, ((Number(client.annual_allowance_used) || 0) / (client.mpaa_triggered ? 10000 : 60000)) * 100)}%` }} />
+                    </div>
+                    <p className="text-xs text-muted-foreground">{(((Number(client.annual_allowance_used) || 0) / (client.mpaa_triggered ? 10000 : 60000)) * 100).toFixed(1)}% of allowance used</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* GDPR Consent */}
+            <Card>
+              <CardHeader><CardTitle className="text-lg">GDPR Consent Management</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {consentTypes.map(type => {
+                    const record = consentRecords.find(r => r.consent_type === type)
+                    return (
+                      <div key={type} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <p className="font-medium text-sm">{type}</p>
+                          {record && (
+                            <p className="text-xs text-muted-foreground">
+                              {record.granted ? `Granted ${new Date(record.granted_at).toLocaleDateString()}` : `Withdrawn ${new Date(record.withdrawn_at).toLocaleDateString()}`}
+                            </p>
+                          )}
+                        </div>
+                        <Switch checked={record?.granted || false} onCheckedChange={async (checked) => {
+                          await setConsent(type, checked)
+                          toast.success(`${type}: consent ${checked ? 'granted' : 'withdrawn'}`)
+                        }} />
+                      </div>
+                    )
+                  })}
                 </div>
               </CardContent>
             </Card>

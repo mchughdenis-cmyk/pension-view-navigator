@@ -67,7 +67,7 @@ import UserManagement from "./admin/UserManagement";
 import SystemConfiguration from "./admin/SystemConfiguration";
 import { ClientDialog, ConfirmDialog, type ClientFormData } from "./admin/AdminDialogs";
 import { downloadCSV } from "@/lib/adminExportUtils";
-import { useClients, useAuditTrail, useSchemeStats, type Client } from "@/hooks/useClientData";
+import { useClients, useAuditTrail, useSchemeStats, useAdminAlerts, type Client } from "@/hooks/useClientData";
 
 // Grouped navigation structure
 const navGroups = [
@@ -139,12 +139,7 @@ const navGroups = [
   },
 ];
 
-// Alerts kept as mock for now (Phase 3)
-const adminAlerts = [
-  { id: 1, type: "allowance_exceeded", client: "David Thompson", message: "Client approaching annual allowance limit", priority: "high", timestamp: "2024-01-15" },
-  { id: 2, type: "review_due", client: "Lisa Anderson", message: "Annual review overdue by 15 days", priority: "medium", timestamp: "2024-01-14" },
-  { id: 3, type: "document_required", client: "Emma Wilson", message: "Transfer documentation pending", priority: "low", timestamp: "2024-01-13" },
-];
+// Alerts are now computed from real data via useAdminAlerts()
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount);
@@ -177,6 +172,7 @@ export default function PensionAdminDashboard() {
   const { clients: dbClients, loading: clientsLoading, addClient: addDbClient, updateClient: updateDbClient } = useClients();
   const { entries: activityEntries } = useAuditTrail();
   const { stats: schemeStats } = useSchemeStats();
+  const { alerts: adminAlerts, loading: alertsLoading } = useAdminAlerts();
   const [clientDialogOpen, setClientDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [clientSearch, setClientSearch] = useState('');

@@ -23,6 +23,8 @@ export interface Client {
   status: string
   risk_profile: string | null
   notes: string | null
+  mpaa_triggered: boolean
+  annual_allowance_used: number
   created_at: string
   updated_at: string
 }
@@ -694,4 +696,56 @@ export function useTradeOrders() {
   }
 
   return { orders, loading, fetchOrders, addOrder, updateOrder }
+}
+
+// Adviser fees CRUD
+export function useAdviserFees() {
+  const [fees, setFees] = useState<any[]>([])
+  const [clients, setClients] = useState<Client[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchFees = useCallback(async () => {
+    setLoading(true)
+    const [feesRes, clientsRes] = await Promise.all([
+      supabase.from('adviser_fees').select('*, clients(first_name, last_name)').order('adviser_name'),
+      supabase.from('clients').select('id, first_name, last_name').order('last_name'),
+    ])
+    if (feesRes.error) { toast.error('Failed to load adviser fees'); console.error(feesRes.error) }
+    const mapped = (feesRes.data || []).map((f: any) => ({
+      ...f,
+      client_name: f.clients ? `${f.clients.first_name} ${f.clients.last_name}` : null,
+    }))
+    setFees(mapped)
+    setClients((clientsRes.data || []) as Client[])
+    setLoading(false)
+  }, [])
+
+  useEffect(() => { fetchFees() }, [fetchFees])
+
+  const addFee = async (fee: any) => {
+    const { data, error } = await supabase.from('adviser_fees').insert(fee).select('*, clients(first_name, last_name)').single()
+    if (error) { toast.error('Failed to add fee'); return null }
+    const mapped = { ...data, client_name: (data as any).clients ? `${(data as any).clients.first_name} ${(data as any).clients.last_name}` : null }
+    setFees(prev => [...prev, mapped])
+    await logActivity('adviser_fee', data.id, 'created', `Adviser fee for ${fee.adviser_name} created`)
+    return mapped
+  }
+
+  const updateFee = async (id: string, updates: any) => {
+    const { error } = await supabase.from('adviser_fees').update(updates).eq('id', id)
+    if (error) { toast.error('Failed to update fee'); return false }
+    setFees(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f))
+    await logActivity('adviser_fee', id, 'updated', `Adviser fee updated`)
+    return true
+  }
+
+  const deleteFee = async (id: string) => {
+    const { error } = await supabase.from('adviser_fees').delete().eq('id', id)
+    if (error) { toast.error('Failed to delete fee'); return false }
+    setFees(prev => prev.filter(f => f.id !== id))
+    await logActivity('adviser_fee', id, 'deleted', `Adviser fee deleted`)
+    return true
+  }
+
+  return { fees, clients, loading, fetchFees, addFee, updateFee, deleteFee }
 }

@@ -6,15 +6,57 @@ import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Shield, Lock } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
+import { useToast } from '@/hooks/use-toast'
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { signIn, signUp, user } = useAuth()
+  const { toast } = useToast()
 
-  const handleSubmit = () => {
-    // Mock login - just navigate to dashboard
-    navigate('/dashboard')
+  // Redirect if already authenticated
+  if (user) {
+    navigate('/dashboard', { replace: true })
+    return null
+  }
+
+  const handleSignIn = async () => {
+    if (!email || !password) {
+      toast({ title: 'Missing fields', description: 'Please enter email and password', variant: 'destructive' })
+      return
+    }
+    setLoading(true)
+    try {
+      await signIn(email, password)
+      navigate('/dashboard')
+    } catch (error: any) {
+      toast({ title: 'Sign in failed', description: error.message || 'Please check your credentials', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleSignUp = async () => {
+    if (!email || !password) {
+      toast({ title: 'Missing fields', description: 'Please enter email and password', variant: 'destructive' })
+      return
+    }
+    if (password.length < 6) {
+      toast({ title: 'Weak password', description: 'Password must be at least 6 characters', variant: 'destructive' })
+      return
+    }
+    setLoading(true)
+    try {
+      await signUp(email, password)
+      toast({ title: 'Account created', description: 'Please check your email to verify your account' })
+    } catch (error: any) {
+      toast({ title: 'Sign up failed', description: error.message || 'Please try again', variant: 'destructive' })
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -67,9 +109,10 @@ export default function LoginScreen() {
                 </div>
                 <Button 
                   className="w-full" 
-                  onClick={handleSubmit}
+                  onClick={handleSignIn}
+                  disabled={loading}
                 >
-                  Sign In
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
               </TabsContent>
               
@@ -89,16 +132,17 @@ export default function LoginScreen() {
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="Create a password"
+                    placeholder="Create a password (min 6 chars)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
                 <Button 
                   className="w-full" 
-                  onClick={handleSubmit}
+                  onClick={handleSignUp}
+                  disabled={loading}
                 >
-                  Create Account
+                  {loading ? 'Creating account...' : 'Create Account'}
                 </Button>
               </TabsContent>
             </Tabs>

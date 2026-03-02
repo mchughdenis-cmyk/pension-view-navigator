@@ -400,11 +400,21 @@ export function useBankFiles() {
   useEffect(() => { fetchAll() }, [fetchAll])
 
   const addBankFile = async (filename: string, fileEntries: { date: string; description: string; amount: number; reference: string }[]) => {
+    // Validate inputs
+    const { BankFileSchema } = await import('@/lib/bankFileValidation')
+    const validation = BankFileSchema.safeParse({ filename, entries: fileEntries })
+    if (!validation.success) {
+      toast.error(`Invalid bank file: ${validation.error.errors[0]?.message || 'Validation failed'}`)
+      return null
+    }
+    const validatedEntries = validation.data.entries
+    const validatedFilename = validation.data.filename
+
     // Create bank file record
-    const totalAmount = fileEntries.reduce((s, e) => s + Math.abs(e.amount), 0)
+    const totalAmount = validatedEntries.reduce((s, e) => s + Math.abs(e.amount), 0)
     const { data: fileData, error: fileError } = await supabase.from('bank_files').insert({
-      filename,
-      total_entries: fileEntries.length,
+      filename: validatedFilename,
+      total_entries: validatedEntries.length,
       total_amount: totalAmount,
       status: 'uploaded',
     } as any).select().single()
@@ -412,7 +422,7 @@ export function useBankFiles() {
     if (fileError) { toast.error('Failed to upload bank file'); return null }
 
     // Auto-match entries against clients
-    const entriesToInsert = fileEntries.map(entry => {
+    const entriesToInsert = validatedEntries.map(entry => {
       // Try auto-matching by reference pattern
       const matchedClient = clients.find(c => {
         const namePattern = `${c.first_name} ${c.last_name}`.toLowerCase()
@@ -446,12 +456,12 @@ export function useBankFiles() {
     const matchedCount = entriesToInsert.filter(e => e.status === 'matched').length
     await supabase.from('bank_files').update({
       matched_count: matchedCount,
-      unmatched_count: fileEntries.length - matchedCount,
+      unmatched_count: validatedEntries.length - matchedCount,
       status: 'completed',
     } as any).eq('id', fileData.id)
 
     await fetchAll()
-    await logActivity('bank_file', fileData.id, 'created', `Bank file uploaded: ${filename} (${fileEntries.length} entries)`)
+    await logActivity('bank_file', fileData.id, 'created', `Bank file uploaded: ${validatedFilename} (${validatedEntries.length} entries)`)
     return { file: fileData, entries: insertedEntries, matchedCount }
   }
 

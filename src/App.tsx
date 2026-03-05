@@ -53,27 +53,27 @@ const AppContent = () => {
         <Route path="/api-directory" element={<APIDirectory />} />
         <Route path="/system-overview" element={<SystemOverview />} />
 
-        {/* Protected routes */}
-        <Route path="/dashboard" element={<ProtectedRoute><ClientProductsDashboard /></ProtectedRoute>} />
-        <Route path="/portfolio" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-        <Route path="/illustration" element={<ProtectedRoute><PensionIllustration /></ProtectedRoute>} />
-        <Route path="/welcome-pack" element={<ProtectedRoute><DigitalWelcomePack /></ProtectedRoute>} />
-        <Route path="/transfer" element={<ProtectedRoute><PensionTransferJourney /></ProtectedRoute>} />
-        <Route path="/onboarding" element={<ProtectedRoute><ClientOnboarding /></ProtectedRoute>} />
-        <Route path="/drawdown" element={<ProtectedRoute><DrawdownJourney /></ProtectedRoute>} />
-        <Route path="/drip-feed" element={<ProtectedRoute><DripFeedDrawdown /></ProtectedRoute>} />
-        <Route path="/transfer-out" element={<ProtectedRoute><TransferOutJourney /></ProtectedRoute>} />
-        <Route path="/annual-summary" element={<ProtectedRoute><AnnualSummary /></ProtectedRoute>} />
-        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-        <Route path="/instant-withdrawal" element={<ProtectedRoute><InstantWithdrawal /></ProtectedRoute>} />
-        <Route path="/learning" element={<ProtectedRoute><LearningCentre /></ProtectedRoute>} />
-        <Route path="/instrument-transfer" element={<ProtectedRoute><InstrumentTransfer /></ProtectedRoute>} />
-        <Route path="/kyc" element={<ProtectedRoute><KYCVerification /></ProtectedRoute>} />
-        <Route path="/payments" element={<ProtectedRoute><PaymentProvider /></ProtectedRoute>} />
-        <Route path="/isa" element={<ProtectedRoute><ISAPortfolio /></ProtectedRoute>} />
-        <Route path="/gia" element={<ProtectedRoute><GIAPortfolio /></ProtectedRoute>} />
-        <Route path="/client-admin/:clientId" element={<ProtectedRoute><ClientAdminView /></ProtectedRoute>} />
+        {/* All routes - no login required */}
+        <Route path="/dashboard" element={<ClientProductsDashboard />} />
+        <Route path="/portfolio" element={<Index />} />
+        <Route path="/admin" element={<Admin />} />
+        <Route path="/illustration" element={<PensionIllustration />} />
+        <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
+        <Route path="/transfer" element={<PensionTransferJourney />} />
+        <Route path="/onboarding" element={<ClientOnboarding />} />
+        <Route path="/drawdown" element={<DrawdownJourney />} />
+        <Route path="/drip-feed" element={<DripFeedDrawdown />} />
+        <Route path="/transfer-out" element={<TransferOutJourney />} />
+        <Route path="/annual-summary" element={<AnnualSummary />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
+        <Route path="/learning" element={<LearningCentre />} />
+        <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
+        <Route path="/kyc" element={<KYCVerification />} />
+        <Route path="/payments" element={<PaymentProvider />} />
+        <Route path="/isa" element={<ISAPortfolio />} />
+        <Route path="/gia" element={<GIAPortfolio />} />
+        <Route path="/client-admin/:clientId" element={<ClientAdminView />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

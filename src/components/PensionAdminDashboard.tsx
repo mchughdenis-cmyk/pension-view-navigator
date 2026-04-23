@@ -186,7 +186,6 @@ export default function PensionAdminDashboard() {
     const [firstName, ...rest] = data.name.split(' ');
     const lastName = rest.join(' ') || firstName;
     await addDbClient({ first_name: firstName, last_name: lastName, email: data.email, status: data.status, risk_profile: data.riskProfile, adviser: data.advisor });
-    toast.success(`Client "${data.name}" added successfully`);
   };
 
   const handleEditClient = async (data: ClientFormData) => {

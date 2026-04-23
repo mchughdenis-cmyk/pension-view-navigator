@@ -112,8 +112,13 @@ export function useClients() {
 
   const addClient = async (client: Partial<Client>) => {
     const { data, error } = await supabase.from('clients').insert(client as any).select().single()
-    if (error) { toast.error('Failed to add client'); return null }
+    if (error) {
+      console.error('Add client error:', error)
+      toast.error(`Failed to add client: ${error.message}`)
+      return null
+    }
     setClients(prev => [...prev, data as Client])
+    toast.success(`Client ${client.first_name} ${client.last_name} added`)
     await logActivity('client', data.id, 'created', `Client ${client.first_name} ${client.last_name} created`)
     return data as Client
   }

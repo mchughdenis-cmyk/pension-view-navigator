@@ -473,7 +473,7 @@ export default function PensionAdminDashboard() {
       </div>
 
       <ClientDialog open={clientDialogOpen} onClose={() => setClientDialogOpen(false)} onSave={handleAddClient} mode="add" />
-      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: `${editingClient.first_name} ${editingClient.last_name}`, email: editingClient.email || '', advisor: editingClient.adviser || '', riskProfile: editingClient.risk_profile || '', status: editingClient.status } : undefined} />
+      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: `${editingClient.first_name} ${editingClient.last_name}`, email: editingClient.email || '', advisor: editingClient.adviser || 'Sarah Johnson', riskProfile: (editingClient.risk_profile || 'balanced').toLowerCase(), status: editingClient.status || 'active' } : undefined} />
     </div>
   );
 }

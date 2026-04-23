@@ -186,7 +186,6 @@ export default function PensionAdminDashboard() {
     const [firstName, ...rest] = data.name.split(' ');
     const lastName = rest.join(' ') || firstName;
     await addDbClient({ first_name: firstName, last_name: lastName, email: data.email, status: data.status, risk_profile: data.riskProfile, adviser: data.advisor });
-    toast.success(`Client "${data.name}" added successfully`);
   };
 
   const handleEditClient = async (data: ClientFormData) => {
@@ -474,7 +473,7 @@ export default function PensionAdminDashboard() {
       </div>
 
       <ClientDialog open={clientDialogOpen} onClose={() => setClientDialogOpen(false)} onSave={handleAddClient} mode="add" />
-      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: `${editingClient.first_name} ${editingClient.last_name}`, email: editingClient.email || '', advisor: editingClient.adviser || '', riskProfile: editingClient.risk_profile || '', status: editingClient.status } : undefined} />
+      <ClientDialog open={!!editingClient} onClose={() => setEditingClient(null)} onSave={handleEditClient} mode="edit" initial={editingClient ? { name: `${editingClient.first_name} ${editingClient.last_name}`, email: editingClient.email || '', advisor: editingClient.adviser || 'Sarah Johnson', riskProfile: (editingClient.risk_profile || 'balanced').toLowerCase(), status: editingClient.status || 'active' } : undefined} />
     </div>
   );
 }

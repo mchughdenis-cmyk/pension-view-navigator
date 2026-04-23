@@ -2,13 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ShowcaseWebsite from "./components/ShowcaseWebsite";
 import { FloatingBackButton } from "./components/ui/floating-back-button";
-import LoginScreen from "./components/LoginScreen";
-import AdminLogin from "./components/AdminLogin";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -43,10 +39,10 @@ const AppContent = () => {
     <BrowserRouter>
       <FloatingBackButton />
       <Routes>
-        {/* Public routes */}
-        <Route path="/" element={<ShowcaseWebsite />} />
-        <Route path="/login" element={<LoginScreen />} />
-        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/overview" element={<ShowcaseWebsite />} />
+        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/admin" replace />} />
         <Route path="/pitch" element={<PensionSystemPitch />} />
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/documentation" element={<SystemDocumentation />} />
@@ -83,13 +79,11 @@ const AppContent = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <AppContent />
-      </TooltipProvider>
-    </AuthProvider>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <AppContent />
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

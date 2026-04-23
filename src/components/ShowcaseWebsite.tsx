@@ -94,11 +94,11 @@ export default function ShowcaseWebsite() {
             <a href="/api-directory" className="text-sm text-muted-foreground hover:text-foreground transition-colors">APIs</a>
           </nav>
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="sm" onClick={() => navigate('/login')}>
-              Sign In
+            <Button variant="ghost" size="sm" onClick={() => navigate('/admin')}>
+              Admin Area
             </Button>
-            <Button size="sm" onClick={() => navigate('/login')}>
-              Try the System
+            <Button size="sm" onClick={() => navigate('/dashboard')}>
+              Open System
               <ArrowRight className="w-4 h-4 ml-1" />
             </Button>
           </div>
@@ -122,8 +122,8 @@ export default function ShowcaseWebsite() {
               A unified system connecting clients, advisers, and administrators — from onboarding and KYC through portfolio management to drawdown and reporting.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" onClick={() => navigate('/login')} className="text-base px-8">
-                Launch Test System
+              <Button size="lg" onClick={() => navigate('/dashboard')} className="text-base px-8">
+                Open Dashboard
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-base px-8">
@@ -281,8 +281,8 @@ export default function ShowcaseWebsite() {
               Access the full test system with client, adviser, and admin views — no setup required.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button size="lg" variant="secondary" onClick={() => navigate('/login')} className="text-base px-8">
-                Launch Test System
+              <Button size="lg" variant="secondary" onClick={() => navigate('/dashboard')} className="text-base px-8">
+                Open Dashboard
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button size="lg" variant="outline" onClick={() => navigate('/demo')} className="text-base px-8 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
@@ -305,8 +305,8 @@ export default function ShowcaseWebsite() {
               </div>
             </div>
             <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <button onClick={() => navigate('/login')} className="hover:text-foreground transition-colors">Client Login</button>
-              <button onClick={() => navigate('/admin-login')} className="hover:text-foreground transition-colors">Admin Login</button>
+              <button onClick={() => navigate('/dashboard')} className="hover:text-foreground transition-colors">Client Dashboard</button>
+              <button onClick={() => navigate('/admin')} className="hover:text-foreground transition-colors">Admin Dashboard</button>
               <button onClick={() => navigate('/documentation')} className="hover:text-foreground transition-colors">Documentation</button>
               <button onClick={() => navigate('/demo')} className="hover:text-foreground transition-colors">Demo</button>
             </div>

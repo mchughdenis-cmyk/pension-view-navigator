@@ -135,12 +135,12 @@ export default function APIDirectory() {
             <span className="text-xl font-bold text-foreground">API Directory</span>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={() => navigate('/')}>
+            <Button variant="outline" size="sm" onClick={() => navigate('/overview')}>
               <Globe className="w-4 h-4 mr-2" />
-              Home
+              Overview
             </Button>
-            <Button size="sm" onClick={() => navigate('/login')}>
-              Try the System
+            <Button size="sm" onClick={() => navigate('/dashboard')}>
+              Open System
             </Button>
           </div>
         </div>
@@ -260,10 +260,10 @@ export default function APIDirectory() {
             See every API in action within the live demo system. Switch between Client, Adviser, and Admin views to experience the full platform.
           </p>
           <div className="flex justify-center gap-4">
-            <Button size="lg" onClick={() => navigate('/login')}>
-              Launch Demo
+            <Button size="lg" onClick={() => navigate('/dashboard')}>
+              Open Dashboard
             </Button>
-            <Button size="lg" variant="outline" onClick={() => navigate('/')}>
+            <Button size="lg" variant="outline" onClick={() => navigate('/overview')}>
               Back to Overview
             </Button>
           </div>

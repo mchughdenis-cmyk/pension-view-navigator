@@ -161,9 +161,17 @@ export default function KYCJourney() {
         description="Verify your identity in minutes. Powered by Onfido, ComplyAdvantage and GBG (mock providers)."
       />
 
+      <ResumeBanner
+        show={resumeOpen}
+        savedAt={savedAt}
+        onResume={handleResume}
+        onDiscard={handleDiscard}
+        label="Resume your KYC verification"
+      />
+
       <Card>
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
             <div className="flex gap-2 flex-wrap">
               {STEPS.map((s, i) => (
                 <div key={s.id} className={`flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border ${i <= stepIndex ? "bg-primary/10 border-primary text-primary" : "bg-muted border-border text-muted-foreground"}`}>
@@ -171,9 +179,19 @@ export default function KYCJourney() {
                 </div>
               ))}
             </div>
-            <Badge variant="outline" className="gap-1"><Sparkles className="w-3 h-3" /> Mock</Badge>
+            <div className="flex items-center gap-3">
+              <SavedIndicator savedAt={savedAt} />
+              <Badge variant="outline" className="gap-1"><Sparkles className="w-3 h-3" /> Mock</Badge>
+            </div>
           </div>
           <Progress value={progress} className="h-2" />
+          {!resumeOpen && hadDraft && step !== "personal" && (
+            <div className="mt-3 flex justify-end">
+              <Button size="sm" variant="ghost" onClick={() => { handleDiscard(); setStep("personal"); setCaseId(null); }}>
+                Start over
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 

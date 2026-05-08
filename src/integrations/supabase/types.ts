@@ -555,6 +555,123 @@ export type Database = {
           },
         ]
       }
+      bulk_order_lines: {
+        Row: {
+          account_id: string | null
+          bulk_id: string
+          client_id: string
+          created_at: string
+          fill_pct: number
+          id: string
+          price: number | null
+          side: string
+          status: string
+          symbol: string
+          units: number
+        }
+        Insert: {
+          account_id?: string | null
+          bulk_id: string
+          client_id: string
+          created_at?: string
+          fill_pct?: number
+          id?: string
+          price?: number | null
+          side: string
+          status?: string
+          symbol: string
+          units?: number
+        }
+        Update: {
+          account_id?: string | null
+          bulk_id?: string
+          client_id?: string
+          created_at?: string
+          fill_pct?: number
+          id?: string
+          price?: number | null
+          side?: string
+          status?: string
+          symbol?: string
+          units?: number
+        }
+        Relationships: []
+      }
+      bulk_orders: {
+        Row: {
+          created_at: string
+          id: string
+          model_id: string | null
+          notes: string | null
+          status: string
+          total_clients: number
+          total_value: number
+          trade_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          model_id?: string | null
+          notes?: string | null
+          status?: string
+          total_clients?: number
+          total_value?: number
+          trade_date?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          model_id?: string | null
+          notes?: string | null
+          status?: string
+          total_clients?: number
+          total_value?: number
+          trade_date?: string
+        }
+        Relationships: []
+      }
+      capped_drawdown_segments: {
+        Row: {
+          account_id: string | null
+          client_id: string
+          created_at: string
+          current_max_pa: number
+          fund_value: number
+          gad_basis_amount: number
+          gad_cap_pct: number
+          id: string
+          last_review_date: string
+          next_review_date: string
+          status: string
+        }
+        Insert: {
+          account_id?: string | null
+          client_id: string
+          created_at?: string
+          current_max_pa?: number
+          fund_value?: number
+          gad_basis_amount?: number
+          gad_cap_pct?: number
+          id?: string
+          last_review_date: string
+          next_review_date: string
+          status?: string
+        }
+        Update: {
+          account_id?: string | null
+          client_id?: string
+          created_at?: string
+          current_max_pa?: number
+          fund_value?: number
+          gad_basis_amount?: number
+          gad_cap_pct?: number
+          id?: string
+          last_review_date?: string
+          next_review_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
       cash_forecasts: {
         Row: {
           client_id: string | null
@@ -708,6 +825,30 @@ export type Database = {
           status?: string
           unmatched_count?: number
           variance?: number | null
+        }
+        Relationships: []
+      }
+      cass_settings: {
+        Row: {
+          alert_email: string | null
+          daily_recon_enabled: boolean
+          id: string
+          materiality_threshold: number
+          updated_at: string
+        }
+        Insert: {
+          alert_email?: string | null
+          daily_recon_enabled?: boolean
+          id?: string
+          materiality_threshold?: number
+          updated_at?: string
+        }
+        Update: {
+          alert_email?: string | null
+          daily_recon_enabled?: boolean
+          id?: string
+          materiality_threshold?: number
+          updated_at?: string
         }
         Relationships: []
       }
@@ -920,6 +1061,45 @@ export type Database = {
           tax_residency?: string | null
           title?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      commercial_properties: {
+        Row: {
+          address: string
+          client_id: string | null
+          created_at: string
+          id: string
+          property_type: string
+          scheme_id: string | null
+          status: string
+          valuation: number
+          valuation_date: string | null
+          vat_registered: boolean
+        }
+        Insert: {
+          address: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          property_type?: string
+          scheme_id?: string | null
+          status?: string
+          valuation?: number
+          valuation_date?: string | null
+          vat_registered?: boolean
+        }
+        Update: {
+          address?: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          property_type?: string
+          scheme_id?: string | null
+          status?: string
+          valuation?: number
+          valuation_date?: string | null
+          vat_registered?: boolean
         }
         Relationships: []
       }
@@ -1430,6 +1610,45 @@ export type Database = {
         }
         Relationships: []
       }
+      dr_drills: {
+        Row: {
+          actual_rpo: number | null
+          actual_rto: number | null
+          created_at: string
+          drill_date: string
+          id: string
+          notes: string | null
+          rpo_minutes: number
+          rto_minutes: number
+          scenario: string
+          status: string
+        }
+        Insert: {
+          actual_rpo?: number | null
+          actual_rto?: number | null
+          created_at?: string
+          drill_date: string
+          id?: string
+          notes?: string | null
+          rpo_minutes?: number
+          rto_minutes?: number
+          scenario: string
+          status?: string
+        }
+        Update: {
+          actual_rpo?: number | null
+          actual_rto?: number | null
+          created_at?: string
+          drill_date?: string
+          id?: string
+          notes?: string | null
+          rpo_minutes?: number
+          rto_minutes?: number
+          scenario?: string
+          status?: string
+        }
+        Relationships: []
+      }
       esg_fund_data: {
         Row: {
           as_of_date: string
@@ -1508,6 +1727,39 @@ export type Database = {
           sent_at?: string
           signed_at?: string | null
           status?: string
+        }
+        Relationships: []
+      }
+      event_report_lines: {
+        Row: {
+          amount: number | null
+          client_id: string | null
+          created_at: string
+          details: Json | null
+          event_code: string
+          event_date: string
+          id: string
+          submission_id: string
+        }
+        Insert: {
+          amount?: number | null
+          client_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_code: string
+          event_date: string
+          id?: string
+          submission_id: string
+        }
+        Update: {
+          amount?: number | null
+          client_id?: string | null
+          created_at?: string
+          details?: Json | null
+          event_code?: string
+          event_date?: string
+          id?: string
+          submission_id?: string
         }
         Relationships: []
       }
@@ -1694,6 +1946,39 @@ export type Database = {
         }
         Relationships: []
       }
+      firm_branding: {
+        Row: {
+          accent_color: string | null
+          created_at: string
+          custom_domain: string | null
+          firm_id: string
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          updated_at: string
+        }
+        Insert: {
+          accent_color?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          firm_id: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accent_color?: string | null
+          created_at?: string
+          custom_domain?: string | null
+          firm_id?: string
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       firms: {
         Row: {
           address_line1: string | null
@@ -1778,6 +2063,84 @@ export type Database = {
         }
         Relationships: []
       }
+      hmrc_submissions: {
+        Row: {
+          created_at: string
+          hmrc_ref: string | null
+          id: string
+          payload: Json | null
+          period: string
+          response: Json | null
+          scheme_ref: string | null
+          status: string
+          submission_type: string
+          submitted_at: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hmrc_ref?: string | null
+          id?: string
+          payload?: Json | null
+          period: string
+          response?: Json | null
+          scheme_ref?: string | null
+          status?: string
+          submission_type: string
+          submitted_at?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hmrc_ref?: string | null
+          id?: string
+          payload?: Json | null
+          period?: string
+          response?: Json | null
+          scheme_ref?: string | null
+          status?: string
+          submission_type?: string
+          submitted_at?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      hmrc_test_runs: {
+        Row: {
+          actual: Json | null
+          expected: Json | null
+          id: string
+          notes: string | null
+          passed: boolean
+          payload: Json | null
+          run_at: string
+          submission_type: string
+        }
+        Insert: {
+          actual?: Json | null
+          expected?: Json | null
+          id?: string
+          notes?: string | null
+          passed?: boolean
+          payload?: Json | null
+          run_at?: string
+          submission_type: string
+        }
+        Update: {
+          actual?: Json | null
+          expected?: Json | null
+          id?: string
+          notes?: string | null
+          passed?: boolean
+          payload?: Json | null
+          run_at?: string
+          submission_type?: string
+        }
+        Relationships: []
+      }
       illustrations: {
         Row: {
           client_id: string
@@ -1820,6 +2183,42 @@ export type Database = {
           projected_pot?: number
           retirement_age?: number
           scenario_name?: string
+        }
+        Relationships: []
+      }
+      in_specie_transfers: {
+        Row: {
+          asset_list: Json
+          client_id: string
+          created_at: string
+          direction: string
+          id: string
+          status: string
+          total_value: number
+          valuation_basis: string
+          valuation_date: string
+        }
+        Insert: {
+          asset_list?: Json
+          client_id: string
+          created_at?: string
+          direction?: string
+          id?: string
+          status?: string
+          total_value?: number
+          valuation_basis?: string
+          valuation_date: string
+        }
+        Update: {
+          asset_list?: Json
+          client_id?: string
+          created_at?: string
+          direction?: string
+          id?: string
+          status?: string
+          total_value?: number
+          valuation_basis?: string
+          valuation_date?: string
         }
         Relationships: []
       }
@@ -1997,6 +2396,39 @@ export type Database = {
         }
         Relationships: []
       }
+      jisa_holders: {
+        Row: {
+          account_id: string
+          child_dob: string
+          child_first_name: string
+          child_last_name: string
+          created_at: string
+          id: string
+          matures_on: string | null
+          registered_contact_client_id: string
+        }
+        Insert: {
+          account_id: string
+          child_dob: string
+          child_first_name: string
+          child_last_name: string
+          created_at?: string
+          id?: string
+          matures_on?: string | null
+          registered_contact_client_id: string
+        }
+        Update: {
+          account_id?: string
+          child_dob?: string
+          child_first_name?: string
+          child_last_name?: string
+          created_at?: string
+          id?: string
+          matures_on?: string | null
+          registered_contact_client_id?: string
+        }
+        Relationships: []
+      }
       kyc_records: {
         Row: {
           address_check: boolean | null
@@ -2039,6 +2471,84 @@ export type Database = {
           reference?: string | null
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      lisa_bonus_claims: {
+        Row: {
+          account_id: string
+          bonus_amount: number
+          claim_status: string
+          claimed_at: string | null
+          client_id: string
+          contributions: number
+          created_at: string
+          id: string
+          tax_year: string
+        }
+        Insert: {
+          account_id: string
+          bonus_amount?: number
+          claim_status?: string
+          claimed_at?: string | null
+          client_id: string
+          contributions?: number
+          created_at?: string
+          id?: string
+          tax_year: string
+        }
+        Update: {
+          account_id?: string
+          bonus_amount?: number
+          claim_status?: string
+          claimed_at?: string | null
+          client_id?: string
+          contributions?: number
+          created_at?: string
+          id?: string
+          tax_year?: string
+        }
+        Relationships: []
+      }
+      lsa_lsdba_ledger: {
+        Row: {
+          client_id: string
+          created_at: string
+          event_date: string
+          event_type: string
+          id: string
+          lsa_used: number
+          lsdba_used: number
+          notes: string | null
+          running_lsa: number
+          running_lsdba: number
+          source_event_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          event_date: string
+          event_type: string
+          id?: string
+          lsa_used?: number
+          lsdba_used?: number
+          notes?: string | null
+          running_lsa?: number
+          running_lsdba?: number
+          source_event_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          event_date?: string
+          event_type?: string
+          id?: string
+          lsa_used?: number
+          lsdba_used?: number
+          notes?: string | null
+          running_lsa?: number
+          running_lsdba?: number
+          source_event_id?: string | null
         }
         Relationships: []
       }
@@ -2233,6 +2743,72 @@ export type Database = {
         }
         Relationships: []
       }
+      open_banking_accounts: {
+        Row: {
+          account_name: string | null
+          account_ref: string
+          balance: number
+          consent_id: string
+          created_at: string
+          currency: string
+          id: string
+          last_synced: string | null
+        }
+        Insert: {
+          account_name?: string | null
+          account_ref: string
+          balance?: number
+          consent_id: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_synced?: string | null
+        }
+        Update: {
+          account_name?: string | null
+          account_ref?: string
+          balance?: number
+          consent_id?: string
+          created_at?: string
+          currency?: string
+          id?: string
+          last_synced?: string | null
+        }
+        Relationships: []
+      }
+      open_banking_consents: {
+        Row: {
+          bank: string
+          client_id: string
+          consent_ref: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          scope: string
+          status: string
+        }
+        Insert: {
+          bank: string
+          client_id: string
+          consent_ref: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          scope?: string
+          status?: string
+        }
+        Update: {
+          bank?: string
+          client_id?: string
+          consent_ref?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          scope?: string
+          status?: string
+        }
+        Relationships: []
+      }
       open_banking_links: {
         Row: {
           account_mask: string | null
@@ -2353,6 +2929,48 @@ export type Database = {
         }
         Relationships: []
       }
+      origo_messages: {
+        Row: {
+          ack_ref: string | null
+          acked_at: string | null
+          client_id: string | null
+          created_at: string
+          direction: string
+          id: string
+          message_type: string
+          payload: Json | null
+          sent_at: string | null
+          status: string
+          transfer_id: string | null
+        }
+        Insert: {
+          ack_ref?: string | null
+          acked_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          direction: string
+          id?: string
+          message_type: string
+          payload?: Json | null
+          sent_at?: string | null
+          status?: string
+          transfer_id?: string | null
+        }
+        Update: {
+          ack_ref?: string | null
+          acked_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          direction?: string
+          id?: string
+          message_type?: string
+          payload?: Json | null
+          sent_at?: string | null
+          status?: string
+          transfer_id?: string | null
+        }
+        Relationships: []
+      }
       paye_calculations: {
         Row: {
           client_id: string
@@ -2401,6 +3019,126 @@ export type Database = {
         }
         Relationships: []
       }
+      paye_payments: {
+        Row: {
+          client_id: string
+          created_at: string
+          gross: number
+          id: string
+          net: number
+          ni: number
+          paye: number
+          run_id: string
+          tax_code: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          gross?: number
+          id?: string
+          net?: number
+          ni?: number
+          paye?: number
+          run_id: string
+          tax_code?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          gross?: number
+          id?: string
+          net?: number
+          ni?: number
+          paye?: number
+          run_id?: string
+          tax_code?: string
+        }
+        Relationships: []
+      }
+      paye_runs: {
+        Row: {
+          created_at: string
+          fps_ref: string | null
+          id: string
+          pay_date: string
+          period: string
+          status: string
+          total_gross: number
+          total_net: number
+          total_ni: number
+          total_tax: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          fps_ref?: string | null
+          id?: string
+          pay_date: string
+          period: string
+          status?: string
+          total_gross?: number
+          total_net?: number
+          total_ni?: number
+          total_tax?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          fps_ref?: string | null
+          id?: string
+          pay_date?: string
+          period?: string
+          status?: string
+          total_gross?: number
+          total_net?: number
+          total_ni?: number
+          total_tax?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pension_sharing_orders: {
+        Row: {
+          court_order_date: string
+          created_at: string
+          ex_partner_dob: string | null
+          ex_partner_name: string
+          id: string
+          implementation_date: string | null
+          member_client_id: string
+          notes: string | null
+          percentage: number
+          status: string
+          transfer_value: number
+        }
+        Insert: {
+          court_order_date: string
+          created_at?: string
+          ex_partner_dob?: string | null
+          ex_partner_name: string
+          id?: string
+          implementation_date?: string | null
+          member_client_id: string
+          notes?: string | null
+          percentage?: number
+          status?: string
+          transfer_value?: number
+        }
+        Update: {
+          court_order_date?: string
+          created_at?: string
+          ex_partner_dob?: string | null
+          ex_partner_name?: string
+          id?: string
+          implementation_date?: string | null
+          member_client_id?: string
+          notes?: string | null
+          percentage?: number
+          status?: string
+          transfer_value?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -2431,6 +3169,114 @@ export type Database = {
         }
         Relationships: []
       }
+      property_insurance: {
+        Row: {
+          created_at: string
+          id: string
+          policy_ref: string | null
+          premium: number
+          property_id: string
+          provider: string
+          renewal_date: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          policy_ref?: string | null
+          premium?: number
+          property_id: string
+          provider: string
+          renewal_date: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          policy_ref?: string | null
+          premium?: number
+          property_id?: string
+          provider?: string
+          renewal_date?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      property_leases: {
+        Row: {
+          created_at: string
+          deposit: number | null
+          end_date: string | null
+          frequency: string
+          id: string
+          next_review: string | null
+          property_id: string
+          rent_pa: number
+          start_date: string | null
+          status: string
+          tenant_name: string
+        }
+        Insert: {
+          created_at?: string
+          deposit?: number | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          next_review?: string | null
+          property_id: string
+          rent_pa?: number
+          start_date?: string | null
+          status?: string
+          tenant_name: string
+        }
+        Update: {
+          created_at?: string
+          deposit?: number | null
+          end_date?: string | null
+          frequency?: string
+          id?: string
+          next_review?: string | null
+          property_id?: string
+          rent_pa?: number
+          start_date?: string | null
+          status?: string
+          tenant_name?: string
+        }
+        Relationships: []
+      }
+      property_rent_ledger: {
+        Row: {
+          amount_due: number
+          amount_received: number
+          created_at: string
+          due_date: string
+          id: string
+          lease_id: string
+          received_date: string | null
+          status: string
+        }
+        Insert: {
+          amount_due?: number
+          amount_received?: number
+          created_at?: string
+          due_date: string
+          id?: string
+          lease_id: string
+          received_date?: string | null
+          status?: string
+        }
+        Update: {
+          amount_due?: number
+          amount_received?: number
+          created_at?: string
+          due_date?: string
+          id?: string
+          lease_id?: string
+          received_date?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
       push_notifications: {
         Row: {
           body: string
@@ -2458,6 +3304,36 @@ export type Database = {
           read_at?: string | null
           sent_at?: string
           title?: string
+        }
+        Relationships: []
+      }
+      ras_reclaim_lines: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          net_contribution: number
+          ni_number: string | null
+          reclaim_amount: number
+          submission_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          net_contribution?: number
+          ni_number?: string | null
+          reclaim_amount?: number
+          submission_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          net_contribution?: number
+          ni_number?: string | null
+          reclaim_amount?: number
+          submission_id?: string
         }
         Relationships: []
       }
@@ -2578,6 +3454,54 @@ export type Database = {
         }
         Relationships: []
       }
+      scheme_pensions: {
+        Row: {
+          client_id: string
+          commencement_date: string
+          created_at: string
+          escalation_pct: number
+          gross_annual: number
+          guarantee_period_years: number
+          id: string
+          paid_to_date: number
+          pension_type: string
+          policy_ref: string | null
+          provider: string
+          spouse_pct: number
+          status: string
+        }
+        Insert: {
+          client_id: string
+          commencement_date: string
+          created_at?: string
+          escalation_pct?: number
+          gross_annual?: number
+          guarantee_period_years?: number
+          id?: string
+          paid_to_date?: number
+          pension_type?: string
+          policy_ref?: string | null
+          provider: string
+          spouse_pct?: number
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          commencement_date?: string
+          created_at?: string
+          escalation_pct?: number
+          gross_annual?: number
+          guarantee_period_years?: number
+          id?: string
+          paid_to_date?: number
+          pension_type?: string
+          policy_ref?: string | null
+          provider?: string
+          spouse_pct?: number
+          status?: string
+        }
+        Relationships: []
+      }
       secure_messages: {
         Row: {
           body: string
@@ -2646,6 +3570,156 @@ export type Database = {
           reference?: string | null
           settlement_date?: string
           settlement_type?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      ssas_loanbacks: {
+        Row: {
+          borrower_employer: string
+          charge_secured: string | null
+          created_at: string
+          fifty_pct_test_pass: boolean
+          id: string
+          interest_rate: number
+          notes: string | null
+          outstanding_balance: number
+          principal: number
+          scheme_id: string
+          start_date: string
+          status: string
+          term_months: number
+        }
+        Insert: {
+          borrower_employer: string
+          charge_secured?: string | null
+          created_at?: string
+          fifty_pct_test_pass?: boolean
+          id?: string
+          interest_rate?: number
+          notes?: string | null
+          outstanding_balance?: number
+          principal?: number
+          scheme_id: string
+          start_date: string
+          status?: string
+          term_months?: number
+        }
+        Update: {
+          borrower_employer?: string
+          charge_secured?: string | null
+          created_at?: string
+          fifty_pct_test_pass?: boolean
+          id?: string
+          interest_rate?: number
+          notes?: string | null
+          outstanding_balance?: number
+          principal?: number
+          scheme_id?: string
+          start_date?: string
+          status?: string
+          term_months?: number
+        }
+        Relationships: []
+      }
+      ssas_members: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          is_trustee: boolean
+          joined_date: string | null
+          scheme_id: string
+          share_pct: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          is_trustee?: boolean
+          joined_date?: string | null
+          scheme_id: string
+          share_pct?: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          is_trustee?: boolean
+          joined_date?: string | null
+          scheme_id?: string
+          share_pct?: number
+        }
+        Relationships: []
+      }
+      ssas_schemes: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          professional_trustee: string | null
+          registration_date: string | null
+          scheme_name: string
+          scheme_ref: string
+          sponsoring_employer: string
+          status: string
+          total_assets: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          professional_trustee?: string | null
+          registration_date?: string | null
+          scheme_name: string
+          scheme_ref: string
+          sponsoring_employer: string
+          status?: string
+          total_assets?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          professional_trustee?: string | null
+          registration_date?: string | null
+          scheme_name?: string
+          scheme_ref?: string
+          sponsoring_employer?: string
+          status?: string
+          total_assets?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      sso_configurations: {
+        Row: {
+          created_at: string
+          domain: string | null
+          firm_id: string | null
+          id: string
+          metadata_xml: string | null
+          provider: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          domain?: string | null
+          firm_id?: string | null
+          id?: string
+          metadata_xml?: string | null
+          provider?: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          domain?: string | null
+          firm_id?: string | null
+          id?: string
+          metadata_xml?: string | null
+          provider?: string
           status?: string
         }
         Relationships: []
@@ -3176,6 +4250,36 @@ export type Database = {
           events?: string[]
           id?: string
           secret?: string | null
+          status?: string
+          url?: string
+        }
+        Relationships: []
+      }
+      webhook_subscriptions: {
+        Row: {
+          api_key_id: string | null
+          created_at: string
+          events: string[]
+          id: string
+          secret: string
+          status: string
+          url: string
+        }
+        Insert: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret: string
+          status?: string
+          url: string
+        }
+        Update: {
+          api_key_id?: string | null
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret?: string
           status?: string
           url?: string
         }

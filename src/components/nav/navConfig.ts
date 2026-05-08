@@ -59,6 +59,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Account",
       items: [
+        { title: "Notifications", url: "/notifications", icon: Bell },
         { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "Settings", url: "/settings", icon: SettingsIcon },
       ],

@@ -38,6 +38,11 @@ export function CommandPalette() {
     { label: 'MI Dashboard', icon: TrendingUp, action: go('/mi'), group: 'Navigate' },
     { label: 'Model Portfolios', icon: Layers, action: go('/models'), group: 'Navigate' },
     { label: 'CASS Reconciliation', icon: ShieldCheck, action: go('/cass'), group: 'Navigate' },
+    { label: 'Client Services Hub', icon: PoundSterling, action: go('/client-services'), group: 'Navigate' },
+    { label: 'Adviser Workbench', icon: Briefcase, action: go('/workbench'), group: 'Navigate' },
+    { label: 'Dealing Desk', icon: TrendingUp, action: go('/dealing'), group: 'Navigate' },
+    { label: 'Reporting Suite', icon: FileText, action: go('/reporting'), group: 'Navigate' },
+    { label: 'Communications Hub', icon: Activity, action: go('/comms'), group: 'Navigate' },
     { label: 'Settings', icon: SettingsIcon, action: go('/settings'), group: 'Navigate' },
 
     { label: 'New transfer in', icon: Building2, action: go('/transfer'), group: 'Actions' },

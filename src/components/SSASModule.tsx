@@ -62,10 +62,10 @@ export default function SSASModule() {
       <PageHeader title="SSAS Administration" description="Small Self-Administered Schemes — member-trustees, loanbacks, and the 50% test." />
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard label="Schemes" value={schemes.length} icon={Building2} />
-        <StatCard label="Total assets under admin" value={formatGBP(totalAssets)} icon={Banknote} />
-        <StatCard label="Loanbacks outstanding" value={formatGBP(totalOutstanding)} icon={ArrowRight} />
-        <StatCard label="Members" value={members.length} icon={Users} />
+        <StatCard label="Schemes" value={schemes.length} />
+        <StatCard label="Total assets under admin" value={formatGBP(totalAssets)} />
+        <StatCard label="Loanbacks outstanding" value={formatGBP(totalOutstanding)} />
+        <StatCard label="Members" value={members.length} />
       </div>
 
       {breaches > 0 && (

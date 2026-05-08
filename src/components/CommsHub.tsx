@@ -21,6 +21,23 @@ const TEMPLATES = [
   { key: "consumer_duty", name: "Consumer Duty review", body: "Dear {{first_name}},\n\nAs part of our Consumer Duty obligations we have completed your annual fair-value review and confirm your products continue to deliver good outcomes.\n\nYours sincerely,\nThe Airgead Team" },
 ];
 
+async function dispatchEmail(params: { clientId: string; subject: string; body: string; category: string; messageId?: string | null; }) {
+  try {
+    const { data: c } = await supabase.from("clients").select("email, first_name, last_name").eq("id", params.clientId).maybeSingle();
+    const to = (c as any)?.email;
+    if (!to) return; // nothing to send to
+    await supabase.functions.invoke("send-email", {
+      body: {
+        to, subject: params.subject,
+        text: params.body,
+        html: `<div style="font-family:system-ui,sans-serif;line-height:1.5">${params.body.replace(/\n/g, "<br/>")}</div>`,
+        category: params.category, client_id: params.clientId, message_id: params.messageId ?? null,
+      },
+    });
+  } catch (_e) { /* swallow — function logs failures */ }
+}
+
+
 export default function CommsHub() {
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -63,8 +80,10 @@ function TemplateEngine() {
 
   const send = async () => {
     if (!clientId) return;
-    await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: TEMPLATES.find((t) => t.key === tplKey)?.name ?? "Comms", body: merged, status: "sent" } as any);
-    await supabase.from("activity_log").insert({ action: "comms_sent", entity_type: "client", entity_id: clientId, description: `Sent ${tplKey} comm` });
+    const subject = TEMPLATES.find((t) => t.key === tplKey)?.name ?? "Comms";
+    const { data: ins } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", recipient: "Client", subject, body: merged } as any).select("id").maybeSingle();
+    await supabase.from("activity_log").insert({ action: "comms_sent", entity_type: "client", entity_id: clientId, description: `Sent ${tplKey} comm`, performed_by: "Adviser", new_values: { template: tplKey, length: merged.length } } as any);
+    await dispatchEmail({ clientId, subject, body: merged, category: "secure_message", messageId: (ins as any)?.id });
     toast.success("Communication archived & sent");
   };
 
@@ -114,13 +133,15 @@ function SecureMessaging() {
   const send = async () => {
     if (!draft || !clientId) return;
     const res = await runWithToast(async () => {
-      const { error } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: "Reply", body: draft, status: "sent" } as any);
+      const { data: ins, error } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", recipient: "Client", subject: "Reply", body: draft } as any).select("id").maybeSingle();
       if (error) throw error;
       await supabase.from("activity_log").insert({
         action: "secure_message_sent", entity_type: "client", entity_id: clientId,
         description: `Secure reply sent (${draft.length} chars)`,
+        performed_by: "Adviser",
         new_values: { subject: "Reply", length: draft.length },
       } as any);
+      await dispatchEmail({ clientId, subject: "Reply", body: draft, category: "secure_message", messageId: (ins as any)?.id });
     }, { success: "Message sent" });
     if (res.ok) { setDraft(""); reload(); }
   };
@@ -170,18 +191,27 @@ function BulkStatementRun() {
 
   const run = async () => {
     setRunning(true); setProgress(0);
-    const { data: cs } = await supabase.from("clients").select("id, first_name, last_name");
+    const { data: cs } = await supabase.from("clients").select("id, first_name, last_name, email");
     const list = cs ?? [];
-    const rows = list.map((c) => ({ client_id: c.id, sender: "System", subject: "Annual benefit statement 2024/25", body: `Dear ${c.first_name}, your annual statement is attached.`, status: "dispatched" }));
-    // chunk inserts
+    const subject = "Annual benefit statement 2024/25";
+    const rows = list.map((c) => ({ client_id: c.id, sender: "System", recipient: "Client", subject, body: `Dear ${c.first_name}, your annual statement is attached.` }));
     for (let i = 0; i < rows.length; i += 25) {
       await supabase.from("secure_messages").insert(rows.slice(i, i + 25) as any);
       setProgress(Math.round(((i + 25) / rows.length) * 100));
     }
+    // Dispatch emails (in batches, fire-and-forget)
+    for (const c of list as any[]) {
+      if (c.email) {
+        supabase.functions.invoke("send-email", {
+          body: { to: c.email, subject, text: `Dear ${c.first_name}, your annual statement is attached.`, category: "statement", client_id: c.id },
+        });
+      }
+    }
     await supabase.from("activity_log").insert({
       action: "bulk_statement_run", entity_type: "comms", entity_id: null,
       description: `Bulk annual statement dispatch — ${rows.length} clients`,
-      new_values: { recipients: rows.length, subject: "Annual benefit statement 2024/25" },
+      performed_by: "System",
+      new_values: { recipients: rows.length, subject },
     } as any);
     setRunning(false); setProgress(100); toast.success(`${rows.length} statements dispatched`);
   };

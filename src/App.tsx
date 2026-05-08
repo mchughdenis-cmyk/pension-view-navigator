@@ -33,6 +33,13 @@ import APIDirectory from "./components/APIDirectory";
 import SystemOverview from "./components/SystemOverview";
 import PensionOperations from "./components/PensionOperations";
 import AuthPage from "./pages/Auth";
+import OperationsCockpit from "./components/OperationsCockpit";
+import MIDashboard from "./components/MIDashboard";
+import ModelPortfolios from "./components/ModelPortfolios";
+import CASSReconciliation from "./components/CASSReconciliation";
+import MonteCarloProjection from "./components/MonteCarloProjection";
+import FirmHierarchy from "./components/FirmHierarchy";
+import { CommandPalette } from "./components/CommandPalette";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +47,7 @@ const AppContent = () => {
   return (
     <BrowserRouter>
       <FloatingBackButton />
+      <CommandPalette />
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/overview" element={<ShowcaseWebsite />} />
@@ -74,6 +82,12 @@ const AppContent = () => {
         <Route path="/gia" element={<GIAPortfolio />} />
         <Route path="/client-admin/:clientId" element={<ClientAdminView />} />
         <Route path="/operations" element={<PensionOperations />} />
+        <Route path="/cockpit" element={<OperationsCockpit />} />
+        <Route path="/mi" element={<MIDashboard />} />
+        <Route path="/models" element={<ModelPortfolios />} />
+        <Route path="/cass" element={<CASSReconciliation />} />
+        <Route path="/projection" element={<MonteCarloProjection />} />
+        <Route path="/firms" element={<FirmHierarchy />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -11,3 +11,16 @@ verify_jwt = false
 
 [functions.integration-stub]
 verify_jwt = false
+
+[functions.rebalance-engine]
+verify_jwt = false
+
+[functions.corporate-actions-processor]
+verify_jwt = false
+
+[functions.monte-carlo-projection]
+verify_jwt = false
+
+[functions.cass-reconciliation]
+verify_jwt = false
+

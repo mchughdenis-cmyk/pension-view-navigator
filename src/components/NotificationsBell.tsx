@@ -35,12 +35,12 @@ export function NotificationsBell() {
         .order("created_at", { ascending: false }).limit(20),
     ]);
     const merged: Notification[] = [
-      ...((pushes ?? []) as any[]).map((p): Notification => ({ ...p, source: "push" })),
-      ...((msgs ?? []) as any[]).map((m): Notification => ({
+      ...((pushes ?? []) as any[]).map((p) => ({ ...p, source: "push" as const }) as Notification),
+      ...((msgs ?? []) as any[]).map((m) => ({
         id: m.id, client_id: m.client_id, title: m.subject || "New message",
         body: m.body, category: "message", read_at: m.read_at, sent_at: m.created_at,
-        source: "message",
-      })),
+        source: "message" as const,
+      }) as Notification),
     ].sort((a, b) => +new Date(b.sent_at) - +new Date(a.sent_at)).slice(0, 30);
     setItems(merged);
   };
@@ -52,7 +52,7 @@ export function NotificationsBell() {
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "push_notifications" },
         (p) => {
           const n = p.new as any;
-          setItems((prev) => [{ ...n, source: "push" }, ...prev].slice(0, 30));
+          setItems((prev) => [{ ...n, source: "push" as const } as Notification, ...prev].slice(0, 30));
           toast({ title: n.title, description: n.body });
         })
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "secure_messages" },
@@ -61,8 +61,8 @@ export function NotificationsBell() {
           setItems((prev) => [{
             id: m.id, client_id: m.client_id, title: m.subject || "New message",
             body: m.body, category: "message", read_at: m.read_at, sent_at: m.created_at,
-            source: "message",
-          }, ...prev].slice(0, 30));
+            source: "message" as const,
+          } as Notification, ...prev].slice(0, 30));
           toast({ title: "New message", description: m.subject || m.body.slice(0, 60) });
         })
       .subscribe();

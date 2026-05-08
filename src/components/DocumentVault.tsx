@@ -158,7 +158,7 @@ export default function DocumentVault() {
           <AsyncState
             loading={loading}
             error={error}
-            empty={!loading && !error && docs.length === 0}
+            isEmpty={!loading && !error && docs.length === 0}
             onRetry={load}
             emptyTitle="No documents yet"
             emptyDescription="Upload a document above to get started."

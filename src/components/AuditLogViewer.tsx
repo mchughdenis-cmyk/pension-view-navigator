@@ -109,7 +109,7 @@ export default function AuditLogViewer() {
           <AsyncState
             loading={loading}
             error={error}
-            empty={!loading && !error && filtered.length === 0}
+            isEmpty={!loading && !error && filtered.length === 0}
             onRetry={load}
             emptyTitle="No matching audit entries"
             emptyDescription="Try clearing filters or trigger an action elsewhere in the app."

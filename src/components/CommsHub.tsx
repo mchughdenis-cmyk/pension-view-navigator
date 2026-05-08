@@ -177,6 +177,11 @@ function BulkStatementRun() {
       await supabase.from("secure_messages").insert(rows.slice(i, i + 25) as any);
       setProgress(Math.round(((i + 25) / rows.length) * 100));
     }
+    await supabase.from("activity_log").insert({
+      action: "bulk_statement_run", entity_type: "comms", entity_id: null,
+      description: `Bulk annual statement dispatch — ${rows.length} clients`,
+      new_values: { recipients: rows.length, subject: "Annual benefit statement 2024/25" },
+    } as any);
     setRunning(false); setProgress(100); toast.success(`${rows.length} statements dispatched`);
   };
 

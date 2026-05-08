@@ -135,13 +135,24 @@ export default function CashOnboarding() {
         description="Fund your pension via Open Banking, Direct Debit or one-off payment. Mock integrations for TrueLayer and GoCardless."
       />
 
-      <Tabs defaultValue="aisp">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="aisp"><Building2 className="w-4 h-4 mr-2" />Link bank</TabsTrigger>
-          <TabsTrigger value="pisp"><Zap className="w-4 h-4 mr-2" />One-off pay</TabsTrigger>
-          <TabsTrigger value="dd"><Repeat className="w-4 h-4 mr-2" />Direct Debit</TabsTrigger>
-          <TabsTrigger value="status"><ShieldCheck className="w-4 h-4 mr-2" />Status</TabsTrigger>
-        </TabsList>
+      <ResumeBanner
+        show={resumeOpen}
+        savedAt={savedAt}
+        onResume={() => { setResumeOpen(false); toast.success("Welcome back — your details are restored"); }}
+        onDiscard={handleDiscard}
+        label="Resume cash onboarding"
+      />
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+            <TabsTrigger value="aisp"><Building2 className="w-4 h-4 mr-2" />Link bank</TabsTrigger>
+            <TabsTrigger value="pisp"><Zap className="w-4 h-4 mr-2" />One-off pay</TabsTrigger>
+            <TabsTrigger value="dd"><Repeat className="w-4 h-4 mr-2" />Direct Debit</TabsTrigger>
+            <TabsTrigger value="status"><ShieldCheck className="w-4 h-4 mr-2" />Status</TabsTrigger>
+          </TabsList>
+          <SavedIndicator savedAt={savedAt} />
+        </div>
 
         <TabsContent value="aisp" className="space-y-4">
           <Card>

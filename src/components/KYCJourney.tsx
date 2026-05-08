@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useDraft, loadDraft } from "@/hooks/useDraft";
 import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
+import { Notifications } from "@/lib/notifications";
 
 const STEPS = [
   { id: "personal",  label: "Personal details", icon: IdCard },
@@ -140,6 +141,11 @@ export default function KYCJourney() {
         status: overall, risk_score: score, risk_level: score >= 60 ? "medium" : "low",
         completed_at: new Date().toISOString(),
       }).eq("id", caseId);
+    }
+    if (overall === "verified") {
+      Notifications.kycApproved(score, caseId ?? undefined);
+    } else {
+      Notifications.kycReview(score, "A potential PEP near-match was found.", caseId ?? undefined);
     }
     setRunning(false);
     setStep("decision");

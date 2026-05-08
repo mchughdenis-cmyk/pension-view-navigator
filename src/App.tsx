@@ -41,6 +41,11 @@ import MonteCarloProjection from "./components/MonteCarloProjection";
 import FirmHierarchy from "./components/FirmHierarchy";
 import { CommandPalette } from "./components/CommandPalette";
 import EnterpriseSuite from "./components/EnterpriseSuite";
+import ClientServicesHub from "./components/ClientServicesHub";
+import AdviserWorkbench from "./components/AdviserWorkbench";
+import DealingDesk from "./components/DealingDesk";
+import ReportingSuite from "./components/ReportingSuite";
+import CommsHub from "./components/CommsHub";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +95,11 @@ const AppContent = () => {
         <Route path="/projection" element={<MonteCarloProjection />} />
         <Route path="/firms" element={<FirmHierarchy />} />
         <Route path="/enterprise" element={<EnterpriseSuite />} />
+        <Route path="/client-services" element={<ClientServicesHub />} />
+        <Route path="/workbench" element={<AdviserWorkbench />} />
+        <Route path="/dealing" element={<DealingDesk />} />
+        <Route path="/reporting" element={<ReportingSuite />} />
+        <Route path="/comms" element={<CommsHub />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

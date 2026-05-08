@@ -44,9 +44,22 @@ const PensionIllustration = () => {
     inflationRate: 2.5
   });
 
-  const updateInput = (key: keyof IllustrationInputs, value: number) => {
-    setInputs(prev => ({ ...prev, [key]: value }));
-  };
+  const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [
+    { name: "Cautious retiree", tag: "Low risk", description: "£250k pot, 4% drawdown, 3% growth — preserves capital.",
+      inputs: { potValue: 250000, currentAge: 60, retirementAge: 65, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 3, annuityRate: 5.4, inflationRate: 2.5 } },
+    { name: "Balanced 65", tag: "Typical", description: "£500k pot retiring at 65 with 5% growth and 4% income.",
+      inputs: { potValue: 500000, currentAge: 60, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 5, annuityRate: 5.6, inflationRate: 2.5 } },
+    { name: "Early retiree FIRE", tag: "Aggressive", description: "Retire at 57 with £750k, 3.5% safe-withdrawal rate.",
+      inputs: { potValue: 750000, currentAge: 55, retirementAge: 57, lifeExpectancy: 92, drawdownRate: 3.5, annualGrowth: 6, annuityRate: 4.8, inflationRate: 2.5 } },
+    { name: "High net worth", tag: "Wealth", description: "£1.25m pot, 4.5% drawdown, growth-oriented portfolio.",
+      inputs: { potValue: 1250000, currentAge: 58, retirementAge: 62, lifeExpectancy: 90, drawdownRate: 4.5, annualGrowth: 6, annuityRate: 5.0, inflationRate: 2.5 } },
+    { name: "Modest pot top-up", tag: "Catch-up", description: "£90k pot at 62, conservative growth & sustainable income.",
+      inputs: { potValue: 90000, currentAge: 62, retirementAge: 67, lifeExpectancy: 85, drawdownRate: 5, annualGrowth: 4, annuityRate: 6.0, inflationRate: 2.5 } },
+    { name: "Annuity comparator", tag: "Secure income", description: "£400k pot, 6% annuity vs 4% drawdown.",
+      inputs: { potValue: 400000, currentAge: 65, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 4.5, annuityRate: 6.0, inflationRate: 2.5 } },
+  ];
+
+  const loadScenario = (s: IllustrationInputs) => setInputs(s);
 
   // Calculate projections
   const calculateProjections = () => {

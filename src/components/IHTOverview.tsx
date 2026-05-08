@@ -117,7 +117,7 @@ export default function IHTOverview() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       <PageHeader
         title="Inheritance Tax overview"
-        subtitle={`Modelling the impact of pension inclusion in the estate from ${REFORM_DATE}`}
+        description={`Modelling the impact of pension inclusion in the estate from ${REFORM_DATE}`}
       />
 
       <Alert>

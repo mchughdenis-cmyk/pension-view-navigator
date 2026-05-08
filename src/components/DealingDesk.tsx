@@ -46,13 +46,19 @@ function TradeTicket() {
     const checks = {
       pre_trade_compliance: "passed", concentration_check: "ok", sanctions: "clear",
     };
-    const { error } = await supabase.from("trade_blocks").insert({
+    const { data, error } = await supabase.from("trade_blocks").insert({
       symbol, side, total_units: Number(qty), order_type: orderType,
       limit_price: limit ? Number(limit) : null, status: aggregating ? "pending_aggregation" : "ready_to_route",
       compliance_checks: checks,
-    } as any);
+    } as any).select("id").maybeSingle();
     setSubmitting(false);
-    if (error) toast.error(error.message); else toast.success(`${side.toUpperCase()} ${qty} ${symbol} ticket created`);
+    if (error) { toast.error(error.message); return; }
+    await supabase.from("activity_log").insert({
+      action: "trade_ticket_submitted", entity_type: "trade_block", entity_id: (data as any)?.id ?? null,
+      description: `${side.toUpperCase()} ${qty} ${symbol} (${orderType}${limit ? ` @£${limit}` : ""})`,
+      new_values: { symbol, side, units: Number(qty), order_type: orderType, limit_price: limit ? Number(limit) : null, aggregating },
+    } as any);
+    toast.success(`${side.toUpperCase()} ${qty} ${symbol} ticket created`);
   };
 
   return (

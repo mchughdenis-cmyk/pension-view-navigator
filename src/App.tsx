@@ -49,13 +49,29 @@ import CommsHub from "./components/CommsHub";
 
 const queryClient = new QueryClient();
 
+import { RoleGate } from "./components/RoleGate";
+import { RoleSwitcher } from "./components/RoleSwitcher";
+import { useRole } from "./contexts/RoleContext";
+
+const HomeRedirect = () => {
+  const { role } = useRole();
+  return <Navigate to={role === 'client' ? '/client-services' : '/dashboard'} replace />;
+};
+
+const DashboardRoute = () => {
+  const { role } = useRole();
+  if (role === 'client') return <Navigate to="/client-services" replace />;
+  return <ClientProductsDashboard />;
+};
+
 const AppContent = () => {
   return (
     <BrowserRouter>
       <FloatingBackButton />
       <CommandPalette />
+      <RoleSwitcher />
       <Routes>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/" element={<HomeRedirect />} />
         <Route path="/overview" element={<ShowcaseWebsite />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
@@ -66,10 +82,10 @@ const AppContent = () => {
         <Route path="/api-directory" element={<APIDirectory />} />
         <Route path="/system-overview" element={<SystemOverview />} />
 
-        {/* All routes - no login required */}
-        <Route path="/dashboard" element={<ClientProductsDashboard />} />
+        {/* Role-gated dashboard: clients are routed to client-services */}
+        <Route path="/dashboard" element={<DashboardRoute />} />
         <Route path="/portfolio" element={<Index />} />
-        <Route path="/admin" element={<Admin />} />
+        <Route path="/admin" element={<RoleGate allow={['admin']}><Admin /></RoleGate>} />
         <Route path="/illustration" element={<PensionIllustration />} />
         <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
         <Route path="/transfer" element={<PensionTransferJourney />} />
@@ -86,20 +102,20 @@ const AppContent = () => {
         <Route path="/payments" element={<PaymentProvider />} />
         <Route path="/isa" element={<ISAPortfolio />} />
         <Route path="/gia" element={<GIAPortfolio />} />
-        <Route path="/client-admin/:clientId" element={<ClientAdminView />} />
-        <Route path="/operations" element={<PensionOperations />} />
-        <Route path="/cockpit" element={<OperationsCockpit />} />
-        <Route path="/mi" element={<MIDashboard />} />
-        <Route path="/models" element={<ModelPortfolios />} />
-        <Route path="/cass" element={<CASSReconciliation />} />
+        <Route path="/client-admin/:clientId" element={<RoleGate allow={['adviser', 'admin']}><ClientAdminView /></RoleGate>} />
+        <Route path="/operations" element={<RoleGate allow={['adviser', 'admin']}><PensionOperations /></RoleGate>} />
+        <Route path="/cockpit" element={<RoleGate allow={['adviser', 'admin']}><OperationsCockpit /></RoleGate>} />
+        <Route path="/mi" element={<RoleGate allow={['adviser', 'admin']}><MIDashboard /></RoleGate>} />
+        <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
+        <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />
         <Route path="/projection" element={<MonteCarloProjection />} />
-        <Route path="/firms" element={<FirmHierarchy />} />
-        <Route path="/enterprise" element={<EnterpriseSuite />} />
-        <Route path="/client-services" element={<ClientServicesHub />} />
-        <Route path="/workbench" element={<AdviserWorkbench />} />
-        <Route path="/dealing" element={<DealingDesk />} />
-        <Route path="/reporting" element={<ReportingSuite />} />
-        <Route path="/comms" element={<CommsHub />} />
+        <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
+        <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />
+        <Route path="/client-services" element={<RoleGate allow={['client', 'adviser', 'admin']}><ClientServicesHub /></RoleGate>} />
+        <Route path="/workbench" element={<RoleGate allow={['adviser', 'admin']}><AdviserWorkbench /></RoleGate>} />
+        <Route path="/dealing" element={<RoleGate allow={['adviser', 'admin']}><DealingDesk /></RoleGate>} />
+        <Route path="/reporting" element={<RoleGate allow={['adviser', 'admin']}><ReportingSuite /></RoleGate>} />
+        <Route path="/comms" element={<RoleGate allow={['adviser', 'admin']}><CommsHub /></RoleGate>} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

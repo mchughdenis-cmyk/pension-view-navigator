@@ -30,6 +30,7 @@ import KYCVerification from "./components/KYCVerification";
 import KYCJourney from "./components/KYCJourney";
 import KYCReview from "./components/KYCReview";
 import CashOnboarding from "./components/CashOnboarding";
+import WebhookSandbox from "./components/WebhookSandbox";
 import OnboardingTracker from "./components/OnboardingTracker";
 import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
@@ -123,6 +124,7 @@ const AppContent = () => {
               <Route path="/kyc-classic" element={<KYCVerification />} />
               <Route path="/kyc-review" element={<RoleGate allow={['adviser', 'admin']}><KYCReview /></RoleGate>} />
               <Route path="/cash-onboarding" element={<CashOnboarding />} />
+              <Route path="/webhook-sandbox" element={<WebhookSandbox />} />
               <Route path="/onboarding-progress" element={<OnboardingTracker />} />
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />

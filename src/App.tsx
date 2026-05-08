@@ -13,7 +13,7 @@ import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
 import PensionTransferJourney from "./components/PensionTransferJourney";
-import PensionSystemPitch from "./components/PensionSystemPitch";
+
 import ClientOnboarding from "./components/ClientOnboarding";
 import DrawdownJourney from "./components/DrawdownJourney";
 import DripFeedDrawdown from "./components/DripFeedDrawdown";

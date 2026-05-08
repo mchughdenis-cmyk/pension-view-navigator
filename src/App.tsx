@@ -32,6 +32,7 @@ import ClientAdminView from "./components/ClientAdminView";
 import APIDirectory from "./components/APIDirectory";
 import SystemOverview from "./components/SystemOverview";
 import PensionOperations from "./components/PensionOperations";
+import AuthPage from "./pages/Auth";
 
 const queryClient = new QueryClient();
 
@@ -42,8 +43,9 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="/overview" element={<ShowcaseWebsite />} />
-        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/admin-login" element={<Navigate to="/admin" replace />} />
+        <Route path="/auth" element={<AuthPage />} />
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<PensionSystemPitch />} />
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/documentation" element={<SystemDocumentation />} />

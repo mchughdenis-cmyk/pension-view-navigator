@@ -1,1 +1,13 @@
 project_id = "hzmkgkgrelxwmkswdkyw"
+
+[functions.daily-valuations]
+verify_jwt = false
+
+[functions.monthly-fees]
+verify_jwt = false
+
+[functions.annual-statements]
+verify_jwt = false
+
+[functions.integration-stub]
+verify_jwt = false

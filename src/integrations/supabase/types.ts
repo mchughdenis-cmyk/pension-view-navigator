@@ -469,6 +469,60 @@ export type Database = {
           },
         ]
       }
+      contributions: {
+        Row: {
+          account_id: string
+          client_id: string
+          contribution_type: string
+          created_at: string
+          effective_date: string
+          gross_amount: number
+          id: string
+          net_amount: number
+          notes: string | null
+          reference: string | null
+          relief_method: string
+          status: string
+          tax_relief: number
+          tax_year: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          client_id: string
+          contribution_type?: string
+          created_at?: string
+          effective_date?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          reference?: string | null
+          relief_method?: string
+          status?: string
+          tax_relief?: number
+          tax_year?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          client_id?: string
+          contribution_type?: string
+          created_at?: string
+          effective_date?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          reference?: string | null
+          relief_method?: string
+          status?: string
+          tax_relief?: number
+          tax_year?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       crystallisation_segments: {
         Row: {
           account_id: string
@@ -535,6 +589,159 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      death_benefit_payments: {
+        Row: {
+          beneficiary_id: string | null
+          beneficiary_name: string
+          client_id: string
+          created_at: string
+          death_claim_id: string
+          gross_amount: number
+          id: string
+          net_amount: number
+          notes: string | null
+          paid_date: string | null
+          payment_type: string
+          status: string
+          tax_amount: number
+          updated_at: string
+        }
+        Insert: {
+          beneficiary_id?: string | null
+          beneficiary_name: string
+          client_id: string
+          created_at?: string
+          death_claim_id: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          paid_date?: string | null
+          payment_type?: string
+          status?: string
+          tax_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          beneficiary_id?: string | null
+          beneficiary_name?: string
+          client_id?: string
+          created_at?: string
+          death_claim_id?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          notes?: string | null
+          paid_date?: string | null
+          payment_type?: string
+          status?: string
+          tax_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      death_claims: {
+        Row: {
+          cause_of_death: string | null
+          client_id: string
+          created_at: string
+          date_of_death: string
+          id: string
+          notes: string | null
+          notified_date: string
+          pre_75: boolean
+          status: string
+          total_pot_value: number
+          updated_at: string
+        }
+        Insert: {
+          cause_of_death?: string | null
+          client_id: string
+          created_at?: string
+          date_of_death: string
+          id?: string
+          notes?: string | null
+          notified_date?: string
+          pre_75?: boolean
+          status?: string
+          total_pot_value?: number
+          updated_at?: string
+        }
+        Update: {
+          cause_of_death?: string | null
+          client_id?: string
+          created_at?: string
+          date_of_death?: string
+          id?: string
+          notes?: string | null
+          notified_date?: string
+          pre_75?: boolean
+          status?: string
+          total_pot_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fee_charges: {
+        Row: {
+          account_id: string
+          amount: number
+          basis: string
+          charged_date: string
+          client_id: string
+          created_at: string
+          description: string | null
+          fee_type: string
+          id: string
+          period_end: string | null
+          period_start: string | null
+          rate: number
+          reference: string | null
+          status: string
+          total: number
+          updated_at: string
+          vat: number
+        }
+        Insert: {
+          account_id: string
+          amount?: number
+          basis?: string
+          charged_date?: string
+          client_id: string
+          created_at?: string
+          description?: string | null
+          fee_type?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          rate?: number
+          reference?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+          vat?: number
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          basis?: string
+          charged_date?: string
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          fee_type?: string
+          id?: string
+          period_end?: string | null
+          period_start?: string | null
+          rate?: number
+          reference?: string | null
+          status?: string
+          total?: number
+          updated_at?: string
+          vat?: number
+        }
+        Relationships: []
       }
       fee_schedules: {
         Row: {
@@ -643,6 +850,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      statements: {
+        Row: {
+          account_id: string | null
+          client_id: string
+          closing_value: number
+          contributions_total: number
+          created_at: string
+          fees_total: number
+          generated_date: string
+          growth: number
+          id: string
+          opening_value: number
+          payload: Json | null
+          period_end: string
+          period_start: string
+          statement_type: string
+          status: string
+          withdrawals_total: number
+        }
+        Insert: {
+          account_id?: string | null
+          client_id: string
+          closing_value?: number
+          contributions_total?: number
+          created_at?: string
+          fees_total?: number
+          generated_date?: string
+          growth?: number
+          id?: string
+          opening_value?: number
+          payload?: Json | null
+          period_end: string
+          period_start: string
+          statement_type?: string
+          status?: string
+          withdrawals_total?: number
+        }
+        Update: {
+          account_id?: string | null
+          client_id?: string
+          closing_value?: number
+          contributions_total?: number
+          created_at?: string
+          fees_total?: number
+          generated_date?: string
+          growth?: number
+          id?: string
+          opening_value?: number
+          payload?: Json | null
+          period_end?: string
+          period_start?: string
+          statement_type?: string
+          status?: string
+          withdrawals_total?: number
+        }
+        Relationships: []
       }
       trade_orders: {
         Row: {
@@ -778,6 +1042,111 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      transfers_in: {
+        Row: {
+          account_id: string | null
+          ceding_provider: string | null
+          ceding_scheme_name: string
+          ceding_scheme_ref: string | null
+          client_id: string
+          completed_date: string | null
+          contains_protected_tax_free_cash: boolean
+          contains_safeguarded_benefits: boolean
+          created_at: string
+          estimated_value: number
+          id: string
+          notes: string | null
+          origo_used: boolean
+          protected_tax_free_cash_pct: number | null
+          received_value: number | null
+          request_date: string
+          status: string
+          transfer_type: string
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          ceding_provider?: string | null
+          ceding_scheme_name: string
+          ceding_scheme_ref?: string | null
+          client_id: string
+          completed_date?: string | null
+          contains_protected_tax_free_cash?: boolean
+          contains_safeguarded_benefits?: boolean
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          notes?: string | null
+          origo_used?: boolean
+          protected_tax_free_cash_pct?: number | null
+          received_value?: number | null
+          request_date?: string
+          status?: string
+          transfer_type?: string
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          ceding_provider?: string | null
+          ceding_scheme_name?: string
+          ceding_scheme_ref?: string | null
+          client_id?: string
+          completed_date?: string | null
+          contains_protected_tax_free_cash?: boolean
+          contains_safeguarded_benefits?: boolean
+          created_at?: string
+          estimated_value?: number
+          id?: string
+          notes?: string | null
+          origo_used?: boolean
+          protected_tax_free_cash_pct?: number | null
+          received_value?: number | null
+          request_date?: string
+          status?: string
+          transfer_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      valuations: {
+        Row: {
+          account_id: string
+          cash_balance: number
+          client_id: string
+          created_at: string
+          id: string
+          investments_value: number
+          notes: string | null
+          source: string
+          total_value: number
+          valuation_date: string
+        }
+        Insert: {
+          account_id: string
+          cash_balance?: number
+          client_id: string
+          created_at?: string
+          id?: string
+          investments_value?: number
+          notes?: string | null
+          source?: string
+          total_value?: number
+          valuation_date?: string
+        }
+        Update: {
+          account_id?: string
+          cash_balance?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          investments_value?: number
+          notes?: string | null
+          source?: string
+          total_value?: number
+          valuation_date?: string
+        }
+        Relationships: []
       }
       workflow_definitions: {
         Row: {

@@ -344,6 +344,45 @@ export type Database = {
           },
         ]
       }
+      client_documents: {
+        Row: {
+          client_id: string
+          created_at: string
+          document_type: string
+          filename: string
+          id: string
+          mime_type: string | null
+          notes: string | null
+          size_bytes: number | null
+          storage_path: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          document_type?: string
+          filename: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          size_bytes?: number | null
+          storage_path: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          document_type?: string
+          filename?: string
+          id?: string
+          mime_type?: string | null
+          notes?: string | null
+          size_bytes?: number | null
+          storage_path?: string
+          uploaded_by?: string | null
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           address_line1: string | null
@@ -785,6 +824,42 @@ export type Database = {
         }
         Relationships: []
       }
+      integration_log: {
+        Row: {
+          created_at: string
+          duration_ms: number | null
+          endpoint: string
+          error_message: string | null
+          id: string
+          provider: string
+          request_payload: Json | null
+          response_payload: Json | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint: string
+          error_message?: string | null
+          id?: string
+          provider: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          duration_ms?: number | null
+          endpoint?: string
+          error_message?: string | null
+          id?: string
+          provider?: string
+          request_payload?: Json | null
+          response_payload?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
       investments: {
         Row: {
           account_id: string
@@ -850,6 +925,120 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      kyc_records: {
+        Row: {
+          address_check: boolean | null
+          checked_at: string | null
+          client_id: string
+          created_at: string
+          id: string
+          identity_check: boolean | null
+          pep_sanctions_check: boolean | null
+          provider: string
+          raw_result: Json | null
+          reference: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_check?: boolean | null
+          checked_at?: string | null
+          client_id: string
+          created_at?: string
+          id?: string
+          identity_check?: boolean | null
+          pep_sanctions_check?: boolean | null
+          provider?: string
+          raw_result?: Json | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_check?: boolean | null
+          checked_at?: string | null
+          client_id?: string
+          created_at?: string
+          id?: string
+          identity_check?: boolean | null
+          pep_sanctions_check?: boolean | null
+          provider?: string
+          raw_result?: Json | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      market_prices: {
+        Row: {
+          created_at: string
+          currency: string
+          fund_name: string | null
+          id: string
+          isin: string | null
+          price: number
+          price_date: string
+          sedol: string | null
+          source: string
+          symbol: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          fund_name?: string | null
+          id?: string
+          isin?: string | null
+          price?: number
+          price_date?: string
+          sedol?: string | null
+          source?: string
+          symbol: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          fund_name?: string | null
+          id?: string
+          isin?: string | null
+          price?: number
+          price_date?: string
+          sedol?: string | null
+          source?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          client_id: string | null
+          created_at: string
+          display_name: string | null
+          id: string
+          is_demo: boolean
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          client_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          id: string
+          is_demo?: boolean
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          client_id?: string | null
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          is_demo?: boolean
+          updated_at?: string
+        }
+        Relationships: []
       }
       statements: {
         Row: {
@@ -1109,6 +1298,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       valuations: {
         Row: {
           account_id: string
@@ -1198,10 +1408,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "adviser" | "client" | "demo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1328,6 +1544,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "adviser", "client", "demo"],
+    },
   },
 } as const

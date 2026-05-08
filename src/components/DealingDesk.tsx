@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/nav/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,10 +15,10 @@ import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state"
 export default function DealingDesk() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Dealing Desk</h1>
-        <p className="text-muted-foreground">Trade tickets, allocation workbench, corporate actions and income processing.</p>
-      </div>
+      <PageHeader
+        title="Dealing desk"
+        description="Trade tickets, allocation workbench, corporate actions and income processing."
+      />
       <Tabs defaultValue="ticket">
         <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="ticket">Trade ticket</TabsTrigger>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/nav/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,10 +24,10 @@ const TEMPLATES = [
 export default function CommsHub() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Communications Hub</h1>
-        <p className="text-muted-foreground">Templated comms, secure messaging, and bulk annual statement runs.</p>
-      </div>
+      <PageHeader
+        title="Communications hub"
+        description="Templated comms, secure messaging, and bulk annual statement runs."
+      />
       <Tabs defaultValue="templates">
         <TabsList className="grid grid-cols-3 w-full">
           <TabsTrigger value="templates"><FileText className="h-4 w-4 mr-1" />Templates</TabsTrigger>

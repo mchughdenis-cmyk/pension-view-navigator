@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ShowcaseWebsite from "./components/ShowcaseWebsite";
 import { FloatingBackButton } from "./components/ui/floating-back-button";
+import { AppShell } from "./components/nav/AppShell";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -69,55 +70,60 @@ const AppContent = () => {
     <BrowserRouter>
       <FloatingBackButton />
       <CommandPalette />
-      <RoleSwitcher />
       <Routes>
-        <Route path="/" element={<HomeRedirect />} />
+        {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<PensionSystemPitch />} />
         <Route path="/demo" element={<SystemDemo />} />
-        <Route path="/documentation" element={<SystemDocumentation />} />
-        <Route path="/api-directory" element={<APIDirectory />} />
-        <Route path="/system-overview" element={<SystemOverview />} />
 
-        {/* Role-gated dashboard: clients are routed to client-services */}
-        <Route path="/dashboard" element={<DashboardRoute />} />
-        <Route path="/portfolio" element={<Index />} />
-        <Route path="/admin" element={<RoleGate allow={['admin']}><Admin /></RoleGate>} />
-        <Route path="/illustration" element={<PensionIllustration />} />
-        <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
-        <Route path="/transfer" element={<PensionTransferJourney />} />
-        <Route path="/onboarding" element={<ClientOnboarding />} />
-        <Route path="/drawdown" element={<DrawdownJourney />} />
-        <Route path="/drip-feed" element={<DripFeedDrawdown />} />
-        <Route path="/transfer-out" element={<TransferOutJourney />} />
-        <Route path="/annual-summary" element={<AnnualSummary />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
-        <Route path="/learning" element={<LearningCentre />} />
-        <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
-        <Route path="/kyc" element={<KYCVerification />} />
-        <Route path="/payments" element={<PaymentProvider />} />
-        <Route path="/isa" element={<ISAPortfolio />} />
-        <Route path="/gia" element={<GIAPortfolio />} />
-        <Route path="/client-admin/:clientId" element={<RoleGate allow={['adviser', 'admin']}><ClientAdminView /></RoleGate>} />
-        <Route path="/operations" element={<RoleGate allow={['adviser', 'admin']}><PensionOperations /></RoleGate>} />
-        <Route path="/cockpit" element={<RoleGate allow={['adviser', 'admin']}><OperationsCockpit /></RoleGate>} />
-        <Route path="/mi" element={<RoleGate allow={['adviser', 'admin']}><MIDashboard /></RoleGate>} />
-        <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
-        <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />
-        <Route path="/projection" element={<MonteCarloProjection />} />
-        <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
-        <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />
-        <Route path="/client-services" element={<RoleGate allow={['client', 'adviser', 'admin']}><ClientServicesHub /></RoleGate>} />
-        <Route path="/workbench" element={<RoleGate allow={['adviser', 'admin']}><AdviserWorkbench /></RoleGate>} />
-        <Route path="/dealing" element={<RoleGate allow={['adviser', 'admin']}><DealingDesk /></RoleGate>} />
-        <Route path="/reporting" element={<RoleGate allow={['adviser', 'admin']}><ReportingSuite /></RoleGate>} />
-        <Route path="/comms" element={<RoleGate allow={['adviser', 'admin']}><CommsHub /></RoleGate>} />
-        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-        <Route path="*" element={<NotFound />} />
+        {/* App routes — wrapped in shell */}
+        <Route path="*" element={
+          <AppShell>
+            <Routes>
+              <Route path="/" element={<HomeRedirect />} />
+              <Route path="/documentation" element={<SystemDocumentation />} />
+              <Route path="/api-directory" element={<APIDirectory />} />
+              <Route path="/system-overview" element={<SystemOverview />} />
+              <Route path="/dashboard" element={<DashboardRoute />} />
+              <Route path="/portfolio" element={<Index />} />
+              <Route path="/admin" element={<RoleGate allow={['admin']}><Admin /></RoleGate>} />
+              <Route path="/illustration" element={<PensionIllustration />} />
+              <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
+              <Route path="/transfer" element={<PensionTransferJourney />} />
+              <Route path="/onboarding" element={<ClientOnboarding />} />
+              <Route path="/drawdown" element={<DrawdownJourney />} />
+              <Route path="/drip-feed" element={<DripFeedDrawdown />} />
+              <Route path="/transfer-out" element={<TransferOutJourney />} />
+              <Route path="/annual-summary" element={<AnnualSummary />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
+              <Route path="/learning" element={<LearningCentre />} />
+              <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
+              <Route path="/kyc" element={<KYCVerification />} />
+              <Route path="/payments" element={<PaymentProvider />} />
+              <Route path="/isa" element={<ISAPortfolio />} />
+              <Route path="/gia" element={<GIAPortfolio />} />
+              <Route path="/client-admin/:clientId" element={<RoleGate allow={['adviser', 'admin']}><ClientAdminView /></RoleGate>} />
+              <Route path="/operations" element={<RoleGate allow={['adviser', 'admin']}><PensionOperations /></RoleGate>} />
+              <Route path="/cockpit" element={<RoleGate allow={['adviser', 'admin']}><OperationsCockpit /></RoleGate>} />
+              <Route path="/mi" element={<RoleGate allow={['adviser', 'admin']}><MIDashboard /></RoleGate>} />
+              <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
+              <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />
+              <Route path="/projection" element={<MonteCarloProjection />} />
+              <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
+              <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />
+              <Route path="/client-services" element={<RoleGate allow={['client', 'adviser', 'admin']}><ClientServicesHub /></RoleGate>} />
+              <Route path="/workbench" element={<RoleGate allow={['adviser', 'admin']}><AdviserWorkbench /></RoleGate>} />
+              <Route path="/dealing" element={<RoleGate allow={['adviser', 'admin']}><DealingDesk /></RoleGate>} />
+              <Route path="/reporting" element={<RoleGate allow={['adviser', 'admin']}><ReportingSuite /></RoleGate>} />
+              <Route path="/comms" element={<RoleGate allow={['adviser', 'admin']}><CommsHub /></RoleGate>} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppShell>
+        } />
       </Routes>
     </BrowserRouter>
   );

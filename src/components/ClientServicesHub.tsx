@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/nav/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -30,19 +31,19 @@ export default function ClientServicesHub() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Client Services</h1>
-          <p className="text-muted-foreground">Self-service wizards: contributions, drawdown, transfers, beneficiaries and documents.</p>
-        </div>
-        <div className="w-72">
-          <Label className="text-xs">Acting for client</Label>
-          <Select value={clientId} onValueChange={setClientId}>
-            <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
-            <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}</SelectContent>
-          </Select>
-        </div>
-      </div>
+      <PageHeader
+        title="Client services"
+        description="Self-service wizards: contributions, drawdown, transfers, beneficiaries and documents."
+        actions={
+          <div className="w-72">
+            <Label className="text-xs">Acting for client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger><SelectValue placeholder="Select client" /></SelectTrigger>
+              <SelectContent>{clients.map((c) => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}</SelectContent>
+            </Select>
+          </div>
+        }
+      />
 
       <Tabs defaultValue="contribution">
         <TabsList className="grid grid-cols-5 w-full">

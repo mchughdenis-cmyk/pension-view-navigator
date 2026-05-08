@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PageHeader } from "@/components/nav/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -102,16 +103,16 @@ export default function EnterpriseSuite() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Enterprise Suite</h1>
-          <p className="text-muted-foreground">Dealing · Cash · Tax · Statements · Workflow · Documents · Adviser · Client · API · ESG · AI</p>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button onClick={runPaye} disabled={busy === "paye"} variant="outline" size="sm">{busy === "paye" ? "Calculating…" : "Run UFPLS PAYE demo"}</Button>
-          <Button onClick={runAi} disabled={busy === "ai"} size="sm">{busy === "ai" ? "Thinking…" : "Generate AI insights"}</Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Enterprise suite"
+        description="Dealing · Cash · Tax · Statements · Workflow · Documents · Adviser · Client · API · ESG · AI"
+        actions={
+          <>
+            <Button onClick={runPaye} disabled={busy === "paye"} variant="outline" size="sm">{busy === "paye" ? "Calculating…" : "Run UFPLS PAYE demo"}</Button>
+            <Button onClick={runAi} disabled={busy === "ai"} size="sm">{busy === "ai" ? "Thinking…" : "Generate AI insights"}</Button>
+          </>
+        }
+      />
 
       <Tabs defaultValue="dealing" className="w-full">
         <TabsList className="flex flex-wrap h-auto">

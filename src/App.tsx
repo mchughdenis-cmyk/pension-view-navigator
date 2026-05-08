@@ -131,6 +131,13 @@ const AppContent = () => {
               <Route path="/comms" element={<RoleGate allow={['adviser', 'admin']}><CommsHub /></RoleGate>} />
               <Route path="/audit-log" element={<RoleGate allow={['admin']}><AuditLogViewer /></RoleGate>} />
               <Route path="/documents" element={<DocumentVault />} />
+              <Route path="/hmrc" element={<RoleGate allow={['adviser', 'admin']}><HMRCReporting /></RoleGate>} />
+              <Route path="/lsa" element={<RoleGate allow={['adviser', 'admin']}><LSAAllowance /></RoleGate>} />
+              <Route path="/paye" element={<RoleGate allow={['adviser', 'admin']}><PAYEDashboard /></RoleGate>} />
+              <Route path="/origo" element={<RoleGate allow={['adviser', 'admin']}><OrigoMessages /></RoleGate>} />
+              <Route path="/ssas" element={<RoleGate allow={['adviser', 'admin']}><SSASModule /></RoleGate>} />
+              <Route path="/property" element={<RoleGate allow={['adviser', 'admin']}><CommercialProperty /></RoleGate>} />
+              <Route path="/advanced" element={<RoleGate allow={['adviser', 'admin']}><MarketLeaderHub /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

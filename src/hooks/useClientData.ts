@@ -1092,3 +1092,557 @@ export function useAdminAlerts() {
   useEffect(() => { fetchAlerts() }, [fetchAlerts])
   return { alerts, loading, fetchAlerts }
 }
+
+// ============================================================
+// CONTRIBUTIONS — with tax relief + AA tracking
+// ============================================================
+export interface Contribution {
+  id: string
+  client_id: string
+  account_id: string
+  contribution_type: string
+  gross_amount: number
+  net_amount: number
+  tax_relief: number
+  relief_method: string
+  tax_year: string | null
+  effective_date: string
+  status: string
+  reference: string | null
+  notes: string | null
+  created_at: string
+}
+
+function currentTaxYear(date = new Date()): string {
+  const y = date.getFullYear()
+  const apr6 = new Date(y, 3, 6)
+  const start = date >= apr6 ? y : y - 1
+  return `${start}/${(start + 1).toString().slice(-2)}`
+}
+
+export interface ContributionInput {
+  clientId: string
+  accountId: string
+  type: 'member' | 'employer' | 'third_party'
+  netAmount?: number       // member contributions usually net, gross-up by 25%
+  grossAmount?: number     // employer contributions usually gross
+  reliefMethod?: 'ras' | 'net_pay' | 'none'
+  effectiveDate?: string
+  notes?: string
+}
+
+export async function processContribution(input: ContributionInput) {
+  const effectiveDate = input.effectiveDate || new Date().toISOString().slice(0, 10)
+  const tax_year = currentTaxYear(new Date(effectiveDate))
+  const reliefMethod = input.reliefMethod || (input.type === 'employer' ? 'none' : 'ras')
+
+  let net = 0, relief = 0, gross = 0
+  if (reliefMethod === 'ras') {
+    net = Number(input.netAmount || 0)
+    gross = +(net / 0.80).toFixed(2)
+    relief = +(gross - net).toFixed(2)
+  } else {
+    gross = Number(input.grossAmount || input.netAmount || 0)
+    net = gross
+    relief = 0
+  }
+
+  // Insert contribution record
+  const { data: contrib, error: cErr } = await supabase.from('contributions').insert({
+    client_id: input.clientId,
+    account_id: input.accountId,
+    contribution_type: input.type,
+    gross_amount: gross,
+    net_amount: net,
+    tax_relief: relief,
+    relief_method: reliefMethod,
+    tax_year,
+    effective_date: effectiveDate,
+    status: 'received',
+    reference: `CON-${Date.now()}`,
+    notes: input.notes,
+  } as any).select().single()
+  if (cErr) { toast.error(`Contribution failed: ${cErr.message}`); return null }
+
+  // Net amount lands in cash now; relief follows later (RAS - typically a few weeks). For demo, we'll credit net immediately and add a separate relief transaction.
+  const { data: account } = await supabase.from('client_accounts').select('cash_balance, total_value').eq('id', input.accountId).single()
+
+  // Member net or employer gross hits cash
+  await supabase.from('transactions').insert({
+    client_id: input.clientId,
+    account_id: input.accountId,
+    transaction_type: input.type === 'employer' ? 'employer_contribution' : 'contribution',
+    description: `${input.type === 'employer' ? 'Employer' : input.type === 'third_party' ? '3rd-party' : 'Member'} contribution${reliefMethod === 'ras' ? ' (net)' : ''}`,
+    amount: net,
+    status: 'settled',
+    effective_date: effectiveDate,
+    tax_year,
+    reference: contrib.reference,
+  } as any)
+
+  // RAS tax relief
+  if (relief > 0) {
+    await supabase.from('transactions').insert({
+      client_id: input.clientId,
+      account_id: input.accountId,
+      transaction_type: 'tax_relief',
+      description: `Tax relief at source (20%)`,
+      amount: relief,
+      status: 'pending',
+      effective_date: effectiveDate,
+      tax_year,
+      tax_relief_amount: relief,
+      reference: `RAS-${contrib.id.slice(0, 8)}`,
+    } as any)
+  }
+
+  // Update account balance
+  if (account) {
+    const credit = net + relief
+    await supabase.from('client_accounts').update({
+      cash_balance: Number(account.cash_balance || 0) + credit,
+      total_value: Number(account.total_value || 0) + credit,
+    } as any).eq('id', input.accountId)
+  }
+
+  // Update annual allowance used (gross counts)
+  const { data: client } = await supabase.from('clients').select('annual_allowance_used, mpaa_triggered').eq('id', input.clientId).single()
+  if (client) {
+    const newUsed = Number(client.annual_allowance_used || 0) + gross
+    await supabase.from('clients').update({ annual_allowance_used: newUsed } as any).eq('id', input.clientId)
+    const limit = client.mpaa_triggered ? MPAA_ALLOWANCE : ANNUAL_ALLOWANCE
+    if (newUsed > limit) {
+      toast.warning(`Annual Allowance exceeded: £${newUsed.toLocaleString()} of £${limit.toLocaleString()}`)
+    }
+  }
+
+  await logActivity('contribution', contrib.id, 'created',
+    `${input.type} contribution: gross £${gross}, net £${net}, relief £${relief} (${tax_year})`)
+  toast.success(`Contribution processed: gross £${gross.toLocaleString()}`)
+  return contrib as Contribution
+}
+
+export function useContributions(clientId?: string) {
+  const [contributions, setContributions] = useState<Contribution[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let q = supabase.from('contributions').select('*').order('effective_date', { ascending: false })
+    if (clientId) q = q.eq('client_id', clientId)
+    const { data, error } = await q
+    if (error) { toast.error('Failed to load contributions') }
+    setContributions((data || []) as Contribution[])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  return { contributions, loading, fetch, processContribution }
+}
+
+// ============================================================
+// TRANSFERS IN — full lifecycle
+// ============================================================
+export interface TransferIn {
+  id: string
+  client_id: string
+  account_id: string | null
+  ceding_scheme_name: string
+  ceding_scheme_ref: string | null
+  ceding_provider: string | null
+  transfer_type: string
+  estimated_value: number
+  received_value: number | null
+  contains_protected_tax_free_cash: boolean
+  protected_tax_free_cash_pct: number | null
+  contains_safeguarded_benefits: boolean
+  status: string
+  request_date: string
+  completed_date: string | null
+  origo_used: boolean
+  notes: string | null
+}
+
+export function useTransfersIn(clientId?: string) {
+  const [transfers, setTransfers] = useState<TransferIn[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let q = supabase.from('transfers_in').select('*').order('request_date', { ascending: false })
+    if (clientId) q = q.eq('client_id', clientId)
+    const { data, error } = await q
+    if (error) { toast.error('Failed to load transfers') }
+    setTransfers((data || []) as TransferIn[])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  const createTransfer = async (t: Partial<TransferIn>) => {
+    const { data, error } = await supabase.from('transfers_in').insert(t as any).select().single()
+    if (error) { toast.error(`Failed: ${error.message}`); return null }
+    setTransfers(prev => [data as TransferIn, ...prev])
+    await logActivity('transfer_in', data.id, 'created', `Transfer requested from ${t.ceding_scheme_name} (£${t.estimated_value})`)
+    return data as TransferIn
+  }
+
+  const updateStatus = async (id: string, status: string, extra: Partial<TransferIn> = {}) => {
+    const updates: any = { status, ...extra }
+    if (status === 'completed') updates.completed_date = new Date().toISOString().slice(0, 10)
+    const { error } = await supabase.from('transfers_in').update(updates).eq('id', id)
+    if (error) { toast.error('Update failed'); return false }
+    setTransfers(prev => prev.map(t => t.id === id ? { ...t, ...updates } : t))
+    await logActivity('transfer_in', id, 'status_changed', `Status -> ${status}`)
+    return true
+  }
+
+  const completeTransfer = async (id: string, receivedValue: number) => {
+    const transfer = transfers.find(t => t.id === id)
+    if (!transfer || !transfer.account_id) { toast.error('No account linked to transfer'); return false }
+
+    // Insert transaction crediting account
+    await supabase.from('transactions').insert({
+      client_id: transfer.client_id,
+      account_id: transfer.account_id,
+      transaction_type: 'transfer_in',
+      description: `Transfer in from ${transfer.ceding_scheme_name}`,
+      amount: receivedValue,
+      status: 'settled',
+      effective_date: new Date().toISOString().slice(0, 10),
+      reference: `TIN-${id.slice(0, 8)}`,
+    } as any)
+
+    // Credit account balance
+    const { data: account } = await supabase.from('client_accounts').select('cash_balance, total_value').eq('id', transfer.account_id).single()
+    if (account) {
+      await supabase.from('client_accounts').update({
+        cash_balance: Number(account.cash_balance || 0) + receivedValue,
+        total_value: Number(account.total_value || 0) + receivedValue,
+      } as any).eq('id', transfer.account_id)
+    }
+
+    return updateStatus(id, 'completed', { received_value: receivedValue })
+  }
+
+  return { transfers, loading, fetch, createTransfer, updateStatus, completeTransfer }
+}
+
+// ============================================================
+// FEE CHARGES
+// ============================================================
+export interface FeeCharge {
+  id: string
+  client_id: string
+  account_id: string
+  fee_type: string
+  description: string | null
+  basis: string
+  rate: number
+  amount: number
+  vat: number
+  total: number
+  period_start: string | null
+  period_end: string | null
+  charged_date: string
+  status: string
+  reference: string | null
+}
+
+export function useFeeCharges(clientId?: string) {
+  const [charges, setCharges] = useState<FeeCharge[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let q = supabase.from('fee_charges').select('*').order('charged_date', { ascending: false })
+    if (clientId) q = q.eq('client_id', clientId)
+    const { data } = await q
+    setCharges((data || []) as FeeCharge[])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  const accrueFee = async (input: { clientId: string; accountId: string; feeType: string; basis: 'percent' | 'flat'; rate: number; description?: string; applyVat?: boolean; periodStart?: string; periodEnd?: string }) => {
+    // Get account total to compute amount
+    const { data: account } = await supabase.from('client_accounts').select('total_value').eq('id', input.accountId).single()
+    const aum = Number(account?.total_value || 0)
+    const amount = input.basis === 'percent' ? +(aum * (input.rate / 100)).toFixed(2) : +Number(input.rate).toFixed(2)
+    const vat = input.applyVat ? +(amount * 0.20).toFixed(2) : 0
+    const total = +(amount + vat).toFixed(2)
+
+    const { data, error } = await supabase.from('fee_charges').insert({
+      client_id: input.clientId,
+      account_id: input.accountId,
+      fee_type: input.feeType,
+      description: input.description,
+      basis: input.basis,
+      rate: input.rate,
+      amount,
+      vat,
+      total,
+      period_start: input.periodStart,
+      period_end: input.periodEnd,
+      status: 'accrued',
+      reference: `FEE-${Date.now()}`,
+    } as any).select().single()
+    if (error) { toast.error('Failed to accrue fee'); return null }
+    setCharges(prev => [data as FeeCharge, ...prev])
+    await logActivity('fee_charge', data.id, 'created', `Fee accrued: ${input.feeType} £${total}`)
+    return data as FeeCharge
+  }
+
+  const chargeFee = async (id: string) => {
+    const charge = charges.find(c => c.id === id)
+    if (!charge) return false
+    // Deduct from account cash
+    const { data: account } = await supabase.from('client_accounts').select('cash_balance, total_value').eq('id', charge.account_id).single()
+    if (!account) { toast.error('Account not found'); return false }
+    if (Number(account.cash_balance) < charge.total) {
+      toast.error(`Insufficient cash: £${account.cash_balance} available, £${charge.total} required`)
+      return false
+    }
+    await supabase.from('client_accounts').update({
+      cash_balance: Number(account.cash_balance) - charge.total,
+      total_value: Number(account.total_value) - charge.total,
+    } as any).eq('id', charge.account_id)
+    await supabase.from('transactions').insert({
+      client_id: charge.client_id,
+      account_id: charge.account_id,
+      transaction_type: 'fee',
+      description: `${charge.fee_type} fee${charge.description ? ': ' + charge.description : ''}`,
+      amount: -charge.total,
+      status: 'settled',
+      effective_date: new Date().toISOString().slice(0, 10),
+      reference: charge.reference,
+    } as any)
+    await supabase.from('fee_charges').update({ status: 'charged', charged_date: new Date().toISOString().slice(0, 10) } as any).eq('id', id)
+    setCharges(prev => prev.map(c => c.id === id ? { ...c, status: 'charged' } : c))
+    await logActivity('fee_charge', id, 'updated', `Fee charged: £${charge.total}`)
+    toast.success(`Fee charged: £${charge.total}`)
+    return true
+  }
+
+  return { charges, loading, fetch, accrueFee, chargeFee }
+}
+
+// ============================================================
+// VALUATIONS
+// ============================================================
+export function useValuations(clientId?: string) {
+  const [valuations, setValuations] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let q = supabase.from('valuations').select('*').order('valuation_date', { ascending: false })
+    if (clientId) q = q.eq('client_id', clientId)
+    const { data } = await q
+    setValuations(data || [])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  const snapshot = async (cId: string) => {
+    // Snapshot every account for client
+    const { data: accounts } = await supabase.from('client_accounts').select('*').eq('client_id', cId)
+    const { data: invs } = await supabase.from('investments').select('*').eq('client_id', cId)
+    let count = 0
+    for (const a of accounts || []) {
+      const accountInvValue = (invs || []).filter((i: any) => i.account_id === a.id).reduce((s: number, i: any) => s + Number(i.current_value || 0), 0)
+      await supabase.from('valuations').insert({
+        client_id: cId,
+        account_id: a.id,
+        valuation_date: new Date().toISOString().slice(0, 10),
+        cash_balance: a.cash_balance,
+        investments_value: accountInvValue,
+        total_value: Number(a.cash_balance || 0) + accountInvValue,
+        source: 'system',
+      } as any)
+      count++
+    }
+    await fetch()
+    await logActivity('valuation', cId, 'created', `Valuation snapshot taken for ${count} account(s)`)
+    toast.success(`${count} account(s) valued`)
+    return count
+  }
+
+  return { valuations, loading, fetch, snapshot }
+}
+
+// ============================================================
+// DEATH CLAIMS & BENEFIT PAYMENTS
+// ============================================================
+export function useDeathClaims(clientId?: string) {
+  const [claims, setClaims] = useState<any[]>([])
+  const [payments, setPayments] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let cq = supabase.from('death_claims').select('*').order('notified_date', { ascending: false })
+    if (clientId) cq = cq.eq('client_id', clientId)
+    const [cRes, pRes] = await Promise.all([
+      cq,
+      clientId
+        ? supabase.from('death_benefit_payments').select('*').eq('client_id', clientId)
+        : supabase.from('death_benefit_payments').select('*'),
+    ])
+    setClaims(cRes.data || [])
+    setPayments(pRes.data || [])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  const openClaim = async (input: { clientId: string; dateOfDeath: string; cause?: string }) => {
+    // Compute total pot
+    const { data: accs } = await supabase.from('client_accounts').select('total_value').eq('client_id', input.clientId)
+    const total = (accs || []).reduce((s: number, a: any) => s + Number(a.total_value || 0), 0)
+
+    // Determine pre/post-75 from DOB
+    const { data: client } = await supabase.from('clients').select('date_of_birth').eq('id', input.clientId).single()
+    let pre75 = true
+    if (client?.date_of_birth) {
+      const dob = new Date(client.date_of_birth)
+      const dod = new Date(input.dateOfDeath)
+      const age = (dod.getTime() - dob.getTime()) / (365.25 * 24 * 3600 * 1000)
+      pre75 = age < 75
+    }
+
+    const { data, error } = await supabase.from('death_claims').insert({
+      client_id: input.clientId,
+      date_of_death: input.dateOfDeath,
+      cause_of_death: input.cause,
+      total_pot_value: total,
+      pre_75: pre75,
+      status: 'opened',
+    } as any).select().single()
+    if (error) { toast.error('Failed to open claim'); return null }
+    // Mark client deceased
+    await supabase.from('clients').update({ status: 'deceased' } as any).eq('id', input.clientId)
+    setClaims(prev => [data, ...prev])
+    await logActivity('death_claim', data.id, 'created', `Death claim opened (pot £${total.toLocaleString()}, ${pre75 ? 'pre-75' : 'post-75'})`)
+    toast.success('Death claim opened')
+    return data
+  }
+
+  const generatePayments = async (claimId: string) => {
+    const claim = claims.find(c => c.id === claimId)
+    if (!claim) return false
+    const { data: bens } = await supabase.from('beneficiaries').select('*').eq('client_id', claim.client_id)
+    if (!bens || bens.length === 0) { toast.error('No beneficiaries on file'); return false }
+
+    // Allocate by allocation_pct (default equal split if zeros)
+    const totalPct = bens.reduce((s: number, b: any) => s + Number(b.allocation_pct || 0), 0)
+    const usePct = totalPct > 0 ? totalPct : 100
+    const equalSplit = totalPct === 0
+
+    for (const b of bens) {
+      const pct = equalSplit ? (100 / bens.length) : Number(b.allocation_pct || 0)
+      const gross = +(claim.total_pot_value * (pct / usePct)).toFixed(2)
+      // Pre-75 lump sum: tax-free up to LSDBA. Post-75: taxed at recipient marginal rate (assume 20% withholding for demo)
+      const tax = claim.pre_75 ? 0 : +(gross * 0.20).toFixed(2)
+      const net = +(gross - tax).toFixed(2)
+      await supabase.from('death_benefit_payments').insert({
+        death_claim_id: claimId,
+        client_id: claim.client_id,
+        beneficiary_id: b.id,
+        beneficiary_name: b.name,
+        payment_type: 'lump_sum',
+        gross_amount: gross,
+        tax_amount: tax,
+        net_amount: net,
+        status: 'pending',
+      } as any)
+    }
+    await supabase.from('death_claims').update({ status: 'in_payment' } as any).eq('id', claimId)
+    await fetch()
+    await logActivity('death_claim', claimId, 'updated', `Generated payments for ${bens.length} beneficiaries`)
+    toast.success(`Generated ${bens.length} payment(s)`)
+    return true
+  }
+
+  const settlePayment = async (paymentId: string) => {
+    const payment = payments.find(p => p.id === paymentId)
+    if (!payment) return false
+    await supabase.from('death_benefit_payments').update({
+      status: 'paid',
+      paid_date: new Date().toISOString().slice(0, 10),
+    } as any).eq('id', paymentId)
+    await fetch()
+    toast.success(`Paid £${payment.net_amount} to ${payment.beneficiary_name}`)
+    return true
+  }
+
+  return { claims, payments, loading, fetch, openClaim, generatePayments, settlePayment }
+}
+
+// ============================================================
+// STATEMENTS — generation
+// ============================================================
+export function useStatements(clientId?: string) {
+  const [statements, setStatements] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const fetch = useCallback(async () => {
+    setLoading(true)
+    let q = supabase.from('statements').select('*').order('period_end', { ascending: false })
+    if (clientId) q = q.eq('client_id', clientId)
+    const { data } = await q
+    setStatements(data || [])
+    setLoading(false)
+  }, [clientId])
+
+  useEffect(() => { fetch() }, [fetch])
+
+  const generateAnnual = async (cId: string, taxYearStart: number) => {
+    const periodStart = `${taxYearStart}-04-06`
+    const periodEnd = `${taxYearStart + 1}-04-05`
+
+    // Pull data for period
+    const [accountsRes, txnsRes, contribsRes, feesRes] = await Promise.all([
+      supabase.from('client_accounts').select('*').eq('client_id', cId),
+      supabase.from('transactions').select('*').eq('client_id', cId).gte('effective_date', periodStart).lte('effective_date', periodEnd),
+      supabase.from('contributions').select('*').eq('client_id', cId).gte('effective_date', periodStart).lte('effective_date', periodEnd),
+      supabase.from('fee_charges').select('*').eq('client_id', cId).eq('status', 'charged').gte('charged_date', periodStart).lte('charged_date', periodEnd),
+    ])
+
+    const closing = (accountsRes.data || []).reduce((s: number, a: any) => s + Number(a.total_value || 0), 0)
+    const contributionsTotal = (contribsRes.data || []).reduce((s: number, c: any) => s + Number(c.gross_amount || 0), 0)
+    const withdrawalsTotal = (txnsRes.data || [])
+      .filter((t: any) => ['drawdown', 'pcls', 'ufpls_taxable'].includes(t.transaction_type))
+      .reduce((s: number, t: any) => s + Math.abs(Number(t.amount || 0)), 0)
+    const feesTotal = (feesRes.data || []).reduce((s: number, f: any) => s + Number(f.total || 0), 0)
+    const opening = closing - contributionsTotal + withdrawalsTotal + feesTotal // approximation
+    const growth = closing - opening - contributionsTotal + withdrawalsTotal + feesTotal
+
+    const { data, error } = await supabase.from('statements').insert({
+      client_id: cId,
+      statement_type: 'annual',
+      period_start: periodStart,
+      period_end: periodEnd,
+      opening_value: Math.max(0, opening),
+      closing_value: closing,
+      contributions_total: contributionsTotal,
+      withdrawals_total: withdrawalsTotal,
+      fees_total: feesTotal,
+      growth,
+      payload: {
+        accounts: accountsRes.data,
+        transaction_count: (txnsRes.data || []).length,
+        contribution_count: (contribsRes.data || []).length,
+      },
+    } as any).select().single()
+    if (error) { toast.error(`Statement failed: ${error.message}`); return null }
+    setStatements(prev => [data, ...prev])
+    await logActivity('statement', data.id, 'created', `Annual statement ${taxYearStart}/${taxYearStart + 1} generated`)
+    toast.success('Annual statement generated')
+    return data
+  }
+
+  return { statements, loading, fetch, generateAnnual }
+}

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ShowcaseWebsite from "./components/ShowcaseWebsite";
 import { FloatingBackButton } from "./components/ui/floating-back-button";
+import { AppShell } from "./components/nav/AppShell";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";

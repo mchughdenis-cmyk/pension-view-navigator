@@ -3,6 +3,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { NotificationsBell } from "@/components/NotificationsBell";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
@@ -35,6 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               Search
               <kbd className="ml-1 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
             </Button>
+            <NotificationsBell />
             <ThemeToggle />
           </header>
           <main className="flex-1 min-w-0">{children}</main>

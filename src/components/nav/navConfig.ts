@@ -3,7 +3,7 @@ import {
   Users, Building2, ClipboardList, TrendingUp, Layers, Calculator, ShieldCheck,
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, RefreshCw, FileSignature, ScrollText, Receipt,
-  Sparkles, Database, Network, Cog,
+  Sparkles, Database, Network, Cog, History, FolderArchive,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -53,7 +53,10 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     },
     {
       label: "Account",
-      items: [{ title: "Settings", url: "/settings", icon: SettingsIcon }],
+      items: [
+        { title: "Documents", url: "/documents", icon: FolderArchive },
+        { title: "Settings", url: "/settings", icon: SettingsIcon },
+      ],
     },
   ],
 
@@ -94,7 +97,10 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     },
     {
       label: "Account",
-      items: [{ title: "Settings", url: "/settings", icon: SettingsIcon }],
+      items: [
+        { title: "Documents", url: "/documents", icon: FolderArchive },
+        { title: "Settings", url: "/settings", icon: SettingsIcon },
+      ],
     },
   ],
 
@@ -147,6 +153,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System",
       items: [
+        { title: "Audit log", url: "/audit-log", icon: History },
+        { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "System overview", url: "/system-overview", icon: Building2 },
         { title: "API directory", url: "/api-directory", icon: Database },
         { title: "Documentation", url: "/documentation", icon: ScrollText },

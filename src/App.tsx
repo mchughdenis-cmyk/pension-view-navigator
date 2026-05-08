@@ -47,6 +47,8 @@ import AdviserWorkbench from "./components/AdviserWorkbench";
 import DealingDesk from "./components/DealingDesk";
 import ReportingSuite from "./components/ReportingSuite";
 import CommsHub from "./components/CommsHub";
+import AuditLogViewer from "./components/AuditLogViewer";
+import DocumentVault from "./components/DocumentVault";
 
 const queryClient = new QueryClient();
 
@@ -120,6 +122,8 @@ const AppContent = () => {
               <Route path="/dealing" element={<RoleGate allow={['adviser', 'admin']}><DealingDesk /></RoleGate>} />
               <Route path="/reporting" element={<RoleGate allow={['adviser', 'admin']}><ReportingSuite /></RoleGate>} />
               <Route path="/comms" element={<RoleGate allow={['adviser', 'admin']}><CommsHub /></RoleGate>} />
+              <Route path="/audit-log" element={<RoleGate allow={['admin']}><AuditLogViewer /></RoleGate>} />
+              <Route path="/documents" element={<DocumentVault />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

@@ -3169,6 +3169,45 @@ export type Database = {
         }
         Relationships: []
       }
+      property_expenses: {
+        Row: {
+          amount: number
+          category: string
+          created_at: string
+          expense_date: string
+          id: string
+          notes: string | null
+          property_id: string
+          status: string
+          vat: number
+          vendor: string
+        }
+        Insert: {
+          amount?: number
+          category: string
+          created_at?: string
+          expense_date: string
+          id?: string
+          notes?: string | null
+          property_id: string
+          status?: string
+          vat?: number
+          vendor: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          created_at?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          property_id?: string
+          status?: string
+          vat?: number
+          vendor?: string
+        }
+        Relationships: []
+      }
       property_insurance: {
         Row: {
           created_at: string

@@ -39,6 +39,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Drawdown", url: "/drawdown", icon: PoundSterling },
         { title: "Drip-feed drawdown", url: "/drip-feed", icon: Workflow },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Transaction history", url: "/transactions", icon: History },
         { title: "Transfer out", url: "/transfer-out", icon: ArrowUpFromLine },
         { title: "Instrument transfer", url: "/instrument-transfer", icon: RefreshCw },
       ],
@@ -98,6 +99,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Transaction history", url: "/transactions", icon: History },
         { title: "Drawdown journey", url: "/drawdown", icon: PoundSterling },
         { title: "Illustration", url: "/illustration", icon: Calculator },
       ],
@@ -170,6 +172,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Transaction history", url: "/transactions", icon: History },
         { title: "Illustration", url: "/illustration", icon: Calculator },
       ],
     },

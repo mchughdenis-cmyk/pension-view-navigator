@@ -66,6 +66,7 @@ import OrigoMessages from "./components/OrigoMessages";
 import SSASModule from "./components/SSASModule";
 import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
+import IHTOverview from "./components/IHTOverview";
 
 const queryClient = new QueryClient();
 
@@ -158,6 +159,7 @@ const AppContent = () => {
               <Route path="/ssas" element={<RoleGate allow={['adviser', 'admin']}><SSASModule /></RoleGate>} />
               <Route path="/property" element={<RoleGate allow={['adviser', 'admin']}><CommercialProperty /></RoleGate>} />
               <Route path="/advanced" element={<RoleGate allow={['adviser', 'admin']}><MarketLeaderHub /></RoleGate>} />
+              <Route path="/iht" element={<RoleGate allow={['client', 'adviser', 'admin']}><IHTOverview /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

@@ -21,6 +21,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "ISA", url: "/isa", icon: PiggyBank },
         { title: "GIA", url: "/gia", icon: Wallet },
         { title: "Annual summary", url: "/annual-summary", icon: FileText },
+        { title: "Inheritance Tax", url: "/iht", icon: ScrollText },
       ],
     },
     {
@@ -81,6 +82,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
+        { title: "IHT planning", url: "/iht", icon: ScrollText },
       ],
     },
     {

@@ -13,6 +13,8 @@ import {
   Banknote, Building2, Repeat, Zap, ShieldCheck, CheckCircle2, Loader2, Clock,
   ArrowRight, RefreshCw, Sparkles, Send, Calendar,
 } from "lucide-react";
+import { useDraft, loadDraft } from "@/hooks/useDraft";
+import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
 
 const BANKS = [
   { id: "lloyds",   name: "Lloyds Bank", color: "bg-emerald-600" },
@@ -24,17 +26,39 @@ const BANKS = [
 ];
 
 const DEMO_CLIENT = "a1111111-1111-1111-1111-111111111111";
+const DRAFT_KEY = "cash_onboarding_draft_v1";
+
+interface CashDraft {
+  tab: string;
+  pisp: { amount: string; reference: string };
+  dd: { holder: string; sort: string; account: string; amount: string; frequency: string };
+}
 
 export default function CashOnboarding() {
+  const draft = loadDraft<CashDraft>(DRAFT_KEY);
+  const [resumeOpen, setResumeOpen] = useState(!!draft);
+  const [tab, setTab] = useState<string>(draft?.tab ?? "aisp");
   const [bankConnections, setBankConnections] = useState<any[]>([]);
   const [mandates, setMandates] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
   const [linkingBank, setLinkingBank] = useState<string | null>(null);
   const [linkStep, setLinkStep] = useState<"select" | "consent" | "auth" | "accounts" | "done">("select");
-  const [pisp, setPisp] = useState({ amount: "5000", reference: "PENSION TOPUP" });
+  const [pisp, setPisp] = useState(draft?.pisp ?? { amount: "5000", reference: "PENSION TOPUP" });
   const [pispRunning, setPispRunning] = useState(false);
-  const [dd, setDd] = useState({ holder: "Alex Morgan", sort: "30-12-34", account: "12345678", amount: "500", frequency: "monthly" });
+  const [dd, setDd] = useState(draft?.dd ?? { holder: "Alex Morgan", sort: "30-12-34", account: "12345678", amount: "500", frequency: "monthly" });
   const [ddSigning, setDdSigning] = useState(false);
+
+  const { savedAt, clear: clearDraft } = useDraft<CashDraft>(DRAFT_KEY, { tab, pisp, dd });
+
+  const handleDiscard = () => {
+    clearDraft();
+    setPisp({ amount: "5000", reference: "PENSION TOPUP" });
+    setDd({ holder: "Alex Morgan", sort: "30-12-34", account: "12345678", amount: "500", frequency: "monthly" });
+    setTab("aisp");
+    setResumeOpen(false);
+    toast.info("Draft discarded");
+  };
+
 
   const load = async () => {
     const [{ data: bc }, { data: m }, { data: p }] = await Promise.all([
@@ -111,13 +135,24 @@ export default function CashOnboarding() {
         description="Fund your pension via Open Banking, Direct Debit or one-off payment. Mock integrations for TrueLayer and GoCardless."
       />
 
-      <Tabs defaultValue="aisp">
-        <TabsList className="grid grid-cols-4 w-full max-w-2xl">
-          <TabsTrigger value="aisp"><Building2 className="w-4 h-4 mr-2" />Link bank</TabsTrigger>
-          <TabsTrigger value="pisp"><Zap className="w-4 h-4 mr-2" />One-off pay</TabsTrigger>
-          <TabsTrigger value="dd"><Repeat className="w-4 h-4 mr-2" />Direct Debit</TabsTrigger>
-          <TabsTrigger value="status"><ShieldCheck className="w-4 h-4 mr-2" />Status</TabsTrigger>
-        </TabsList>
+      <ResumeBanner
+        show={resumeOpen}
+        savedAt={savedAt}
+        onResume={() => { setResumeOpen(false); toast.success("Welcome back — your details are restored"); }}
+        onDiscard={handleDiscard}
+        label="Resume cash onboarding"
+      />
+
+      <Tabs value={tab} onValueChange={setTab}>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl">
+            <TabsTrigger value="aisp"><Building2 className="w-4 h-4 mr-2" />Link bank</TabsTrigger>
+            <TabsTrigger value="pisp"><Zap className="w-4 h-4 mr-2" />One-off pay</TabsTrigger>
+            <TabsTrigger value="dd"><Repeat className="w-4 h-4 mr-2" />Direct Debit</TabsTrigger>
+            <TabsTrigger value="status"><ShieldCheck className="w-4 h-4 mr-2" />Status</TabsTrigger>
+          </TabsList>
+          <SavedIndicator savedAt={savedAt} />
+        </div>
 
         <TabsContent value="aisp" className="space-y-4">
           <Card>

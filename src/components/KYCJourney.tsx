@@ -16,6 +16,7 @@ import {
 import { useDraft, loadDraft } from "@/hooks/useDraft";
 import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
 import { Notifications } from "@/lib/notifications";
+import { logAudit } from "@/lib/audit";
 
 const STEPS = [
   { id: "personal",  label: "Personal details", icon: IdCard },
@@ -109,6 +110,11 @@ export default function KYCJourney() {
       .select("id").single();
     if (error) { toast.error("Failed to start KYC case"); return null; }
     setCaseId(data.id);
+    await logAudit({
+      entity_type: "kyc_case", entity_id: data.id, action: "created",
+      description: `KYC case opened for ${details.firstName} ${details.lastName}`.trim(),
+      new_values: { provider: "Onfido (mock)", status: "in_progress" },
+    });
     return data.id;
   };
 
@@ -141,6 +147,15 @@ export default function KYCJourney() {
         status: overall, risk_score: score, risk_level: score >= 60 ? "medium" : "low",
         completed_at: new Date().toISOString(),
       }).eq("id", caseId);
+      await logAudit({
+        entity_type: "kyc_case", entity_id: caseId,
+        action: overall === "verified" ? "verified" : "review_required",
+        description: overall === "verified"
+          ? `KYC verified — risk score ${score}/100, all checks passed`
+          : `KYC sent to manual review — risk score ${score}/100, PEP near-match flagged`,
+        old_values: { status: "in_progress" },
+        new_values: { status: overall, risk_score: score, checks: { ...checks } },
+      });
     }
     if (overall === "verified") {
       Notifications.kycApproved(score, caseId ?? undefined);

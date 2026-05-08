@@ -162,6 +162,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
         { title: "CASS reconciliation", url: "/cass", icon: ShieldCheck },
         { title: "KYC review queue", url: "/kyc-review", icon: ShieldCheck },
+        { title: "Audit trail", url: "/audit", icon: ScrollText },
         { title: "Firm hierarchy", url: "/firms", icon: Network },
       ],
     },

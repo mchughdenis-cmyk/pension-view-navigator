@@ -16,6 +16,7 @@ import {
 import { useDraft, loadDraft } from "@/hooks/useDraft";
 import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
 import { Notifications } from "@/lib/notifications";
+import { logAudit } from "@/lib/audit";
 
 const BANKS = [
   { id: "lloyds",   name: "Lloyds Bank", color: "bg-emerald-600" },
@@ -84,14 +85,19 @@ export default function CashOnboarding() {
       { id: crypto.randomUUID(), name: "Main Current", sort_code: "30-12-34", account_number: `****${Math.floor(1000 + Math.random() * 9000)}`, balance: Math.floor(5000 + Math.random() * 50000), currency: "GBP" },
       { id: crypto.randomUUID(), name: "Savings",      sort_code: "30-12-34", account_number: `****${Math.floor(1000 + Math.random() * 9000)}`, balance: Math.floor(1000 + Math.random() * 30000), currency: "GBP" },
     ];
-    await supabase.from("bank_connections").insert({
+    const { data: conn } = await supabase.from("bank_connections").insert({
       client_id: DEMO_CLIENT, provider: "TrueLayer (mock)", bank_name: bank.name, status: "active",
       consent_expires_at: new Date(Date.now() + 90 * 24 * 3600 * 1000).toISOString(),
       accounts: accts, last_synced_at: new Date().toISOString(),
-    });
+    }).select("id").single();
     setLinkStep("done");
     toast.success(`${bank.name} connected via Open Banking (mock)`);
     Notifications.consentGranted(bank.name, DEMO_CLIENT);
+    await logAudit({
+      entity_type: "bank_connection", entity_id: conn?.id ?? null, action: "consent_granted",
+      description: `${bank.name} linked via Open Banking — ${accts.length} accounts shared, 90-day PSD2 consent`,
+      new_values: { provider: "TrueLayer (mock)", bank: bank.name, accounts: accts.length, expires_in_days: 90 },
+    });
     await new Promise(r => setTimeout(r, 600));
     setLinkingBank(null); setLinkStep("select");
     load();
@@ -104,11 +110,21 @@ export default function CashOnboarding() {
       client_id: DEMO_CLIENT, provider: "TrueLayer Pay (mock)",
       amount: parseFloat(pisp.amount), reference: ref, status: "initiated",
     }).select().single();
+    await logAudit({
+      entity_type: "payment_initiation", entity_id: data?.id ?? null, action: "payment_initiated",
+      description: `PISP payment £${pisp.amount} initiated — ref ${ref}`,
+      new_values: { amount: parseFloat(pisp.amount), reference: ref, status: "initiated" },
+    });
     toast.info("Redirecting to bank for SCA…");
     await new Promise(r => setTimeout(r, 1500));
     toast.info("Strong Customer Authentication complete");
     await new Promise(r => setTimeout(r, 800));
     await supabase.from("payment_initiations").update({ status: "settled", settled_at: new Date().toISOString() }).eq("id", data!.id);
+    await logAudit({
+      entity_type: "payment_initiation", entity_id: data!.id, action: "payment_settled",
+      description: `PISP payment £${pisp.amount} settled to pension — ref ${ref}`,
+      old_values: { status: "initiated" }, new_values: { status: "settled" },
+    });
     toast.success(`£${pisp.amount} settled — ref ${ref}`);
     Notifications.paymentSettled(parseFloat(pisp.amount), ref, DEMO_CLIENT);
     setPispRunning(false); load();
@@ -120,12 +136,17 @@ export default function CashOnboarding() {
     await new Promise(r => setTimeout(r, 800));
     toast.info("GoCardless Bacs verification…");
     await new Promise(r => setTimeout(r, 1200));
-    await supabase.from("dd_mandates").insert({
+    const { data: mandate } = await supabase.from("dd_mandates").insert({
       client_id: DEMO_CLIENT, provider: "GoCardless (mock)", scheme: "bacs", reference: ref,
       account_holder: dd.holder, sort_code: dd.sort, account_number: `****${dd.account.slice(-4)}`,
       bank_name: "Customer bank", status: "active", signed_at: new Date().toISOString(),
       next_collection: new Date(Date.now() + 5 * 24 * 3600 * 1000).toISOString().slice(0, 10),
       amount: parseFloat(dd.amount), frequency: dd.frequency,
+    }).select("id").single();
+    await logAudit({
+      entity_type: "dd_mandate", entity_id: mandate?.id ?? null, action: "mandate_signed",
+      description: `Direct Debit mandate ${ref} signed — £${dd.amount} ${dd.frequency} (Bacs)`,
+      new_values: { reference: ref, amount: parseFloat(dd.amount), frequency: dd.frequency, scheme: "bacs", holder: dd.holder },
     });
     toast.success(`Direct Debit mandate ${ref} signed (Bacs)`);
     Notifications.mandateSigned(ref, parseFloat(dd.amount), dd.frequency, DEMO_CLIENT);

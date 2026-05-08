@@ -16,10 +16,10 @@ import { AsyncState, useAsync } from "@/components/ui/async-state";
 export default function ReportingSuite() {
   return (
     <div className="container mx-auto p-6 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Reporting Suite</h1>
-        <p className="text-muted-foreground">Annual tax packs and HMRC / FCA regulatory return generators.</p>
-      </div>
+      <PageHeader
+        title="Reporting suite"
+        description="Annual tax packs and HMRC / FCA regulatory return generators."
+      />
       <Tabs defaultValue="taxpack">
         <TabsList className="grid grid-cols-4 w-full">
           <TabsTrigger value="taxpack">Annual Tax Pack</TabsTrigger>

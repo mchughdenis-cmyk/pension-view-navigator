@@ -27,6 +27,9 @@ import LearningCentre from "./components/LearningCentre";
 import InstrumentTransfer from "./components/InstrumentTransfer";
 import SystemDemo from "./components/SystemDemo";
 import KYCVerification from "./components/KYCVerification";
+import KYCJourney from "./components/KYCJourney";
+import KYCReview from "./components/KYCReview";
+import CashOnboarding from "./components/CashOnboarding";
 import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
 import ISAPortfolio from "./components/ISAPortfolio";
@@ -115,7 +118,10 @@ const AppContent = () => {
               <Route path="/transactions" element={<TransactionHistory />} />
               <Route path="/learning" element={<LearningCentre />} />
               <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
-              <Route path="/kyc" element={<KYCVerification />} />
+              <Route path="/kyc" element={<KYCJourney />} />
+              <Route path="/kyc-classic" element={<KYCVerification />} />
+              <Route path="/kyc-review" element={<RoleGate allow={['adviser', 'admin']}><KYCReview /></RoleGate>} />
+              <Route path="/cash-onboarding" element={<CashOnboarding />} />
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />
               <Route path="/gia" element={<GIAPortfolio />} />

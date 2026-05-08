@@ -114,6 +114,11 @@ function AllocationWorkbench() {
       const rows = accs.map((a) => ({ block_id: blockId, account_id: a.id, client_id: a.client_id, units: per, allocation_method: "average_price" }));
       const { error } = await (supabase as any).from("trade_allocations").insert(rows);
       if (error) throw error;
+      await supabase.from("activity_log").insert({
+        action: "trade_block_allocated", entity_type: "trade_block", entity_id: blockId,
+        description: `Allocated ${block?.symbol ?? "block"} (${total} units) across ${accs.length} accounts (avg price)`,
+        new_values: { method: "average_price", account_count: accs.length, units_per: per, total_units: total },
+      } as any);
       return accs.length;
     }, { success: `Allocated using average pricing` });
     reload();
@@ -162,6 +167,11 @@ function CorporateActionsInbox() {
       const rows = accs.map((a) => ({ corporate_action_id: caId, client_id: a.client_id, account_id: a.id, election: choice, status: "elected", elected_at: new Date().toISOString(), units_held: 100 }));
       const { error } = await supabase.from("corporate_action_elections").insert(rows);
       if (error) throw error;
+      await supabase.from("activity_log").insert({
+        action: "corporate_action_elected", entity_type: "corporate_action", entity_id: caId,
+        description: `Election '${choice}' recorded for ${accs.length} positions`,
+        new_values: { choice, account_count: accs.length },
+      } as any);
     }, { success: `Election '${choice}' recorded` });
   };
 
@@ -212,6 +222,11 @@ function IncomeProcessing() {
       const rows = accs.map((a: any) => ({ account_id: a.id, client_id: a.client_id, accrual_date: today, gross_interest: 12.5, withholding_tax: 0, net_interest: 12.5, status: "posted" }));
       const { error } = await (supabase as any).from("interest_accruals").insert(rows);
       if (error) throw error;
+      await supabase.from("activity_log").insert({
+        action: "income_posted", entity_type: "interest_accrual", entity_id: null,
+        description: `Posted income to ${accs.length} accounts on ${today}`,
+        new_values: { date: today, account_count: accs.length, gross_each: 12.5 },
+      } as any);
       return accs.length;
     }, { success: "Income posted" });
     reload();

@@ -74,6 +74,11 @@ function AnnualTaxPack() {
     });
     const blob = await Packer.toBlob(doc);
     saveAs(blob, `tax-pack-${client.last_name}-${taxYear.replace("/", "-")}.docx`);
+    await supabase.from("activity_log").insert({
+      action: "report_generated", entity_type: "client", entity_id: clientId,
+      description: `Annual Tax Pack ${taxYear} for ${client.first_name} ${client.last_name}`,
+      new_values: { report: "annual_tax_pack", tax_year: taxYear, totals: { contributions: totalContrib, relief: totalRelief, gain: totalGain, fees: totalFees } },
+    } as any);
     setGenerating(false); toast.success("Tax pack generated");
   };
 

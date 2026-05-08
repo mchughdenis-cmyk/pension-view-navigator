@@ -115,6 +115,11 @@ function SecureMessaging() {
     const res = await runWithToast(async () => {
       const { error } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: "Reply", body: draft, status: "sent" } as any);
       if (error) throw error;
+      await supabase.from("activity_log").insert({
+        action: "secure_message_sent", entity_type: "client", entity_id: clientId,
+        description: `Secure reply sent (${draft.length} chars)`,
+        new_values: { subject: "Reply", length: draft.length },
+      } as any);
     }, { success: "Message sent" });
     if (res.ok) { setDraft(""); reload(); }
   };

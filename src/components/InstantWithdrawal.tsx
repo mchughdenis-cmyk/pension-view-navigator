@@ -6,39 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
 import { calculateUFPLS, formatGBP } from "@/lib/pensionCalculations";
-import { 
-  Banknote, 
-  Building2, 
-  Clock,
-  CheckCircle,
-  AlertTriangle,
-  Shield,
-  ArrowRight,
-  Eye,
-  EyeOff
-} from "lucide-react";
-
-interface BankAccount {
-  id: string;
-  accountName: string;
-  accountNumber: string;
-  sortCode: string;
-  bankName: string;
-  isDefault: boolean;
-}
-
-interface WithdrawalRequest {
-  id: string;
-  amount: number;
-  accountId: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  requestDate: string;
-  expectedDate: string;
-  reference: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { DEMO_BANK_ACCOUNTS, maskAccount } from "@/lib/demoBankAccounts";
+import { Banknote, Clock, Shield, ArrowRight, Eye, EyeOff } from "lucide-react";
 
 export default function InstantWithdrawal() {
   const { toast } = useToast();
@@ -48,245 +22,166 @@ export default function InstantWithdrawal() {
   const { client, accounts, fetchAll } = useClientDetail(clientId);
   const sipp = accounts.find(a => a.account_type?.toLowerCase().includes("sipp"));
   const availableBalance = Number(sipp?.total_value || 0);
+
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
-  const [selectedAccount, setSelectedAccount] = useState("");
   const [otherIncome, setOtherIncome] = useState(11500);
+  const [selectedAccount, setSelectedAccount] = useState<string>(DEMO_BANK_ACCOUNTS[0].id);
   const [showAccountNumbers, setShowAccountNumbers] = useState(false);
-  const ufplsPreview = useMemo(() => calculateUFPLS(parseFloat(withdrawalAmount) || 0, otherIncome), [withdrawalAmount, otherIncome]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showAddAccount, setShowAddAccount] = useState(false);
-  
-  const [newAccount, setNewAccount] = useState({
-    accountName: "",
-    accountNumber: "",
-    sortCode: "",
-    bankName: ""
-  });
+  const [history, setHistory] = useState<any[]>([]);
 
-  const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([
-    {
-      id: '1',
-      accountName: 'Main Current Account',
-      accountNumber: '12345678',
-      sortCode: '12-34-56',
-      bankName: 'Lloyds Bank',
-      isDefault: true
-    },
-    {
-      id: '2',
-      accountName: 'Savings Account',
-      accountNumber: '87654321',
-      sortCode: '65-43-21',
-      bankName: 'HSBC',
-      isDefault: false
-    }
-  ]);
+  const ufpls = useMemo(
+    () => calculateUFPLS(parseFloat(withdrawalAmount) || 0, otherIncome),
+    [withdrawalAmount, otherIncome]
+  );
 
-  const [withdrawalHistory] = useState<WithdrawalRequest[]>([
-    {
-      id: 'WD001',
-      amount: 5000,
-      accountId: '1',
-      status: 'completed',
-      requestDate: '2024-08-10',
-      expectedDate: '2024-08-11',
-      reference: 'Pension withdrawal'
-    },
-    {
-      id: 'WD002',
-      amount: 2500,
-      accountId: '1',
-      status: 'processing',
-      requestDate: '2024-08-25',
-      expectedDate: '2024-08-26',
-      reference: 'Emergency fund'
-    }
-  ]);
+  // Emergency Month-1 PAYE estimate: 1/12th of allowances applied to first payment
+  const emergencyTax = useMemo(() => {
+    const tax = parseFloat(withdrawalAmount) || 0;
+    if (tax <= 0) return 0;
+    const monthlyPA = 12570 / 12;
+    const monthlyBasic = 37700 / 12;
+    const taxable = Math.max(0, ufpls.taxablePortion - monthlyPA);
+    const inBasic = Math.min(taxable, monthlyBasic);
+    const inHigher = Math.min(Math.max(0, taxable - monthlyBasic), 87440 / 12);
+    const inAdd = Math.max(0, taxable - monthlyBasic - 87440 / 12);
+    return inBasic * 0.20 + inHigher * 0.40 + inAdd * 0.45;
+  }, [ufpls.taxablePortion, withdrawalAmount]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
+  const loadHistory = async () => {
+    if (!clientId) return;
+    const { data } = await supabase
+      .from("transactions")
+      .select("*")
+      .eq("client_id", clientId)
+      .in("transaction_type", ["pcls", "ufpls_taxable", "drawdown", "tax_withheld"])
+      .order("effective_date", { ascending: false })
+      .limit(8);
+    setHistory(data || []);
   };
-
-  const formatAccountNumber = (accountNumber: string) => {
-    if (!showAccountNumbers) {
-      return '****' + accountNumber.slice(-4);
-    }
-    return accountNumber;
-  };
-
-  const formatSortCode = (sortCode: string) => {
-    if (!showAccountNumbers) {
-      return '**-**-' + sortCode.slice(-2);
-    }
-    return sortCode;
-  };
-
-  const handleAddAccount = () => {
-    if (!newAccount.accountName || !newAccount.accountNumber || !newAccount.sortCode || !newAccount.bankName) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all account details",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    const account: BankAccount = {
-      id: Date.now().toString(),
-      ...newAccount,
-      isDefault: bankAccounts.length === 0
-    };
-
-    setBankAccounts([...bankAccounts, account]);
-    setNewAccount({ accountName: "", accountNumber: "", sortCode: "", bankName: "" });
-    setShowAddAccount(false);
-    
-    toast({
-      title: "Bank Account Added",
-      description: "Your new bank account has been added successfully",
-    });
-  };
+  useEffect(() => { loadHistory(); }, [clientId]);
 
   const handleWithdrawal = async () => {
     const amount = parseFloat(withdrawalAmount);
-    if (!amount || amount <= 0) { toast({ title: "Invalid Amount", description: "Enter a valid amount", variant: "destructive" }); return; }
-    if (amount > availableBalance) { toast({ title: "Insufficient Funds", description: "Exceeds available balance", variant: "destructive" }); return; }
-    if (!selectedAccount) { toast({ title: "No Account", description: "Select a destination bank account", variant: "destructive" }); return; }
-    if (!clientId || !sipp) { toast({ title: "No SIPP", description: "Selected client has no SIPP account", variant: "destructive" }); return; }
+    const account = DEMO_BANK_ACCOUNTS.find(a => a.id === selectedAccount);
+    if (!amount || amount <= 0) return toast({ title: "Invalid amount", variant: "destructive" });
+    if (amount > availableBalance) return toast({ title: "Insufficient funds", variant: "destructive" });
+    if (!account) return toast({ title: "Select bank", variant: "destructive" });
+    if (!clientId || !sipp) return toast({ title: "No SIPP", variant: "destructive" });
 
     setIsProcessing(true);
     const result = await processDrawdown({
       clientId, accountId: sipp.id,
       mode: "UFPLS", potValue: availableBalance, ufplsGross: amount, otherIncome,
-      notes: `Instant UFPLS withdrawal to bank account`,
+      notes: `UFPLS to ${account.bankName} ${maskAccount(account.accountNumber, false)}`,
     });
+
+    // Record explicit bank transfer leg for traceability
+    if (result) {
+      const netToBank = result.pclsAmount + result.net;
+      await supabase.from("transactions").insert({
+        client_id: clientId,
+        account_id: sipp.id,
+        transaction_type: "bank_transfer",
+        amount: -netToBank,
+        description: `Net payment to ${account.bankName} ${maskAccount(account.accountNumber, false)}`,
+        reference: `BANK-${Date.now()}`,
+        status: "settled",
+        effective_date: new Date().toISOString().slice(0, 10),
+        notes: `Sort ${account.sortCode}, A/C ${account.accountNumber}`,
+      } as any);
+    }
+
     setIsProcessing(false);
     if (result) {
       setWithdrawalAmount("");
-      setSelectedAccount("");
       await fetchAll();
-      toast({ title: "Withdrawal processed", description: `Net ${formatGBP(result.pclsAmount + result.net)} (after £${result.tax.toFixed(0)} tax) will reach the account in 1-2 days.` });
+      await loadHistory();
+      toast({
+        title: "Withdrawal processed",
+        description: `${formatGBP(result.pclsAmount + result.net)} to ${account.bankName} (after PAYE ${formatGBP(result.tax)}).`,
+      });
     }
-  };
-
-  const getStatusBadge = (status: string) => {
-    const variants = {
-      'pending': 'bg-warning text-warning-foreground',
-      'processing': 'bg-primary text-primary-foreground',
-      'completed': 'bg-success text-success-foreground',
-      'failed': 'bg-destructive text-destructive-foreground'
-    };
-    
-    return <Badge className={variants[status as keyof typeof variants]}>{status}</Badge>;
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted p-4">
       <div className="max-w-4xl mx-auto space-y-6">
         <BackButton />
-        
-        {/* Header */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Instant Withdrawal</h1>
-          <p className="text-muted-foreground">Withdraw funds from your drawdown account</p>
+          <h1 className="text-3xl font-bold mb-2">Instant Withdrawal</h1>
+          <p className="text-muted-foreground">UFPLS to your linked bank with realtime PAYE breakdown</p>
         </div>
 
-        {/* Available Balance */}
+        {clients.length > 1 && (
+          <Card><CardContent className="pt-6">
+            <Label>Acting for client</Label>
+            <Select value={clientId} onValueChange={setClientId}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}</SelectContent>
+            </Select>
+          </CardContent></Card>
+        )}
+
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Banknote className="w-5 h-5" />
-              Available Balance
-            </CardTitle>
+            <CardTitle className="flex items-center gap-2"><Banknote className="w-5 h-5" /> Available pension balance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-primary mb-2">
-              {formatCurrency(availableBalance)}
-            </div>
-            <p className="text-muted-foreground">Ready for immediate withdrawal</p>
+            <div className="text-4xl font-bold text-primary">{formatGBP(availableBalance)}</div>
+            <p className="text-sm text-muted-foreground mt-1">SIPP {sipp?.account_number ?? ""}</p>
           </CardContent>
         </Card>
 
-        {/* Withdrawal Form */}
         <Card>
-          <CardHeader>
-            <CardTitle>Request Withdrawal</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Request UFPLS withdrawal</CardTitle></CardHeader>
           <CardContent className="space-y-6">
-            {clients.length > 1 && (
+            <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Client</Label>
-                <Select value={clientId} onValueChange={setClientId}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+                <Label>Gross amount (£)</Label>
+                <Input type="number" placeholder="10000" value={withdrawalAmount} onChange={e => setWithdrawalAmount(e.target.value)} min={0} max={availableBalance} />
+                <p className="text-xs text-muted-foreground">Max: {formatGBP(availableBalance)}</p>
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="amount">UFPLS Withdrawal Amount (£)</Label>
-              <Input id="amount" type="number" placeholder="Enter amount" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(e.target.value)} min="1" max={availableBalance} />
-              <p className="text-sm text-muted-foreground">Maximum: {formatCurrency(availableBalance)}</p>
+              <div className="space-y-2">
+                <Label>Other taxable income this year (£)</Label>
+                <Input type="number" value={otherIncome} onChange={e => setOtherIncome(Number(e.target.value) || 0)} />
+                <p className="text-xs text-muted-foreground">Used for marginal-rate PAYE estimate.</p>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Other annual taxable income (£)</Label>
-              <Input type="number" value={otherIncome} onChange={e => setOtherIncome(Number(e.target.value) || 0)} />
-            </div>
+
             {parseFloat(withdrawalAmount) > 0 && (
-              <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
-                <div className="flex justify-between"><span className="text-muted-foreground">Tax-free (25%)</span><span className="font-medium text-success">{formatGBP(ufplsPreview.taxFreePortion)}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Taxable (75%)</span><span className="font-medium">{formatGBP(ufplsPreview.taxablePortion)}</span></div>
-                <div className="flex justify-between"><span className="text-muted-foreground">Income tax</span><span className="font-medium text-destructive">−{formatGBP(ufplsPreview.tax.totalTax)}</span></div>
-                <div className="flex justify-between border-t pt-1"><span className="font-semibold">Net to bank</span><span className="font-semibold">{formatGBP(ufplsPreview.netPayment)}</span></div>
+              <div className="rounded-lg border p-4 bg-muted/40 space-y-2 text-sm">
+                <div className="flex justify-between"><span className="font-medium">Tax-free 25% (PCLS)</span><span className="text-green-600 font-semibold">+{formatGBP(ufpls.taxFreePortion)}</span></div>
+                <div className="flex justify-between"><span className="font-medium">Taxable 75%</span><span>{formatGBP(ufpls.taxablePortion)}</span></div>
+                <Separator className="my-2" />
+                <div className="text-xs text-muted-foreground uppercase tracking-wide">PAYE breakdown — annualised</div>
+                <div className="flex justify-between"><span>Personal Allowance used</span><span>{formatGBP(ufpls.tax.personalAllowance)}</span></div>
+                <div className="flex justify-between"><span>Basic rate (20%)</span><span>−{formatGBP(ufpls.tax.basicRateTax)}</span></div>
+                <div className="flex justify-between"><span>Higher rate (40%)</span><span>−{formatGBP(ufpls.tax.higherRateTax)}</span></div>
+                <div className="flex justify-between"><span>Additional rate (45%)</span><span>−{formatGBP(ufpls.tax.additionalRateTax)}</span></div>
+                <div className="flex justify-between border-t pt-1"><span className="font-semibold">Total PAYE (annualised)</span><span className="text-destructive font-semibold">−{formatGBP(ufpls.tax.totalTax)}</span></div>
+                <div className="flex justify-between text-xs"><span>HMRC Month-1 emergency tax (estimated first payment)</span><span className="text-amber-600">−{formatGBP(emergencyTax)}</span></div>
+                <Separator className="my-2" />
+                <div className="flex justify-between text-base"><span className="font-semibold">Net to your bank</span><span className="font-semibold">{formatGBP(ufpls.netPayment)}</span></div>
+                <p className="text-xs text-muted-foreground">UFPLS triggers MPAA — future contributions capped at £10,000 p.a.</p>
               </div>
             )}
 
-            {/* Bank Account Selection */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Select Bank Account</Label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setShowAccountNumbers(!showAccountNumbers)}
-                  >
-                    {showAccountNumbers ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    {showAccountNumbers ? 'Hide' : 'Show'} Details
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAddAccount(true)}
-                  >
-                    Add Account
-                  </Button>
-                </div>
+                <Label>Pay to bank</Label>
+                <Button type="button" variant="ghost" size="sm" onClick={() => setShowAccountNumbers(!showAccountNumbers)}>
+                  {showAccountNumbers ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}{showAccountNumbers ? "Hide" : "Show"} details
+                </Button>
               </div>
-              
               <Select value={selectedAccount} onValueChange={setSelectedAccount}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose account" />
-                </SelectTrigger>
+                <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {bankAccounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id}>
-                      <div className="flex items-center justify-between w-full">
-                        <div>
-                          <div className="font-medium">{account.accountName}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {account.bankName} • {formatSortCode(account.sortCode)} • {formatAccountNumber(account.accountNumber)}
-                          </div>
-                        </div>
-                        {account.isDefault && <Badge variant="outline">Default</Badge>}
+                  {DEMO_BANK_ACCOUNTS.map(a => (
+                    <SelectItem key={a.id} value={a.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{a.accountName} · {a.bankName}</span>
+                        <span className="text-xs text-muted-foreground">{maskAccount(a.sortCode, showAccountNumbers, 2)} · {maskAccount(a.accountNumber, showAccountNumbers)}</span>
                       </div>
                     </SelectItem>
                   ))}
@@ -294,122 +189,41 @@ export default function InstantWithdrawal() {
               </Select>
             </div>
 
-            {/* Add Account Form */}
-            {showAddAccount && (
-              <Card className="bg-muted">
-                <CardHeader>
-                  <CardTitle className="text-lg">Add New Bank Account</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="accountName">Account Name</Label>
-                      <Input
-                        id="accountName"
-                        placeholder="e.g., Main Current Account"
-                        value={newAccount.accountName}
-                        onChange={(e) => setNewAccount({...newAccount, accountName: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="bankName">Bank Name</Label>
-                      <Input
-                        id="bankName"
-                        placeholder="e.g., Lloyds Bank"
-                        value={newAccount.bankName}
-                        onChange={(e) => setNewAccount({...newAccount, bankName: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="accountNumber">Account Number</Label>
-                      <Input
-                        id="accountNumber"
-                        placeholder="12345678"
-                        value={newAccount.accountNumber}
-                        onChange={(e) => setNewAccount({...newAccount, accountNumber: e.target.value})}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="sortCode">Sort Code</Label>
-                      <Input
-                        id="sortCode"
-                        placeholder="12-34-56"
-                        value={newAccount.sortCode}
-                        onChange={(e) => setNewAccount({...newAccount, sortCode: e.target.value})}
-                      />
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={handleAddAccount}>Add Account</Button>
-                    <Button variant="outline" onClick={() => setShowAddAccount(false)}>Cancel</Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Security Notice */}
-            <div className="bg-muted p-4 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Shield className="w-5 h-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-foreground">Secure Transfer</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Funds will be transferred via secure bank transfer. Processing time is typically 1-2 business days.
-                  </p>
-                </div>
+            <div className="bg-muted p-4 rounded-lg flex items-start gap-3">
+              <Shield className="w-5 h-5 text-primary mt-0.5" />
+              <div>
+                <h4 className="font-medium">Faster Payments mock</h4>
+                <p className="text-sm text-muted-foreground">Net amount lands in your bank within 1–2 working days. PAYE is remitted to HMRC under your scheme reference.</p>
               </div>
             </div>
 
-            <Button 
-              onClick={handleWithdrawal} 
-              disabled={isProcessing || !withdrawalAmount || !selectedAccount}
-              className="w-full"
-            >
-              {isProcessing ? (
-                <>
-                  <Clock className="w-4 h-4 mr-2 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <ArrowRight className="w-4 h-4 mr-2" />
-                  Request Withdrawal
-                </>
-              )}
+            <Button className="w-full" disabled={isProcessing || !withdrawalAmount} onClick={handleWithdrawal}>
+              {isProcessing ? <><Clock className="w-4 h-4 mr-2 animate-spin" />Processing…</> : <><ArrowRight className="w-4 h-4 mr-2" />Withdraw {formatGBP(ufpls.netPayment)} to {DEMO_BANK_ACCOUNTS.find(a => a.id === selectedAccount)?.bankName}</>}
             </Button>
           </CardContent>
         </Card>
 
-        {/* Recent Withdrawals */}
         <Card>
-          <CardHeader>
-            <CardTitle>Recent Withdrawals</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Recent pension cash-out activity</CardTitle></CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              {withdrawalHistory.map((withdrawal) => {
-                const account = bankAccounts.find(acc => acc.id === withdrawal.accountId);
-                return (
-                  <div key={withdrawal.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="space-y-1">
-                      <div className="font-medium">{formatCurrency(withdrawal.amount)}</div>
-                      <div className="text-sm text-muted-foreground">
-                        To: {account?.accountName} ({account?.bankName})
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Requested: {new Date(withdrawal.requestDate).toLocaleDateString()}
-                      </div>
+            {history.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No withdrawal activity yet.</p>
+            ) : (
+              <div className="space-y-2">
+                {history.map(h => (
+                  <div key={h.id} className="flex items-center justify-between border rounded-lg p-3">
+                    <div>
+                      <p className="font-medium text-sm">{h.description}</p>
+                      <p className="text-xs text-muted-foreground">{h.reference} · {h.effective_date}</p>
                     </div>
-                    <div className="text-right space-y-2">
-                      {getStatusBadge(withdrawal.status)}
-                      <div className="text-sm text-muted-foreground">
-                        {withdrawal.status === 'completed' ? 'Completed' : `Expected: ${new Date(withdrawal.expectedDate).toLocaleDateString()}`}
-                      </div>
+                    <div className="text-right">
+                      <p className={`font-semibold ${Number(h.amount) < 0 ? "text-destructive" : "text-green-600"}`}>{formatGBP(Math.abs(Number(h.amount)))}</p>
+                      <Badge variant="secondary" className="text-xs">{h.transaction_type.replace("_", " ")}</Badge>
                     </div>
                   </div>
-                );
-              })}
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

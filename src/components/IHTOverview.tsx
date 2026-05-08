@@ -57,6 +57,7 @@ export default function IHTOverview() {
   const [transferableNRB, setTransferableNRB] = useState(0) // % from late spouse 0-100
   const [passesToDescendants, setPassesToDescendants] = useState(true)
   const [charityPctOfEstate, setCharityPctOfEstate] = useState(0)
+  const [sippToSpouse, setSippToSpouse] = useState(false) // spouse exemption on SIPP at first death
 
   const addAsset = () =>
     setAssets((a) => [...a, { id: crypto.randomUUID(), label: 'New asset', category: 'other', value: 0 }])
@@ -75,10 +76,11 @@ export default function IHTOverview() {
     const grossEstate = total - lifeInTrust // life policies in trust never form part of estate
     const chargeable = (estateForIHT: number) => Math.max(0, estateForIHT - businessRelief)
 
-    // Estate for IHT pre-2027: excludes SIPP
+    // Estate for IHT pre-2027: excludes SIPP (pensions outside estate)
     const estatePre = grossEstate - sippTotal
-    // Estate post-2027: includes SIPP
-    const estatePost = grossEstate
+    // Estate post-2027: includes SIPP, unless spouse exemption applied (passes to surviving spouse)
+    const sippExempt = marriedSpouse && sippToSpouse ? sippTotal : 0
+    const estatePost = grossEstate - sippExempt
 
     const tnrbExtra = (transferableNRB / 100) * NRB
     const baseNRB = NRB + (marriedSpouse ? tnrbExtra : 0)
@@ -109,7 +111,7 @@ export default function IHTOverview() {
     const delta = post.iht - pre.iht
 
     return { total, sippTotal, businessRelief, lifeInTrust, mainResidence, grossEstate, estatePre, estatePost, baseNRB, pre, post, delta }
-  }, [assets, marriedSpouse, transferableNRB, passesToDescendants, charityPctOfEstate])
+  }, [assets, marriedSpouse, transferableNRB, passesToDescendants, charityPctOfEstate, sippToSpouse])
 
   const isAdviser = role !== 'client'
 
@@ -217,6 +219,16 @@ export default function IHTOverview() {
                   <p className="text-xs text-muted-foreground">Allows transferable NRB & spouse exemption</p>
                 </div>
                 <Switch checked={marriedSpouse} onCheckedChange={setMarriedSpouse} />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>SIPP passes to spouse (spouse exemption)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    From {REFORM_DATE} pensions enter the estate, but transfers to a surviving spouse remain
+                    fully exempt. Tick to model the SIPP passing to your spouse on first death.
+                  </p>
+                </div>
+                <Switch checked={sippToSpouse} onCheckedChange={setSippToSpouse} disabled={!marriedSpouse} />
               </div>
               <div>
                 <Label>Transferable NRB from late spouse (%)</Label>

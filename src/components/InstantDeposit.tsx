@@ -119,7 +119,8 @@ export default function InstantDeposit() {
       relief_method: reliefKey === "net_pay" ? "net_pay" : reliefKey === "employer" ? "employer" : "ras",
       tax_year: "2024/25",
       status: "received",
-      source_bank: `${source.bankName} ${mask(source.accountNumber)}`,
+      reference: `DEP-${Date.now()}`,
+      notes: `From ${source.bankName} ${mask(source.accountNumber)} via Open Banking`,
     } as any);
 
     if (!error) {

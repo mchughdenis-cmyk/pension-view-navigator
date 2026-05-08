@@ -32,6 +32,7 @@ import KYCReview from "./components/KYCReview";
 import CashOnboarding from "./components/CashOnboarding";
 import WebhookSandbox from "./components/WebhookSandbox";
 import NotificationsCenter from "./components/NotificationsCenter";
+import AuditTrail from "./components/AuditTrail";
 import OnboardingTracker from "./components/OnboardingTracker";
 import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
@@ -127,6 +128,7 @@ const AppContent = () => {
               <Route path="/cash-onboarding" element={<CashOnboarding />} />
               <Route path="/webhook-sandbox" element={<WebhookSandbox />} />
               <Route path="/notifications" element={<NotificationsCenter />} />
+              <Route path="/audit" element={<AuditTrail />} />
               <Route path="/onboarding-progress" element={<OnboardingTracker />} />
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />

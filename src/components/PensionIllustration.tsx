@@ -123,6 +123,27 @@ const PensionIllustration = () => {
         </Button>
       </div>
 
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5" /> Demo scenarios</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">Click any preset to populate the illustration with realistic 2024/25 UK figures.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {SCENARIOS.map(s => (
+              <button key={s.name} onClick={() => loadScenario(s.inputs)} className="text-left rounded-lg border p-3 hover:bg-muted transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-sm">{s.name}</span>
+                  <Badge variant="secondary" className="text-xs">{s.tag}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{s.description}</p>
+                <p className="text-xs mt-2 font-mono text-primary">£{s.inputs.potValue.toLocaleString()} · {s.inputs.drawdownRate}% drawdown · {s.inputs.annualGrowth}% growth</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Input Panel */}
         <Card className="xl:col-span-1">

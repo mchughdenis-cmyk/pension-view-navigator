@@ -21,6 +21,7 @@ import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
 import Settings from "./components/Settings";
 import InstantWithdrawal from "./components/InstantWithdrawal";
+import InstantDeposit from "./components/InstantDeposit";
 import LearningCentre from "./components/LearningCentre";
 import InstrumentTransfer from "./components/InstrumentTransfer";
 import SystemDemo from "./components/SystemDemo";
@@ -109,6 +110,7 @@ const AppContent = () => {
               <Route path="/annual-summary" element={<AnnualSummary />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
+              <Route path="/instant-deposit" element={<InstantDeposit />} />
               <Route path="/learning" element={<LearningCentre />} />
               <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
               <Route path="/kyc" element={<KYCVerification />} />

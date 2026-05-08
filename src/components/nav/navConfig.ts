@@ -33,7 +33,9 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Money in & out",
       items: [
+        { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Transfer in", url: "/transfer", icon: ArrowDownToLine },
+        { title: "Illustration", url: "/illustration", icon: Calculator },
         { title: "Drawdown", url: "/drawdown", icon: PoundSterling },
         { title: "Drip-feed drawdown", url: "/drip-feed", icon: Workflow },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
@@ -89,6 +91,15 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Commercial property", url: "/property", icon: Building2 },
         { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
         { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
+      ],
+    },
+    {
+      label: "Money in & out",
+      items: [
+        { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
+        { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Drawdown journey", url: "/drawdown", icon: PoundSterling },
+        { title: "Illustration", url: "/illustration", icon: Calculator },
       ],
     },
     {
@@ -152,6 +163,14 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "SSAS", url: "/ssas", icon: Building2 },
         { title: "Commercial property", url: "/property", icon: Building2 },
         { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
+      ],
+    },
+    {
+      label: "Money in & out",
+      items: [
+        { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
+        { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Illustration", url: "/illustration", icon: Calculator },
       ],
     },
     {

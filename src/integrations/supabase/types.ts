@@ -1486,6 +1486,7 @@ export type Database = {
       }
       dd_mandates: {
         Row: {
+          account_holder: string | null
           account_id: string
           account_number: string
           amount: number
@@ -1495,10 +1496,15 @@ export type Database = {
           frequency: string
           id: string
           next_collection: string | null
+          provider: string
+          reference: string | null
+          scheme: string
+          signed_at: string | null
           sort_code: string
           status: string
         }
         Insert: {
+          account_holder?: string | null
           account_id: string
           account_number: string
           amount?: number
@@ -1508,10 +1514,15 @@ export type Database = {
           frequency?: string
           id?: string
           next_collection?: string | null
+          provider?: string
+          reference?: string | null
+          scheme?: string
+          signed_at?: string | null
           sort_code: string
           status?: string
         }
         Update: {
+          account_holder?: string | null
           account_id?: string
           account_number?: string
           amount?: number
@@ -1521,6 +1532,10 @@ export type Database = {
           frequency?: string
           id?: string
           next_collection?: string | null
+          provider?: string
+          reference?: string | null
+          scheme?: string
+          signed_at?: string | null
           sort_code?: string
           status?: string
         }

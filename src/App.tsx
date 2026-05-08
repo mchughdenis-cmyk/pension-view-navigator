@@ -21,6 +21,7 @@ import TransferOutJourney from "./components/TransferOutJourney";
 import AnnualSummary from "./components/AnnualSummary";
 import Settings from "./components/Settings";
 import InstantWithdrawal from "./components/InstantWithdrawal";
+import InstantDeposit from "./components/InstantDeposit";
 import LearningCentre from "./components/LearningCentre";
 import InstrumentTransfer from "./components/InstrumentTransfer";
 import SystemDemo from "./components/SystemDemo";

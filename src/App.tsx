@@ -49,6 +49,13 @@ import ReportingSuite from "./components/ReportingSuite";
 import CommsHub from "./components/CommsHub";
 import AuditLogViewer from "./components/AuditLogViewer";
 import DocumentVault from "./components/DocumentVault";
+import HMRCReporting from "./components/HMRCReporting";
+import LSAAllowance from "./components/LSAAllowance";
+import PAYEDashboard from "./components/PAYEDashboard";
+import OrigoMessages from "./components/OrigoMessages";
+import SSASModule from "./components/SSASModule";
+import CommercialProperty from "./components/CommercialProperty";
+import MarketLeaderHub from "./components/MarketLeaderHub";
 
 const queryClient = new QueryClient();
 

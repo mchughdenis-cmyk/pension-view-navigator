@@ -220,6 +220,16 @@ export default function IHTOverview() {
                 </div>
                 <Switch checked={marriedSpouse} onCheckedChange={setMarriedSpouse} />
               </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label>SIPP passes to spouse (spouse exemption)</Label>
+                  <p className="text-xs text-muted-foreground">
+                    From {REFORM_DATE} pensions enter the estate, but transfers to a surviving spouse remain
+                    fully exempt. Tick to model the SIPP passing to your spouse on first death.
+                  </p>
+                </div>
+                <Switch checked={sippToSpouse} onCheckedChange={setSippToSpouse} disabled={!marriedSpouse} />
+              </div>
               <div>
                 <Label>Transferable NRB from late spouse (%)</Label>
                 <Input

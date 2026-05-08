@@ -13,6 +13,8 @@ import {
   ShieldCheck, IdCard, Camera, FileCheck2, Search, CheckCircle2, AlertTriangle,
   Loader2, ScanFace, Sparkles, FileText, Building2,
 } from "lucide-react";
+import { useDraft, loadDraft } from "@/hooks/useDraft";
+import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
 
 const STEPS = [
   { id: "personal",  label: "Personal details", icon: IdCard },
@@ -26,29 +28,72 @@ type StepId = typeof STEPS[number]["id"];
 
 const PROVIDERS = ["Onfido", "Veriff", "ComplyAdvantage", "GBG"];
 
+const DRAFT_KEY = "kyc_journey_draft_v1";
+
+interface KycDraft {
+  step: StepId;
+  caseId: string | null;
+  details: { firstName: string; lastName: string; dob: string; nationality: string; address: string };
+  docType: string;
+  docFile: string | null;
+  selfie: string | null;
+  poaFile: string | null;
+}
+
 export default function KYCJourney() {
+  const draft = loadDraft<KycDraft>(DRAFT_KEY);
+  // Show resume banner if a draft exists AND it's not at the very first step
+  const [resumeOpen, setResumeOpen] = useState(!!draft && draft.step !== "personal");
+
   const [step, setStep] = useState<StepId>("personal");
   const [running, setRunning] = useState(false);
   const [caseId, setCaseId] = useState<string | null>(null);
-  const [details, setDetails] = useState({
+  const [details, setDetails] = useState(draft?.details ?? {
     firstName: "Alex",
     lastName: "Morgan",
     dob: "1980-05-21",
     nationality: "United Kingdom",
     address: "12 Baker Street, London NW1 6XE",
   });
-  const [docType, setDocType] = useState("passport");
-  const [docFile, setDocFile] = useState<string | null>(null);
-  const [selfie, setSelfie] = useState<string | null>(null);
-  const [poaFile, setPoaFile] = useState<string | null>(null);
+  const [docType, setDocType] = useState(draft?.docType ?? "passport");
+  const [docFile, setDocFile] = useState<string | null>(draft?.docFile ?? null);
+  const [selfie, setSelfie] = useState<string | null>(draft?.selfie ?? null);
+  const [poaFile, setPoaFile] = useState<string | null>(draft?.poaFile ?? null);
   const [checks, setChecks] = useState<Record<string, "idle" | "running" | "pass" | "review" | "fail">>({
     document: "idle", liveness: "idle", address: "idle", pep: "idle", sanctions: "idle", adverse: "idle",
   });
   const [decision, setDecision] = useState<"verified" | "review" | "rejected" | null>(null);
   const [riskScore, setRiskScore] = useState(0);
 
+  // Auto-save draft (excluding the resume banner state)
+  const { savedAt, clear: clearDraft, hadDraft } = useDraft<KycDraft>(
+    DRAFT_KEY,
+    { step, caseId, details, docType, docFile, selfie, poaFile },
+    { skip: step === "decision" && decision === "verified" } // stop saving after verified
+  );
+
   const stepIndex = STEPS.findIndex(s => s.id === step);
   const progress = ((stepIndex) / (STEPS.length - 1)) * 100;
+
+  const handleResume = () => {
+    if (draft) {
+      setStep(draft.step);
+      setCaseId(draft.caseId);
+    }
+    setResumeOpen(false);
+    toast.success("Welcome back — picking up where you left off");
+  };
+  const handleDiscard = () => {
+    clearDraft();
+    setResumeOpen(false);
+    toast.info("Draft discarded");
+  };
+
+  // Clear draft once we hit a verified decision
+  useEffect(() => {
+    if (decision === "verified") clearDraft();
+  }, [decision]);
+
 
   const startCase = async () => {
     const { data, error } = await supabase

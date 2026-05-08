@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { ShieldCheck, FileText, AlertTriangle, CheckCircle2, XCircle, Eye, Search } from "lucide-react";
 import { toast } from "sonner";
+import { logAudit } from "@/lib/audit";
+import { Notifications } from "@/lib/notifications";
 
 interface KycCase { id: string; client_id: string; provider: string; provider_ref: string|null; status: string; risk_level: string; risk_score: number; reviewer: string|null; started_at: string|null; completed_at: string|null; }
 interface KycCheck { id: string; case_id: string; check_type: string; provider: string; decision: string; score: number|null; details: any; ran_at: string; }
@@ -40,9 +42,19 @@ export default function KYCReview() {
   useEffect(() => { load(); }, []);
 
   const decide = async (id: string, status: "verified" | "rejected") => {
+    const before = cases.find(c => c.id === id);
     await supabase.from("kyc_cases").update({
       status, decision_reason: reason || null, reviewer: "Demo Reviewer", completed_at: new Date().toISOString(),
     }).eq("id", id);
+    await logAudit({
+      entity_type: "kyc_case", entity_id: id,
+      action: status === "verified" ? "approved" : "rejected",
+      description: `Adviser ${status === "verified" ? "approved" : "rejected"} KYC case${reason ? ` — ${reason}` : ""}`,
+      old_values: { status: before?.status ?? "review", reviewer: before?.reviewer ?? null },
+      new_values: { status, reviewer: "Demo Reviewer", decision_reason: reason || null },
+    });
+    if (status === "verified") Notifications.kycApproved(before?.risk_score ?? 0, id);
+    else Notifications.kycRejected(reason || "Unable to verify identity", id);
     toast.success(`Case ${status}`);
     setReason("");
     load();

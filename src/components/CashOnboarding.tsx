@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useDraft, loadDraft } from "@/hooks/useDraft";
 import { ResumeBanner, SavedIndicator } from "@/components/ResumeBanner";
+import { Notifications } from "@/lib/notifications";
 
 const BANKS = [
   { id: "lloyds",   name: "Lloyds Bank", color: "bg-emerald-600" },
@@ -90,6 +91,7 @@ export default function CashOnboarding() {
     });
     setLinkStep("done");
     toast.success(`${bank.name} connected via Open Banking (mock)`);
+    Notifications.consentGranted(bank.name, DEMO_CLIENT);
     await new Promise(r => setTimeout(r, 600));
     setLinkingBank(null); setLinkStep("select");
     load();
@@ -108,6 +110,7 @@ export default function CashOnboarding() {
     await new Promise(r => setTimeout(r, 800));
     await supabase.from("payment_initiations").update({ status: "settled", settled_at: new Date().toISOString() }).eq("id", data!.id);
     toast.success(`£${pisp.amount} settled — ref ${ref}`);
+    Notifications.paymentSettled(parseFloat(pisp.amount), ref, DEMO_CLIENT);
     setPispRunning(false); load();
   };
 
@@ -125,6 +128,7 @@ export default function CashOnboarding() {
       amount: parseFloat(dd.amount), frequency: dd.frequency,
     });
     toast.success(`Direct Debit mandate ${ref} signed (Bacs)`);
+    Notifications.mandateSigned(ref, parseFloat(dd.amount), dd.frequency, DEMO_CLIENT);
     setDdSigning(false); load();
   };
 

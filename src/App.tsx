@@ -40,6 +40,7 @@ import CASSReconciliation from "./components/CASSReconciliation";
 import MonteCarloProjection from "./components/MonteCarloProjection";
 import FirmHierarchy from "./components/FirmHierarchy";
 import { CommandPalette } from "./components/CommandPalette";
+import EnterpriseSuite from "./components/EnterpriseSuite";
 
 const queryClient = new QueryClient();
 

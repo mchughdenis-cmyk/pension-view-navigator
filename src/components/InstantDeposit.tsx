@@ -14,20 +14,10 @@ import {
   Banknote, Building2, Clock, CheckCircle2, Shield, ArrowRight, Eye, EyeOff, PiggyBank
 } from "lucide-react";
 
-interface SourceAccount {
-  id: string;
-  accountName: string;
-  accountNumber: string;
-  sortCode: string;
-  bankName: string;
-  isDefault: boolean;
-  balance: number;
-}
+import { DEMO_BANK_ACCOUNTS, type DemoBankAccount } from "@/lib/demoBankAccounts";
 
-const initialSources: SourceAccount[] = [
-  { id: "s1", accountName: "Main Current Account", accountNumber: "12345678", sortCode: "12-34-56", bankName: "Lloyds Bank", isDefault: true, balance: 18540 },
-  { id: "s2", accountName: "Joint Savings", accountNumber: "87654321", sortCode: "65-43-21", bankName: "HSBC", isDefault: false, balance: 42130 },
-];
+type SourceAccount = DemoBankAccount;
+const initialSources: SourceAccount[] = DEMO_BANK_ACCOUNTS;
 
 const reliefMethods = [
   { value: "ras", label: "Relief at Source (basic)", rate: 0.20, hint: "Net member contribution; HMRC adds 20% basic-rate uplift directly to your pot." },

@@ -364,6 +364,42 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_connections: {
+        Row: {
+          accounts: Json | null
+          bank_name: string
+          client_id: string
+          consent_expires_at: string | null
+          created_at: string
+          id: string
+          last_synced_at: string | null
+          provider: string
+          status: string
+        }
+        Insert: {
+          accounts?: Json | null
+          bank_name: string
+          client_id: string
+          consent_expires_at?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          provider?: string
+          status?: string
+        }
+        Update: {
+          accounts?: Json | null
+          bank_name?: string
+          client_id?: string
+          consent_expires_at?: string | null
+          created_at?: string
+          id?: string
+          last_synced_at?: string | null
+          provider?: string
+          status?: string
+        }
+        Relationships: []
+      }
       bank_file_entries: {
         Row: {
           amount: number
@@ -1450,7 +1486,8 @@ export type Database = {
       }
       dd_mandates: {
         Row: {
-          account_id: string
+          account_holder: string | null
+          account_id: string | null
           account_number: string
           amount: number
           bank_name: string
@@ -1459,11 +1496,16 @@ export type Database = {
           frequency: string
           id: string
           next_collection: string | null
+          provider: string
+          reference: string | null
+          scheme: string
+          signed_at: string | null
           sort_code: string
           status: string
         }
         Insert: {
-          account_id: string
+          account_holder?: string | null
+          account_id?: string | null
           account_number: string
           amount?: number
           bank_name: string
@@ -1472,11 +1514,16 @@ export type Database = {
           frequency?: string
           id?: string
           next_collection?: string | null
+          provider?: string
+          reference?: string | null
+          scheme?: string
+          signed_at?: string | null
           sort_code: string
           status?: string
         }
         Update: {
-          account_id?: string
+          account_holder?: string | null
+          account_id?: string | null
           account_number?: string
           amount?: number
           bank_name?: string
@@ -1485,6 +1532,10 @@ export type Database = {
           frequency?: string
           id?: string
           next_collection?: string | null
+          provider?: string
+          reference?: string | null
+          scheme?: string
+          signed_at?: string | null
           sort_code?: string
           status?: string
         }
@@ -2429,6 +2480,117 @@ export type Database = {
         }
         Relationships: []
       }
+      kyc_cases: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          decision_reason: string | null
+          id: string
+          provider: string
+          provider_ref: string | null
+          reviewer: string | null
+          risk_level: string
+          risk_score: number
+          started_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          decision_reason?: string | null
+          id?: string
+          provider?: string
+          provider_ref?: string | null
+          reviewer?: string | null
+          risk_level?: string
+          risk_score?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          decision_reason?: string | null
+          id?: string
+          provider?: string
+          provider_ref?: string | null
+          reviewer?: string | null
+          risk_level?: string
+          risk_score?: number
+          started_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      kyc_checks: {
+        Row: {
+          case_id: string
+          check_type: string
+          decision: string
+          details: Json | null
+          id: string
+          provider: string
+          ran_at: string
+          score: number | null
+        }
+        Insert: {
+          case_id: string
+          check_type: string
+          decision: string
+          details?: Json | null
+          id?: string
+          provider: string
+          ran_at?: string
+          score?: number | null
+        }
+        Update: {
+          case_id?: string
+          check_type?: string
+          decision?: string
+          details?: Json | null
+          id?: string
+          provider?: string
+          ran_at?: string
+          score?: number | null
+        }
+        Relationships: []
+      }
+      kyc_documents: {
+        Row: {
+          case_id: string
+          doc_type: string
+          extracted: Json | null
+          file_name: string
+          id: string
+          status: string
+          uploaded_at: string
+        }
+        Insert: {
+          case_id: string
+          doc_type: string
+          extracted?: Json | null
+          file_name: string
+          id?: string
+          status?: string
+          uploaded_at?: string
+        }
+        Update: {
+          case_id?: string
+          doc_type?: string
+          extracted?: Json | null
+          file_name?: string
+          id?: string
+          status?: string
+          uploaded_at?: string
+        }
+        Relationships: []
+      }
       kyc_records: {
         Row: {
           address_check: boolean | null
@@ -3094,6 +3256,42 @@ export type Database = {
           total_ni?: number
           total_tax?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      payment_initiations: {
+        Row: {
+          amount: number
+          bank_connection_id: string | null
+          client_id: string
+          id: string
+          initiated_at: string
+          provider: string
+          reference: string
+          settled_at: string | null
+          status: string
+        }
+        Insert: {
+          amount: number
+          bank_connection_id?: string | null
+          client_id: string
+          id?: string
+          initiated_at?: string
+          provider?: string
+          reference: string
+          settled_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number
+          bank_connection_id?: string | null
+          client_id?: string
+          id?: string
+          initiated_at?: string
+          provider?: string
+          reference?: string
+          settled_at?: string | null
+          status?: string
         }
         Relationships: []
       }

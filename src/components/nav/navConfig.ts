@@ -33,7 +33,9 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Money in & out",
       items: [
+        { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Transfer in", url: "/transfer", icon: ArrowDownToLine },
+        { title: "Illustration", url: "/illustration", icon: Calculator },
         { title: "Drawdown", url: "/drawdown", icon: PoundSterling },
         { title: "Drip-feed drawdown", url: "/drip-feed", icon: Workflow },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },

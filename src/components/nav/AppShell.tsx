@@ -38,6 +38,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               Search
               <kbd className="ml-1 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
             </Button>
+            <ViewSwitcher />
             <NotificationsBell />
             <ThemeToggle />
           </header>

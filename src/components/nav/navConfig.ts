@@ -47,6 +47,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Get started",
       items: [
+        { title: "Onboarding progress", url: "/onboarding-progress", icon: ClipboardList },
         { title: "Onboarding", url: "/onboarding", icon: ClipboardList },
         { title: "Welcome pack", url: "/welcome-pack", icon: BookOpen },
         { title: "Identity check (KYC)", url: "/kyc", icon: ShieldCheck },

@@ -76,10 +76,11 @@ export default function IHTOverview() {
     const grossEstate = total - lifeInTrust // life policies in trust never form part of estate
     const chargeable = (estateForIHT: number) => Math.max(0, estateForIHT - businessRelief)
 
-    // Estate for IHT pre-2027: excludes SIPP
+    // Estate for IHT pre-2027: excludes SIPP (pensions outside estate)
     const estatePre = grossEstate - sippTotal
-    // Estate post-2027: includes SIPP
-    const estatePost = grossEstate
+    // Estate post-2027: includes SIPP, unless spouse exemption applied (passes to surviving spouse)
+    const sippExempt = marriedSpouse && sippToSpouse ? sippTotal : 0
+    const estatePost = grossEstate - sippExempt
 
     const tnrbExtra = (transferableNRB / 100) * NRB
     const baseNRB = NRB + (marriedSpouse ? tnrbExtra : 0)

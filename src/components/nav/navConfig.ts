@@ -159,6 +159,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
         { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
         { title: "CASS reconciliation", url: "/cass", icon: ShieldCheck },
+        { title: "KYC review queue", url: "/kyc-review", icon: ShieldCheck },
         { title: "Firm hierarchy", url: "/firms", icon: Network },
       ],
     },
@@ -173,6 +174,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Money in & out",
       items: [
+        { title: "Cash onboarding", url: "/cash-onboarding", icon: ArrowDownToLine },
         { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
         { title: "Transaction history", url: "/transactions", icon: History },

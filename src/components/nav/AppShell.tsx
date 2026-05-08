@@ -5,6 +5,7 @@ import { Breadcrumbs } from "./Breadcrumbs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
+import { ViewSwitcher } from "./ViewSwitcher";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 

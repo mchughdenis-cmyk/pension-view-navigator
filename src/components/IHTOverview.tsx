@@ -111,7 +111,7 @@ export default function IHTOverview() {
     const delta = post.iht - pre.iht
 
     return { total, sippTotal, businessRelief, lifeInTrust, mainResidence, grossEstate, estatePre, estatePost, baseNRB, pre, post, delta }
-  }, [assets, marriedSpouse, transferableNRB, passesToDescendants, charityPctOfEstate])
+  }, [assets, marriedSpouse, transferableNRB, passesToDescendants, charityPctOfEstate, sippToSpouse])
 
   const isAdviser = role !== 'client'
 

@@ -40,6 +40,7 @@ import CASSReconciliation from "./components/CASSReconciliation";
 import MonteCarloProjection from "./components/MonteCarloProjection";
 import FirmHierarchy from "./components/FirmHierarchy";
 import { CommandPalette } from "./components/CommandPalette";
+import EnterpriseSuite from "./components/EnterpriseSuite";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ const AppContent = () => {
         <Route path="/cass" element={<CASSReconciliation />} />
         <Route path="/projection" element={<MonteCarloProjection />} />
         <Route path="/firms" element={<FirmHierarchy />} />
+        <Route path="/enterprise" element={<EnterpriseSuite />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      aa_carry_forward: {
+        Row: {
+          annual_allowance: number
+          carried_forward: number
+          client_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          tax_year: string
+          used_this_year: number
+        }
+        Insert: {
+          annual_allowance?: number
+          carried_forward?: number
+          client_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tax_year: string
+          used_this_year?: number
+        }
+        Update: {
+          annual_allowance?: number
+          carried_forward?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          tax_year?: string
+          used_this_year?: number
+        }
+        Relationships: []
+      }
       activity_log: {
         Row: {
           action: string
@@ -190,6 +223,144 @@ export type Database = {
           firm_id?: string
           id?: string
           is_primary?: boolean
+        }
+        Relationships: []
+      }
+      agency_transfers: {
+        Row: {
+          client_id: string
+          created_at: string
+          effective_date: string
+          from_firm_id: string | null
+          id: string
+          notes: string | null
+          status: string
+          to_firm_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          effective_date?: string
+          from_firm_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          to_firm_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          effective_date?: string
+          from_firm_id?: string | null
+          id?: string
+          notes?: string | null
+          status?: string
+          to_firm_id?: string
+        }
+        Relationships: []
+      }
+      ai_insights: {
+        Row: {
+          acted_on: boolean
+          client_id: string | null
+          confidence: number
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          insight_type: string
+          raw: Json | null
+          severity: string
+          summary: string
+          title: string
+        }
+        Insert: {
+          acted_on?: boolean
+          client_id?: string | null
+          confidence?: number
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          insight_type: string
+          raw?: Json | null
+          severity?: string
+          summary: string
+          title: string
+        }
+        Update: {
+          acted_on?: boolean
+          client_id?: string | null
+          confidence?: number
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          insight_type?: string
+          raw?: Json | null
+          severity?: string
+          summary?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      api_keys: {
+        Row: {
+          created_at: string
+          id: string
+          key_prefix: string
+          last_used_at: string | null
+          name: string
+          scopes: string[]
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key_prefix: string
+          last_used_at?: string | null
+          name: string
+          scopes?: string[]
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key_prefix?: string
+          last_used_at?: string | null
+          name?: string
+          scopes?: string[]
+          status?: string
+        }
+        Relationships: []
+      }
+      atr_assessments: {
+        Row: {
+          assessed_at: string
+          capacity_for_loss: string | null
+          category: string
+          client_id: string
+          id: string
+          questionnaire: Json | null
+          score: number
+        }
+        Insert: {
+          assessed_at?: string
+          capacity_for_loss?: string | null
+          category: string
+          client_id: string
+          id?: string
+          questionnaire?: Json | null
+          score: number
+        }
+        Update: {
+          assessed_at?: string
+          capacity_for_loss?: string | null
+          category?: string
+          client_id?: string
+          id?: string
+          questionnaire?: Json | null
+          score?: number
         }
         Relationships: []
       }
@@ -384,6 +555,75 @@ export type Database = {
           },
         ]
       }
+      cash_forecasts: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          expected_inflows: number
+          expected_outflows: number
+          forecast_date: string
+          id: string
+          net: number | null
+          notes: string | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          expected_inflows?: number
+          expected_outflows?: number
+          forecast_date: string
+          id?: string
+          net?: number | null
+          notes?: string | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          expected_inflows?: number
+          expected_outflows?: number
+          forecast_date?: string
+          id?: string
+          net?: number | null
+          notes?: string | null
+        }
+        Relationships: []
+      }
+      cash_sweeps: {
+        Row: {
+          account_id: string
+          amount: number
+          client_id: string
+          created_at: string
+          from_account: string
+          id: string
+          status: string
+          sweep_date: string
+          to_account: string
+        }
+        Insert: {
+          account_id: string
+          amount?: number
+          client_id: string
+          created_at?: string
+          from_account: string
+          id?: string
+          status?: string
+          sweep_date?: string
+          to_account: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          client_id?: string
+          created_at?: string
+          from_account?: string
+          id?: string
+          status?: string
+          sweep_date?: string
+          to_account?: string
+        }
+        Relationships: []
+      }
       cass_breaches: {
         Row: {
           amount: number | null
@@ -468,6 +708,51 @@ export type Database = {
           status?: string
           unmatched_count?: number
           variance?: number | null
+        }
+        Relationships: []
+      }
+      cgt_disposals: {
+        Row: {
+          account_id: string
+          client_id: string
+          cost_basis: number
+          created_at: string
+          disposal_date: string
+          gain_loss: number | null
+          id: string
+          matching_rule: string
+          proceeds: number
+          symbol: string
+          tax_year: string
+          units: number
+        }
+        Insert: {
+          account_id: string
+          client_id: string
+          cost_basis?: number
+          created_at?: string
+          disposal_date: string
+          gain_loss?: number | null
+          id?: string
+          matching_rule?: string
+          proceeds?: number
+          symbol: string
+          tax_year?: string
+          units?: number
+        }
+        Update: {
+          account_id?: string
+          client_id?: string
+          cost_basis?: number
+          created_at?: string
+          disposal_date?: string
+          gain_loss?: number | null
+          id?: string
+          matching_rule?: string
+          proceeds?: number
+          symbol?: string
+          tax_year?: string
+          units?: number
         }
         Relationships: []
       }
@@ -682,6 +967,42 @@ export type Database = {
           },
         ]
       }
+      consumer_duty_reviews: {
+        Row: {
+          client_id: string
+          created_at: string
+          fair_value_score: number
+          id: string
+          notes: string | null
+          outcomes_score: number
+          review_date: string
+          reviewer: string | null
+          vulnerability_flag: boolean
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          fair_value_score?: number
+          id?: string
+          notes?: string | null
+          outcomes_score?: number
+          review_date?: string
+          reviewer?: string | null
+          vulnerability_flag?: boolean
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          fair_value_score?: number
+          id?: string
+          notes?: string | null
+          outcomes_score?: number
+          review_date?: string
+          reviewer?: string | null
+          vulnerability_flag?: boolean
+        }
+        Relationships: []
+      }
       contributions: {
         Row: {
           account_id: string
@@ -835,6 +1156,51 @@ export type Database = {
         }
         Relationships: []
       }
+      costs_charges: {
+        Row: {
+          adviser_charges: number
+          client_id: string
+          created_at: string
+          disclosure_type: string
+          fund_charges: number
+          id: string
+          pct_of_aua: number | null
+          period_end: string
+          period_start: string
+          platform_charges: number
+          total_charges: number | null
+          transaction_costs: number
+        }
+        Insert: {
+          adviser_charges?: number
+          client_id: string
+          created_at?: string
+          disclosure_type?: string
+          fund_charges?: number
+          id?: string
+          pct_of_aua?: number | null
+          period_end: string
+          period_start: string
+          platform_charges?: number
+          total_charges?: number | null
+          transaction_costs?: number
+        }
+        Update: {
+          adviser_charges?: number
+          client_id?: string
+          created_at?: string
+          disclosure_type?: string
+          fund_charges?: number
+          id?: string
+          pct_of_aua?: number | null
+          period_end?: string
+          period_start?: string
+          platform_charges?: number
+          total_charges?: number | null
+          transaction_costs?: number
+        }
+        Relationships: []
+      }
       crystallisation_segments: {
         Row: {
           account_id: string
@@ -901,6 +1267,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dd_mandates: {
+        Row: {
+          account_id: string
+          account_number: string
+          amount: number
+          bank_name: string
+          client_id: string
+          created_at: string
+          frequency: string
+          id: string
+          next_collection: string | null
+          sort_code: string
+          status: string
+        }
+        Insert: {
+          account_id: string
+          account_number: string
+          amount?: number
+          bank_name: string
+          client_id: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          next_collection?: string | null
+          sort_code: string
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          account_number?: string
+          amount?: number
+          bank_name?: string
+          client_id?: string
+          created_at?: string
+          frequency?: string
+          id?: string
+          next_collection?: string | null
+          sort_code?: string
+          status?: string
+        }
+        Relationships: []
       }
       death_benefit_payments: {
         Row: {
@@ -992,6 +1400,153 @@ export type Database = {
           status?: string
           total_pot_value?: number
           updated_at?: string
+        }
+        Relationships: []
+      }
+      document_versions: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          storage_path: string
+          uploaded_by: string | null
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          storage_path: string
+          uploaded_by?: string | null
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          storage_path?: string
+          uploaded_by?: string | null
+          version?: number
+        }
+        Relationships: []
+      }
+      esg_fund_data: {
+        Row: {
+          as_of_date: string
+          carbon_intensity: number | null
+          controversies: number
+          created_at: string
+          esg_score: number | null
+          fossil_fuel_pct: number | null
+          fund_name: string | null
+          id: string
+          isin: string | null
+          sfdr_article: string | null
+          source: string
+          symbol: string
+        }
+        Insert: {
+          as_of_date?: string
+          carbon_intensity?: number | null
+          controversies?: number
+          created_at?: string
+          esg_score?: number | null
+          fossil_fuel_pct?: number | null
+          fund_name?: string | null
+          id?: string
+          isin?: string | null
+          sfdr_article?: string | null
+          source?: string
+          symbol: string
+        }
+        Update: {
+          as_of_date?: string
+          carbon_intensity?: number | null
+          controversies?: number
+          created_at?: string
+          esg_score?: number | null
+          fossil_fuel_pct?: number | null
+          fund_name?: string | null
+          id?: string
+          isin?: string | null
+          sfdr_article?: string | null
+          source?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      esign_envelopes: {
+        Row: {
+          client_id: string
+          created_at: string
+          document_name: string
+          envelope_ref: string | null
+          id: string
+          provider: string
+          sent_at: string
+          signed_at: string | null
+          status: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          document_name: string
+          envelope_ref?: string | null
+          id?: string
+          provider?: string
+          sent_at?: string
+          signed_at?: string | null
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          document_name?: string
+          envelope_ref?: string | null
+          id?: string
+          provider?: string
+          sent_at?: string
+          signed_at?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      fact_finds: {
+        Row: {
+          assets: Json | null
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          dependants: number | null
+          expenditure_annual: number | null
+          id: string
+          income_annual: number | null
+          liabilities: Json | null
+          objectives: string | null
+        }
+        Insert: {
+          assets?: Json | null
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          dependants?: number | null
+          expenditure_annual?: number | null
+          id?: string
+          income_annual?: number | null
+          liabilities?: Json | null
+          objectives?: string | null
+        }
+        Update: {
+          assets?: Json | null
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          dependants?: number | null
+          expenditure_annual?: number | null
+          id?: string
+          income_annual?: number | null
+          liabilities?: Json | null
+          objectives?: string | null
         }
         Relationships: []
       }
@@ -1184,6 +1739,90 @@ export type Database = {
         }
         Relationships: []
       }
+      four_eyes_approvals: {
+        Row: {
+          amount: number | null
+          approved_at: string | null
+          approved_by: string | null
+          entity_id: string
+          entity_type: string
+          id: string
+          notes: string | null
+          requested_at: string
+          requested_by: string
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          entity_id: string
+          entity_type: string
+          id?: string
+          notes?: string | null
+          requested_at?: string
+          requested_by: string
+          status?: string
+        }
+        Update: {
+          amount?: number | null
+          approved_at?: string | null
+          approved_by?: string | null
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          requested_at?: string
+          requested_by?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      illustrations: {
+        Row: {
+          client_id: string
+          contributions: number
+          created_at: string
+          fca_rate_high: number
+          fca_rate_low: number
+          fca_rate_mid: number
+          growth_rate: number
+          id: string
+          inflation_rate: number
+          projected_pot: number
+          retirement_age: number
+          scenario_name: string
+        }
+        Insert: {
+          client_id: string
+          contributions?: number
+          created_at?: string
+          fca_rate_high?: number
+          fca_rate_low?: number
+          fca_rate_mid?: number
+          growth_rate?: number
+          id?: string
+          inflation_rate?: number
+          projected_pot?: number
+          retirement_age?: number
+          scenario_name: string
+        }
+        Update: {
+          client_id?: string
+          contributions?: number
+          created_at?: string
+          fca_rate_high?: number
+          fca_rate_low?: number
+          fca_rate_mid?: number
+          growth_rate?: number
+          id?: string
+          inflation_rate?: number
+          projected_pot?: number
+          retirement_age?: number
+          scenario_name?: string
+        }
+        Relationships: []
+      }
       integration_log: {
         Row: {
           created_at: string
@@ -1216,6 +1855,45 @@ export type Database = {
           provider?: string
           request_payload?: Json | null
           response_payload?: Json | null
+          status?: string
+        }
+        Relationships: []
+      }
+      interest_accruals: {
+        Row: {
+          account_id: string
+          accrual_date: string
+          client_id: string
+          created_at: string
+          daily_balance: number
+          id: string
+          interest: number
+          paid_date: string | null
+          rate_pct: number
+          status: string
+        }
+        Insert: {
+          account_id: string
+          accrual_date?: string
+          client_id: string
+          created_at?: string
+          daily_balance?: number
+          id?: string
+          interest?: number
+          paid_date?: string | null
+          rate_pct?: number
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          accrual_date?: string
+          client_id?: string
+          created_at?: string
+          daily_balance?: number
+          id?: string
+          interest?: number
+          paid_date?: string | null
+          rate_pct?: number
           status?: string
         }
         Relationships: []
@@ -1285,6 +1963,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      isa_subscriptions: {
+        Row: {
+          account_id: string
+          amount: number
+          client_id: string
+          created_at: string
+          id: string
+          source: string
+          subscription_date: string
+          tax_year: string
+        }
+        Insert: {
+          account_id: string
+          amount?: number
+          client_id: string
+          created_at?: string
+          id?: string
+          source?: string
+          subscription_date?: string
+          tax_year?: string
+        }
+        Update: {
+          account_id?: string
+          amount?: number
+          client_id?: string
+          created_at?: string
+          id?: string
+          source?: string
+          subscription_date?: string
+          tax_year?: string
+        }
+        Relationships: []
       }
       kyc_records: {
         Row: {
@@ -1367,6 +2078,42 @@ export type Database = {
           sedol?: string | null
           source?: string
           symbol?: string
+        }
+        Relationships: []
+      }
+      mifid_drop_alerts: {
+        Row: {
+          account_id: string
+          alerted_at: string
+          client_id: string
+          current_value: number
+          drop_pct: number
+          id: string
+          notified: boolean
+          reference_value: number
+          threshold_pct: number
+        }
+        Insert: {
+          account_id: string
+          alerted_at?: string
+          client_id: string
+          current_value: number
+          drop_pct: number
+          id?: string
+          notified?: boolean
+          reference_value: number
+          threshold_pct?: number
+        }
+        Update: {
+          account_id?: string
+          alerted_at?: string
+          client_id?: string
+          current_value?: number
+          drop_pct?: number
+          id?: string
+          notified?: boolean
+          reference_value?: number
+          threshold_pct?: number
         }
         Relationships: []
       }
@@ -1486,6 +2233,39 @@ export type Database = {
         }
         Relationships: []
       }
+      open_banking_links: {
+        Row: {
+          account_mask: string | null
+          bank_name: string | null
+          client_id: string
+          consent_expiry: string | null
+          created_at: string
+          id: string
+          provider: string
+          status: string
+        }
+        Insert: {
+          account_mask?: string | null
+          bank_name?: string | null
+          client_id: string
+          consent_expiry?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          status?: string
+        }
+        Update: {
+          account_mask?: string | null
+          bank_name?: string | null
+          client_id?: string
+          consent_expiry?: string | null
+          created_at?: string
+          id?: string
+          provider?: string
+          status?: string
+        }
+        Relationships: []
+      }
       ops_case_notes: {
         Row: {
           author: string
@@ -1573,6 +2353,54 @@ export type Database = {
         }
         Relationships: []
       }
+      paye_calculations: {
+        Row: {
+          client_id: string
+          created_at: string
+          emergency_basis: boolean
+          gross_amount: number
+          id: string
+          income_tax: number
+          net_amount: number
+          pay_date: string
+          payment_type: string
+          tax_code: string
+          tax_free_amount: number
+          tax_year: string
+          taxable_amount: number
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          emergency_basis?: boolean
+          gross_amount?: number
+          id?: string
+          income_tax?: number
+          net_amount?: number
+          pay_date?: string
+          payment_type: string
+          tax_code?: string
+          tax_free_amount?: number
+          tax_year?: string
+          taxable_amount?: number
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          emergency_basis?: boolean
+          gross_amount?: number
+          id?: string
+          income_tax?: number
+          net_amount?: number
+          pay_date?: string
+          payment_type?: string
+          tax_code?: string
+          tax_free_amount?: number
+          tax_year?: string
+          taxable_amount?: number
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1600,6 +2428,36 @@ export type Database = {
           id?: string
           is_demo?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      push_notifications: {
+        Row: {
+          body: string
+          category: string | null
+          client_id: string
+          id: string
+          read_at: string | null
+          sent_at: string
+          title: string
+        }
+        Insert: {
+          body: string
+          category?: string | null
+          client_id: string
+          id?: string
+          read_at?: string | null
+          sent_at?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          category?: string | null
+          client_id?: string
+          id?: string
+          read_at?: string | null
+          sent_at?: string
+          title?: string
         }
         Relationships: []
       }
@@ -1648,6 +2506,147 @@ export type Database = {
           total_sell_value?: number
           trades_generated?: Json | null
           triggered_by?: string
+        }
+        Relationships: []
+      }
+      retention_policies: {
+        Row: {
+          doc_type: string
+          id: string
+          legal_hold: boolean
+          notes: string | null
+          retention_years: number
+        }
+        Insert: {
+          doc_type: string
+          id?: string
+          legal_hold?: boolean
+          notes?: string | null
+          retention_years?: number
+        }
+        Update: {
+          doc_type?: string
+          id?: string
+          legal_hold?: boolean
+          notes?: string | null
+          retention_years?: number
+        }
+        Relationships: []
+      }
+      rti_submissions: {
+        Row: {
+          client_count: number
+          created_at: string
+          hmrc_reference: string | null
+          id: string
+          payload: Json | null
+          period_end: string
+          status: string
+          submission_type: string
+          submitted_at: string | null
+          tax_year: string
+          total_gross: number
+          total_tax: number
+        }
+        Insert: {
+          client_count?: number
+          created_at?: string
+          hmrc_reference?: string | null
+          id?: string
+          payload?: Json | null
+          period_end?: string
+          status?: string
+          submission_type?: string
+          submitted_at?: string | null
+          tax_year?: string
+          total_gross?: number
+          total_tax?: number
+        }
+        Update: {
+          client_count?: number
+          created_at?: string
+          hmrc_reference?: string | null
+          id?: string
+          payload?: Json | null
+          period_end?: string
+          status?: string
+          submission_type?: string
+          submitted_at?: string | null
+          tax_year?: string
+          total_gross?: number
+          total_tax?: number
+        }
+        Relationships: []
+      }
+      secure_messages: {
+        Row: {
+          body: string
+          client_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient: string
+          sender: string
+          subject: string | null
+          thread_id: string | null
+        }
+        Insert: {
+          body: string
+          client_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient: string
+          sender: string
+          subject?: string | null
+          thread_id?: string | null
+        }
+        Update: {
+          body?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient?: string
+          sender?: string
+          subject?: string | null
+          thread_id?: string | null
+        }
+        Relationships: []
+      }
+      settlement_instructions: {
+        Row: {
+          amount: number
+          block_id: string | null
+          counterparty: string
+          created_at: string
+          id: string
+          reference: string | null
+          settlement_date: string
+          settlement_type: string
+          status: string
+        }
+        Insert: {
+          amount?: number
+          block_id?: string | null
+          counterparty: string
+          created_at?: string
+          id?: string
+          reference?: string | null
+          settlement_date: string
+          settlement_type?: string
+          status?: string
+        }
+        Update: {
+          amount?: number
+          block_id?: string | null
+          counterparty?: string
+          created_at?: string
+          id?: string
+          reference?: string | null
+          settlement_date?: string
+          settlement_type?: string
+          status?: string
         }
         Relationships: []
       }
@@ -1705,6 +2704,129 @@ export type Database = {
           statement_type?: string
           status?: string
           withdrawals_total?: number
+        }
+        Relationships: []
+      }
+      suitability_reports: {
+        Row: {
+          client_id: string
+          costs_summary: string | null
+          created_at: string
+          id: string
+          rationale: string | null
+          recommendation: string
+          risk_alignment: string | null
+          signed_off_by: string | null
+          status: string
+        }
+        Insert: {
+          client_id: string
+          costs_summary?: string | null
+          created_at?: string
+          id?: string
+          rationale?: string | null
+          recommendation: string
+          risk_alignment?: string | null
+          signed_off_by?: string | null
+          status?: string
+        }
+        Update: {
+          client_id?: string
+          costs_summary?: string | null
+          created_at?: string
+          id?: string
+          rationale?: string | null
+          recommendation?: string
+          risk_alignment?: string | null
+          signed_off_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      trade_allocations: {
+        Row: {
+          account_id: string
+          block_id: string
+          client_id: string
+          created_at: string
+          id: string
+          status: string
+          units: number
+          value: number
+        }
+        Insert: {
+          account_id: string
+          block_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          status?: string
+          units?: number
+          value?: number
+        }
+        Update: {
+          account_id?: string
+          block_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          status?: string
+          units?: number
+          value?: number
+        }
+        Relationships: []
+      }
+      trade_blocks: {
+        Row: {
+          block_ref: string
+          created_at: string
+          cut_off_at: string | null
+          exec_price: number | null
+          executed_at: string | null
+          id: string
+          isin: string | null
+          settlement_date: string | null
+          side: string
+          status: string
+          symbol: string
+          total_units: number
+          total_value: number
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          block_ref?: string
+          created_at?: string
+          cut_off_at?: string | null
+          exec_price?: number | null
+          executed_at?: string | null
+          id?: string
+          isin?: string | null
+          settlement_date?: string | null
+          side: string
+          status?: string
+          symbol: string
+          total_units?: number
+          total_value?: number
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          block_ref?: string
+          created_at?: string
+          cut_off_at?: string | null
+          exec_price?: number | null
+          executed_at?: string | null
+          id?: string
+          isin?: string | null
+          settlement_date?: string | null
+          side?: string
+          status?: string
+          symbol?: string
+          total_units?: number
+          total_value?: number
+          updated_at?: string
+          venue?: string | null
         }
         Relationships: []
       }
@@ -1969,6 +3091,96 @@ export type Database = {
         }
         Relationships: []
       }
+      voting_records: {
+        Row: {
+          created_at: string
+          fund_symbol: string
+          id: string
+          meeting_date: string
+          proposal: string
+          rationale: string | null
+          vote: string
+        }
+        Insert: {
+          created_at?: string
+          fund_symbol: string
+          id?: string
+          meeting_date: string
+          proposal: string
+          rationale?: string | null
+          vote: string
+        }
+        Update: {
+          created_at?: string
+          fund_symbol?: string
+          id?: string
+          meeting_date?: string
+          proposal?: string
+          rationale?: string | null
+          vote?: string
+        }
+        Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          endpoint_id: string
+          event: string
+          id: string
+          payload: Json | null
+          response_code: number | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id: string
+          event: string
+          id?: string
+          payload?: Json | null
+          response_code?: number | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id?: string
+          event?: string
+          id?: string
+          payload?: Json | null
+          response_code?: number | null
+          status?: string
+        }
+        Relationships: []
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          events: string[]
+          id: string
+          secret: string | null
+          status: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret?: string | null
+          status?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          events?: string[]
+          id?: string
+          secret?: string | null
+          status?: string
+          url?: string
+        }
+        Relationships: []
+      }
       workflow_definitions: {
         Row: {
           action: string
@@ -2014,6 +3226,81 @@ export type Database = {
         }
         Relationships: []
       }
+      workflow_instances: {
+        Row: {
+          case_id: string | null
+          client_id: string | null
+          completed_at: string | null
+          context: Json | null
+          current_step: number
+          due_at: string | null
+          id: string
+          started_at: string
+          status: string
+          template_id: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          context?: Json | null
+          current_step?: number
+          due_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          template_id?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          client_id?: string | null
+          completed_at?: string | null
+          context?: Json | null
+          current_step?: number
+          due_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          template_id?: string | null
+        }
+        Relationships: []
+      }
+      workflow_templates: {
+        Row: {
+          active: boolean
+          created_at: string
+          description: string | null
+          four_eyes_required: boolean
+          id: string
+          name: string
+          sla_minutes: number
+          steps: Json
+          trigger_event: string | null
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          four_eyes_required?: boolean
+          id?: string
+          name: string
+          sla_minutes?: number
+          steps?: Json
+          trigger_event?: string | null
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          description?: string | null
+          four_eyes_required?: boolean
+          id?: string
+          name?: string
+          sla_minutes?: number
+          steps?: Json
+          trigger_event?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       mi_aua_by_firm: {
@@ -2028,10 +3315,9 @@ export type Database = {
       }
       mi_fee_yield: {
         Row: {
-          clients_charged: number | null
-          fee_type: string | null
+          billed_clients: number | null
+          fees_charged: number | null
           month: string | null
-          total_fees: number | null
         }
         Relationships: []
       }
@@ -2052,6 +3338,15 @@ export type Database = {
           queue: string | null
           sla_breached: number | null
           status: string | null
+        }
+        Relationships: []
+      }
+      mi_persistency: {
+        Row: {
+          active_clients: number | null
+          closed_clients: number | null
+          month: string | null
+          persistency_pct: number | null
         }
         Relationships: []
       }

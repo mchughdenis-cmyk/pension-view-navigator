@@ -115,6 +115,11 @@ function SecureMessaging() {
     const res = await runWithToast(async () => {
       const { error } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: "Reply", body: draft, status: "sent" } as any);
       if (error) throw error;
+      await supabase.from("activity_log").insert({
+        action: "secure_message_sent", entity_type: "client", entity_id: clientId,
+        description: `Secure reply sent (${draft.length} chars)`,
+        new_values: { subject: "Reply", length: draft.length },
+      } as any);
     }, { success: "Message sent" });
     if (res.ok) { setDraft(""); reload(); }
   };
@@ -172,6 +177,11 @@ function BulkStatementRun() {
       await supabase.from("secure_messages").insert(rows.slice(i, i + 25) as any);
       setProgress(Math.round(((i + 25) / rows.length) * 100));
     }
+    await supabase.from("activity_log").insert({
+      action: "bulk_statement_run", entity_type: "comms", entity_id: null,
+      description: `Bulk annual statement dispatch — ${rows.length} clients`,
+      new_values: { recipients: rows.length, subject: "Annual benefit statement 2024/25" },
+    } as any);
     setRunning(false); setProgress(100); toast.success(`${rows.length} statements dispatched`);
   };
 

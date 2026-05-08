@@ -154,47 +154,24 @@ export default function InstantWithdrawal() {
 
   const handleWithdrawal = async () => {
     const amount = parseFloat(withdrawalAmount);
-    
-    if (!amount || amount <= 0) {
-      toast({
-        title: "Invalid Amount",
-        description: "Please enter a valid withdrawal amount",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (amount > availableBalance) {
-      toast({
-        title: "Insufficient Funds",
-        description: "The withdrawal amount exceeds your available balance",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!selectedAccount) {
-      toast({
-        title: "No Account Selected",
-        description: "Please select a bank account for the withdrawal",
-        variant: "destructive"
-      });
-      return;
-    }
+    if (!amount || amount <= 0) { toast({ title: "Invalid Amount", description: "Enter a valid amount", variant: "destructive" }); return; }
+    if (amount > availableBalance) { toast({ title: "Insufficient Funds", description: "Exceeds available balance", variant: "destructive" }); return; }
+    if (!selectedAccount) { toast({ title: "No Account", description: "Select a destination bank account", variant: "destructive" }); return; }
+    if (!clientId || !sipp) { toast({ title: "No SIPP", description: "Selected client has no SIPP account", variant: "destructive" }); return; }
 
     setIsProcessing(true);
-    
-    // Simulate processing delay
-    setTimeout(() => {
-      setIsProcessing(false);
+    const result = await processDrawdown({
+      clientId, accountId: sipp.id,
+      mode: "UFPLS", potValue: availableBalance, ufplsGross: amount, otherIncome,
+      notes: `Instant UFPLS withdrawal to bank account`,
+    });
+    setIsProcessing(false);
+    if (result) {
       setWithdrawalAmount("");
       setSelectedAccount("");
-      
-      toast({
-        title: "Withdrawal Requested",
-        description: `${formatCurrency(amount)} will be transferred to your selected account within 1-2 business days`,
-      });
-    }, 2000);
+      await fetchAll();
+      toast({ title: "Withdrawal processed", description: `Net ${formatGBP(result.pclsAmount + result.net)} (after £${result.tax.toFixed(0)} tax) will reach the account in 1-2 days.` });
+    }
   };
 
   const getStatusBadge = (status: string) => {

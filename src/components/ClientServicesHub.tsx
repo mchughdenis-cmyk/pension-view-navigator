@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText } from "lucide-react";
+import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
 
 type Client = { id: string; first_name: string; last_name: string; mpaa_triggered: boolean; annual_allowance_used: number };
 
@@ -267,17 +268,25 @@ function TransferWizard({ client }: { client?: Client }) {
 
 /* ============ Beneficiaries ============ */
 function BeneficiariesPanel({ client }: { client?: Client }) {
-  const [rows, setRows] = useState<any[]>([]);
   const [name, setName] = useState(""); const [rel, setRel] = useState("Spouse"); const [pct, setPct] = useState("100");
 
-  const load = async () => { if (!client) return; const { data } = await supabase.from("beneficiaries").select("*").eq("client_id", client.id); setRows(data ?? []); };
-  useEffect(() => { load(); }, [client?.id]);
-  const total = rows.reduce((s, r) => s + Number(r.allocation_pct || 0), 0);
+  const { data: rows, loading, error, reload } = useAsync(async () => {
+    if (!client) return [];
+    const { data, error } = await supabase.from("beneficiaries").select("*").eq("client_id", client.id);
+    if (error) throw error;
+    return data ?? [];
+  }, [client?.id]);
+
+  const list = rows ?? [];
+  const total = list.reduce((s: number, r: any) => s + Number(r.allocation_pct || 0), 0);
 
   const add = async () => {
     if (!client || !name) return;
-    await supabase.from("beneficiaries").insert({ client_id: client.id, name, relationship: rel, allocation_pct: Number(pct) });
-    setName(""); setPct("100"); load(); toast.success("Beneficiary added");
+    const res = await runWithToast(async () => {
+      const { error } = await supabase.from("beneficiaries").insert({ client_id: client.id, name, relationship: rel, allocation_pct: Number(pct) });
+      if (error) throw error;
+    }, { success: "Beneficiary added" });
+    if (res.ok) { setName(""); setPct("100"); reload(); }
   };
 
   return (
@@ -292,17 +301,24 @@ function BeneficiariesPanel({ client }: { client?: Client }) {
             </Select>
           </div>
           <div><Label>Allocation %</Label><Input type="number" value={pct} onChange={(e) => setPct(e.target.value)} /></div>
-          <Button onClick={add}>Add</Button>
+          <Button onClick={add} disabled={!client || !name}>Add</Button>
         </div>
-        <div className="space-y-2">
-          {rows.map((r) => (
-            <div key={r.id} className="flex justify-between items-center border rounded-lg p-3">
-              <div><p className="font-medium">{r.name}</p><p className="text-xs text-muted-foreground">{r.relationship}</p></div>
-              <Badge variant="secondary">{r.allocation_pct}%</Badge>
-            </div>
-          ))}
-          <div className="flex justify-between text-sm pt-2 border-t"><span>Total</span><span className={total === 100 ? "text-green-600 font-semibold" : "text-destructive font-semibold"}>{total}%</span></div>
-        </div>
+        <AsyncState
+          loading={loading} error={error} onRetry={reload} isEmpty={list.length === 0}
+          loadingLabel="Loading beneficiaries…"
+          emptyTitle="No beneficiaries nominated"
+          emptyDescription="Add at least one beneficiary above. Allocations must total 100%."
+        >
+          <div className="space-y-2">
+            {list.map((r: any) => (
+              <div key={r.id} className="flex justify-between items-center border rounded-lg p-3">
+                <div><p className="font-medium">{r.name}</p><p className="text-xs text-muted-foreground">{r.relationship}</p></div>
+                <Badge variant="secondary">{r.allocation_pct}%</Badge>
+              </div>
+            ))}
+            <div className="flex justify-between text-sm pt-2 border-t"><span>Total</span><span className={total === 100 ? "text-green-600 font-semibold" : "text-destructive font-semibold"}>{total}%</span></div>
+          </div>
+        </AsyncState>
       </CardContent>
     </Card>
   );
@@ -310,26 +326,34 @@ function BeneficiariesPanel({ client }: { client?: Client }) {
 
 /* ============ Document vault ============ */
 function DocumentVault({ client }: { client?: Client }) {
-  const [docs, setDocs] = useState<any[]>([]);
-  useEffect(() => {
-    if (!client) return;
-    supabase.from("client_documents").select("*").eq("client_id", client.id).order("created_at", { ascending: false }).then(({ data }) => setDocs(data ?? []));
+  const { data, loading, error, reload } = useAsync(async () => {
+    if (!client) return [];
+    const { data, error } = await supabase.from("client_documents").select("*").eq("client_id", client.id).order("created_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
   }, [client?.id]);
+
+  const docs = data ?? [];
 
   return (
     <Card>
       <CardHeader><CardTitle>Document vault</CardTitle><CardDescription>Illustrations, statements, KIIDs, annual benefit statements.</CardDescription></CardHeader>
       <CardContent>
-        {docs.length === 0 ? <p className="text-sm text-muted-foreground">No documents yet.</p> : (
+        <AsyncState
+          loading={loading} error={error} onRetry={reload} isEmpty={docs.length === 0}
+          loadingLabel="Loading documents…"
+          emptyTitle="No documents yet"
+          emptyDescription="Statements and illustrations will appear here once generated."
+        >
           <div className="space-y-2">
-            {docs.map((d) => (
+            {docs.map((d: any) => (
               <div key={d.id} className="flex justify-between border rounded-lg p-3">
                 <div><p className="font-medium text-sm">{d.filename}</p><p className="text-xs text-muted-foreground">{d.document_type} · {new Date(d.created_at).toLocaleDateString("en-GB")}</p></div>
                 <Badge variant="outline">{(d.size_bytes ?? 0) > 0 ? `${Math.round(d.size_bytes / 1024)} KB` : "—"}</Badge>
               </div>
             ))}
           </div>
-        )}
+        </AsyncState>
       </CardContent>
     </Card>
   );

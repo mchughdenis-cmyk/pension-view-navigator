@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Send, Mail, FileText } from "lucide-react";
+import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
 
 const TEMPLATES = [
   { key: "welcome", name: "Welcome letter", body: "Dear {{first_name}},\n\nWelcome to Pension Navigator by Airgead. Your account {{account_number}} is now active.\n\nKind regards,\nThe Airgead Team" },
@@ -92,16 +93,30 @@ function TemplateEngine() {
 
 function SecureMessaging() {
   const [clients, setClients] = useState<any[]>([]); const [clientId, setClientId] = useState<string>("");
-  const [thread, setThread] = useState<any[]>([]); const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState("");
 
-  useEffect(() => { supabase.from("clients").select("id, first_name, last_name").order("last_name").then(({ data }) => { setClients(data ?? []); if (data?.[0]) setClientId(data[0].id); }); }, []);
-  const load = async () => { if (!clientId) return; const { data } = await supabase.from("secure_messages").select("*").eq("client_id", clientId).order("created_at", { ascending: true }); setThread(data ?? []); };
-  useEffect(() => { load(); }, [clientId]);
+  useEffect(() => {
+    supabase.from("clients").select("id, first_name, last_name").order("last_name").then(({ data, error }) => {
+      if (error) { toast.error(error.message); return; }
+      setClients(data ?? []); if (data?.[0]) setClientId(data[0].id);
+    });
+  }, []);
+
+  const { data, loading, error, reload } = useAsync(async () => {
+    if (!clientId) return [];
+    const { data, error } = await supabase.from("secure_messages").select("*").eq("client_id", clientId).order("created_at", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  }, [clientId]);
+  const thread = data ?? [];
 
   const send = async () => {
     if (!draft || !clientId) return;
-    await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: "Reply", body: draft, status: "sent" } as any);
-    setDraft(""); load();
+    const res = await runWithToast(async () => {
+      const { error } = await supabase.from("secure_messages").insert({ client_id: clientId, sender: "Adviser", subject: "Reply", body: draft, status: "sent" } as any);
+      if (error) throw error;
+    }, { success: "Message sent" });
+    if (res.ok) { setDraft(""); reload(); }
   };
 
   return (
@@ -116,18 +131,25 @@ function SecureMessaging() {
         </div>
         <div className="md:col-span-2 space-y-3">
           <ScrollArea className="h-72 rounded-lg border p-3">
-            {thread.length === 0 ? <p className="text-sm text-muted-foreground">No messages.</p> :
-              thread.map((m) => (
+            <AsyncState
+              loading={loading} error={error} onRetry={reload} isEmpty={thread.length === 0}
+              loadingLabel="Loading messages…"
+              emptyTitle="No messages yet"
+              emptyDescription="Start a conversation by sending a message below."
+              rows={2}
+            >
+              {thread.map((m: any) => (
                 <div key={m.id} className="mb-3">
                   <div className="flex justify-between text-xs text-muted-foreground"><span>{m.sender}</span><span>{new Date(m.created_at).toLocaleString("en-GB")}</span></div>
                   <p className="text-sm font-medium">{m.subject}</p>
                   <p className="text-sm whitespace-pre-wrap">{m.body}</p>
                 </div>
               ))}
+            </AsyncState>
           </ScrollArea>
           <div className="flex gap-2">
             <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Type a secure reply…" />
-            <Button onClick={send}><Send className="h-4 w-4" /></Button>
+            <Button onClick={send} disabled={!clientId || !draft}><Send className="h-4 w-4" /></Button>
           </div>
         </div>
       </CardContent>

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Download } from "lucide-react";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
 import { saveAs } from "file-saver";
+import { AsyncState, useAsync } from "@/components/ui/async-state";
 
 export default function ReportingSuite() {
   return (
@@ -147,24 +148,34 @@ function FCAReturns() {
 }
 
 function CGT30Day() {
-  const [disposals, setDisposals] = useState<any[]>([]);
-  useEffect(() => { supabase.from("cgt_disposals").select("*").order("disposal_date", { ascending: false }).limit(20).then(({ data }) => setDisposals(data ?? [])); }, []);
+  const { data, loading, error, reload } = useAsync(async () => {
+    const { data, error } = await supabase.from("cgt_disposals").select("*").order("disposal_date", { ascending: false }).limit(20);
+    if (error) throw error;
+    return data ?? [];
+  }, []);
+  const disposals = data ?? [];
 
   return (
     <Card>
       <CardHeader><CardTitle>CGT 30-day reporter</CardTitle><CardDescription>In-year disposals requiring 60-day reporting (UK property) or annual self-assessment.</CardDescription></CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Symbol</TableHead><TableHead>Proceeds</TableHead><TableHead>Cost</TableHead><TableHead>Gain/Loss</TableHead><TableHead>Rule</TableHead></TableRow></TableHeader>
-          <TableBody>{disposals.map((d) => (
-            <TableRow key={d.id}><TableCell>{d.disposal_date}</TableCell><TableCell className="font-mono">{d.symbol}</TableCell>
-              <TableCell>£{Number(d.proceeds).toLocaleString()}</TableCell><TableCell>£{Number(d.cost_basis).toLocaleString()}</TableCell>
-              <TableCell className={Number(d.gain_loss) >= 0 ? "text-green-600" : "text-destructive"}>£{Number(d.gain_loss || 0).toLocaleString()}</TableCell>
-              <TableCell><Badge variant="outline">{d.matching_rule}</Badge></TableCell>
-            </TableRow>
-          ))}
-          {!disposals.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground">No disposals.</TableCell></TableRow>}</TableBody>
-        </Table>
+        <AsyncState
+          loading={loading} error={error} onRetry={reload} isEmpty={disposals.length === 0}
+          loadingLabel="Loading disposals…"
+          emptyTitle="No disposals in window"
+          emptyDescription="Capital disposals will appear here once recorded."
+        >
+          <Table>
+            <TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Symbol</TableHead><TableHead>Proceeds</TableHead><TableHead>Cost</TableHead><TableHead>Gain/Loss</TableHead><TableHead>Rule</TableHead></TableRow></TableHeader>
+            <TableBody>{disposals.map((d: any) => (
+              <TableRow key={d.id}><TableCell>{d.disposal_date}</TableCell><TableCell className="font-mono">{d.symbol}</TableCell>
+                <TableCell>£{Number(d.proceeds).toLocaleString()}</TableCell><TableCell>£{Number(d.cost_basis).toLocaleString()}</TableCell>
+                <TableCell className={Number(d.gain_loss) >= 0 ? "text-green-600" : "text-destructive"}>£{Number(d.gain_loss || 0).toLocaleString()}</TableCell>
+                <TableCell><Badge variant="outline">{d.matching_rule}</Badge></TableCell>
+              </TableRow>
+            ))}</TableBody>
+          </Table>
+        </AsyncState>
       </CardContent>
     </Card>
   );

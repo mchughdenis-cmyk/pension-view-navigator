@@ -106,6 +106,93 @@ export type Database = {
           },
         ]
       }
+      advisers: {
+        Row: {
+          created_at: string
+          email: string | null
+          fca_individual_ref: string | null
+          firm_id: string | null
+          id: string
+          name: string
+          role: string
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          fca_individual_ref?: string | null
+          firm_id?: string | null
+          id?: string
+          name: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          fca_individual_ref?: string | null
+          firm_id?: string | null
+          id?: string
+          name?: string
+          role?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisers_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "advisers_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "mi_aua_by_firm"
+            referencedColumns: ["firm_id"]
+          },
+        ]
+      }
+      agency_assignments: {
+        Row: {
+          adviser_id: string
+          assigned_from: string
+          assigned_to: string | null
+          client_id: string
+          created_at: string
+          firm_id: string
+          id: string
+          is_primary: boolean
+        }
+        Insert: {
+          adviser_id: string
+          assigned_from?: string
+          assigned_to?: string | null
+          client_id: string
+          created_at?: string
+          firm_id: string
+          id?: string
+          is_primary?: boolean
+        }
+        Update: {
+          adviser_id?: string
+          assigned_from?: string
+          assigned_to?: string | null
+          client_id?: string
+          created_at?: string
+          firm_id?: string
+          id?: string
+          is_primary?: boolean
+        }
+        Relationships: []
+      }
       bank_file_entries: {
         Row: {
           amount: number
@@ -296,6 +383,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cass_breaches: {
+        Row: {
+          amount: number | null
+          breach_date: string
+          breach_type: string
+          created_at: string
+          description: string
+          id: string
+          recon_id: string | null
+          resolved_at: string | null
+          severity: string
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          breach_date?: string
+          breach_type: string
+          created_at?: string
+          description: string
+          id?: string
+          recon_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Update: {
+          amount?: number | null
+          breach_date?: string
+          breach_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          recon_id?: string | null
+          resolved_at?: string | null
+          severity?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      cass_reconciliations: {
+        Row: {
+          created_at: string
+          external_balance: number
+          id: string
+          internal_balance: number
+          performed_by: string | null
+          recon_date: string
+          recon_type: string
+          resolution_notes: string | null
+          reviewed_by: string | null
+          signed_off_at: string | null
+          status: string
+          unmatched_count: number
+          variance: number | null
+        }
+        Insert: {
+          created_at?: string
+          external_balance?: number
+          id?: string
+          internal_balance?: number
+          performed_by?: string | null
+          recon_date?: string
+          recon_type?: string
+          resolution_notes?: string | null
+          reviewed_by?: string | null
+          signed_off_at?: string | null
+          status?: string
+          unmatched_count?: number
+          variance?: number | null
+        }
+        Update: {
+          created_at?: string
+          external_balance?: number
+          id?: string
+          internal_balance?: number
+          performed_by?: string | null
+          recon_date?: string
+          recon_type?: string
+          resolution_notes?: string | null
+          reviewed_by?: string | null
+          signed_off_at?: string | null
+          status?: string
+          unmatched_count?: number
+          variance?: number | null
+        }
+        Relationships: []
       }
       client_accounts: {
         Row: {
@@ -562,6 +736,105 @@ export type Database = {
         }
         Relationships: []
       }
+      corporate_action_elections: {
+        Row: {
+          account_id: string
+          cash_amount: number | null
+          client_id: string
+          corporate_action_id: string
+          created_at: string
+          elected_at: string | null
+          election: string
+          id: string
+          settled_at: string | null
+          status: string
+          units_held: number
+          units_received: number | null
+        }
+        Insert: {
+          account_id: string
+          cash_amount?: number | null
+          client_id: string
+          corporate_action_id: string
+          created_at?: string
+          elected_at?: string | null
+          election?: string
+          id?: string
+          settled_at?: string | null
+          status?: string
+          units_held?: number
+          units_received?: number | null
+        }
+        Update: {
+          account_id?: string
+          cash_amount?: number | null
+          client_id?: string
+          corporate_action_id?: string
+          created_at?: string
+          elected_at?: string | null
+          election?: string
+          id?: string
+          settled_at?: string | null
+          status?: string
+          units_held?: number
+          units_received?: number | null
+        }
+        Relationships: []
+      }
+      corporate_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          currency: string | null
+          description: string | null
+          election_deadline: string | null
+          ex_date: string | null
+          id: string
+          isin: string | null
+          payment_date: string | null
+          rate: number | null
+          ratio: string | null
+          record_date: string | null
+          status: string
+          symbol: string
+          voluntary: boolean
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          election_deadline?: string | null
+          ex_date?: string | null
+          id?: string
+          isin?: string | null
+          payment_date?: string | null
+          rate?: number | null
+          ratio?: string | null
+          record_date?: string | null
+          status?: string
+          symbol: string
+          voluntary?: boolean
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          currency?: string | null
+          description?: string | null
+          election_deadline?: string | null
+          ex_date?: string | null
+          id?: string
+          isin?: string | null
+          payment_date?: string | null
+          rate?: number | null
+          ratio?: string | null
+          record_date?: string | null
+          status?: string
+          symbol?: string
+          voluntary?: boolean
+        }
+        Relationships: []
+      }
       crystallisation_segments: {
         Row: {
           account_id: string
@@ -824,6 +1097,93 @@ export type Database = {
         }
         Relationships: []
       }
+      fee_splits: {
+        Row: {
+          adviser_id: string | null
+          adviser_share_pct: number
+          amount_adviser: number
+          amount_firm: number
+          created_at: string
+          fee_charge_id: string | null
+          firm_id: string
+          firm_share_pct: number
+          id: string
+          period_end: string
+          status: string
+        }
+        Insert: {
+          adviser_id?: string | null
+          adviser_share_pct?: number
+          amount_adviser?: number
+          amount_firm?: number
+          created_at?: string
+          fee_charge_id?: string | null
+          firm_id: string
+          firm_share_pct?: number
+          id?: string
+          period_end?: string
+          status?: string
+        }
+        Update: {
+          adviser_id?: string | null
+          adviser_share_pct?: number
+          amount_adviser?: number
+          amount_firm?: number
+          created_at?: string
+          fee_charge_id?: string | null
+          firm_id?: string
+          firm_share_pct?: number
+          id?: string
+          period_end?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      firms: {
+        Row: {
+          address_line1: string | null
+          city: string | null
+          created_at: string
+          default_adviser_fee_pct: number
+          default_platform_fee_pct: number
+          fca_ref: string | null
+          id: string
+          name: string
+          network_id: string | null
+          postcode: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          address_line1?: string | null
+          city?: string | null
+          created_at?: string
+          default_adviser_fee_pct?: number
+          default_platform_fee_pct?: number
+          fca_ref?: string | null
+          id?: string
+          name: string
+          network_id?: string | null
+          postcode?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          address_line1?: string | null
+          city?: string | null
+          created_at?: string
+          default_adviser_fee_pct?: number
+          default_platform_fee_pct?: number
+          fca_ref?: string | null
+          id?: string
+          name?: string
+          network_id?: string | null
+          postcode?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       integration_log: {
         Row: {
           created_at: string
@@ -1010,6 +1370,209 @@ export type Database = {
         }
         Relationships: []
       }
+      model_assignments: {
+        Row: {
+          account_id: string
+          assigned_at: string
+          client_id: string
+          id: string
+          model_id: string
+          status: string
+        }
+        Insert: {
+          account_id: string
+          assigned_at?: string
+          client_id: string
+          id?: string
+          model_id: string
+          status?: string
+        }
+        Update: {
+          account_id?: string
+          assigned_at?: string
+          client_id?: string
+          id?: string
+          model_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      model_holdings: {
+        Row: {
+          asset_class: string | null
+          created_at: string
+          fund_name: string
+          id: string
+          isin: string | null
+          model_id: string
+          region: string | null
+          symbol: string
+          target_pct: number
+        }
+        Insert: {
+          asset_class?: string | null
+          created_at?: string
+          fund_name: string
+          id?: string
+          isin?: string | null
+          model_id: string
+          region?: string | null
+          symbol: string
+          target_pct?: number
+        }
+        Update: {
+          asset_class?: string | null
+          created_at?: string
+          fund_name?: string
+          id?: string
+          isin?: string | null
+          model_id?: string
+          region?: string | null
+          symbol?: string
+          target_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_holdings_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "model_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      model_portfolios: {
+        Row: {
+          benchmark: string | null
+          created_at: string
+          description: string | null
+          drift_tolerance_pct: number
+          id: string
+          manager: string | null
+          name: string
+          ocf: number
+          rebalance_frequency: string
+          risk_level: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          benchmark?: string | null
+          created_at?: string
+          description?: string | null
+          drift_tolerance_pct?: number
+          id?: string
+          manager?: string | null
+          name: string
+          ocf?: number
+          rebalance_frequency?: string
+          risk_level?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          benchmark?: string | null
+          created_at?: string
+          description?: string | null
+          drift_tolerance_pct?: number
+          id?: string
+          manager?: string | null
+          name?: string
+          ocf?: number
+          rebalance_frequency?: string
+          risk_level?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      ops_case_notes: {
+        Row: {
+          author: string
+          case_id: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          note: string
+        }
+        Insert: {
+          author?: string
+          case_id: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note: string
+        }
+        Update: {
+          author?: string
+          case_id?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          note?: string
+        }
+        Relationships: []
+      }
+      ops_cases: {
+        Row: {
+          assigned_to: string | null
+          case_ref: string
+          case_type: string
+          client_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json | null
+          priority: string
+          queue: string
+          related_id: string | null
+          related_table: string | null
+          resolved_at: string | null
+          sla_due_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_ref?: string
+          case_type: string
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          queue?: string
+          related_id?: string | null
+          related_table?: string | null
+          resolved_at?: string | null
+          sla_due_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          case_ref?: string
+          case_type?: string
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json | null
+          priority?: string
+          queue?: string
+          related_id?: string | null
+          related_table?: string | null
+          resolved_at?: string | null
+          sla_due_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1037,6 +1600,54 @@ export type Database = {
           id?: string
           is_demo?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      rebalance_runs: {
+        Row: {
+          account_id: string
+          approved_by: string | null
+          client_id: string
+          created_at: string
+          drift_summary: Json | null
+          executed_at: string | null
+          id: string
+          model_id: string
+          status: string
+          total_buy_value: number
+          total_sell_value: number
+          trades_generated: Json | null
+          triggered_by: string
+        }
+        Insert: {
+          account_id: string
+          approved_by?: string | null
+          client_id: string
+          created_at?: string
+          drift_summary?: Json | null
+          executed_at?: string | null
+          id?: string
+          model_id: string
+          status?: string
+          total_buy_value?: number
+          total_sell_value?: number
+          trades_generated?: Json | null
+          triggered_by?: string
+        }
+        Update: {
+          account_id?: string
+          approved_by?: string | null
+          client_id?: string
+          created_at?: string
+          drift_summary?: Json | null
+          executed_at?: string | null
+          id?: string
+          model_id?: string
+          status?: string
+          total_buy_value?: number
+          total_sell_value?: number
+          trades_generated?: Json | null
+          triggered_by?: string
         }
         Relationships: []
       }
@@ -1405,7 +2016,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      mi_aua_by_firm: {
+        Row: {
+          aua: number | null
+          cash: number | null
+          client_count: number | null
+          firm_id: string | null
+          firm_name: string | null
+        }
+        Relationships: []
+      }
+      mi_fee_yield: {
+        Row: {
+          clients_charged: number | null
+          fee_type: string | null
+          month: string | null
+          total_fees: number | null
+        }
+        Relationships: []
+      }
+      mi_net_flows: {
+        Row: {
+          inflows: number | null
+          month: string | null
+          net_flow: number | null
+          outflows: number | null
+          txn_count: number | null
+        }
+        Relationships: []
+      }
+      mi_ops_queue_health: {
+        Row: {
+          case_count: number | null
+          priority: string | null
+          queue: string | null
+          sla_breached: number | null
+          status: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

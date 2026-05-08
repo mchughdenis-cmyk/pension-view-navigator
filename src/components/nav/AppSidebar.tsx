@@ -36,9 +36,8 @@ export function AppSidebar() {
 
       <SidebarContent>
         {groups.map((g) => {
-          const hasActive = g.items.some((i) => isActive(i.url));
           return (
-            <SidebarGroup key={g.label} defaultOpen={hasActive}>
+            <SidebarGroup key={g.label}>
               {!collapsed && <SidebarGroupLabel>{g.label}</SidebarGroupLabel>}
               <SidebarGroupContent>
                 <SidebarMenu>

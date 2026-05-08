@@ -213,6 +213,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "System overview", url: "/system-overview", icon: Building2 },
         { title: "API directory", url: "/api-directory", icon: Database },
         { title: "Documentation", url: "/documentation", icon: ScrollText },
+        { title: "Webhook sandbox", url: "/webhook-sandbox", icon: Database },
         { title: "Settings", url: "/settings", icon: Cog },
       ],
     },

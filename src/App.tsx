@@ -67,6 +67,7 @@ import SSASModule from "./components/SSASModule";
 import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
 import IHTOverview from "./components/IHTOverview";
+import MobileClientApp from "./components/MobileClientApp";
 
 const queryClient = new QueryClient();
 
@@ -98,6 +99,8 @@ const AppContent = () => {
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<PensionSystemPitch />} />
         <Route path="/demo" element={<SystemDemo />} />
+        <Route path="/m" element={<MobileClientApp />} />
+        <Route path="/mobile" element={<Navigate to="/m" replace />} />
 
         {/* App routes — wrapped in shell */}
         <Route path="*" element={

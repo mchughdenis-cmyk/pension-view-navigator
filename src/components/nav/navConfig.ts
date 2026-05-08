@@ -94,6 +94,15 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Money in & out",
+      items: [
+        { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
+        { title: "Instant withdrawal", url: "/instant-withdrawal", icon: Send },
+        { title: "Drawdown journey", url: "/drawdown", icon: PoundSterling },
+        { title: "Illustration", url: "/illustration", icon: Calculator },
+      ],
+    },
+    {
       label: "Investments",
       items: [
         { title: "Model portfolios", url: "/models", icon: Layers },

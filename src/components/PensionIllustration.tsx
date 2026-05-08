@@ -48,6 +48,23 @@ const PensionIllustration = () => {
     setInputs(prev => ({ ...prev, [key]: value }));
   };
 
+  const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [
+    { name: "Cautious retiree", tag: "Low risk", description: "£250k pot, 4% drawdown, 3% growth — preserves capital.",
+      inputs: { potValue: 250000, currentAge: 60, retirementAge: 65, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 3, annuityRate: 5.4, inflationRate: 2.5 } },
+    { name: "Balanced 65", tag: "Typical", description: "£500k pot retiring at 65 with 5% growth and 4% income.",
+      inputs: { potValue: 500000, currentAge: 60, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 5, annuityRate: 5.6, inflationRate: 2.5 } },
+    { name: "Early retiree FIRE", tag: "Aggressive", description: "Retire at 57 with £750k, 3.5% safe-withdrawal rate.",
+      inputs: { potValue: 750000, currentAge: 55, retirementAge: 57, lifeExpectancy: 92, drawdownRate: 3.5, annualGrowth: 6, annuityRate: 4.8, inflationRate: 2.5 } },
+    { name: "High net worth", tag: "Wealth", description: "£1.25m pot, 4.5% drawdown, growth-oriented portfolio.",
+      inputs: { potValue: 1250000, currentAge: 58, retirementAge: 62, lifeExpectancy: 90, drawdownRate: 4.5, annualGrowth: 6, annuityRate: 5.0, inflationRate: 2.5 } },
+    { name: "Modest pot top-up", tag: "Catch-up", description: "£90k pot at 62, conservative growth & sustainable income.",
+      inputs: { potValue: 90000, currentAge: 62, retirementAge: 67, lifeExpectancy: 85, drawdownRate: 5, annualGrowth: 4, annuityRate: 6.0, inflationRate: 2.5 } },
+    { name: "Annuity comparator", tag: "Secure income", description: "£400k pot, 6% annuity vs 4% drawdown.",
+      inputs: { potValue: 400000, currentAge: 65, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 4.5, annuityRate: 6.0, inflationRate: 2.5 } },
+  ];
+
+  const loadScenario = (s: IllustrationInputs) => setInputs(s);
+
   // Calculate projections
   const calculateProjections = () => {
     const { potValue, retirementAge, lifeExpectancy, drawdownRate, annualGrowth, annuityRate, inflationRate } = inputs;
@@ -105,6 +122,27 @@ const PensionIllustration = () => {
           Export Illustration
         </Button>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><PiggyBank className="w-5 h-5" /> Demo scenarios</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-3">Click any preset to populate the illustration with realistic 2024/25 UK figures.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+            {SCENARIOS.map(s => (
+              <button key={s.name} onClick={() => loadScenario(s.inputs)} className="text-left rounded-lg border p-3 hover:bg-muted transition-colors">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="font-semibold text-sm">{s.name}</span>
+                  <Badge variant="secondary" className="text-xs">{s.tag}</Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{s.description}</p>
+                <p className="text-xs mt-2 font-mono text-primary">£{s.inputs.potValue.toLocaleString()} · {s.inputs.drawdownRate}% drawdown · {s.inputs.annualGrowth}% growth</p>
+              </button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {/* Input Panel */}

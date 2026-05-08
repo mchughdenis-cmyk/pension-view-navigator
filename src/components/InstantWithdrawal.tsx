@@ -42,10 +42,17 @@ interface WithdrawalRequest {
 
 export default function InstantWithdrawal() {
   const { toast } = useToast();
-  const [availableBalance] = useState(364313);
+  const { clients } = useClients();
+  const [clientId, setClientId] = useState<string | undefined>();
+  useEffect(() => { if (!clientId && clients.length) setClientId(clients[0].id); }, [clients, clientId]);
+  const { client, accounts, fetchAll } = useClientDetail(clientId);
+  const sipp = accounts.find(a => a.account_type?.toLowerCase().includes("sipp"));
+  const availableBalance = Number(sipp?.total_value || 0);
   const [withdrawalAmount, setWithdrawalAmount] = useState("");
   const [selectedAccount, setSelectedAccount] = useState("");
+  const [otherIncome, setOtherIncome] = useState(11500);
   const [showAccountNumbers, setShowAccountNumbers] = useState(false);
+  const ufplsPreview = useMemo(() => calculateUFPLS(parseFloat(withdrawalAmount) || 0, otherIncome), [withdrawalAmount, otherIncome]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showAddAccount, setShowAddAccount] = useState(false);
   

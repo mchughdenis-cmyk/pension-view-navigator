@@ -2905,6 +2905,51 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          channel: string
+          client_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json
+          read_at: string | null
+          recipient: string | null
+          severity: string
+          status: string
+          title: string
+        }
+        Insert: {
+          body: string
+          channel: string
+          client_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json
+          read_at?: string | null
+          recipient?: string | null
+          severity?: string
+          status?: string
+          title: string
+        }
+        Update: {
+          body?: string
+          channel?: string
+          client_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json
+          read_at?: string | null
+          recipient?: string | null
+          severity?: string
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
       open_banking_accounts: {
         Row: {
           account_name: string | null

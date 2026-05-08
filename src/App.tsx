@@ -126,6 +126,7 @@ const AppContent = () => {
               <Route path="/kyc-review" element={<RoleGate allow={['adviser', 'admin']}><KYCReview /></RoleGate>} />
               <Route path="/cash-onboarding" element={<CashOnboarding />} />
               <Route path="/webhook-sandbox" element={<WebhookSandbox />} />
+              <Route path="/notifications" element={<NotificationsCenter />} />
               <Route path="/onboarding-progress" element={<OnboardingTracker />} />
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />

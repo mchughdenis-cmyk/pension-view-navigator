@@ -288,6 +288,152 @@ export function useClientDetail(clientId: string | undefined) {
   }
 }
 
+// Drawdown processor — single source of truth for crystallisation + UFPLS + FAD
+import { calculatePCLS, calculateUFPLS, calculateFADIncome, ANNUAL_ALLOWANCE, MPAA_ALLOWANCE } from '@/lib/pensionCalculations'
+
+export interface DrawdownInput {
+  clientId: string
+  accountId: string
+  mode: 'PCLS_FAD' | 'UFPLS' | 'FAD'
+  potValue: number               // current uncrystallised value (PCLS_FAD/UFPLS) or designated drawdown pot (FAD)
+  pclsAmount?: number            // for PCLS_FAD
+  drawdownIncome?: number        // for PCLS_FAD/FAD: taxable income to take this period
+  ufplsGross?: number            // for UFPLS: total UFPLS payment
+  otherIncome?: number           // other taxable income for tax calc
+  effectiveDate?: string
+  notes?: string
+}
+
+export async function processDrawdown(input: DrawdownInput) {
+  const { clientId, accountId, mode, potValue, otherIncome = 0, effectiveDate = new Date().toISOString().slice(0, 10), notes } = input
+
+  // Load current client to track AA / MPAA
+  const { data: client } = await supabase.from('clients').select('mpaa_triggered, annual_allowance_used').eq('id', clientId).single()
+  const { data: account } = await supabase.from('client_accounts').select('cash_balance, total_value').eq('id', accountId).single()
+
+  let pclsAmount = 0
+  let crystallised = 0
+  let taxable = 0
+  let tax = 0
+  let net = 0
+  let bceType = 'FAD'
+  let triggersMPAA = false
+
+  if (mode === 'PCLS_FAD') {
+    const pcls = calculatePCLS(potValue, input.pclsAmount)
+    pclsAmount = pcls.pcls
+    crystallised = pcls.pcls + pcls.designatedToDrawdown
+    bceType = 'PCLS+FAD'
+    if (input.drawdownIncome && input.drawdownIncome > 0) {
+      const fad = calculateFADIncome(input.drawdownIncome, otherIncome)
+      taxable = fad.income
+      tax = fad.tax.totalTax
+      net = fad.netPayment
+      triggersMPAA = true // taking taxable income from FAD triggers MPAA
+    }
+  } else if (mode === 'UFPLS') {
+    const ufpls = calculateUFPLS(input.ufplsGross || 0, otherIncome)
+    pclsAmount = ufpls.taxFreePortion
+    taxable = ufpls.taxablePortion
+    tax = ufpls.tax.totalTax
+    net = ufpls.netPayment
+    crystallised = ufpls.gross
+    bceType = 'UFPLS'
+    triggersMPAA = true
+  } else if (mode === 'FAD') {
+    const fad = calculateFADIncome(input.drawdownIncome || 0, otherIncome)
+    taxable = fad.income
+    tax = fad.tax.totalTax
+    net = fad.netPayment
+    bceType = 'FAD-Income'
+    triggersMPAA = true
+  }
+
+  // 1) BCE event (skip pure FAD income from already-crystallised funds)
+  let bceId: string | null = null
+  if (mode !== 'FAD') {
+    const { data: bce, error: bceErr } = await supabase.from('bce_events').insert({
+      client_id: clientId,
+      bce_type: bceType,
+      event_date: effectiveDate,
+      crystallised_amount: crystallised,
+      tax_free_lump_sum: pclsAmount,
+      lta_percentage: 0,
+      notes,
+    } as any).select().single()
+    if (bceErr) { toast.error(`BCE create failed: ${bceErr.message}`); return null }
+    bceId = bce.id
+
+    // 2) Crystallisation segment
+    await supabase.from('crystallisation_segments').insert({
+      client_id: clientId,
+      account_id: accountId,
+      bce_event_id: bceId,
+      segment_type: 'designated',
+      crystallised_amount: crystallised,
+      pcls_amount: pclsAmount,
+      residual_fund: Math.max(0, crystallised - pclsAmount - taxable),
+      drawdown_type: mode === 'UFPLS' ? 'UFPLS' : 'FAD',
+      status: 'active',
+    } as any)
+  }
+
+  // 3) Transactions — PCLS (tax-free), taxable income, tax withheld
+  const txns: any[] = []
+  if (pclsAmount > 0) {
+    txns.push({
+      client_id: clientId, account_id: accountId,
+      transaction_type: 'pcls',
+      description: `Tax-free cash (PCLS) — ${bceType}`,
+      amount: -pclsAmount, status: 'settled', effective_date: effectiveDate,
+      reference: `PCLS-${Date.now()}`,
+    })
+  }
+  if (taxable > 0) {
+    txns.push({
+      client_id: clientId, account_id: accountId,
+      transaction_type: mode === 'UFPLS' ? 'ufpls_taxable' : 'drawdown',
+      description: `Taxable drawdown — ${bceType} (gross)`,
+      amount: -taxable, status: 'settled', effective_date: effectiveDate,
+      tax_relief_amount: -tax,
+      reference: `DD-${Date.now()}`,
+    })
+    if (tax > 0) {
+      txns.push({
+        client_id: clientId, account_id: accountId,
+        transaction_type: 'tax_withheld',
+        description: `Income tax withheld (PAYE)`,
+        amount: tax, status: 'settled', effective_date: effectiveDate,
+        reference: `TAX-${Date.now()}`,
+      })
+    }
+  }
+  if (txns.length > 0) {
+    const { error: txErr } = await supabase.from('transactions').insert(txns as any)
+    if (txErr) { toast.error(`Transactions failed: ${txErr.message}`); return null }
+  }
+
+  // 4) Update account balance (decrement by gross outflow excluding tax which stays for HMRC)
+  const grossOut = pclsAmount + taxable
+  if (account && grossOut > 0) {
+    const newCash = Math.max(0, Number(account.cash_balance || 0) - grossOut)
+    const newTotal = Math.max(0, Number(account.total_value || 0) - grossOut)
+    await supabase.from('client_accounts').update({ cash_balance: newCash, total_value: newTotal } as any).eq('id', accountId)
+  }
+
+  // 5) Update MPAA / AA usage on client
+  const updates: any = {}
+  if (triggersMPAA && client && !client.mpaa_triggered) updates.mpaa_triggered = true
+  if (Object.keys(updates).length) {
+    await supabase.from('clients').update(updates).eq('id', clientId)
+  }
+
+  await logActivity('transaction', bceId || clientId, 'created',
+    `${bceType}: PCLS £${pclsAmount.toFixed(0)}, taxable £${taxable.toFixed(0)}, tax £${tax.toFixed(0)}, net £${net.toFixed(0)}`)
+  toast.success(`${bceType} processed: net payment ${new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(pclsAmount + net)}`)
+  return { bceId, pclsAmount, taxable, tax, net, gross: grossOut }
+}
+
 // Activity log
 export async function logActivity(entityType: string, entityId: string | undefined, action: string, description: string) {
   await supabase.from('activity_log').insert({

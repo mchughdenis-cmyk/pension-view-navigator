@@ -112,6 +112,7 @@ const AppContent = () => {
               <Route path="/settings" element={<Settings />} />
               <Route path="/instant-withdrawal" element={<InstantWithdrawal />} />
               <Route path="/instant-deposit" element={<InstantDeposit />} />
+              <Route path="/transactions" element={<TransactionHistory />} />
               <Route path="/learning" element={<LearningCentre />} />
               <Route path="/instrument-transfer" element={<InstrumentTransfer />} />
               <Route path="/kyc" element={<KYCVerification />} />

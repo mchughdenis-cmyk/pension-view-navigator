@@ -4,6 +4,7 @@ import { AppSidebar } from "./AppSidebar";
 import { Breadcrumbs } from "./Breadcrumbs";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
+import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </header>
           <main className="flex-1 min-w-0">{children}</main>
         </div>
+        <ChatLauncher />
       </div>
     </SidebarProvider>
   );

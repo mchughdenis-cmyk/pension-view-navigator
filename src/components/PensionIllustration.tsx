@@ -44,6 +44,10 @@ const PensionIllustration = () => {
     inflationRate: 2.5
   });
 
+  const updateInput = (key: keyof IllustrationInputs, value: number) => {
+    setInputs(prev => ({ ...prev, [key]: value }));
+  };
+
   const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [
     { name: "Cautious retiree", tag: "Low risk", description: "£250k pot, 4% drawdown, 3% growth — preserves capital.",
       inputs: { potValue: 250000, currentAge: 60, retirementAge: 65, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 3, annuityRate: 5.4, inflationRate: 2.5 } },

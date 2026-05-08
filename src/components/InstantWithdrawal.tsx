@@ -218,22 +218,34 @@ export default function InstantWithdrawal() {
             <CardTitle>Request Withdrawal</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Amount Input */}
+            {clients.length > 1 && (
+              <div className="space-y-2">
+                <Label>Client</Label>
+                <Select value={clientId} onValueChange={setClientId}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.first_name} {c.last_name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="amount">Withdrawal Amount (£)</Label>
-              <Input
-                id="amount"
-                type="number"
-                placeholder="Enter amount"
-                value={withdrawalAmount}
-                onChange={(e) => setWithdrawalAmount(e.target.value)}
-                min="1"
-                max={availableBalance}
-              />
-              <p className="text-sm text-muted-foreground">
-                Maximum: {formatCurrency(availableBalance)}
-              </p>
+              <Label htmlFor="amount">UFPLS Withdrawal Amount (£)</Label>
+              <Input id="amount" type="number" placeholder="Enter amount" value={withdrawalAmount} onChange={(e) => setWithdrawalAmount(e.target.value)} min="1" max={availableBalance} />
+              <p className="text-sm text-muted-foreground">Maximum: {formatCurrency(availableBalance)}</p>
             </div>
+            <div className="space-y-2">
+              <Label>Other annual taxable income (£)</Label>
+              <Input type="number" value={otherIncome} onChange={e => setOtherIncome(Number(e.target.value) || 0)} />
+            </div>
+            {parseFloat(withdrawalAmount) > 0 && (
+              <div className="bg-muted/50 rounded-lg p-3 text-sm space-y-1">
+                <div className="flex justify-between"><span className="text-muted-foreground">Tax-free (25%)</span><span className="font-medium text-success">{formatGBP(ufplsPreview.taxFreePortion)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Taxable (75%)</span><span className="font-medium">{formatGBP(ufplsPreview.taxablePortion)}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Income tax</span><span className="font-medium text-destructive">−{formatGBP(ufplsPreview.tax.totalTax)}</span></div>
+                <div className="flex justify-between border-t pt-1"><span className="font-semibold">Net to bank</span><span className="font-semibold">{formatGBP(ufplsPreview.netPayment)}</span></div>
+              </div>
+            )}
 
             {/* Bank Account Selection */}
             <div className="space-y-2">

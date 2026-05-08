@@ -5,7 +5,7 @@ import { findNavLabel } from "./navConfig";
 const SPECIAL: Record<string, string> = {
   "": "Home",
   overview: "Overview",
-  pitch: "Pitch",
+  
   demo: "Demo",
   documentation: "Documentation",
   "api-directory": "API directory",

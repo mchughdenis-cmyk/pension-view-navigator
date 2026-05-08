@@ -13,7 +13,7 @@ import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
 import PensionTransferJourney from "./components/PensionTransferJourney";
-import PensionSystemPitch from "./components/PensionSystemPitch";
+
 import ClientOnboarding from "./components/ClientOnboarding";
 import DrawdownJourney from "./components/DrawdownJourney";
 import DripFeedDrawdown from "./components/DripFeedDrawdown";
@@ -97,7 +97,7 @@ const AppContent = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
-        <Route path="/pitch" element={<PensionSystemPitch />} />
+        <Route path="/pitch" element={<Navigate to="/" replace />} />
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/m" element={<MobileClientApp />} />
         <Route path="/mobile" element={<Navigate to="/m" replace />} />

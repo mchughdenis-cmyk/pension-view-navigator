@@ -19,12 +19,6 @@ const Index = () => {
           </a>
         </Button>
         <Button variant="outline" asChild>
-          <a href="/pitch">
-            <ExternalLink className="w-4 h-4 mr-2" />
-            System Pitch
-          </a>
-        </Button>
-        <Button variant="outline" asChild>
           <a href="/admin">
             <ExternalLink className="w-4 h-4 mr-2" />
             Admin Portal
@@ -40,20 +34,14 @@ const Index = () => {
               <Menu className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent 
-            align="end" 
+          <DropdownMenuContent
+            align="end"
             className="w-48 bg-background border shadow-lg z-50"
           >
             <DropdownMenuItem asChild>
               <a href="/drip-feed" className="flex items-center w-full">
                 <TrendingDown className="w-4 h-4 mr-2" />
                 Drip Feed Drawdown
-              </a>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <a href="/pitch" className="flex items-center w-full">
-                <ExternalLink className="w-4 h-4 mr-2" />
-                System Pitch
               </a>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

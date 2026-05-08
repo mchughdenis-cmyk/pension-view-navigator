@@ -82,6 +82,13 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Operations cockpit", url: "/cockpit", icon: Layers },
         { title: "Pension operations", url: "/operations", icon: Workflow },
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
+        { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
+        { title: "PAYE / RTI", url: "/paye", icon: Receipt },
+        { title: "Origo Options", url: "/origo", icon: Send },
+        { title: "SSAS", url: "/ssas", icon: Building2 },
+        { title: "Commercial property", url: "/property", icon: Building2 },
+        { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
+        { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
       ],
     },
     {
@@ -121,10 +128,30 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Operations",
+      items: [
+        { title: "Operations cockpit", url: "/cockpit", icon: Layers },
+        { title: "Pension operations", url: "/operations", icon: Workflow },
+        { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
+        { title: "PAYE / RTI", url: "/paye", icon: Receipt },
+        { title: "Origo Options", url: "/origo", icon: Send },
+      ],
+    },
+    {
       label: "Compliance",
       items: [
+        { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
+        { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
         { title: "CASS reconciliation", url: "/cass", icon: ShieldCheck },
         { title: "Firm hierarchy", url: "/firms", icon: Network },
+      ],
+    },
+    {
+      label: "Products",
+      items: [
+        { title: "SSAS", url: "/ssas", icon: Building2 },
+        { title: "Commercial property", url: "/property", icon: Building2 },
+        { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
       ],
     },
     {

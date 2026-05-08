@@ -1487,7 +1487,7 @@ export type Database = {
       dd_mandates: {
         Row: {
           account_holder: string | null
-          account_id: string
+          account_id: string | null
           account_number: string
           amount: number
           bank_name: string
@@ -1505,7 +1505,7 @@ export type Database = {
         }
         Insert: {
           account_holder?: string | null
-          account_id: string
+          account_id?: string | null
           account_number: string
           amount?: number
           bank_name: string
@@ -1523,7 +1523,7 @@ export type Database = {
         }
         Update: {
           account_holder?: string | null
-          account_id?: string
+          account_id?: string | null
           account_number?: string
           amount?: number
           bank_name?: string

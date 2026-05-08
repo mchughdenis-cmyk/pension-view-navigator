@@ -1,0 +1,1 @@
+ALTER TABLE public.dd_mandates ALTER COLUMN account_id DROP NOT NULL;

@@ -26,6 +26,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Service",
       items: [
+        { title: "Ask Navigator (AI)", url: "/assistant", icon: Sparkles },
         { title: "Client services", url: "/client-services", icon: PoundSterling },
         { title: "Learning centre", url: "/learning", icon: GraduationCap },
       ],

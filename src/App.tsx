@@ -33,6 +33,7 @@ import CashOnboarding from "./components/CashOnboarding";
 import WebhookSandbox from "./components/WebhookSandbox";
 import NotificationsCenter from "./components/NotificationsCenter";
 import AuditTrail from "./components/AuditTrail";
+import AssistantPage from "./components/AssistantPage";
 import OnboardingTracker from "./components/OnboardingTracker";
 import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
@@ -129,6 +130,7 @@ const AppContent = () => {
               <Route path="/webhook-sandbox" element={<WebhookSandbox />} />
               <Route path="/notifications" element={<NotificationsCenter />} />
               <Route path="/audit" element={<AuditTrail />} />
+              <Route path="/assistant" element={<AssistantPage />} />
               <Route path="/onboarding-progress" element={<OnboardingTracker />} />
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />

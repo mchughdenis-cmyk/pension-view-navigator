@@ -57,6 +57,7 @@ export default function IHTOverview() {
   const [transferableNRB, setTransferableNRB] = useState(0) // % from late spouse 0-100
   const [passesToDescendants, setPassesToDescendants] = useState(true)
   const [charityPctOfEstate, setCharityPctOfEstate] = useState(0)
+  const [sippToSpouse, setSippToSpouse] = useState(false) // spouse exemption on SIPP at first death
 
   const addAsset = () =>
     setAssets((a) => [...a, { id: crypto.randomUUID(), label: 'New asset', category: 'other', value: 0 }])

@@ -1,4 +1,4 @@
-import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
 import airgeadLogoUrl from '@/assets/airgead-logo.png';
 

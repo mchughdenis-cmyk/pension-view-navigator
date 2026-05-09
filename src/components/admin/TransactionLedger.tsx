@@ -43,7 +43,6 @@ export default function TransactionLedger() {
   // Get accounts for selected client
   const [clientAccounts, setClientAccounts] = useState<any[]>([])
   const loadClientAccounts = async (clientId: string) => {
-    const { supabase } = await import('@/integrations/supabase/client')
     const { data } = await supabase.from('client_accounts').select('id, account_type, account_number').eq('client_id', clientId)
     setClientAccounts(data || [])
   }

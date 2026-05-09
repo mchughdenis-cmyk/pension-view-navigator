@@ -9,6 +9,7 @@ import {
   Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
   GraduationCap, Gauge, Map, Target,
 } from "lucide-react";
+import { ContactForm } from "./ContactForm";
 
 /* ---------------------------------- Layout --------------------------------- */
 

@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   ShieldCheck, Sparkles, Layers, TrendingUp, Workflow, Building2, Users, Globe,
   ArrowRight, CheckCircle2, ScrollText, BarChart3, Cpu, Lock, Award, BookOpen,
-  Mail, Phone, MapPin, Compass, PiggyBank,
+  Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
+  GraduationCap, Gauge, Map, Target,
 } from "lucide-react";
 
 /* ---------------------------------- Layout --------------------------------- */
@@ -428,12 +429,172 @@ engine      & PAYE    desk         engine
           </div>
         </div>
       </Section>
+
+      {/* Persona experiences */}
+      <Section className="!pt-0">
+        <Eyebrow><Users className="h-3 w-3" /> Three roles, one platform</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Purpose-built workspaces for clients, advisers and administrators.
+        </h2>
+        <p className="mt-4 text-muted-foreground max-w-3xl">
+          Pension Navigator presents the right surface to the right user. No more advisers wading
+          through admin screens, or members confronted with regulatory jargon.
+        </p>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[
+            {
+              icon: Users, title: "Client portal",
+              tagline: "Clarity, control, confidence.",
+              points: [
+                "Total wealth and YTD growth at a glance",
+                "Self-serve contributions and drawdown adjustments",
+                "Mobile-native app with bottom-tab navigation",
+                "Embedded AI assistant for plain-English answers",
+              ],
+              cta: { to: "/dashboard", label: "Open client view" },
+            },
+            {
+              icon: Briefcase, title: "Adviser workbench",
+              tagline: "Leverage across every household.",
+              points: [
+                "Cross-client illustrations and Monte Carlo projections",
+                "IHT planning across pensions, ISAs, GIAs and property",
+                "Drawdown sustainability and tax-efficient sequencing",
+                "One-click reporting suite with Airgead branding",
+              ],
+              cta: { to: "/workbench", label: "Open adviser workbench" },
+            },
+            {
+              icon: ShieldCheck, title: "Administrator console",
+              tagline: "Operational control, end-to-end.",
+              points: [
+                "Operations cockpit with real-time SLA monitoring",
+                "Bulk bank operations: match → allocate → apply",
+                "HMRC RTI, PAYE, LSA / LSDBA and Origo Options",
+                "Full audit trail with who-when-what and CSV export",
+              ],
+              cta: { to: "/cockpit", label: "Open ops cockpit" },
+            },
+          ].map((p) => (
+            <Card key={p.title} className="flex flex-col">
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                  <p.icon className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{p.title}</CardTitle>
+                <CardDescription>{p.tagline}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {p.points.map((t) => (
+                    <li key={t} className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-secondary mt-0.5 shrink-0" />{t}</li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <Button asChild variant="outline" size="sm"><Link to={p.cta.to}>{p.cta.label} <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Integrations */}
+      <Section className="!pt-0">
+        <div className="rounded-xl border border-border bg-card p-8 md:p-12">
+          <div className="grid md:grid-cols-[1fr_2fr] gap-10 items-start">
+            <div>
+              <Eyebrow><Globe className="h-3 w-3" /> Integrations</Eyebrow>
+              <h2 className="text-3xl font-bold tracking-tight">Open by design.</h2>
+              <p className="mt-4 text-muted-foreground">
+                Every external touchpoint is API-first. We treat integrations as products, not
+                projects — so connecting custodians, banks, identity providers or market data feeds
+                is a config exercise, not a six-month build.
+              </p>
+              <div className="mt-6">
+                <Button asChild variant="outline"><Link to="/api-directory">Browse API directory <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[
+                "HMRC RTI / APSS", "Origo Options", "Bank file (BACS / CHAPS)",
+                "Identity & KYC providers", "Market data feeds", "Custodian APIs",
+                "Payment providers", "Document signing", "Email / SMS gateways",
+              ].map((i) => (
+                <div key={i} className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-secondary shrink-0" /> {i}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Security */}
+      <Section className="!pt-0">
+        <Eyebrow><Lock className="h-3 w-3" /> Security & resilience</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Built to a financial-services security bar.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-4 gap-5">
+          {[
+            { icon: Lock, title: "Data protection", body: "Encryption in transit and at rest, row-level security and fine-grained role-based access controls." },
+            { icon: ScrollText, title: "Audit & evidence", body: "Every KYC decision, cash event and admin change is captured with actor, timestamp and diff — exportable to CSV." },
+            { icon: ShieldCheck, title: "Operational resilience", body: "Multi-region deployment options, point-in-time recovery and CASS-aligned reconciliation routines." },
+            { icon: Award, title: "Regulatory alignment", body: "Designed against FCA SYSC, CASS, SDR and Consumer Duty expectations from day one." },
+          ].map((s) => (
+            <Card key={s.title}>
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-secondary/15 grid place-items-center mb-3">
+                  <s.icon className="h-5 w-5 text-secondary" />
+                </div>
+                <CardTitle className="text-lg">{s.title}</CardTitle>
+              </CardHeader>
+              <CardContent><p className="text-sm text-muted-foreground">{s.body}</p></CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Implementation timeline */}
+      <Section className="!pt-0">
+        <Eyebrow><Workflow className="h-3 w-3" /> Implementation</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          From kick-off to go-live in weeks, not years.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-4 gap-4">
+          {[
+            { step: "01", title: "Discover", body: "Operating-model review, data audit and integration map. Output: a phased delivery plan." },
+            { step: "02", title: "Configure", body: "Wrappers, fee schedules, permissions, model portfolios and reporting templates set up to your firm." },
+            { step: "03", title: "Migrate", body: "Bulk data load, balancing reconciliation, parallel running and a regulator-grade migration evidence pack." },
+            { step: "04", title: "Operate", body: "Go-live with named support, SLA monitoring and a continuous-improvement roadmap." },
+          ].map((s) => (
+            <div key={s.step} className="rounded-xl border border-border bg-card p-6">
+              <div className="text-xs font-mono text-primary mb-2">{s.step}</div>
+              <div className="font-semibold mb-1">{s.title}</div>
+              <p className="text-sm text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* CTA */}
+      <Section className="!pt-0">
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-secondary/10 p-10 md:p-14 text-center">
+          <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Ready to see it work on your data?</h3>
+          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+            We'll run a tailored walkthrough using a sanitised slice of your scheme data so the
+            value is concrete on day one.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 justify-center">
+            <Button asChild size="lg"><Link to="/site/contact">Book a demo</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/dashboard">Launch the live app</Link></Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }
-
-
-/* --------------------------------- Expertise ------------------------------- */
 
 export function MarketingExpertise() {
   const areas = [
@@ -503,11 +664,102 @@ export function MarketingExpertise() {
           </div>
         </div>
       </Section>
+
+      {/* Regulatory timeline */}
+      <Section className="!pt-0">
+        <Eyebrow><Calendar className="h-3 w-3" /> Regulatory horizon</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          We track every change so your operation doesn't have to.
+        </h2>
+        <p className="mt-4 text-muted-foreground max-w-3xl">
+          UK pensions regulation moves constantly. Pension Navigator's roadmap is anchored to a
+          live regulatory tracker maintained by our pensions team — so the platform is ready for
+          the rule change before it lands.
+        </p>
+        <div className="mt-10 relative">
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-px" aria-hidden />
+          <div className="space-y-8">
+            {[
+              { date: "April 2024", title: "LTA abolished, LSA / LSDBA introduced", body: "Replaced lifetime allowance with the Lump Sum Allowance and Lump Sum Death Benefit Allowance. Navigator tracks both per member, per crystallisation event." },
+              { date: "April 2025", title: "Annual allowance £60,000 + tapering", body: "Carry-forward, tapered allowance and MPAA tracked across SIPP and SSAS contributions in real time." },
+              { date: "April 2026", title: "Origo Options enhanced reporting", body: "Expanded transfer messaging and SLA reporting baked into our Origo integration." },
+              { date: "April 2027", title: "Pensions enter the IHT estate", body: "Our IHT engine models the post-2027 regime today, including spousal exemption, residence nil-rate band tapering and cross-asset estate composition." },
+              { date: "Ongoing", title: "Consumer Duty & SDR", body: "Outcome monitoring, fair-value assessments and sustainability disclosures captured in the audit trail and reporting suite." },
+            ].map((e, i) => (
+              <div key={e.title} className={`relative md:grid md:grid-cols-2 md:gap-12 ${i % 2 ? "md:[&>*:first-child]:order-2" : ""}`}>
+                <div className={`pl-12 md:pl-0 ${i % 2 ? "md:pl-12" : "md:pr-12 md:text-right"}`}>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">{e.date}</div>
+                  <div className="font-semibold mt-1">{e.title}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{e.body}</p>
+                </div>
+                <div className="hidden md:block" />
+                <span className="absolute left-4 md:left-1/2 top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-background md:-translate-x-1/2" aria-hidden />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Team / heritage */}
+      <Section className="!pt-0">
+        <Eyebrow><GraduationCap className="h-3 w-3" /> Our pensions team</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Practitioners, not just product managers.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[
+            { role: "Pensions operations leadership", body: "Former Heads of SIPP and Heads of Operations from leading UK SIPP operators and platform providers — with hands-on responsibility for HMRC, Origo and CASS." },
+            { role: "Adviser-side specialists", body: "Ex-paraplanners, technical advisers and proposition leads who have run cashflow planning, drawdown reviews and IHT cases at scale." },
+            { role: "Engineering & data", body: "A senior engineering team with deep financial-services experience — building the modern, API-native, real-time stack underneath." },
+          ].map((t) => (
+            <Card key={t.role}>
+              <CardHeader><CardTitle className="text-lg">{t.role}</CardTitle></CardHeader>
+              <CardContent><p className="text-sm text-muted-foreground">{t.body}</p></CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Knowledge base / FAQ */}
+      <Section className="!pt-0">
+        <Eyebrow><BookOpen className="h-3 w-3" /> Pensions FAQ</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Plain-English answers to the questions we hear most.</h2>
+        <div className="mt-10 grid md:grid-cols-2 gap-5">
+          {[
+            { q: "How is the LSA different from the old LTA?", a: "The Lump Sum Allowance caps the total tax-free cash a member can take across their lifetime at £268,275. Unlike the LTA, it doesn't tax growth — only crystallised lump sums." },
+            { q: "What does the 2027 IHT change actually do?", a: "From April 2027, most unused pension funds will fall inside the deceased's estate for IHT purposes. Our IHT engine models pre- and post-2027 outcomes side-by-side, including spousal exemption logic." },
+            { q: "How does drip-feed drawdown help clients?", a: "It crystallises only what's needed each period, releasing 25% PCLS gradually rather than in one event. This preserves uncrystallised growth and can manage tax-band exposure year-on-year." },
+            { q: "Do you support SSAS connected-party loans?", a: "Yes — full SSAS administration including loan-back to sponsoring employers, commercial property purchase and member-directed investment." },
+            { q: "How is MPAA tracked?", a: "Once a member triggers MPAA via flexible drawdown or UFPLS, Navigator automatically caps DC contributions at £10,000 across all wrappers and flags any breaches in real time." },
+            { q: "Can advisers white-label the client experience?", a: "Yes. Branding, communication templates and the document pack are all configurable per firm — the underlying admin and compliance engine remains shared." },
+          ].map((f) => (
+            <div key={f.q} className="rounded-lg border border-border bg-card p-5">
+              <div className="font-semibold flex gap-2"><Quote className="h-4 w-4 text-primary mt-1 shrink-0" />{f.q}</div>
+              <p className="text-sm text-muted-foreground mt-2">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* CTA */}
+      <Section className="!pt-0">
+        <div className="rounded-2xl border border-border bg-card p-10 md:p-14 grid md:grid-cols-[2fr_1fr] gap-6 items-center">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Talk to a pensions specialist.</h3>
+            <p className="mt-3 text-muted-foreground max-w-2xl">
+              Whether you're scoping a platform replacement, reviewing your IHT proposition or
+              modernising adviser tooling, our team will give you a straight answer.
+            </p>
+          </div>
+          <div className="flex md:justify-end gap-3">
+            <Button asChild size="lg"><Link to="/site/contact">Get in touch</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/site/platform">Explore platform</Link></Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }
-
-/* ----------------------------------- Market -------------------------------- */
 
 export function MarketingMarket() {
   const competitors = [
@@ -584,11 +836,132 @@ export function MarketingMarket() {
           ))}
         </div>
       </Section>
+
+      {/* Positioning quadrant */}
+      <Section className="!pt-0">
+        <Eyebrow><Target className="h-3 w-3" /> Positioning</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Where Pension Navigator sits in the market.
+        </h2>
+        <p className="mt-4 text-muted-foreground max-w-3xl">
+          Most providers trade off pensions depth against modern technology. We don't accept the
+          trade-off.
+        </p>
+        <div className="mt-10 rounded-xl border border-border bg-card p-6 md:p-10">
+          <div className="relative aspect-[16/10] w-full">
+            {/* Axes */}
+            <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
+              <div className="border-r border-b border-border" />
+              <div className="border-b border-border" />
+              <div className="border-r border-border" />
+              <div />
+            </div>
+            <div className="absolute -left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs uppercase tracking-wider text-muted-foreground">Modern technology →</div>
+            <div className="absolute left-1/2 -bottom-6 -translate-x-1/2 text-xs uppercase tracking-wider text-muted-foreground">Pensions depth →</div>
+            {/* Markers */}
+            {[
+              { left: "12%", top: "70%", label: "Spreadsheet + back-office", muted: true },
+              { left: "38%", top: "55%", label: "Generic platforms", muted: true },
+              { left: "65%", top: "62%", label: "Legacy SIPP operators", muted: true },
+              { left: "78%", top: "18%", label: "Pension Navigator", muted: false },
+            ].map((m) => (
+              <div key={m.label} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: m.left, top: m.top }}>
+                <div className={`h-3 w-3 rounded-full mx-auto ${m.muted ? "bg-muted-foreground/60" : "bg-primary ring-4 ring-primary/20"}`} />
+                <div className={`mt-2 text-xs whitespace-nowrap ${m.muted ? "text-muted-foreground" : "font-semibold text-primary"}`}>{m.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Segments served */}
+      <Section className="!pt-0">
+        <Eyebrow><Map className="h-3 w-3" /> Segments served</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          One platform, four go-to-market motions.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-2 gap-5">
+          {[
+            { icon: Building2, title: "SIPP & SSAS operators", body: "Modernise core admin without ripping out custodian or banking relationships. Phased migration with full parallel running." },
+            { icon: Users, title: "IFA networks & advised platforms", body: "Adviser-grade workbench, IHT planning and reporting suite — branded for the network, white-labelled where required." },
+            { icon: TrendingUp, title: "Discretionary fund managers", body: "Model portfolios, dealing desk and corporate-actions handling integrated with member-level reporting and PAYE." },
+            { icon: Scale, title: "Workplace & SSAS schemes", body: "Sponsor-employer schemes with member-directed investment, PAYE-on-pension and trustee reporting." },
+          ].map((s) => (
+            <Card key={s.title}>
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                  <s.icon className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{s.title}</CardTitle>
+              </CardHeader>
+              <CardContent><p className="text-sm text-muted-foreground">{s.body}</p></CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Outcomes */}
+      <Section className="!pt-0">
+        <Eyebrow><Gauge className="h-3 w-3" /> Outcomes our clients target</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Measurable change, not just better screens.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-4 gap-4">
+          {[
+            { value: "−60%", label: "Manual admin effort", body: "Bulk operations and STP onboarding remove repetitive ops work." },
+            { value: "<24h", label: "Cash onboarding SLA", body: "Match → allocate → apply on bank files, with full reconciliation evidence." },
+            { value: "100%", label: "Audit coverage", body: "Every KYC decision and admin change captured and exportable." },
+            { value: "10×", label: "Faster client reviews", body: "IHT, drawdown and projection tooling collapse review prep time." },
+          ].map((o) => (
+            <div key={o.label} className="rounded-xl border border-border bg-card p-6">
+              <div className="text-3xl font-bold tracking-tight text-primary">{o.value}</div>
+              <div className="text-xs uppercase tracking-wider text-muted-foreground mt-1">{o.label}</div>
+              <p className="text-sm text-muted-foreground mt-3">{o.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Voices */}
+      <Section className="!pt-0">
+        <Eyebrow><Quote className="h-3 w-3" /> What the market is telling us</Eyebrow>
+        <div className="grid md:grid-cols-3 gap-5">
+          {[
+            { quote: "We've been waiting for a SIPP platform that takes the 2027 IHT change seriously. The modelling alone changes the adviser conversation.", who: "Head of Pensions, advised platform" },
+            { quote: "The audit trail and CASS-aware reconciliation are exactly what our compliance team kept asking legacy vendors for — and never got.", who: "COO, SIPP operator" },
+            { quote: "Our paraplanners cut review prep by more than half. The cross-asset IHT view is the bit clients actually understand.", who: "Director, IFA network" },
+          ].map((t, i) => (
+            <Card key={i}>
+              <CardContent className="pt-6">
+                <Quote className="h-5 w-5 text-primary mb-3" />
+                <p className="text-sm">{t.quote}</p>
+                <div className="text-xs text-muted-foreground mt-4">— {t.who}</div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground mt-3">Representative voices from prospect conversations. Named references available on request.</p>
+      </Section>
+
+      {/* CTA */}
+      <Section className="!pt-0">
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-10 md:p-14 grid md:grid-cols-[1fr_auto] items-center gap-6">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Stake your position before 2027.</h3>
+            <p className="mt-2 text-primary-foreground/80 max-w-xl">
+              Operators who modernise now will own the post-reform conversation. Let's plan your
+              path.
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button asChild size="lg" variant="secondary"><Link to="/site/contact">Book a strategy call</Link></Button>
+            <Button asChild size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"><Link to="/dashboard">Launch app</Link></Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }
-
-/* --------------------------------- Contact --------------------------------- */
 
 export function MarketingContact() {
   return (

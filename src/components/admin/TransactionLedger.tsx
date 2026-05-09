@@ -11,6 +11,7 @@ import { Search, Download, ArrowUpRight, ArrowDownLeft, RefreshCw, Receipt, Tren
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
 import { useAllTransactions, useClients } from '@/hooks/useClientData'
+import { supabase } from '@/integrations/supabase/client'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)

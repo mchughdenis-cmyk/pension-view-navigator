@@ -664,11 +664,102 @@ export function MarketingExpertise() {
           </div>
         </div>
       </Section>
+
+      {/* Regulatory timeline */}
+      <Section className="!pt-0">
+        <Eyebrow><Calendar className="h-3 w-3" /> Regulatory horizon</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          We track every change so your operation doesn't have to.
+        </h2>
+        <p className="mt-4 text-muted-foreground max-w-3xl">
+          UK pensions regulation moves constantly. Pension Navigator's roadmap is anchored to a
+          live regulatory tracker maintained by our pensions team — so the platform is ready for
+          the rule change before it lands.
+        </p>
+        <div className="mt-10 relative">
+          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-border md:-translate-x-px" aria-hidden />
+          <div className="space-y-8">
+            {[
+              { date: "April 2024", title: "LTA abolished, LSA / LSDBA introduced", body: "Replaced lifetime allowance with the Lump Sum Allowance and Lump Sum Death Benefit Allowance. Navigator tracks both per member, per crystallisation event." },
+              { date: "April 2025", title: "Annual allowance £60,000 + tapering", body: "Carry-forward, tapered allowance and MPAA tracked across SIPP and SSAS contributions in real time." },
+              { date: "April 2026", title: "Origo Options enhanced reporting", body: "Expanded transfer messaging and SLA reporting baked into our Origo integration." },
+              { date: "April 2027", title: "Pensions enter the IHT estate", body: "Our IHT engine models the post-2027 regime today, including spousal exemption, residence nil-rate band tapering and cross-asset estate composition." },
+              { date: "Ongoing", title: "Consumer Duty & SDR", body: "Outcome monitoring, fair-value assessments and sustainability disclosures captured in the audit trail and reporting suite." },
+            ].map((e, i) => (
+              <div key={e.title} className={`relative md:grid md:grid-cols-2 md:gap-12 ${i % 2 ? "md:[&>*:first-child]:order-2" : ""}`}>
+                <div className={`pl-12 md:pl-0 ${i % 2 ? "md:pl-12" : "md:pr-12 md:text-right"}`}>
+                  <div className="text-xs font-semibold uppercase tracking-wider text-primary">{e.date}</div>
+                  <div className="font-semibold mt-1">{e.title}</div>
+                  <p className="text-sm text-muted-foreground mt-1">{e.body}</p>
+                </div>
+                <div className="hidden md:block" />
+                <span className="absolute left-4 md:left-1/2 top-1.5 h-3 w-3 rounded-full bg-primary ring-4 ring-background md:-translate-x-1/2" aria-hidden />
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
+
+      {/* Team / heritage */}
+      <Section className="!pt-0">
+        <Eyebrow><GraduationCap className="h-3 w-3" /> Our pensions team</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Practitioners, not just product managers.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[
+            { role: "Pensions operations leadership", body: "Former Heads of SIPP and Heads of Operations from leading UK SIPP operators and platform providers — with hands-on responsibility for HMRC, Origo and CASS." },
+            { role: "Adviser-side specialists", body: "Ex-paraplanners, technical advisers and proposition leads who have run cashflow planning, drawdown reviews and IHT cases at scale." },
+            { role: "Engineering & data", body: "A senior engineering team with deep financial-services experience — building the modern, API-native, real-time stack underneath." },
+          ].map((t) => (
+            <Card key={t.role}>
+              <CardHeader><CardTitle className="text-lg">{t.role}</CardTitle></CardHeader>
+              <CardContent><p className="text-sm text-muted-foreground">{t.body}</p></CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Knowledge base / FAQ */}
+      <Section className="!pt-0">
+        <Eyebrow><BookOpen className="h-3 w-3" /> Pensions FAQ</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Plain-English answers to the questions we hear most.</h2>
+        <div className="mt-10 grid md:grid-cols-2 gap-5">
+          {[
+            { q: "How is the LSA different from the old LTA?", a: "The Lump Sum Allowance caps the total tax-free cash a member can take across their lifetime at £268,275. Unlike the LTA, it doesn't tax growth — only crystallised lump sums." },
+            { q: "What does the 2027 IHT change actually do?", a: "From April 2027, most unused pension funds will fall inside the deceased's estate for IHT purposes. Our IHT engine models pre- and post-2027 outcomes side-by-side, including spousal exemption logic." },
+            { q: "How does drip-feed drawdown help clients?", a: "It crystallises only what's needed each period, releasing 25% PCLS gradually rather than in one event. This preserves uncrystallised growth and can manage tax-band exposure year-on-year." },
+            { q: "Do you support SSAS connected-party loans?", a: "Yes — full SSAS administration including loan-back to sponsoring employers, commercial property purchase and member-directed investment." },
+            { q: "How is MPAA tracked?", a: "Once a member triggers MPAA via flexible drawdown or UFPLS, Navigator automatically caps DC contributions at £10,000 across all wrappers and flags any breaches in real time." },
+            { q: "Can advisers white-label the client experience?", a: "Yes. Branding, communication templates and the document pack are all configurable per firm — the underlying admin and compliance engine remains shared." },
+          ].map((f) => (
+            <div key={f.q} className="rounded-lg border border-border bg-card p-5">
+              <div className="font-semibold flex gap-2"><Quote className="h-4 w-4 text-primary mt-1 shrink-0" />{f.q}</div>
+              <p className="text-sm text-muted-foreground mt-2">{f.a}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* CTA */}
+      <Section className="!pt-0">
+        <div className="rounded-2xl border border-border bg-card p-10 md:p-14 grid md:grid-cols-[2fr_1fr] gap-6 items-center">
+          <div>
+            <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Talk to a pensions specialist.</h3>
+            <p className="mt-3 text-muted-foreground max-w-2xl">
+              Whether you're scoping a platform replacement, reviewing your IHT proposition or
+              modernising adviser tooling, our team will give you a straight answer.
+            </p>
+          </div>
+          <div className="flex md:justify-end gap-3">
+            <Button asChild size="lg"><Link to="/site/contact">Get in touch</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/site/platform">Explore platform</Link></Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }
-
-/* ----------------------------------- Market -------------------------------- */
 
 export function MarketingMarket() {
   const competitors = [

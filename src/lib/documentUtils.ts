@@ -1,4 +1,4 @@
-import { Document, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
+import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, convertInchesToTwip, ImageRun, Table, TableRow, TableCell, WidthType, BorderStyle } from 'docx';
 import { saveAs } from 'file-saver';
 import airgeadLogoUrl from '@/assets/airgead-logo.png';
 
@@ -110,7 +110,6 @@ export async function downloadAirgeadDocx(title: string, filename: string, conte
     }],
   });
 
-  const { Packer } = await import('docx');
   const blob = await Packer.toBlob(doc);
   saveAs(blob, filename);
 }
@@ -158,7 +157,6 @@ const formatCurrency = (amount: number) =>
 
 // Pre-built document generators for demo templates
 export async function downloadWelcomeLetter(clientName: string = 'New Client') {
-  const { Paragraph, TextRun, HeadingLevel } = await import('docx');
   const content = [
     new Paragraph({ text: `Dear ${clientName},`, spacing: { after: 200 } }),
     new Paragraph({ text: 'Welcome to Pension Navigator by Airgead. We are delighted to confirm your registration on our platform.', spacing: { after: 200 } }),
@@ -179,7 +177,6 @@ export async function downloadWelcomeLetter(clientName: string = 'New Client') {
 }
 
 export async function downloadBenefitStatement(clientName: string = 'John Smith') {
-  const { Paragraph, TextRun, HeadingLevel } = await import('docx');
   const content = [
     new Paragraph({ children: [new TextRun({ text: `Client: ${clientName}`, bold: true })], spacing: { after: 100 } }),
     new Paragraph({ children: [new TextRun({ text: `Statement Date: ${new Date().toLocaleDateString('en-GB')}` })], spacing: { after: 100 } }),
@@ -206,7 +203,6 @@ export async function downloadBenefitStatement(clientName: string = 'John Smith'
 }
 
 export async function downloadTransferConfirmation(clientName: string = 'Emma Wilson') {
-  const { Paragraph, TextRun, HeadingLevel } = await import('docx');
   const content = [
     new Paragraph({ children: [new TextRun({ text: `Client: ${clientName}`, bold: true })], spacing: { after: 100 } }),
     new Paragraph({ children: [new TextRun({ text: `Date: ${new Date().toLocaleDateString('en-GB')}` })], spacing: { after: 300 } }),
@@ -224,7 +220,6 @@ export async function downloadTransferConfirmation(clientName: string = 'Emma Wi
 }
 
 export async function downloadDrawdownConfirmation(clientName: string = 'David Thompson') {
-  const { Paragraph, TextRun, HeadingLevel } = await import('docx');
   const content = [
     new Paragraph({ children: [new TextRun({ text: `Client: ${clientName}`, bold: true })], spacing: { after: 100 } }),
     new Paragraph({ children: [new TextRun({ text: `Date: ${new Date().toLocaleDateString('en-GB')}` })], spacing: { after: 300 } }),
@@ -242,7 +237,6 @@ export async function downloadDrawdownConfirmation(clientName: string = 'David T
 }
 
 export async function downloadFeeSchedule() {
-  const { Paragraph, TextRun, HeadingLevel } = await import('docx');
   const content = [
     new Paragraph({ children: [new TextRun({ text: `Effective Date: ${new Date().toLocaleDateString('en-GB')}` })], spacing: { after: 300 } }),
     new Paragraph({ text: 'Platform Fees', heading: HeadingLevel.HEADING_2, spacing: { before: 200, after: 200 } }),

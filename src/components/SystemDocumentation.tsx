@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import airgeadLogo from '@/assets/airgead-logo.png';
 import { downloadAirgeadDocx } from '@/lib/documentUtils';
+import { Paragraph, TextRun, HeadingLevel } from 'docx';
 import { 
   FileText, 
   Home, 
@@ -33,8 +34,6 @@ const SystemDocumentation = () => {
 
   const handleExportWord = async () => {
     try {
-      const { Paragraph, TextRun, HeadingLevel } = await import('docx');
-
       const contentParagraphs: any[] = [];
 
       features.forEach(category => {

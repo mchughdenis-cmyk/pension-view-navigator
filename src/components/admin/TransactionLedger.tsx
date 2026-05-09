@@ -11,6 +11,7 @@ import { Search, Download, ArrowUpRight, ArrowDownLeft, RefreshCw, Receipt, Tren
 import { toast } from 'sonner'
 import { downloadCSV } from '@/lib/adminExportUtils'
 import { useAllTransactions, useClients } from '@/hooks/useClientData'
+import { supabase } from '@/integrations/supabase/client'
 
 const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
@@ -42,7 +43,6 @@ export default function TransactionLedger() {
   // Get accounts for selected client
   const [clientAccounts, setClientAccounts] = useState<any[]>([])
   const loadClientAccounts = async (clientId: string) => {
-    const { supabase } = await import('@/integrations/supabase/client')
     const { data } = await supabase.from('client_accounts').select('id, account_type, account_number').eq('client_id', clientId)
     setClientAccounts(data || [])
   }

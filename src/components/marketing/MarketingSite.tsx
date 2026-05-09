@@ -342,7 +342,7 @@ export function MarketingAbout() {
 export function MarketingPlatform() {
   const modules = [
     { icon: Workflow, title: "Onboarding & KYC", desc: "Digital welcome packs, identity checks, cash onboarding and a bulk bank reconciliation workflow." },
-    { icon: PiggyIcon, title: "Multi-wrapper engine", desc: "SIPP, SSAS, ISA (allowance tracking), GIA (CGT tracking) and bespoke schemes in a single ledger." },
+    { icon: PiggyBank, title: "Multi-wrapper engine", desc: "SIPP, SSAS, ISA (allowance tracking), GIA (CGT tracking) and bespoke schemes in a single ledger." },
     { icon: TrendingUp, title: "Drawdown & UFPLS", desc: "Flexible drawdown, drip-feed, annuities, PCLS, UFPLS — with PAYE, RTI and tax-code automation." },
     { icon: ScrollText, title: "IHT & estate planning", desc: "Post-2027 IHT modelling on pensions and other assets, including spousal exemption logic." },
     { icon: BarChart3, title: "Dealing & portfolios", desc: "Model portfolios, rebalancing, dealing desk, Monte Carlo projections and corporate actions." },

@@ -432,8 +432,6 @@ engine      & PAYE    desk         engine
   );
 }
 
-// Lucide doesn't ship a "PiggyIcon" — alias to PiggyBank for module table above.
-import { PiggyBank as PiggyIcon } from "lucide-react";
 
 /* --------------------------------- Expertise ------------------------------- */
 

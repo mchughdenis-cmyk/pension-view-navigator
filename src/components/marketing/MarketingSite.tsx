@@ -9,6 +9,7 @@ import {
   Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
   GraduationCap, Gauge, Map, Target,
 } from "lucide-react";
+import { ContactForm } from "./ContactForm";
 
 /* ---------------------------------- Layout --------------------------------- */
 
@@ -985,39 +986,7 @@ export function MarketingContact() {
             <Button asChild size="lg"><Link to="/dashboard">Or launch the live demo <ArrowRight className="ml-2 h-4 w-4" /></Link></Button>
           </div>
         </div>
-        <Card>
-          <CardHeader>
-            <CardTitle>Request a demo</CardTitle>
-            <CardDescription>We'll respond within one business day.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); alert("Thanks — we'll be in touch."); }}>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-medium">First name</label>
-                  <input className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required />
-                </div>
-                <div>
-                  <label className="text-xs font-medium">Last name</label>
-                  <input className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required />
-                </div>
-              </div>
-              <div>
-                <label className="text-xs font-medium">Work email</label>
-                <input type="email" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required />
-              </div>
-              <div>
-                <label className="text-xs font-medium">Firm</label>
-                <input className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" required />
-              </div>
-              <div>
-                <label className="text-xs font-medium">What would you like to see?</label>
-                <textarea rows={4} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
-              </div>
-              <Button type="submit" className="w-full">Request demo</Button>
-            </form>
-          </CardContent>
-        </Card>
+        <ContactForm />
       </div>
     </Section>
   );

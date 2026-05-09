@@ -2753,6 +2753,51 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_leads: {
+        Row: {
+          created_at: string
+          email: string
+          firm: string
+          first_name: string
+          id: string
+          ip_hash: string | null
+          last_name: string
+          message: string | null
+          source: string
+          status: string
+          updated_at: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          firm: string
+          first_name: string
+          id?: string
+          ip_hash?: string | null
+          last_name: string
+          message?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          firm?: string
+          first_name?: string
+          id?: string
+          ip_hash?: string | null
+          last_name?: string
+          message?: string | null
+          source?: string
+          status?: string
+          updated_at?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       mifid_drop_alerts: {
         Row: {
           account_id: string

@@ -68,6 +68,10 @@ import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
 import IHTOverview from "./components/IHTOverview";
 import MobileClientApp from "./components/MobileClientApp";
+import {
+  MarketingLayout, MarketingHome, MarketingAbout, MarketingPlatform,
+  MarketingExpertise, MarketingMarket, MarketingContact,
+} from "./components/marketing/MarketingSite";
 
 const queryClient = new QueryClient();
 
@@ -101,6 +105,16 @@ const AppContent = () => {
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/m" element={<MobileClientApp />} />
         <Route path="/mobile" element={<Navigate to="/m" replace />} />
+
+        {/* Marketing site */}
+        <Route path="/site" element={<MarketingLayout />}>
+          <Route index element={<MarketingHome />} />
+          <Route path="about" element={<MarketingAbout />} />
+          <Route path="platform" element={<MarketingPlatform />} />
+          <Route path="expertise" element={<MarketingExpertise />} />
+          <Route path="market" element={<MarketingMarket />} />
+          <Route path="contact" element={<MarketingContact />} />
+        </Route>
 
         {/* App routes — wrapped in shell */}
         <Route path="*" element={

@@ -34,8 +34,6 @@ const SystemDocumentation = () => {
 
   const handleExportWord = async () => {
     try {
-      const { Paragraph, TextRun, HeadingLevel } = await import('docx');
-
       const contentParagraphs: any[] = [];
 
       features.forEach(category => {

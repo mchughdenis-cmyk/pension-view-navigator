@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   ShieldCheck, Sparkles, Layers, TrendingUp, Workflow, Building2, Users, Globe,
   ArrowRight, CheckCircle2, ScrollText, BarChart3, Cpu, Lock, Award, BookOpen,
-  Mail, Phone, MapPin, Compass,
+  Mail, Phone, MapPin, Compass, PiggyBank,
 } from "lucide-react";
 
 /* ---------------------------------- Layout --------------------------------- */

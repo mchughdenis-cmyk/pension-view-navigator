@@ -428,12 +428,172 @@ engine      & PAYE    desk         engine
           </div>
         </div>
       </Section>
+
+      {/* Persona experiences */}
+      <Section className="!pt-0">
+        <Eyebrow><Users className="h-3 w-3" /> Three roles, one platform</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Purpose-built workspaces for clients, advisers and administrators.
+        </h2>
+        <p className="mt-4 text-muted-foreground max-w-3xl">
+          Pension Navigator presents the right surface to the right user. No more advisers wading
+          through admin screens, or members confronted with regulatory jargon.
+        </p>
+        <div className="mt-10 grid md:grid-cols-3 gap-5">
+          {[
+            {
+              icon: Users, title: "Client portal",
+              tagline: "Clarity, control, confidence.",
+              points: [
+                "Total wealth and YTD growth at a glance",
+                "Self-serve contributions and drawdown adjustments",
+                "Mobile-native app with bottom-tab navigation",
+                "Embedded AI assistant for plain-English answers",
+              ],
+              cta: { to: "/dashboard", label: "Open client view" },
+            },
+            {
+              icon: Briefcase, title: "Adviser workbench",
+              tagline: "Leverage across every household.",
+              points: [
+                "Cross-client illustrations and Monte Carlo projections",
+                "IHT planning across pensions, ISAs, GIAs and property",
+                "Drawdown sustainability and tax-efficient sequencing",
+                "One-click reporting suite with Airgead branding",
+              ],
+              cta: { to: "/workbench", label: "Open adviser workbench" },
+            },
+            {
+              icon: ShieldCheck, title: "Administrator console",
+              tagline: "Operational control, end-to-end.",
+              points: [
+                "Operations cockpit with real-time SLA monitoring",
+                "Bulk bank operations: match → allocate → apply",
+                "HMRC RTI, PAYE, LSA / LSDBA and Origo Options",
+                "Full audit trail with who-when-what and CSV export",
+              ],
+              cta: { to: "/cockpit", label: "Open ops cockpit" },
+            },
+          ].map((p) => (
+            <Card key={p.title} className="flex flex-col">
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                  <p.icon className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{p.title}</CardTitle>
+                <CardDescription>{p.tagline}</CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  {p.points.map((t) => (
+                    <li key={t} className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-secondary mt-0.5 shrink-0" />{t}</li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <Button asChild variant="outline" size="sm"><Link to={p.cta.to}>{p.cta.label} <ArrowRight className="ml-1 h-3.5 w-3.5" /></Link></Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Integrations */}
+      <Section className="!pt-0">
+        <div className="rounded-xl border border-border bg-card p-8 md:p-12">
+          <div className="grid md:grid-cols-[1fr_2fr] gap-10 items-start">
+            <div>
+              <Eyebrow><Globe className="h-3 w-3" /> Integrations</Eyebrow>
+              <h2 className="text-3xl font-bold tracking-tight">Open by design.</h2>
+              <p className="mt-4 text-muted-foreground">
+                Every external touchpoint is API-first. We treat integrations as products, not
+                projects — so connecting custodians, banks, identity providers or market data feeds
+                is a config exercise, not a six-month build.
+              </p>
+              <div className="mt-6">
+                <Button asChild variant="outline"><Link to="/api-directory">Browse API directory <ArrowRight className="ml-1 h-4 w-4" /></Link></Button>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {[
+                "HMRC RTI / APSS", "Origo Options", "Bank file (BACS / CHAPS)",
+                "Identity & KYC providers", "Market data feeds", "Custodian APIs",
+                "Payment providers", "Document signing", "Email / SMS gateways",
+              ].map((i) => (
+                <div key={i} className="rounded-lg border border-border bg-muted/30 px-4 py-3 text-sm flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-secondary shrink-0" /> {i}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      {/* Security */}
+      <Section className="!pt-0">
+        <Eyebrow><Lock className="h-3 w-3" /> Security & resilience</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Built to a financial-services security bar.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-4 gap-5">
+          {[
+            { icon: Lock, title: "Data protection", body: "Encryption in transit and at rest, row-level security and fine-grained role-based access controls." },
+            { icon: ScrollText, title: "Audit & evidence", body: "Every KYC decision, cash event and admin change is captured with actor, timestamp and diff — exportable to CSV." },
+            { icon: ShieldCheck, title: "Operational resilience", body: "Multi-region deployment options, point-in-time recovery and CASS-aligned reconciliation routines." },
+            { icon: Award, title: "Regulatory alignment", body: "Designed against FCA SYSC, CASS, SDR and Consumer Duty expectations from day one." },
+          ].map((s) => (
+            <Card key={s.title}>
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-secondary/15 grid place-items-center mb-3">
+                  <s.icon className="h-5 w-5 text-secondary" />
+                </div>
+                <CardTitle className="text-lg">{s.title}</CardTitle>
+              </CardHeader>
+              <CardContent><p className="text-sm text-muted-foreground">{s.body}</p></CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Implementation timeline */}
+      <Section className="!pt-0">
+        <Eyebrow><Workflow className="h-3 w-3" /> Implementation</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          From kick-off to go-live in weeks, not years.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-4 gap-4">
+          {[
+            { step: "01", title: "Discover", body: "Operating-model review, data audit and integration map. Output: a phased delivery plan." },
+            { step: "02", title: "Configure", body: "Wrappers, fee schedules, permissions, model portfolios and reporting templates set up to your firm." },
+            { step: "03", title: "Migrate", body: "Bulk data load, balancing reconciliation, parallel running and a regulator-grade migration evidence pack." },
+            { step: "04", title: "Operate", body: "Go-live with named support, SLA monitoring and a continuous-improvement roadmap." },
+          ].map((s) => (
+            <div key={s.step} className="rounded-xl border border-border bg-card p-6">
+              <div className="text-xs font-mono text-primary mb-2">{s.step}</div>
+              <div className="font-semibold mb-1">{s.title}</div>
+              <p className="text-sm text-muted-foreground">{s.body}</p>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      {/* CTA */}
+      <Section className="!pt-0">
+        <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-secondary/10 p-10 md:p-14 text-center">
+          <h3 className="text-2xl md:text-3xl font-bold tracking-tight">Ready to see it work on your data?</h3>
+          <p className="mt-3 text-muted-foreground max-w-2xl mx-auto">
+            We'll run a tailored walkthrough using a sanitised slice of your scheme data so the
+            value is concrete on day one.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3 justify-center">
+            <Button asChild size="lg"><Link to="/site/contact">Book a demo</Link></Button>
+            <Button asChild size="lg" variant="outline"><Link to="/dashboard">Launch the live app</Link></Button>
+          </div>
+        </div>
+      </Section>
     </>
   );
 }
-
-
-/* --------------------------------- Expertise ------------------------------- */
 
 export function MarketingExpertise() {
   const areas = [

@@ -68,6 +68,10 @@ import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
 import IHTOverview from "./components/IHTOverview";
 import MobileClientApp from "./components/MobileClientApp";
+import {
+  MarketingLayout, MarketingHome, MarketingAbout, MarketingPlatform,
+  MarketingExpertise, MarketingMarket, MarketingContact,
+} from "./components/marketing/MarketingSite";
 
 const queryClient = new QueryClient();
 

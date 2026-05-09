@@ -7,7 +7,7 @@ import {
   ShieldCheck, Sparkles, Layers, TrendingUp, Workflow, Building2, Users, Globe,
   ArrowRight, CheckCircle2, ScrollText, BarChart3, Cpu, Lock, Award, BookOpen,
   Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
-  GraduationCap, Gauge, Map, Target, Scale, Quote, Calendar, Briefcase,
+  GraduationCap, Gauge, Map, Target,
 } from "lucide-react";
 
 /* ---------------------------------- Layout --------------------------------- */

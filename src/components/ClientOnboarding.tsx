@@ -48,6 +48,9 @@ const ClientOnboarding = () => {
     // Product Selection
     selectedProduct: '',
     
+    // KYC
+    kycCompleted: false,
+
     // Terms
     termsAccepted: false,
     marketingConsent: false,

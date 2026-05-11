@@ -11,8 +11,8 @@ interface PageHeaderProps {
 export function PageHeader({ title, description, actions, badge }: PageHeaderProps) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
+      <div className="min-w-0 flex-1 basis-72">
+        <div className="flex items-center gap-2 flex-wrap">
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{title}</h1>
           {badge}
         </div>
@@ -20,7 +20,7 @@ export function PageHeader({ title, description, actions, badge }: PageHeaderPro
           <p className="text-sm md:text-base text-muted-foreground mt-1 max-w-3xl">{description}</p>
         )}
       </div>
-      {actions && <div className="flex items-center gap-2 shrink-0">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
     </header>
   );
 }

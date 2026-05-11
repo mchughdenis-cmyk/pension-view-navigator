@@ -147,14 +147,6 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Operations cockpit", url: "/cockpit", icon: Layers },
         { title: "Pension operations", url: "/operations", icon: Workflow },
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
-      ],
-    },
-    {
-      label: "Operations",
-      items: [
-        { title: "Operations cockpit", url: "/cockpit", icon: Layers },
-        { title: "Pension operations", url: "/operations", icon: Workflow },
-        { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
         { title: "Origo Options", url: "/origo", icon: Send },
       ],

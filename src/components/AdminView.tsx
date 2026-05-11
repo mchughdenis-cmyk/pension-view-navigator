@@ -148,13 +148,13 @@ export default function AdminView() {
       {/* Header */}
       <div className="bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <div>
+          <div className="flex flex-wrap justify-between items-start gap-4 py-4">
+            <div className="min-w-0 flex-1 basis-72">
               <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-              <p className="text-muted-foreground">{user?.name} - System Administrator</p>
+              <p className="text-muted-foreground truncate">{user?.name} - System Administrator</p>
               <Badge variant="outline" className="mt-1">Admin View</Badge>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2 shrink-0">
               <Button variant="outline" size="sm" onClick={() => switchRole('client')}>
                 <User className="w-4 h-4 mr-2" />
                 Switch to Client
@@ -186,7 +186,7 @@ export default function AdminView() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Clients</CardTitle>

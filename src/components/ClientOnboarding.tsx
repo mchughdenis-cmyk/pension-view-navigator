@@ -606,35 +606,42 @@ const ClientOnboarding = () => {
               <h1 className="text-3xl font-bold">Client Onboarding</h1>
               <Badge variant="outline">Step {currentStep} of 7</Badge>
             </div>
-            <Progress value={(currentStep / 7) * 100} className="mb-4" />
-            
-            {/* Step Navigation */}
-            <div className="flex items-center justify-between">
-              {steps.map((step, index) => {
-                const Icon = step.icon;
-                const isActive = currentStep === step.id;
-                const isCompleted = currentStep > step.id || isStepComplete(step.id);
-                
-                return (
-                  <div key={step.id} className="flex items-center">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                      isCompleted ? 'bg-primary border-primary text-primary-foreground' :
-                      isActive ? 'border-primary text-primary' : 'border-muted text-muted-foreground'
-                    }`}>
-                      {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
-                    </div>
-                    <div className="ml-3 hidden md:block">
-                      <div className={`text-sm font-medium ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
-                        {step.title}
+            <Progress value={((currentStep - 1) / (steps.length - 1)) * 100} className="mb-6 h-2" />
+
+            {/* Step Navigation — continuous track spanning all steps */}
+            <div className="relative">
+              {/* Track */}
+              <div className="absolute left-5 right-5 top-5 h-0.5 bg-muted -z-0" aria-hidden="true" />
+              <div
+                className="absolute left-5 top-5 h-0.5 bg-primary -z-0 transition-all"
+                style={{
+                  width: `calc((100% - 2.5rem) * ${(currentStep - 1) / (steps.length - 1)})`,
+                }}
+                aria-hidden="true"
+              />
+              <div className="relative flex items-start justify-between gap-2">
+                {steps.map((step) => {
+                  const Icon = step.icon;
+                  const isActive = currentStep === step.id;
+                  const isCompleted = currentStep > step.id || isStepComplete(step.id);
+
+                  return (
+                    <div key={step.id} className="flex flex-col items-center text-center flex-1 min-w-0">
+                      <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 bg-background transition-all ${
+                        isCompleted ? 'bg-primary border-primary text-primary-foreground' :
+                        isActive ? 'border-primary text-primary' : 'border-muted text-muted-foreground'
+                      }`}>
+                        {isCompleted ? <CheckCircle className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                       </div>
-                      <div className="text-xs text-muted-foreground">{step.description}</div>
+                      <div className="mt-2 hidden md:block px-1">
+                        <div className={`text-xs font-medium leading-tight ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                          {step.title}
+                        </div>
+                      </div>
                     </div>
-                    {index < steps.length - 1 && (
-                      <Separator className="w-8 mx-4 hidden lg:block" />
-                    )}
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
 

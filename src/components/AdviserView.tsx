@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MobileHeader } from '@/components/ui/mobile-header'
 import { SidebarNavLayout, type NavGroup } from '@/components/ui/sidebar-nav'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Users, TrendingUp, PiggyBank, DollarSign, FileText, Settings, LogOut,
   Search, Eye, Edit, UserPlus, Calendar, User, Shield, BarChart3,
@@ -161,25 +162,23 @@ export default function AdviserView() {
         return (
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <CardTitle>My Client Portfolio</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <div className="relative">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <CardTitle className="whitespace-nowrap">My Client Portfolio</CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative flex-1 min-w-[180px]">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search clients..." className="pl-10 w-full sm:w-48 md:w-64" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    <Input placeholder="Search clients..." className="pl-10 w-full" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   </div>
-                  <div className="flex gap-2">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="Filter" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="review_required">Review Required</SelectItem>
-                        <SelectItem value="onboarding">Onboarding</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button className="flex-shrink-0"><UserPlus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Client</span></Button>
-                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-36"><SelectValue placeholder="Filter" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="review_required">Review Required</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button className="flex-shrink-0"><UserPlus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Client</span></Button>
                 </div>
               </div>
             </CardHeader>
@@ -270,9 +269,17 @@ export default function AdviserView() {
       />
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <SidebarNavLayout groups={navGroups} activeTab={activeTab} onTabChange={handleTabChange}>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="mb-4 flex flex-wrap h-auto gap-1 bg-muted/60 p-1">
+            <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="w-4 h-4" /> Overview</TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-2"><Bell className="w-4 h-4" /> Alerts</TabsTrigger>
+            <TabsTrigger value="clients" className="gap-2"><Users className="w-4 h-4" /> My Clients</TabsTrigger>
+            <TabsTrigger value="onboarding" className="gap-2"><UserPlus className="w-4 h-4" /> Onboarding</TabsTrigger>
+            <TabsTrigger value="illustrations" className="gap-2"><FileText className="w-4 h-4" /> Illustrations</TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2"><ClipboardList className="w-4 h-4" /> Reports</TabsTrigger>
+          </TabsList>
           {renderContent()}
-        </SidebarNavLayout>
+        </Tabs>
       </div>
     </div>
   )

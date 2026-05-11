@@ -51,13 +51,13 @@ export function MobileHeader({ title, subtitle, badge, actions, className }: Mob
   return (
     <div className={cn("bg-card border-b border-border", className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
-          <div>
+        <div className="flex flex-wrap justify-between items-start gap-4 py-4">
+          <div className="min-w-0 flex-1 basis-72">
             <h1 className="text-2xl font-bold text-foreground">{title}</h1>
-            {subtitle && <p className="text-muted-foreground">{subtitle}</p>}
+            {subtitle && <p className="text-muted-foreground truncate">{subtitle}</p>}
             {badge && <div className="mt-1">{badge}</div>}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             {actions}
           </div>
         </div>

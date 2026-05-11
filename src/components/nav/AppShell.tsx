@@ -6,6 +6,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { NotificationsBell } from "@/components/NotificationsBell";
 import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { ViewSwitcher } from "./ViewSwitcher";
+import { FirmSwitcher } from "./FirmSwitcher";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 
@@ -38,6 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               Search
               <kbd className="ml-1 rounded border bg-muted px-1.5 py-0.5 text-[10px] font-mono">⌘K</kbd>
             </Button>
+            <FirmSwitcher />
             <ViewSwitcher />
             <NotificationsBell />
             <ThemeToggle />

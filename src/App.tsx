@@ -78,6 +78,10 @@ const queryClient = new QueryClient();
 import { RoleGate } from "./components/RoleGate";
 import { RoleSwitcher } from "./components/RoleSwitcher";
 import { useRole } from "./contexts/RoleContext";
+import { FirmProvider } from "./contexts/FirmContext";
+import CASSReconEngine from "./components/admin/CASSReconEngine";
+import RealisticKYC from "./components/RealisticKYC";
+import SuitabilityAssessment from "./components/SuitabilityAssessment";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -159,6 +163,9 @@ const AppContent = () => {
               <Route path="/mi" element={<RoleGate allow={['adviser', 'admin']}><MIDashboard /></RoleGate>} />
               <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
               <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />
+              <Route path="/cass-engine" element={<RoleGate allow={['admin']}><CASSReconEngine /></RoleGate>} />
+              <Route path="/kyc-verify" element={<RealisticKYC />} />
+              <Route path="/suitability" element={<RoleGate allow={['adviser', 'admin']}><SuitabilityAssessment /></RoleGate>} />
               <Route path="/projection" element={<MonteCarloProjection />} />
               <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
               <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />
@@ -191,7 +198,9 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AppContent />
+      <FirmProvider>
+        <AppContent />
+      </FirmProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -818,51 +818,84 @@ export type Database = {
       }
       cass_reconciliations: {
         Row: {
+          bank_balance: number | null
           created_at: string
+          custody_balance: number | null
           external_balance: number
+          firm_id: string | null
           id: string
           internal_balance: number
+          ledger_balance: number | null
+          notes_url: string | null
           performed_by: string | null
           recon_date: string
           recon_type: string
           resolution_notes: string | null
           reviewed_by: string | null
           signed_off_at: string | null
+          signed_off_by: string | null
           status: string
           unmatched_count: number
           variance: number | null
         }
         Insert: {
+          bank_balance?: number | null
           created_at?: string
+          custody_balance?: number | null
           external_balance?: number
+          firm_id?: string | null
           id?: string
           internal_balance?: number
+          ledger_balance?: number | null
+          notes_url?: string | null
           performed_by?: string | null
           recon_date?: string
           recon_type?: string
           resolution_notes?: string | null
           reviewed_by?: string | null
           signed_off_at?: string | null
+          signed_off_by?: string | null
           status?: string
           unmatched_count?: number
           variance?: number | null
         }
         Update: {
+          bank_balance?: number | null
           created_at?: string
+          custody_balance?: number | null
           external_balance?: number
+          firm_id?: string | null
           id?: string
           internal_balance?: number
+          ledger_balance?: number | null
+          notes_url?: string | null
           performed_by?: string | null
           recon_date?: string
           recon_type?: string
           resolution_notes?: string | null
           reviewed_by?: string | null
           signed_off_at?: string | null
+          signed_off_by?: string | null
           status?: string
           unmatched_count?: number
           variance?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cass_reconciliations_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cass_reconciliations_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "mi_aua_by_firm"
+            referencedColumns: ["firm_id"]
+          },
+        ]
       }
       cass_settings: {
         Row: {
@@ -1030,6 +1063,7 @@ export type Database = {
           date_of_birth: string | null
           email: string | null
           employment_status: string | null
+          firm_id: string | null
           first_name: string
           id: string
           last_name: string
@@ -1056,6 +1090,7 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           employment_status?: string | null
+          firm_id?: string | null
           first_name: string
           id?: string
           last_name: string
@@ -1082,6 +1117,7 @@ export type Database = {
           date_of_birth?: string | null
           email?: string | null
           employment_status?: string | null
+          firm_id?: string | null
           first_name?: string
           id?: string
           last_name?: string
@@ -1098,7 +1134,22 @@ export type Database = {
           title?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "clients_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "mi_aua_by_firm"
+            referencedColumns: ["firm_id"]
+          },
+        ]
       }
       commercial_properties: {
         Row: {
@@ -2482,51 +2533,87 @@ export type Database = {
       }
       kyc_cases: {
         Row: {
+          address_status: string | null
           client_id: string
           completed_at: string | null
           created_at: string
+          decision: string | null
           decision_reason: string | null
+          document_status: string | null
+          firm_id: string | null
           id: string
+          pep_status: string | null
           provider: string
           provider_ref: string | null
           reviewer: string | null
           risk_level: string
           risk_score: number
+          sanctions_status: string | null
+          selfie_status: string | null
           started_at: string | null
           status: string
           updated_at: string
         }
         Insert: {
+          address_status?: string | null
           client_id: string
           completed_at?: string | null
           created_at?: string
+          decision?: string | null
           decision_reason?: string | null
+          document_status?: string | null
+          firm_id?: string | null
           id?: string
+          pep_status?: string | null
           provider?: string
           provider_ref?: string | null
           reviewer?: string | null
           risk_level?: string
           risk_score?: number
+          sanctions_status?: string | null
+          selfie_status?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
         }
         Update: {
+          address_status?: string | null
           client_id?: string
           completed_at?: string | null
           created_at?: string
+          decision?: string | null
           decision_reason?: string | null
+          document_status?: string | null
+          firm_id?: string | null
           id?: string
+          pep_status?: string | null
           provider?: string
           provider_ref?: string | null
           reviewer?: string | null
           risk_level?: string
           risk_score?: number
+          sanctions_status?: string | null
+          selfie_status?: string | null
           started_at?: string | null
           status?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "kyc_cases_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "kyc_cases_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "mi_aua_by_firm"
+            referencedColumns: ["firm_id"]
+          },
+        ]
       }
       kyc_checks: {
         Row: {
@@ -4110,39 +4197,85 @@ export type Database = {
       }
       suitability_reports: {
         Row: {
+          atr_score: number | null
+          capacity_for_loss: string | null
           client_id: string
           costs_summary: string | null
           created_at: string
+          firm_id: string | null
           id: string
+          objectives: string | null
           rationale: string | null
           recommendation: string
+          recommended_portfolio_id: string | null
+          report_pdf_url: string | null
+          responses: Json | null
           risk_alignment: string | null
           signed_off_by: string | null
           status: string
+          time_horizon_years: number | null
         }
         Insert: {
+          atr_score?: number | null
+          capacity_for_loss?: string | null
           client_id: string
           costs_summary?: string | null
           created_at?: string
+          firm_id?: string | null
           id?: string
+          objectives?: string | null
           rationale?: string | null
           recommendation: string
+          recommended_portfolio_id?: string | null
+          report_pdf_url?: string | null
+          responses?: Json | null
           risk_alignment?: string | null
           signed_off_by?: string | null
           status?: string
+          time_horizon_years?: number | null
         }
         Update: {
+          atr_score?: number | null
+          capacity_for_loss?: string | null
           client_id?: string
           costs_summary?: string | null
           created_at?: string
+          firm_id?: string | null
           id?: string
+          objectives?: string | null
           rationale?: string | null
           recommendation?: string
+          recommended_portfolio_id?: string | null
+          report_pdf_url?: string | null
+          responses?: Json | null
           risk_alignment?: string | null
           signed_off_by?: string | null
           status?: string
+          time_horizon_years?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "suitability_reports_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "firms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "suitability_reports_firm_id_fkey"
+            columns: ["firm_id"]
+            isOneToOne: false
+            referencedRelation: "mi_aua_by_firm"
+            referencedColumns: ["firm_id"]
+          },
+          {
+            foreignKeyName: "suitability_reports_recommended_portfolio_id_fkey"
+            columns: ["recommended_portfolio_id"]
+            isOneToOne: false
+            referencedRelation: "model_portfolios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trade_allocations: {
         Row: {

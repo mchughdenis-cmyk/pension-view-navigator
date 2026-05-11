@@ -586,6 +586,8 @@ const ClientOnboarding = () => {
       case 5:
         return formData.selectedProduct;
       case 6:
+        return formData.kycCompleted;
+      case 7:
         return formData.termsAccepted;
       default:
         return false;

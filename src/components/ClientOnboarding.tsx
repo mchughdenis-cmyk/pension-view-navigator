@@ -604,9 +604,9 @@ const ClientOnboarding = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-3xl font-bold">Client Onboarding</h1>
-              <Badge variant="outline">Step {currentStep} of 6</Badge>
+              <Badge variant="outline">Step {currentStep} of 7</Badge>
             </div>
-            <Progress value={(currentStep / 6) * 100} className="mb-4" />
+            <Progress value={(currentStep / 7) * 100} className="mb-4" />
             
             {/* Step Navigation */}
             <div className="flex items-center justify-between">

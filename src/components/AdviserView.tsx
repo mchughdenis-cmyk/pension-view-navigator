@@ -184,54 +184,73 @@ export default function AdviserView() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {filteredClients.map((client) => (
-                  <div key={client.id} className="p-4 border rounded-lg hover:bg-accent/50 transition-colors">
-                    {/* Mobile Layout */}
-                    <div className="md:hidden space-y-3">
-                      <div className="flex justify-between items-start">
-                        <div><p className="font-medium">{client.name}</p><p className="text-sm text-muted-foreground">{client.email}</p></div>
-                        <Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mb-2">{client.accounts.map(acc => <Badge key={acc} variant="outline" className="text-xs">{acc}</Badge>)}</div>
-                      <div className="grid grid-cols-2 gap-3 text-sm">
-                        <div><p className="text-muted-foreground">Total Value</p><p className="font-semibold">{formatCurrency(client.portfolioValue + client.isaValue + client.giaValue)}</p></div>
-                        <div><p className="text-muted-foreground">Risk Profile</p><p className="font-medium">{client.riskProfile}</p></div>
-                        <div><p className="text-muted-foreground">Next Review</p><p className="font-medium">{client.nextReview}</p></div>
-                        <div>
-                          {client.monthlyDrawdown > 0 && <><p className="text-muted-foreground">Drawdown</p><p className="font-medium">{formatCurrency(client.monthlyDrawdown)}/mo</p></>}
-                          {client.pendingActions > 0 && <Badge variant="secondary" className="mt-1">{client.pendingActions} pending</Badge>}
+              <div className="space-y-4">
+                {filteredClients.map((client) => {
+                  const total = client.portfolioValue + client.isaValue + client.giaValue
+                  const openPlan = (path: string) => {
+                    switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })
+                    navigate(path)
+                  }
+                  const plans: { key: string; label: string; value: number; path: string; tone: string }[] = [
+                    { key: 'SIPP', label: 'SIPP', value: client.portfolioValue, path: '/portfolio', tone: 'text-primary' },
+                    { key: 'ISA',  label: 'Stocks & Shares ISA', value: client.isaValue, path: '/isa', tone: 'text-success' },
+                    { key: 'GIA',  label: 'GIA', value: client.giaValue, path: '/gia', tone: 'text-warning' },
+                  ].filter(p => client.accounts.includes(p.key))
+
+                  return (
+                    <div key={client.id} className="border rounded-lg overflow-hidden">
+                      {/* Top strip: identity + headline valuation */}
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 bg-muted/40 border-b">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <p className="font-semibold text-base truncate">{client.name}</p>
+                            <Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge>
+                            {client.pendingActions > 0 && <Badge variant="secondary">{client.pendingActions} pending</Badge>}
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">{client.email} · {client.riskProfile} · review {client.nextReview}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Total valuation</p>
+                          <p className="text-2xl md:text-3xl font-bold text-primary tabular-nums leading-tight">{formatCurrency(total)}</p>
+                          {client.monthlyDrawdown > 0 && (
+                            <p className="text-xs text-muted-foreground">Drawdown {formatCurrency(client.monthlyDrawdown)}/mo</p>
+                          )}
                         </div>
                       </div>
-                      <div className="flex gap-2 pt-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}><Eye className="w-4 h-4 mr-2" /> View</Button>
-                        <Button variant="outline" size="sm" className="flex-1"><Edit className="w-4 h-4 mr-2" /> Edit</Button>
+
+                      {/* Plan tiles — click to drill into each plan */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-3">
+                        {plans.map(p => (
+                          <button
+                            key={p.key}
+                            type="button"
+                            onClick={() => openPlan(p.path)}
+                            className="text-left p-3 rounded-md border bg-card hover:bg-accent hover:border-primary/40 transition-colors group"
+                            aria-label={`Open ${client.name}'s ${p.label}`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-medium text-muted-foreground">{p.label}</span>
+                              <Badge variant="outline" className="text-[10px] px-1 py-0">{p.key}</Badge>
+                            </div>
+                            <p className={`text-lg font-bold tabular-nums mt-1 ${p.tone}`}>{formatCurrency(p.value)}</p>
+                            <p className="text-[11px] text-primary opacity-0 group-hover:opacity-100 transition-opacity">Open plan →</p>
+                          </button>
+                        ))}
+                      </div>
+
+                      {/* Footer actions */}
+                      <div className="flex flex-wrap gap-2 px-3 pb-3">
+                        <Button variant="default" size="sm" onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}>
+                          <Eye className="w-4 h-4 mr-2" /> Open client view
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => openPlan('/annual-summary')}>
+                          <FileText className="w-4 h-4 mr-2" /> Annual summary
+                        </Button>
+                        <Button variant="outline" size="sm"><Edit className="w-4 h-4 mr-2" /> Edit</Button>
                       </div>
                     </div>
-                    {/* Desktop Layout */}
-                    <div className="hidden md:flex items-center justify-between">
-                      <div className="flex-1 grid grid-cols-6 gap-4 items-center">
-                        <div><p className="font-medium">{client.name}</p><p className="text-sm text-muted-foreground">{client.email}</p></div>
-                        <div className="text-center">
-                          <p className="font-semibold">{formatCurrency(client.portfolioValue + client.isaValue + client.giaValue)}</p>
-                          <p className="text-xs text-muted-foreground">Total Value</p>
-                          <div className="flex justify-center gap-1 mt-1">{client.accounts.map(acc => <Badge key={acc} variant="outline" className="text-[10px] px-1 py-0">{acc}</Badge>)}</div>
-                        </div>
-                        <div className="text-center"><Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge></div>
-                        <div className="text-center"><p className="text-sm">{client.riskProfile}</p><p className="text-xs text-muted-foreground">Risk Profile</p></div>
-                        <div className="text-center"><p className="text-sm">{client.nextReview}</p><p className="text-xs text-muted-foreground">Next Review</p></div>
-                        <div className="text-center">
-                          {client.pendingActions > 0 && <Badge variant="secondary">{client.pendingActions} pending</Badge>}
-                          {client.monthlyDrawdown > 0 && <p className="text-xs text-muted-foreground mt-1">{formatCurrency(client.monthlyDrawdown)}/month</p>}
-                        </div>
-                      </div>
-                      <div className="flex gap-2 ml-4">
-                        <Button variant="outline" size="sm" onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}><Eye className="w-4 h-4" /></Button>
-                        <Button variant="outline" size="sm"><Edit className="w-4 h-4" /></Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </CardContent>
           </Card>

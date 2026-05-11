@@ -11,8 +11,10 @@ import { PageHeader } from "@/components/nav/PageHeader";
 import { supabase } from "@/integrations/supabase/client";
 import { useFirm } from "@/contexts/FirmContext";
 import { toast } from "sonner";
-import { FileText, ArrowRight, Download, CheckCircle2 } from "lucide-react";
-import { exportToWord } from "@/lib/documentUtils";
+import { ArrowRight, Download, CheckCircle2 } from "lucide-react";
+import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
+import { saveAs } from "file-saver";
+import { createAirgeadDocxHeader, createAirgeadDocxFooter } from "@/lib/documentUtils";
 
 // FCA COBS 9 generic — 8 questions covering objectives, K&E, financial situation, ATR.
 type Q = { id: string; section: string; question: string; options: { label: string; score: number }[] };
@@ -91,7 +93,7 @@ type ModelPortfolio = {
   id: string;
   name: string;
   manager: string | null;
-  risk_level: string | null;
+  risk_level: number | string | null;
   description: string | null;
   benchmark: string | null;
   ocf: number | null;

@@ -61,10 +61,27 @@ export default function RealisticKYC() {
 
   const startCase = async () => {
     const ref = `KYC-${Date.now().toString(36).toUpperCase()}`;
+    // Fetch (or create) a demo client to anchor the KYC case
+    let cid = clientId;
+    if (!cid) {
+      const { data: c } = await supabase
+        .from("clients").select("id").eq("first_name", firstName).eq("last_name", lastName).maybeSingle();
+      if (c?.id) cid = c.id;
+      else {
+        const { data: n, error: ne } = await supabase
+          .from("clients")
+          .insert({ first_name: firstName, last_name: lastName, date_of_birth: dob, firm_id: firmId, status: "prospect" })
+          .select("id").single();
+        if (ne) { toast.error(ne.message); return; }
+        cid = n.id;
+      }
+      setClientId(cid);
+    }
     setCaseRef(ref);
     const { data, error } = await supabase
       .from("kyc_cases")
       .insert({
+        client_id: cid!,
         provider: "Mock Verify (Onfido-style)",
         provider_ref: ref,
         status: "in_progress",

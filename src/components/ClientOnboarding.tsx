@@ -471,6 +471,35 @@ const ClientOnboarding = () => {
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Identity Verification (KYC)</h2>
+              <p className="text-muted-foreground">
+                Before we can open your pension and accept contributions, we need to verify your identity in line with FCA & AML regulations.
+              </p>
+            </div>
+
+            <RealisticKYC />
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="kycCompleted"
+                    checked={formData.kycCompleted}
+                    onCheckedChange={(checked) => updateFormData('kycCompleted', checked)}
+                  />
+                  <Label htmlFor="kycCompleted" className="text-sm leading-relaxed">
+                    I confirm I have completed all five verification stages above (ID document, selfie, PEP, sanctions and address checks) and the results show as <span className="font-semibold">Verified</span>.
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold">Setup Initial Contribution</h2>
               <p className="text-muted-foreground">Setup your payment method and confirm your application.</p>
             </div>

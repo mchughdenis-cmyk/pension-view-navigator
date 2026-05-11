@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { MobileHeader } from '@/components/ui/mobile-header'
 import { SidebarNavLayout, type NavGroup } from '@/components/ui/sidebar-nav'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Users, TrendingUp, PiggyBank, DollarSign, FileText, Settings, LogOut,
   Search, Eye, Edit, UserPlus, Calendar, User, Shield, BarChart3,

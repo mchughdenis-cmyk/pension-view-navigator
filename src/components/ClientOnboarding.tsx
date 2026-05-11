@@ -9,8 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, User, Calculator, Target, FileText, CreditCard, Shield } from "lucide-react";
+import { CheckCircle, User, Calculator, Target, FileText, CreditCard, Shield, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import RealisticKYC from "@/components/RealisticKYC";
 
 const steps = [
   { id: 1, title: "Welcome", icon: User, description: "Personal information" },
@@ -18,7 +19,8 @@ const steps = [
   { id: 3, title: "Goals & Objectives", icon: Target, description: "Retirement planning" },
   { id: 4, title: "Risk Assessment", icon: Shield, description: "Investment preferences" },
   { id: 5, title: "Product Selection", icon: FileText, description: "Choose your pension" },
-  { id: 6, title: "Initial Contribution", icon: CreditCard, description: "Set up payments" },
+  { id: 6, title: "Identity Verification", icon: ShieldCheck, description: "KYC & AML checks" },
+  { id: 7, title: "Initial Contribution", icon: CreditCard, description: "Set up payments" },
 ];
 
 const ClientOnboarding = () => {
@@ -46,6 +48,9 @@ const ClientOnboarding = () => {
     // Product Selection
     selectedProduct: '',
     
+    // KYC
+    kycCompleted: false,
+
     // Terms
     termsAccepted: false,
     marketingConsent: false,
@@ -58,7 +63,7 @@ const ClientOnboarding = () => {
   };
 
   const nextStep = () => {
-    if (currentStep < 6) {
+    if (currentStep < 7) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -466,6 +471,35 @@ const ClientOnboarding = () => {
         return (
           <div className="space-y-6">
             <div className="text-center space-y-2">
+              <h2 className="text-2xl font-bold">Identity Verification (KYC)</h2>
+              <p className="text-muted-foreground">
+                Before we can open your pension and accept contributions, we need to verify your identity in line with FCA & AML regulations.
+              </p>
+            </div>
+
+            <RealisticKYC />
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-start space-x-3">
+                  <Checkbox
+                    id="kycCompleted"
+                    checked={formData.kycCompleted}
+                    onCheckedChange={(checked) => updateFormData('kycCompleted', checked)}
+                  />
+                  <Label htmlFor="kycCompleted" className="text-sm leading-relaxed">
+                    I confirm I have completed all five verification stages above (ID document, selfie, PEP, sanctions and address checks) and the results show as <span className="font-semibold">Verified</span>.
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        );
+
+      case 7:
+        return (
+          <div className="space-y-6">
+            <div className="text-center space-y-2">
               <h2 className="text-2xl font-bold">Setup Initial Contribution</h2>
               <p className="text-muted-foreground">Setup your payment method and confirm your application.</p>
             </div>
@@ -552,6 +586,8 @@ const ClientOnboarding = () => {
       case 5:
         return formData.selectedProduct;
       case 6:
+        return formData.kycCompleted;
+      case 7:
         return formData.termsAccepted;
       default:
         return false;
@@ -568,9 +604,9 @@ const ClientOnboarding = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-3xl font-bold">Client Onboarding</h1>
-              <Badge variant="outline">Step {currentStep} of 6</Badge>
+              <Badge variant="outline">Step {currentStep} of 7</Badge>
             </div>
-            <Progress value={(currentStep / 6) * 100} className="mb-4" />
+            <Progress value={(currentStep / 7) * 100} className="mb-4" />
             
             {/* Step Navigation */}
             <div className="flex items-center justify-between">
@@ -619,7 +655,7 @@ const ClientOnboarding = () => {
               Previous
             </Button>
             
-            {currentStep < 6 ? (
+            {currentStep < 7 ? (
               <Button 
                 onClick={nextStep} 
                 disabled={!canProceed}

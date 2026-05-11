@@ -133,10 +133,11 @@ export default function SuitabilityAssessment() {
     const scored = models.map(m => {
       const num = Number(m.risk_level);
       let dist = 99;
-      if (!Number.isNaN(num)) dist = Math.abs(num - targetAtr);
+      if (!Number.isNaN(num) && m.risk_level !== null) dist = Math.abs(num - targetAtr);
       else {
+        const lvl = String(m.risk_level ?? "").toLowerCase();
         const map: Record<string, number> = { cautious: 2, defensive: 3, "cautious-balanced": 4, balanced: 6, growth: 8, adventurous: 10 };
-        const r = map[(m.risk_level || "").toLowerCase()] ?? map[(m.name || "").toLowerCase().split(" ")[0]] ?? 6;
+        const r = map[lvl] ?? map[(m.name || "").toLowerCase().split(" ")[0]] ?? 6;
         dist = Math.abs(r - targetAtr);
       }
       return { m, dist };
@@ -147,6 +148,21 @@ export default function SuitabilityAssessment() {
   const submit = async () => {
     if (answered < QUESTIONS.length) { toast.error("Please answer every question"); return; }
     if (!clientName.trim()) { toast.error("Enter the client's name"); return; }
+
+    // Anchor to a client row (find-or-create)
+    const [fn, ...rest] = clientName.trim().split(" ");
+    const ln = rest.join(" ") || "—";
+    let cid: string | null = null;
+    const { data: c } = await supabase
+      .from("clients").select("id").eq("first_name", fn).eq("last_name", ln).maybeSingle();
+    if (c?.id) cid = c.id;
+    else {
+      const { data: n, error: ne } = await supabase
+        .from("clients").insert({ first_name: fn, last_name: ln, firm_id: firmId, status: "prospect" })
+        .select("id").single();
+      if (ne) { toast.error(ne.message); return; }
+      cid = n.id;
+    }
 
     const rationale = [
       `Client ${clientName} scored ${score}/${MAX_SCORE} across the eight-question FCA COBS 9 framework, indicating a "${profile.label}" attitude to risk (ATR ${profile.atr}/10).`,
@@ -159,6 +175,7 @@ export default function SuitabilityAssessment() {
     const { data, error } = await supabase
       .from("suitability_reports")
       .insert({
+        client_id: cid!,
         recommendation: recommended ? `Invest into ${recommended.name}` : `Risk profile ${profile.label}`,
         rationale,
         risk_alignment: `${profile.label} (ATR ${profile.atr}/10)`,
@@ -181,27 +198,33 @@ export default function SuitabilityAssessment() {
   };
 
   const exportReport = async () => {
-    const body = [
-      { type: "heading", text: "Suitability Report (COBS 9)" },
-      { type: "paragraph", text: `Firm: ${firm?.name ?? "—"} · FRN ${firm?.fca_ref ?? "—"}` },
-      { type: "paragraph", text: `Client: ${clientName}` },
-      { type: "paragraph", text: `Date: ${new Date().toLocaleDateString("en-GB")}` },
-      { type: "heading", text: "Risk profile" },
-      { type: "paragraph", text: `${profile.label} (ATR ${profile.atr}/10) — ${profile.description}` },
-      { type: "paragraph", text: `Score: ${score} / ${MAX_SCORE}` },
-      { type: "paragraph", text: `Capacity for loss: ${capacity}` },
-      { type: "paragraph", text: `Investment time horizon: ${horizon} years` },
-      { type: "heading", text: "Objectives" },
-      { type: "paragraph", text: objectives },
-      { type: "heading", text: "Recommendation" },
-      { type: "paragraph", text: recommended
+    const H = (text: string) => new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text, bold: true })] });
+    const P = (text: string) => new Paragraph({ children: [new TextRun(text)] });
+    const header = await createAirgeadDocxHeader();
+    const footer = createAirgeadDocxFooter();
+    const paras = [
+      ...header,
+      new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun({ text: "Suitability Report (COBS 9)", bold: true })] }),
+      P(`Firm: ${firm?.name ?? "—"} · FRN ${firm?.fca_ref ?? "—"}`),
+      P(`Client: ${clientName}`),
+      P(`Date: ${new Date().toLocaleDateString("en-GB")}`),
+      H("Risk profile"),
+      P(`${profile.label} (ATR ${profile.atr}/10) — ${profile.description}`),
+      P(`Score: ${score} / ${MAX_SCORE} · Capacity for loss: ${capacity} · Horizon: ${horizon} years`),
+      H("Objectives"),
+      P(objectives),
+      H("Recommendation"),
+      P(recommended
         ? `Invest into ${recommended.name} (manager: ${recommended.manager ?? "—"}). OCF ${recommended.ocf ?? "—"}%. Benchmark ${recommended.benchmark ?? "—"}.`
-        : `Risk profile ${profile.label}` },
-      { type: "heading", text: "Rationale" },
-      ...QUESTIONS.map(q => ({ type: "paragraph" as const, text: `${q.question} — ${q.options.find(o => o.score === answers[q.id])?.label ?? "—"}` })),
-      { type: "paragraph", text: "Issued under FCA COBS 9 by Pension Navigator by Airgead. Guidance only — please discuss with your authorised adviser." },
+        : `Risk profile ${profile.label}`),
+      H("Questionnaire responses"),
+      ...QUESTIONS.map(q => P(`${q.question} — ${q.options.find(o => o.score === answers[q.id])?.label ?? "—"}`)),
+      P("Issued by Pension Navigator by Airgead under FCA COBS 9. Guidance only — please discuss with your authorised adviser."),
+      ...footer,
     ];
-    await exportToWord({ title: `Suitability Report - ${clientName}`, sections: body as any });
+    const doc = new Document({ sections: [{ properties: {}, children: paras }] });
+    const blob = await Packer.toBlob(doc);
+    saveAs(blob, `Suitability-${clientName.replace(/\s+/g, "_")}.docx`);
   };
 
   if (stage === "intro") {

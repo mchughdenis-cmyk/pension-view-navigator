@@ -9,8 +9,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, User, Calculator, Target, FileText, CreditCard, Shield } from "lucide-react";
+import { CheckCircle, User, Calculator, Target, FileText, CreditCard, Shield, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import RealisticKYC from "@/components/RealisticKYC";
 
 const steps = [
   { id: 1, title: "Welcome", icon: User, description: "Personal information" },
@@ -18,7 +19,8 @@ const steps = [
   { id: 3, title: "Goals & Objectives", icon: Target, description: "Retirement planning" },
   { id: 4, title: "Risk Assessment", icon: Shield, description: "Investment preferences" },
   { id: 5, title: "Product Selection", icon: FileText, description: "Choose your pension" },
-  { id: 6, title: "Initial Contribution", icon: CreditCard, description: "Set up payments" },
+  { id: 6, title: "Identity Verification", icon: ShieldCheck, description: "KYC & AML checks" },
+  { id: 7, title: "Initial Contribution", icon: CreditCard, description: "Set up payments" },
 ];
 
 const ClientOnboarding = () => {

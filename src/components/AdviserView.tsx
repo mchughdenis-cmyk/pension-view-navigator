@@ -162,25 +162,23 @@ export default function AdviserView() {
         return (
           <Card>
             <CardHeader className="pb-3">
-              <div className="flex flex-col md:flex-row justify-between gap-4">
-                <CardTitle>My Client Portfolio</CardTitle>
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-                  <div className="relative">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <CardTitle className="whitespace-nowrap">My Client Portfolio</CardTitle>
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="relative flex-1 min-w-[180px]">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input placeholder="Search clients..." className="pl-10 w-full sm:w-48 md:w-64" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                    <Input placeholder="Search clients..." className="pl-10 w-full" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                   </div>
-                  <div className="flex gap-2">
-                    <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-full sm:w-36"><SelectValue placeholder="Filter" /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="review_required">Review Required</SelectItem>
-                        <SelectItem value="onboarding">Onboarding</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <Button className="flex-shrink-0"><UserPlus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Client</span></Button>
-                  </div>
+                  <Select value={statusFilter} onValueChange={setStatusFilter}>
+                    <SelectTrigger className="w-36"><SelectValue placeholder="Filter" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="review_required">Review Required</SelectItem>
+                      <SelectItem value="onboarding">Onboarding</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button className="flex-shrink-0"><UserPlus className="w-4 h-4 sm:mr-2" /><span className="hidden sm:inline">Add Client</span></Button>
                 </div>
               </div>
             </CardHeader>

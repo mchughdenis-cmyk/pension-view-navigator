@@ -270,9 +270,17 @@ export default function AdviserView() {
       />
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <SidebarNavLayout groups={navGroups} activeTab={activeTab} onTabChange={handleTabChange}>
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+          <TabsList className="mb-4 flex flex-wrap h-auto gap-1 bg-muted/60 p-1">
+            <TabsTrigger value="dashboard" className="gap-2"><BarChart3 className="w-4 h-4" /> Overview</TabsTrigger>
+            <TabsTrigger value="alerts" className="gap-2"><Bell className="w-4 h-4" /> Alerts</TabsTrigger>
+            <TabsTrigger value="clients" className="gap-2"><Users className="w-4 h-4" /> My Clients</TabsTrigger>
+            <TabsTrigger value="onboarding" className="gap-2"><UserPlus className="w-4 h-4" /> Onboarding</TabsTrigger>
+            <TabsTrigger value="illustrations" className="gap-2"><FileText className="w-4 h-4" /> Illustrations</TabsTrigger>
+            <TabsTrigger value="reports" className="gap-2"><ClipboardList className="w-4 h-4" /> Reports</TabsTrigger>
+          </TabsList>
           {renderContent()}
-        </SidebarNavLayout>
+        </Tabs>
       </div>
     </div>
   )

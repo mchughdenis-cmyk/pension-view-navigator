@@ -655,7 +655,7 @@ const ClientOnboarding = () => {
               Previous
             </Button>
             
-            {currentStep < 6 ? (
+            {currentStep < 7 ? (
               <Button 
                 onClick={nextStep} 
                 disabled={!canProceed}

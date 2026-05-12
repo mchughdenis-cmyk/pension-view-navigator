@@ -82,6 +82,7 @@ import { FirmProvider } from "./contexts/FirmContext";
 import CASSReconEngine from "./components/admin/CASSReconEngine";
 import RealisticKYC from "./components/RealisticKYC";
 import SuitabilityAssessment from "./components/SuitabilityAssessment";
+import CashWarnings from "./components/CashWarnings";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -166,6 +167,7 @@ const AppContent = () => {
               <Route path="/cass-engine" element={<RoleGate allow={['admin']}><CASSReconEngine /></RoleGate>} />
               <Route path="/kyc-verify" element={<RealisticKYC />} />
               <Route path="/suitability" element={<RoleGate allow={['adviser', 'admin']}><SuitabilityAssessment /></RoleGate>} />
+              <Route path="/cash-warnings" element={<RoleGate allow={['adviser', 'admin']}><CashWarnings /></RoleGate>} />
               <Route path="/projection" element={<MonteCarloProjection />} />
               <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
               <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />

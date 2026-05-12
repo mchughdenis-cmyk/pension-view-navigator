@@ -169,6 +169,7 @@ const AppContent = () => {
               <Route path="/kyc-verify" element={<RealisticKYC />} />
               <Route path="/suitability" element={<RoleGate allow={['adviser', 'admin']}><SuitabilityAssessment /></RoleGate>} />
               <Route path="/cash-warnings" element={<RoleGate allow={['adviser', 'admin']}><CashWarnings /></RoleGate>} />
+              <Route path="/sla-tracker" element={<RoleGate allow={['adviser', 'admin']}><SLATracker /></RoleGate>} />
               <Route path="/projection" element={<MonteCarloProjection />} />
               <Route path="/firms" element={<RoleGate allow={['admin']}><FirmHierarchy /></RoleGate>} />
               <Route path="/enterprise" element={<RoleGate allow={['admin']}><EnterpriseSuite /></RoleGate>} />

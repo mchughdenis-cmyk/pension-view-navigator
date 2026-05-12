@@ -101,18 +101,24 @@ export interface BCEEvent {
 export function useClients() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
+  const { firmId } = useFirm()
 
   const fetchClients = useCallback(async () => {
-    const { data, error } = await supabase.from('clients').select('*').order('last_name')
+    setLoading(true)
+    let q = supabase.from('clients').select('*').order('last_name')
+    if (firmId) q = q.eq('firm_id', firmId)
+    const { data, error } = await q
     if (error) { toast.error('Failed to load clients'); console.error(error) }
     else setClients(data || [])
     setLoading(false)
-  }, [])
+  }, [firmId])
 
   useEffect(() => { fetchClients() }, [fetchClients])
 
   const addClient = async (client: Partial<Client>) => {
-    const { data, error } = await supabase.from('clients').insert(client as any).select().single()
+    const payload: any = { ...client }
+    if (firmId && !payload.firm_id) payload.firm_id = firmId
+    const { data, error } = await supabase.from('clients').insert(payload).select().single()
     if (error) {
       console.error('Add client error:', error)
       toast.error(`Failed to add client: ${error.message}`)

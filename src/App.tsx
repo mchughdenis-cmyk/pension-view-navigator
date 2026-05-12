@@ -82,6 +82,7 @@ import { FirmProvider } from "./contexts/FirmContext";
 import CASSReconEngine from "./components/admin/CASSReconEngine";
 import RealisticKYC from "./components/RealisticKYC";
 import SuitabilityAssessment from "./components/SuitabilityAssessment";
+import CashWarnings from "./components/CashWarnings";
 
 const HomeRedirect = () => {
   const { role } = useRole();

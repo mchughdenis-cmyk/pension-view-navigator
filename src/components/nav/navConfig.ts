@@ -3,7 +3,7 @@ import {
   Users, Building2, ClipboardList, TrendingUp, Layers, Calculator, ShieldCheck,
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, RefreshCw, FileSignature, ScrollText, Receipt,
-  Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone,
+  Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";

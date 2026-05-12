@@ -99,6 +99,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Commercial property", url: "/property", icon: Building2 },
         { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
         { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
+        { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "KYC review queue", url: "/kyc-review", icon: ShieldCheck },
       ],
     },

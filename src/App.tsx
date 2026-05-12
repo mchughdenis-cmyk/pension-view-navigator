@@ -83,6 +83,7 @@ import CASSReconEngine from "./components/admin/CASSReconEngine";
 import RealisticKYC from "./components/RealisticKYC";
 import SuitabilityAssessment from "./components/SuitabilityAssessment";
 import CashWarnings from "./components/CashWarnings";
+import SLATracker from "./components/SLATracker";
 
 const HomeRedirect = () => {
   const { role } = useRole();

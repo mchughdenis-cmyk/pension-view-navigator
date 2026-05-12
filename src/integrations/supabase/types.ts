@@ -3988,6 +3988,71 @@ export type Database = {
         }
         Relationships: []
       }
+      sla_cases: {
+        Row: {
+          case_type: string
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_at: string
+          firm_id: string | null
+          id: string
+          notes: string | null
+          opened_at: string
+          owner: string | null
+          priority: string
+          reference: string | null
+          sla_hours: number
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          case_type: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at: string
+          firm_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          owner?: string | null
+          priority?: string
+          reference?: string | null
+          sla_hours?: number
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          case_type?: string
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_at?: string
+          firm_id?: string | null
+          id?: string
+          notes?: string | null
+          opened_at?: string
+          owner?: string | null
+          priority?: string
+          reference?: string | null
+          sla_hours?: number
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ssas_loanbacks: {
         Row: {
           borrower_employer: string

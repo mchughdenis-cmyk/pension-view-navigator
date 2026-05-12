@@ -132,30 +132,43 @@ export default function AdviserView() {
 
       case 'alerts':
         return (
-          <Card>
-            <CardHeader><CardTitle>Alerts & Pending Tasks</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {clients.filter(c => c.pendingActions > 0 || c.status === 'review_required').map(client => (
-                  <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{client.name}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {client.status === 'review_required' ? 'Review required' : `${client.pendingActions} pending action(s)`}
-                        {' • '}Next review: {client.nextReview}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge>
-                      <Button variant="outline" size="sm" onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
+          <div className="space-y-4">
+            <Card className="border-warning/50 bg-warning/5">
+              <CardHeader className="pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5 text-warning" /> Regulatory cash warnings</CardTitle>
+                    <CardDescription>FCA COBS 19.10, CASS 7 and FSCS checks across your client book.</CardDescription>
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+                  <Button onClick={() => navigate('/cash-warnings')}>Review warnings</Button>
+                </div>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader><CardTitle>Alerts & Pending Tasks</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {clients.filter(c => c.pendingActions > 0 || c.status === 'review_required').map(client => (
+                    <div key={client.id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{client.name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {client.status === 'review_required' ? 'Review required' : `${client.pendingActions} pending action(s)`}
+                          {' • '}Next review: {client.nextReview}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={getStatusColor(client.status)}>{client.status.replace('_', ' ')}</Badge>
+                        <Button variant="outline" size="sm" onClick={() => switchRole('client', { id: client.id.toString(), name: client.name, email: client.email })}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )
 
       case 'clients':

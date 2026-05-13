@@ -269,13 +269,14 @@ export default function SLATracker() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Type / Ref</TableHead>
-                        <TableHead>Client</TableHead>
+                        <TableHead>Client / Account</TableHead>
                         <TableHead>Owner</TableHead>
                         <TableHead>Priority</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>SLA</TableHead>
-                        <TableHead className="w-[200px]">Progress</TableHead>
+                        <TableHead className="w-[180px]">Progress</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -283,56 +284,87 @@ export default function SLATracker() {
                       {filtered.map((c) => {
                         const pct = progressPct(c.opened_at, c.due_at);
                         const breached = c.status === "breached";
+                        const acct = c.account_id ? accounts[c.account_id] : undefined;
+                        const warns = acct ? evaluateAccountWarnings(acct) : [];
+                        const isOpen = !!expanded[c.id];
                         return (
-                          <TableRow key={c.id}>
-                            <TableCell>
-                              <div className="font-medium">{c.case_type}</div>
-                              <div className="text-xs text-muted-foreground">{c.reference}</div>
-                            </TableCell>
-                            <TableCell>{clientNames[c.client_id ?? ""] ?? "—"}</TableCell>
-                            <TableCell className="text-sm">{c.owner ?? "—"}</TableCell>
-                            <TableCell>
-                              <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
-                                {c.priority}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={STATUS_BADGE[c.status]} className="capitalize">
-                                {c.status.replace("_", " ")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              <div>{timeRemaining(c.due_at, c.completed_at)}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Due {new Date(c.due_at).toLocaleDateString("en-GB")}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="h-2 w-full rounded bg-muted overflow-hidden">
-                                <div
-                                  className={`h-full ${breached ? "bg-destructive" : pct > 75 ? "bg-warning" : "bg-primary"}`}
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">SLA {c.sla_hours}h</div>
-                            </TableCell>
-                            <TableCell className="text-right space-x-2">
-                              {c.status !== "completed" && (
-                                <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
-                                  Complete
+                          <Fragment key={c.id}>
+                            <TableRow>
+                              <TableCell>
+                                <Button variant="ghost" size="icon" className="h-7 w-7"
+                                  onClick={() => setExpanded((s) => ({ ...s, [c.id]: !s[c.id] }))}>
+                                  {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                 </Button>
-                              )}
-                              {c.client_id && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => navigate(`/client-admin/${c.client_id}`)}
-                                >
-                                  Open <ExternalLink className="w-3 h-3 ml-1" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-medium">{c.case_type}</div>
+                                <div className="text-xs text-muted-foreground">{c.reference}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div>{clientNames[c.client_id ?? ""] ?? "—"}</div>
+                                {acct ? (
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                    <Wallet className="w-3 h-3" />
+                                    {acct.account_type}{acct.account_number ? ` · ${acct.account_number}` : ""}
+                                    {warns.length > 0 && (
+                                      <Badge variant="destructive" className="ml-1 text-[9px] px-1.5 py-0 gap-0.5">
+                                        <ShieldAlert className="w-2.5 h-2.5" /> {warns.length}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-muted-foreground">No account linked</div>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm">{c.owner ?? "—"}</TableCell>
+                              <TableCell>
+                                <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
+                                  {c.priority}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={STATUS_BADGE[c.status]} className="capitalize">
+                                  {c.status.replace("_", " ")}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                <div>{timeRemaining(c.due_at, c.completed_at)}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Due {new Date(c.due_at).toLocaleDateString("en-GB")}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="h-2 w-full rounded bg-muted overflow-hidden">
+                                  <div
+                                    className={`h-full ${breached ? "bg-destructive" : pct > 75 ? "bg-warning" : "bg-primary"}`}
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">SLA {c.sla_hours}h</div>
+                              </TableCell>
+                              <TableCell className="text-right space-x-2">
+                                {c.status !== "completed" && (
+                                  <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
+                                    Complete
+                                  </Button>
+                                )}
+                                {c.client_id && (
+                                  <Button size="sm" variant="ghost"
+                                    onClick={() => navigate(`/client-admin/${c.client_id}`)}>
+                                    Open <ExternalLink className="w-3 h-3 ml-1" />
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                            {isOpen && (
+                              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                                <TableCell></TableCell>
+                                <TableCell colSpan={8} className="py-4">
+                                  <CaseDetails acct={acct} warns={warns} description={c.description} notes={c.notes} />
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </Fragment>
                         );
                       })}
                     </TableBody>
@@ -344,6 +376,9 @@ export default function SLATracker() {
                   {filtered.map((c) => {
                     const pct = progressPct(c.opened_at, c.due_at);
                     const breached = c.status === "breached";
+                    const acct = c.account_id ? accounts[c.account_id] : undefined;
+                    const warns = acct ? evaluateAccountWarnings(acct) : [];
+                    const isOpen = !!expanded[c.id];
                     return (
                       <div key={c.id} className="border rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
@@ -354,6 +389,17 @@ export default function SLATracker() {
                         </div>
                         <div className="text-xs text-muted-foreground">{c.reference}</div>
                         <div className="text-sm mt-1">{clientNames[c.client_id ?? ""] ?? "—"}</div>
+                        {acct && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Wallet className="w-3 h-3" />
+                            {acct.account_type}{acct.account_number ? ` · ${acct.account_number}` : ""}
+                            {warns.length > 0 && (
+                              <Badge variant="destructive" className="ml-1 text-[9px] px-1.5 py-0 gap-0.5">
+                                <ShieldAlert className="w-2.5 h-2.5" /> {warns.length}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
                             {c.priority}
@@ -366,22 +412,30 @@ export default function SLATracker() {
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <div className="flex justify-end gap-2 mt-2">
-                          {c.status !== "completed" && (
-                            <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
-                              Complete
-                            </Button>
-                          )}
-                          {c.client_id && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => navigate(`/client-admin/${c.client_id}`)}
-                            >
-                              Open <ExternalLink className="w-3 h-3 ml-1" />
-                            </Button>
-                          )}
+                        <div className="flex justify-between gap-2 mt-2">
+                          <Button size="sm" variant="ghost"
+                            onClick={() => setExpanded((s) => ({ ...s, [c.id]: !s[c.id] }))}>
+                            {isOpen ? "Hide details" : "Details"}
+                          </Button>
+                          <div className="flex gap-2">
+                            {c.status !== "completed" && (
+                              <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
+                                Complete
+                              </Button>
+                            )}
+                            {c.client_id && (
+                              <Button size="sm" variant="ghost"
+                                onClick={() => navigate(`/client-admin/${c.client_id}`)}>
+                                Open <ExternalLink className="w-3 h-3 ml-1" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
+                        {isOpen && (
+                          <div className="mt-3 border-t pt-3">
+                            <CaseDetails acct={acct} warns={warns} description={c.description} notes={c.notes} />
+                          </div>
+                        )}
                       </div>
                     );
                   })}

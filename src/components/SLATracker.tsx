@@ -65,10 +65,71 @@ function timeRemaining(due: string, completed: string | null) {
   return `${Math.round(hrs / 24)}d left`;
 }
 
-function progressPct(opened: string, due: string) {
-  const total = new Date(due).getTime() - new Date(opened).getTime();
-  const used = Date.now() - new Date(opened).getTime();
-  return Math.min(100, Math.max(0, (used / total) * 100));
+function CaseDetails({
+  acct, warns, description, notes,
+}: {
+  acct?: AccountRow;
+  warns: Warning[];
+  description: string | null;
+  notes: string | null;
+}) {
+  const total = Number(acct?.total_value ?? 0);
+  const cash = Number(acct?.cash_balance ?? 0);
+  const pct = total > 0 ? (cash / total) * 100 : 0;
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <div className="text-sm font-medium flex items-center gap-2">
+          <Wallet className="w-4 h-4" /> Linked account
+        </div>
+        {acct ? (
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{acct.account_type}</span></div>
+            {acct.account_number && (
+              <div className="flex justify-between"><span className="text-muted-foreground">Number</span><span className="font-mono text-xs">{acct.account_number}</span></div>
+            )}
+            <div className="flex justify-between"><span className="text-muted-foreground">Total value</span><span>{fmtGBP(total)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Cash balance</span><span>{fmtGBP(cash)} ({pct.toFixed(1)}%)</span></div>
+            {acct.status && (
+              <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge variant="outline" className="text-[10px]">{acct.status}</Badge></div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No client account linked to this case.</p>
+        )}
+        {(description || notes) && (
+          <div className="pt-2 text-xs text-muted-foreground space-y-1">
+            {description && <div><span className="font-medium text-foreground">Description: </span>{description}</div>}
+            {notes && <div><span className="font-medium text-foreground">Notes: </span>{notes}</div>}
+          </div>
+        )}
+      </div>
+      <div className="space-y-2">
+        <div className="text-sm font-medium flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4" /> Cash warnings on this account
+        </div>
+        {!acct ? (
+          <p className="text-xs text-muted-foreground">Link an account to surface cash warnings.</p>
+        ) : warns.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No cash warnings — account passes COBS 19.10, CASS 7, FSCS and fee-cover checks.</p>
+        ) : (
+          <div className="space-y-2">
+            {warns.map((w) => (
+              <div key={w.rule} className="border rounded-md p-2 bg-background">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant={SEVERITY_BADGE[w.severity]} className="uppercase text-[10px]">{w.severity}</Badge>
+                  <span className="text-sm font-medium">{w.ruleName}</span>
+                </div>
+                <p className="text-xs">{w.detail}</p>
+                <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Basis:</span> {w.basis}</p>
+                <p className="text-xs mt-1"><span className="font-medium">Suggested:</span> {w.suggested}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
 
 export default function SLATracker() {

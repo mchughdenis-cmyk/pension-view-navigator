@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Clock, AlertTriangle, CheckCircle2, Timer, Info, ExternalLink, Search } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle2, Timer, Info, ExternalLink, Search, ChevronDown, ChevronRight, ShieldAlert, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFirm } from "@/contexts/FirmContext";
 import { MobileHeader } from "@/components/ui/mobile-header";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { evaluateAccountWarnings, SEVERITY_BADGE, fmtGBP, type Warning, type AccountLike } from "@/lib/cashWarnings";
 
 type Status = "open" | "in_progress" | "completed" | "breached";
 type Priority = "high" | "medium" | "low";
@@ -23,6 +24,7 @@ interface SLACase {
   id: string;
   firm_id: string | null;
   client_id: string | null;
+  account_id: string | null;
   case_type: string;
   reference: string | null;
   description: string | null;
@@ -34,6 +36,11 @@ interface SLACase {
   due_at: string;
   completed_at: string | null;
   notes: string | null;
+}
+
+interface AccountRow extends AccountLike {
+  account_number: string | null;
+  status: string | null;
 }
 
 const STATUS_BADGE: Record<Status, "destructive" | "default" | "secondary" | "outline"> = {

@@ -3990,6 +3990,7 @@ export type Database = {
       }
       sla_cases: {
         Row: {
+          account_id: string | null
           case_type: string
           client_id: string | null
           completed_at: string | null
@@ -4008,6 +4009,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          account_id?: string | null
           case_type: string
           client_id?: string | null
           completed_at?: string | null
@@ -4026,6 +4028,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          account_id?: string | null
           case_type?: string
           client_id?: string | null
           completed_at?: string | null
@@ -4044,6 +4047,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "sla_cases_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "client_accounts"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "sla_cases_client_id_fkey"
             columns: ["client_id"]

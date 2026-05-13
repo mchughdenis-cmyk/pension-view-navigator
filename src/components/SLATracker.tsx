@@ -65,6 +65,12 @@ function timeRemaining(due: string, completed: string | null) {
   return `${Math.round(hrs / 24)}d left`;
 }
 
+function progressPct(opened: string, due: string) {
+  const total = new Date(due).getTime() - new Date(opened).getTime();
+  const used = Date.now() - new Date(opened).getTime();
+  return Math.min(100, Math.max(0, (used / total) * 100));
+}
+
 function CaseDetails({
   acct, warns, description, notes,
 }: {

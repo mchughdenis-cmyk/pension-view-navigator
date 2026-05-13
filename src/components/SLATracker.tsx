@@ -77,6 +77,8 @@ export default function SLATracker() {
   const [loading, setLoading] = useState(true);
   const [cases, setCases] = useState<SLACase[]>([]);
   const [clientNames, setClientNames] = useState<Record<string, string>>({});
+  const [accounts, setAccounts] = useState<Record<string, AccountRow>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [tab, setTab] = useState<"all" | Status>("all");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -88,13 +90,11 @@ export default function SLATracker() {
     const { data } = await q;
     const list = (data ?? []) as SLACase[];
 
-    // Auto-mark breaches client-side display (status stored may be 'open' but past due)
     list.forEach((c) => {
       if (c.status !== "completed" && new Date(c.due_at).getTime() < Date.now()) {
         c.status = "breached";
       }
     });
-
     setCases(list);
 
     const clientIds = Array.from(new Set(list.map((c) => c.client_id).filter(Boolean))) as string[];
@@ -108,6 +108,17 @@ export default function SLATracker() {
         map[c.id] = `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim();
       });
       setClientNames(map);
+    }
+
+    const acctIds = Array.from(new Set(list.map((c) => c.account_id).filter(Boolean))) as string[];
+    if (acctIds.length) {
+      const { data: acs } = await supabase
+        .from("client_accounts")
+        .select("id, account_type, account_number, cash_balance, total_value, status")
+        .in("id", acctIds);
+      const am: Record<string, AccountRow> = {};
+      (acs ?? []).forEach((a: any) => { am[a.id] = a as AccountRow; });
+      setAccounts(am);
     }
     setLoading(false);
   };

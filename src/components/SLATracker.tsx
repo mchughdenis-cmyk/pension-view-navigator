@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { Fragment, useEffect, useMemo, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -9,12 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { Clock, AlertTriangle, CheckCircle2, Timer, Info, ExternalLink, Search } from "lucide-react";
+import { Clock, AlertTriangle, CheckCircle2, Timer, Info, ExternalLink, Search, ChevronDown, ChevronRight, ShieldAlert, Wallet } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useFirm } from "@/contexts/FirmContext";
 import { MobileHeader } from "@/components/ui/mobile-header";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { evaluateAccountWarnings, SEVERITY_BADGE, fmtGBP, type Warning, type AccountLike } from "@/lib/cashWarnings";
 
 type Status = "open" | "in_progress" | "completed" | "breached";
 type Priority = "high" | "medium" | "low";
@@ -23,6 +24,7 @@ interface SLACase {
   id: string;
   firm_id: string | null;
   client_id: string | null;
+  account_id: string | null;
   case_type: string;
   reference: string | null;
   description: string | null;
@@ -34,6 +36,11 @@ interface SLACase {
   due_at: string;
   completed_at: string | null;
   notes: string | null;
+}
+
+interface AccountRow extends AccountLike {
+  account_number: string | null;
+  status: string | null;
 }
 
 const STATUS_BADGE: Record<Status, "destructive" | "default" | "secondary" | "outline"> = {
@@ -64,12 +71,81 @@ function progressPct(opened: string, due: string) {
   return Math.min(100, Math.max(0, (used / total) * 100));
 }
 
+function CaseDetails({
+  acct, warns, description, notes,
+}: {
+  acct?: AccountRow;
+  warns: Warning[];
+  description: string | null;
+  notes: string | null;
+}) {
+  const total = Number(acct?.total_value ?? 0);
+  const cash = Number(acct?.cash_balance ?? 0);
+  const pct = total > 0 ? (cash / total) * 100 : 0;
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <div className="text-sm font-medium flex items-center gap-2">
+          <Wallet className="w-4 h-4" /> Linked account
+        </div>
+        {acct ? (
+          <div className="text-sm space-y-1">
+            <div className="flex justify-between"><span className="text-muted-foreground">Type</span><span>{acct.account_type}</span></div>
+            {acct.account_number && (
+              <div className="flex justify-between"><span className="text-muted-foreground">Number</span><span className="font-mono text-xs">{acct.account_number}</span></div>
+            )}
+            <div className="flex justify-between"><span className="text-muted-foreground">Total value</span><span>{fmtGBP(total)}</span></div>
+            <div className="flex justify-between"><span className="text-muted-foreground">Cash balance</span><span>{fmtGBP(cash)} ({pct.toFixed(1)}%)</span></div>
+            {acct.status && (
+              <div className="flex justify-between"><span className="text-muted-foreground">Status</span><Badge variant="outline" className="text-[10px]">{acct.status}</Badge></div>
+            )}
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">No client account linked to this case.</p>
+        )}
+        {(description || notes) && (
+          <div className="pt-2 text-xs text-muted-foreground space-y-1">
+            {description && <div><span className="font-medium text-foreground">Description: </span>{description}</div>}
+            {notes && <div><span className="font-medium text-foreground">Notes: </span>{notes}</div>}
+          </div>
+        )}
+      </div>
+      <div className="space-y-2">
+        <div className="text-sm font-medium flex items-center gap-2">
+          <ShieldAlert className="w-4 h-4" /> Cash warnings on this account
+        </div>
+        {!acct ? (
+          <p className="text-xs text-muted-foreground">Link an account to surface cash warnings.</p>
+        ) : warns.length === 0 ? (
+          <p className="text-xs text-muted-foreground">No cash warnings — account passes COBS 19.10, CASS 7, FSCS and fee-cover checks.</p>
+        ) : (
+          <div className="space-y-2">
+            {warns.map((w) => (
+              <div key={w.rule} className="border rounded-md p-2 bg-background">
+                <div className="flex items-center gap-2 mb-1">
+                  <Badge variant={SEVERITY_BADGE[w.severity]} className="uppercase text-[10px]">{w.severity}</Badge>
+                  <span className="text-sm font-medium">{w.ruleName}</span>
+                </div>
+                <p className="text-xs">{w.detail}</p>
+                <p className="text-xs text-muted-foreground mt-1"><span className="font-medium">Basis:</span> {w.basis}</p>
+                <p className="text-xs mt-1"><span className="font-medium">Suggested:</span> {w.suggested}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function SLATracker() {
   const { firmId, firm } = useFirm();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [cases, setCases] = useState<SLACase[]>([]);
   const [clientNames, setClientNames] = useState<Record<string, string>>({});
+  const [accounts, setAccounts] = useState<Record<string, AccountRow>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [tab, setTab] = useState<"all" | Status>("all");
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -81,13 +157,11 @@ export default function SLATracker() {
     const { data } = await q;
     const list = (data ?? []) as SLACase[];
 
-    // Auto-mark breaches client-side display (status stored may be 'open' but past due)
     list.forEach((c) => {
       if (c.status !== "completed" && new Date(c.due_at).getTime() < Date.now()) {
         c.status = "breached";
       }
     });
-
     setCases(list);
 
     const clientIds = Array.from(new Set(list.map((c) => c.client_id).filter(Boolean))) as string[];
@@ -101,6 +175,17 @@ export default function SLATracker() {
         map[c.id] = `${c.first_name ?? ""} ${c.last_name ?? ""}`.trim();
       });
       setClientNames(map);
+    }
+
+    const acctIds = Array.from(new Set(list.map((c) => c.account_id).filter(Boolean))) as string[];
+    if (acctIds.length) {
+      const { data: acs } = await supabase
+        .from("client_accounts")
+        .select("id, account_type, account_number, cash_balance, total_value, status")
+        .in("id", acctIds);
+      const am: Record<string, AccountRow> = {};
+      (acs ?? []).forEach((a: any) => { am[a.id] = a as AccountRow; });
+      setAccounts(am);
     }
     setLoading(false);
   };
@@ -251,13 +336,14 @@ export default function SLATracker() {
                   <Table>
                     <TableHeader>
                       <TableRow>
+                        <TableHead className="w-[40px]"></TableHead>
                         <TableHead>Type / Ref</TableHead>
-                        <TableHead>Client</TableHead>
+                        <TableHead>Client / Account</TableHead>
                         <TableHead>Owner</TableHead>
                         <TableHead>Priority</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>SLA</TableHead>
-                        <TableHead className="w-[200px]">Progress</TableHead>
+                        <TableHead className="w-[180px]">Progress</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -265,56 +351,87 @@ export default function SLATracker() {
                       {filtered.map((c) => {
                         const pct = progressPct(c.opened_at, c.due_at);
                         const breached = c.status === "breached";
+                        const acct = c.account_id ? accounts[c.account_id] : undefined;
+                        const warns = acct ? evaluateAccountWarnings(acct) : [];
+                        const isOpen = !!expanded[c.id];
                         return (
-                          <TableRow key={c.id}>
-                            <TableCell>
-                              <div className="font-medium">{c.case_type}</div>
-                              <div className="text-xs text-muted-foreground">{c.reference}</div>
-                            </TableCell>
-                            <TableCell>{clientNames[c.client_id ?? ""] ?? "—"}</TableCell>
-                            <TableCell className="text-sm">{c.owner ?? "—"}</TableCell>
-                            <TableCell>
-                              <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
-                                {c.priority}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <Badge variant={STATUS_BADGE[c.status]} className="capitalize">
-                                {c.status.replace("_", " ")}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-sm">
-                              <div>{timeRemaining(c.due_at, c.completed_at)}</div>
-                              <div className="text-xs text-muted-foreground">
-                                Due {new Date(c.due_at).toLocaleDateString("en-GB")}
-                              </div>
-                            </TableCell>
-                            <TableCell>
-                              <div className="h-2 w-full rounded bg-muted overflow-hidden">
-                                <div
-                                  className={`h-full ${breached ? "bg-destructive" : pct > 75 ? "bg-warning" : "bg-primary"}`}
-                                  style={{ width: `${pct}%` }}
-                                />
-                              </div>
-                              <div className="text-xs text-muted-foreground mt-1">SLA {c.sla_hours}h</div>
-                            </TableCell>
-                            <TableCell className="text-right space-x-2">
-                              {c.status !== "completed" && (
-                                <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
-                                  Complete
+                          <Fragment key={c.id}>
+                            <TableRow>
+                              <TableCell>
+                                <Button variant="ghost" size="icon" className="h-7 w-7"
+                                  onClick={() => setExpanded((s) => ({ ...s, [c.id]: !s[c.id] }))}>
+                                  {isOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                                 </Button>
-                              )}
-                              {c.client_id && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => navigate(`/client-admin/${c.client_id}`)}
-                                >
-                                  Open <ExternalLink className="w-3 h-3 ml-1" />
-                                </Button>
-                              )}
-                            </TableCell>
-                          </TableRow>
+                              </TableCell>
+                              <TableCell>
+                                <div className="font-medium">{c.case_type}</div>
+                                <div className="text-xs text-muted-foreground">{c.reference}</div>
+                              </TableCell>
+                              <TableCell>
+                                <div>{clientNames[c.client_id ?? ""] ?? "—"}</div>
+                                {acct ? (
+                                  <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                    <Wallet className="w-3 h-3" />
+                                    {acct.account_type}{acct.account_number ? ` · ${acct.account_number}` : ""}
+                                    {warns.length > 0 && (
+                                      <Badge variant="destructive" className="ml-1 text-[9px] px-1.5 py-0 gap-0.5">
+                                        <ShieldAlert className="w-2.5 h-2.5" /> {warns.length}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="text-xs text-muted-foreground">No account linked</div>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-sm">{c.owner ?? "—"}</TableCell>
+                              <TableCell>
+                                <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
+                                  {c.priority}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant={STATUS_BADGE[c.status]} className="capitalize">
+                                  {c.status.replace("_", " ")}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-sm">
+                                <div>{timeRemaining(c.due_at, c.completed_at)}</div>
+                                <div className="text-xs text-muted-foreground">
+                                  Due {new Date(c.due_at).toLocaleDateString("en-GB")}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="h-2 w-full rounded bg-muted overflow-hidden">
+                                  <div
+                                    className={`h-full ${breached ? "bg-destructive" : pct > 75 ? "bg-warning" : "bg-primary"}`}
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <div className="text-xs text-muted-foreground mt-1">SLA {c.sla_hours}h</div>
+                              </TableCell>
+                              <TableCell className="text-right space-x-2">
+                                {c.status !== "completed" && (
+                                  <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
+                                    Complete
+                                  </Button>
+                                )}
+                                {c.client_id && (
+                                  <Button size="sm" variant="ghost"
+                                    onClick={() => navigate(`/client-admin/${c.client_id}`)}>
+                                    Open <ExternalLink className="w-3 h-3 ml-1" />
+                                  </Button>
+                                )}
+                              </TableCell>
+                            </TableRow>
+                            {isOpen && (
+                              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                                <TableCell></TableCell>
+                                <TableCell colSpan={8} className="py-4">
+                                  <CaseDetails acct={acct} warns={warns} description={c.description} notes={c.notes} />
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </Fragment>
                         );
                       })}
                     </TableBody>
@@ -326,6 +443,9 @@ export default function SLATracker() {
                   {filtered.map((c) => {
                     const pct = progressPct(c.opened_at, c.due_at);
                     const breached = c.status === "breached";
+                    const acct = c.account_id ? accounts[c.account_id] : undefined;
+                    const warns = acct ? evaluateAccountWarnings(acct) : [];
+                    const isOpen = !!expanded[c.id];
                     return (
                       <div key={c.id} className="border rounded-lg p-3">
                         <div className="flex items-center justify-between mb-1">
@@ -336,6 +456,17 @@ export default function SLATracker() {
                         </div>
                         <div className="text-xs text-muted-foreground">{c.reference}</div>
                         <div className="text-sm mt-1">{clientNames[c.client_id ?? ""] ?? "—"}</div>
+                        {acct && (
+                          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                            <Wallet className="w-3 h-3" />
+                            {acct.account_type}{acct.account_number ? ` · ${acct.account_number}` : ""}
+                            {warns.length > 0 && (
+                              <Badge variant="destructive" className="ml-1 text-[9px] px-1.5 py-0 gap-0.5">
+                                <ShieldAlert className="w-2.5 h-2.5" /> {warns.length}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center gap-2 mt-2">
                           <Badge variant={PRIORITY_BADGE[c.priority]} className="uppercase text-[10px]">
                             {c.priority}
@@ -348,22 +479,30 @@ export default function SLATracker() {
                             style={{ width: `${pct}%` }}
                           />
                         </div>
-                        <div className="flex justify-end gap-2 mt-2">
-                          {c.status !== "completed" && (
-                            <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
-                              Complete
-                            </Button>
-                          )}
-                          {c.client_id && (
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => navigate(`/client-admin/${c.client_id}`)}
-                            >
-                              Open <ExternalLink className="w-3 h-3 ml-1" />
-                            </Button>
-                          )}
+                        <div className="flex justify-between gap-2 mt-2">
+                          <Button size="sm" variant="ghost"
+                            onClick={() => setExpanded((s) => ({ ...s, [c.id]: !s[c.id] }))}>
+                            {isOpen ? "Hide details" : "Details"}
+                          </Button>
+                          <div className="flex gap-2">
+                            {c.status !== "completed" && (
+                              <Button size="sm" variant="outline" onClick={() => markCompleted(c.id)}>
+                                Complete
+                              </Button>
+                            )}
+                            {c.client_id && (
+                              <Button size="sm" variant="ghost"
+                                onClick={() => navigate(`/client-admin/${c.client_id}`)}>
+                                Open <ExternalLink className="w-3 h-3 ml-1" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
+                        {isOpen && (
+                          <div className="mt-3 border-t pt-3">
+                            <CaseDetails acct={acct} warns={warns} description={c.description} notes={c.notes} />
+                          </div>
+                        )}
                       </div>
                     );
                   })}

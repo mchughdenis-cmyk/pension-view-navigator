@@ -1,0 +1,2 @@
+ALTER TABLE public.sla_cases ADD COLUMN IF NOT EXISTS account_id uuid REFERENCES public.client_accounts(id) ON DELETE SET NULL;
+CREATE INDEX IF NOT EXISTS idx_sla_cases_account ON public.sla_cases(account_id);

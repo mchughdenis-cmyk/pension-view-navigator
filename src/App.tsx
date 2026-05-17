@@ -110,6 +110,10 @@ const AppContent = () => {
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<Navigate to="/site" replace />} />
         <Route path="/" element={<Navigate to="/site" replace />} />
+        {/* Dedicated shareable entry points — skip marketing site */}
+        <Route path="/app" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/enter" element={<Navigate to="/dashboard" replace />} />
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/m" element={<MobileClientApp />} />
         <Route path="/mobile" element={<Navigate to="/m" replace />} />

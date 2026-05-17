@@ -185,8 +185,23 @@ export function MarketingLayout() {
           </nav>
           <div className="flex items-center gap-2">
             <NavigatorDropdown />
+            <Button
+              variant="outline"
+              size="sm"
+              className="hidden md:inline-flex"
+              onClick={() => {
+                const url = `${window.location.origin}/home`;
+                navigator.clipboard?.writeText(url);
+                import("sonner").then(({ toast }) =>
+                  toast.success("Direct link copied", { description: url })
+                );
+              }}
+              title="Copy a direct link straight to the app home"
+            >
+              Copy share link
+            </Button>
             <Button asChild size="sm" className="hidden sm:inline-flex">
-              <Link to="/dashboard">Launch app <ArrowRight className="ml-1 h-4 w-4" /></Link>
+              <Link to="/home">Launch app <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
           </div>
         </div>

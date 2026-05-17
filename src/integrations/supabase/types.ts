@@ -3310,6 +3310,81 @@ export type Database = {
         }
         Relationships: []
       }
+      origo_transfers: {
+        Row: {
+          account_id: string | null
+          actual_settlement_date: string | null
+          ceding_provider: string
+          ceding_scheme_ref: string | null
+          client_id: string | null
+          client_name: string
+          client_ref: string | null
+          created_at: string
+          current_state: string
+          direction: string
+          expected_settlement_date: string | null
+          id: string
+          initiated_at: string
+          last_event_at: string
+          origo_ref: string
+          progress_pct: number
+          receiving_provider: string
+          receiving_scheme_ref: string | null
+          rejection_reason: string | null
+          transfer_type: string
+          transfer_value: number
+          updated_at: string
+        }
+        Insert: {
+          account_id?: string | null
+          actual_settlement_date?: string | null
+          ceding_provider: string
+          ceding_scheme_ref?: string | null
+          client_id?: string | null
+          client_name: string
+          client_ref?: string | null
+          created_at?: string
+          current_state?: string
+          direction: string
+          expected_settlement_date?: string | null
+          id?: string
+          initiated_at?: string
+          last_event_at?: string
+          origo_ref: string
+          progress_pct?: number
+          receiving_provider: string
+          receiving_scheme_ref?: string | null
+          rejection_reason?: string | null
+          transfer_type?: string
+          transfer_value?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string | null
+          actual_settlement_date?: string | null
+          ceding_provider?: string
+          ceding_scheme_ref?: string | null
+          client_id?: string | null
+          client_name?: string
+          client_ref?: string | null
+          created_at?: string
+          current_state?: string
+          direction?: string
+          expected_settlement_date?: string | null
+          id?: string
+          initiated_at?: string
+          last_event_at?: string
+          origo_ref?: string
+          progress_pct?: number
+          receiving_provider?: string
+          receiving_scheme_ref?: string | null
+          rejection_reason?: string | null
+          transfer_type?: string
+          transfer_value?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       paye_calculations: {
         Row: {
           client_id: string

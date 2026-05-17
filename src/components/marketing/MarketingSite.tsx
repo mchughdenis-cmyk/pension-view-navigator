@@ -4,12 +4,145 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   ShieldCheck, Sparkles, Layers, TrendingUp, Workflow, Building2, Users, Globe,
   ArrowRight, CheckCircle2, ScrollText, BarChart3, Cpu, Lock, Award, BookOpen,
   Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
-  GraduationCap, Gauge, Map, Target,
+  GraduationCap, Gauge, Map, Target, ChevronDown, LayoutDashboard,
 } from "lucide-react";
 import { ContactForm } from "./ContactForm";
+
+/* --------------------------- Pension Navigator menu ------------------------ */
+
+const navigatorGroups: { label: string; items: { to: string; label: string }[] }[] = [
+  {
+    label: "Core",
+    items: [
+      { to: "/dashboard", label: "Dashboard (home)" },
+      { to: "/client-services", label: "Client services hub" },
+      { to: "/portfolio", label: "Portfolio overview" },
+      { to: "/m", label: "Mobile client app" },
+    ],
+  },
+  {
+    label: "Client journeys",
+    items: [
+      { to: "/onboarding", label: "Client onboarding" },
+      { to: "/welcome-pack", label: "Digital welcome pack" },
+      { to: "/kyc", label: "KYC / AML" },
+      { to: "/illustration", label: "Pension illustration" },
+      { to: "/transfer", label: "Pension transfer in" },
+      { to: "/transfer-out", label: "Transfer out" },
+      { to: "/drawdown", label: "Drawdown journey" },
+      { to: "/drip-feed", label: "Drip-feed drawdown" },
+      { to: "/instant-withdrawal", label: "Instant withdrawal" },
+      { to: "/instant-deposit", label: "Instant deposit" },
+      { to: "/instrument-transfer", label: "Instrument transfer" },
+      { to: "/annual-summary", label: "Annual summary" },
+      { to: "/learning", label: "Learning centre" },
+    ],
+  },
+  {
+    label: "Wrappers",
+    items: [
+      { to: "/isa", label: "Stocks & Shares ISA" },
+      { to: "/gia", label: "GIA" },
+      { to: "/ssas", label: "SSAS module" },
+      { to: "/property", label: "Commercial property" },
+      { to: "/iht", label: "IHT overview" },
+    ],
+  },
+  {
+    label: "Adviser & operations",
+    items: [
+      { to: "/workbench", label: "Adviser workbench" },
+      { to: "/operations", label: "Pension operations" },
+      { to: "/cockpit", label: "Operations cockpit" },
+      { to: "/dealing", label: "Dealing desk" },
+      { to: "/models", label: "Model portfolios" },
+      { to: "/projection", label: "Monte Carlo projection" },
+      { to: "/suitability", label: "Suitability assessment" },
+      { to: "/sla-tracker", label: "SLA tracker" },
+      { to: "/cash-warnings", label: "Cash warnings" },
+      { to: "/comms", label: "Communications hub" },
+    ],
+  },
+  {
+    label: "Admin & compliance",
+    items: [
+      { to: "/admin", label: "Admin portal" },
+      { to: "/firms", label: "Firm hierarchy" },
+      { to: "/enterprise", label: "Enterprise suite" },
+      { to: "/mi", label: "MI dashboard" },
+      { to: "/reporting", label: "Reporting suite" },
+      { to: "/hmrc", label: "HMRC reporting" },
+      { to: "/lsa", label: "LSA / LSDBA" },
+      { to: "/paye", label: "PAYE dashboard" },
+      { to: "/cass", label: "CASS reconciliation" },
+      { to: "/cass-engine", label: "CASS recon engine" },
+      { to: "/origo", label: "Origo messages" },
+      { to: "/origo-transfers", label: "Origo transfers" },
+      { to: "/audit-log", label: "Audit log" },
+      { to: "/documents", label: "Document vault" },
+    ],
+  },
+  {
+    label: "System",
+    items: [
+      { to: "/system-overview", label: "System overview" },
+      { to: "/overview", label: "Showcase" },
+      { to: "/api-directory", label: "API directory" },
+      { to: "/documentation", label: "Documentation" },
+      { to: "/demo", label: "Interactive demo" },
+      { to: "/advanced", label: "Market leader hub" },
+      { to: "/settings", label: "Settings" },
+    ],
+  },
+];
+
+function NavigatorDropdown({ size = "sm" }: { size?: "sm" | "default" }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" size={size} className="gap-1">
+          <LayoutDashboard className="h-4 w-4" />
+          <span className="hidden sm:inline">Pension Navigator</span>
+          <span className="sm:hidden">App</span>
+          <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-[min(92vw,640px)] max-h-[75vh] overflow-y-auto bg-popover z-50"
+      >
+        <DropdownMenuLabel className="flex items-center justify-between">
+          <span>Pension Navigator</span>
+          <Link to="/dashboard" className="text-xs text-primary hover:underline">
+            Open home →
+          </Link>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <div className="grid sm:grid-cols-2 gap-x-2">
+          {navigatorGroups.map((g) => (
+            <div key={g.label} className="py-1">
+              <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {g.label}
+              </div>
+              {g.items.map((it) => (
+                <DropdownMenuItem key={it.to} asChild>
+                  <Link to={it.to} className="text-sm">{it.label}</Link>
+                </DropdownMenuItem>
+              ))}
+            </div>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
 
 /* ---------------------------------- Layout --------------------------------- */
 
@@ -51,10 +184,8 @@ export function MarketingLayout() {
             ))}
           </nav>
           <div className="flex items-center gap-2">
-            <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
-              <Link to="/dashboard">Sign in</Link>
-            </Button>
-            <Button asChild size="sm">
+            <NavigatorDropdown />
+            <Button asChild size="sm" className="hidden sm:inline-flex">
               <Link to="/dashboard">Launch app <ArrowRight className="ml-1 h-4 w-4" /></Link>
             </Button>
           </div>

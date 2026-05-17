@@ -108,7 +108,8 @@ const AppContent = () => {
         <Route path="/auth" element={<AuthPage />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
-        <Route path="/pitch" element={<Navigate to="/" replace />} />
+        <Route path="/pitch" element={<Navigate to="/site" replace />} />
+        <Route path="/" element={<Navigate to="/site" replace />} />
         <Route path="/demo" element={<SystemDemo />} />
         <Route path="/m" element={<MobileClientApp />} />
         <Route path="/mobile" element={<Navigate to="/m" replace />} />

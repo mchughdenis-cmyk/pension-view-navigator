@@ -105,8 +105,26 @@ const navigatorGroups: { label: string; items: { to: string; label: string }[] }
 ];
 
 function NavigatorDropdown({ size = "sm" }: { size?: "sm" | "default" }) {
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const filteredGroups = useMemo(() => {
+    if (!q) return navigatorGroups;
+    return navigatorGroups
+      .map((g) => ({
+        ...g,
+        items: g.items.filter(
+          (it) =>
+            it.label.toLowerCase().includes(q) ||
+            it.to.toLowerCase().includes(q) ||
+            g.label.toLowerCase().includes(q)
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+  }, [q]);
+  const totalMatches = filteredGroups.reduce((n, g) => n + g.items.length, 0);
+
   return (
-    <DropdownMenu>
+    <DropdownMenu onOpenChange={(o) => { if (!o) setQuery(""); }}>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size={size} className="gap-1">
           <LayoutDashboard className="h-4 w-4" />
@@ -125,21 +143,37 @@ function NavigatorDropdown({ size = "sm" }: { size?: "sm" | "default" }) {
             Open home →
           </Link>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <div className="grid sm:grid-cols-2 gap-x-2">
-          {navigatorGroups.map((g) => (
-            <div key={g.label} className="py-1">
-              <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {g.label}
-              </div>
-              {g.items.map((it) => (
-                <DropdownMenuItem key={it.to} asChild>
-                  <Link to={it.to} className="text-sm">{it.label}</Link>
-                </DropdownMenuItem>
-              ))}
-            </div>
-          ))}
+        <div className="px-2 pb-2">
+          <Input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyDown={(e) => e.stopPropagation()}
+            placeholder="Search pages…"
+            className="h-8 text-sm"
+          />
         </div>
+        <DropdownMenuSeparator />
+        {totalMatches === 0 ? (
+          <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+            No pages match "{query}"
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-x-2">
+            {filteredGroups.map((g) => (
+              <div key={g.label} className="py-1">
+                <div className="px-2 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  {g.label}
+                </div>
+                {g.items.map((it) => (
+                  <DropdownMenuItem key={it.to} asChild>
+                    <Link to={it.to} className="text-sm">{it.label}</Link>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

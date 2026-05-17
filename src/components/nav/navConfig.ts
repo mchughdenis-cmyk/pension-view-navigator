@@ -2,7 +2,7 @@ import {
   LayoutDashboard, PoundSterling, Wallet, PiggyBank, FileText, GraduationCap, Briefcase,
   Users, Building2, ClipboardList, TrendingUp, Layers, Calculator, ShieldCheck,
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
-  ArrowDownToLine, ArrowUpFromLine, RefreshCw, FileSignature, ScrollText, Receipt,
+  ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
@@ -94,7 +94,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
         { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
-        { title: "Origo Options", url: "/origo", icon: Send },
+        { title: "Origo messages", url: "/origo", icon: Send },
+        { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
         { title: "SSAS", url: "/ssas", icon: Building2 },
         { title: "Commercial property", url: "/property", icon: Building2 },
         { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
@@ -150,7 +151,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Pension operations", url: "/operations", icon: Workflow },
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
-        { title: "Origo Options", url: "/origo", icon: Send },
+        { title: "Origo messages", url: "/origo", icon: Send },
+        { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
       ],
     },
     {

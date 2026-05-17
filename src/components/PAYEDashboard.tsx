@@ -100,8 +100,8 @@ export default function PAYEDashboard() {
     if (!l.account_id) { toast.error('No SIPP account for this client'); return }
     if (l.shortfall <= 0) return
     // Pick largest holding to sell, fall back to "CASH SELL"
-    const { data: holdings } = await supabase.from('investments').select('id, instrument_name, market_value').eq('account_id', l.account_id).order('market_value', { ascending: false }).limit(1)
-    const instrument = (holdings && holdings[0]?.instrument_name) || 'TBD — largest holding'
+    const { data: holdings } = await supabase.from('investments').select('id, fund_name, current_value').eq('account_id', l.account_id).order('current_value', { ascending: false }).limit(1)
+    const instrument = (holdings && holdings[0]?.fund_name) || 'TBD — largest holding'
     const { data: order, error } = await supabase.from('trade_orders').insert({
       client_id: l.client_id, account_id: l.account_id,
       client_name: clients.find(c => c.id === l.client_id)?.last_name || '',

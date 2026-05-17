@@ -63,6 +63,7 @@ import HMRCReporting from "./components/HMRCReporting";
 import LSAAllowance from "./components/LSAAllowance";
 import PAYEDashboard from "./components/PAYEDashboard";
 import OrigoMessages from "./components/OrigoMessages";
+import OrigoTransfers from "./components/OrigoTransfers";
 import SSASModule from "./components/SSASModule";
 import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
@@ -184,6 +185,7 @@ const AppContent = () => {
               <Route path="/lsa" element={<RoleGate allow={['adviser', 'admin']}><LSAAllowance /></RoleGate>} />
               <Route path="/paye" element={<RoleGate allow={['adviser', 'admin']}><PAYEDashboard /></RoleGate>} />
               <Route path="/origo" element={<RoleGate allow={['adviser', 'admin']}><OrigoMessages /></RoleGate>} />
+              <Route path="/origo-transfers" element={<RoleGate allow={['adviser', 'admin']}><div className="container mx-auto p-6"><OrigoTransfers /></div></RoleGate>} />
               <Route path="/ssas" element={<RoleGate allow={['adviser', 'admin']}><SSASModule /></RoleGate>} />
               <Route path="/property" element={<RoleGate allow={['adviser', 'admin']}><CommercialProperty /></RoleGate>} />
               <Route path="/advanced" element={<RoleGate allow={['adviser', 'admin']}><MarketLeaderHub /></RoleGate>} />

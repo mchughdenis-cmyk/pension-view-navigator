@@ -11,7 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/nav/PageHeader'
 import { useRole } from '@/contexts/RoleContext'
 import { formatGBP } from '@/lib/pensionCalculations'
-import { Plus, Trash2, AlertTriangle, Info, ScrollText, Home, PiggyBank, Briefcase, Building2 } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, Info, ScrollText, Home, PiggyBank, Briefcase, Building2, Download } from 'lucide-react'
+import { downloadIHTIllustration } from '@/lib/ihtIllustration'
+import { toast } from 'sonner'
 
 // IHT 2024/25 → post-April 2027 reform
 // From 6 April 2027, most unused pension funds and death benefits will be included

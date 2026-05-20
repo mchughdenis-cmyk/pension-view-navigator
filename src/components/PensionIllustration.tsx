@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { downloadAirgeadHtml } from "@/lib/documentUtils";
+import { generateCompliantIllustrationPdf } from "@/lib/compliantIllustration";
+import { toast } from "sonner";
 
 interface IllustrationInputs {
   potValue: number;

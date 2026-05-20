@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { downloadAirgeadHtml } from "@/lib/documentUtils";
+import { generateCompliantIllustrationPdf } from "@/lib/compliantIllustration";
+import { toast } from "sonner";
 
 interface IllustrationInputs {
   potValue: number;
@@ -103,24 +105,47 @@ const PensionIllustration = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Pension Illustration</h1>
           <p className="text-muted-foreground">Compare drawdown vs annuity options</p>
+          <Badge variant="outline" className="mt-2 text-xs">
+            FCA COBS 13 Annex 2 compliant · 2% / 5% / 8% standardised growth · real terms
+          </Badge>
         </div>
-        <Button variant="outline" onClick={() => {
-          const rows = projections.map(p => `<tr><td>${p.age}</td><td>£${p.drawdownIncome.toLocaleString()}</td><td>£${p.annuityIncome.toLocaleString()}</td><td>£${p.drawdownPot.toLocaleString()}</td></tr>`).join('');
-          const bodyContent = `
-            <h2>Pension Illustration Summary</h2>
-            <p><strong>Pot Value:</strong> £${inputs.potValue.toLocaleString()} | <strong>Retirement Age:</strong> ${inputs.retirementAge} | <strong>Growth Rate:</strong> ${inputs.annualGrowth}%</p>
-            <p><strong>Total Drawdown Income:</strong> £${totalDrawdownIncome.toLocaleString()} | <strong>Total Annuity Income:</strong> £${totalAnnuityIncome.toLocaleString()}</p>
-            <h2>Year-by-Year Projection</h2>
-            <table><thead><tr><th>Age</th><th>Drawdown Income</th><th>Annuity Income</th><th>Remaining Pot</th></tr></thead><tbody>${rows}</tbody></table>`;
-          downloadAirgeadHtml('Pension Illustration', 'Pension-Illustration.html', bodyContent);
-        }}>
-          <Download className="w-4 h-4 mr-2" />
-          Export Illustration
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={() => {
+            const rows = projections.map(p => `<tr><td>${p.age}</td><td>£${p.drawdownIncome.toLocaleString()}</td><td>£${p.annuityIncome.toLocaleString()}</td><td>£${p.drawdownPot.toLocaleString()}</td></tr>`).join('');
+            const bodyContent = `
+              <h2>Pension Illustration Summary</h2>
+              <p><strong>Pot Value:</strong> £${inputs.potValue.toLocaleString()} | <strong>Retirement Age:</strong> ${inputs.retirementAge} | <strong>Growth Rate:</strong> ${inputs.annualGrowth}%</p>
+              <p><strong>Total Drawdown Income:</strong> £${totalDrawdownIncome.toLocaleString()} | <strong>Total Annuity Income:</strong> £${totalAnnuityIncome.toLocaleString()}</p>
+              <h2>Year-by-Year Projection</h2>
+              <table><thead><tr><th>Age</th><th>Drawdown Income</th><th>Annuity Income</th><th>Remaining Pot</th></tr></thead><tbody>${rows}</tbody></table>`;
+            downloadAirgeadHtml('Pension Illustration', 'Pension-Illustration.html', bodyContent);
+          }}>
+            <Download className="w-4 h-4 mr-2" />
+            Quick HTML
+          </Button>
+          <Button onClick={() => {
+            try {
+              generateCompliantIllustrationPdf({
+                potValue: inputs.potValue,
+                currentAge: inputs.currentAge,
+                retirementAge: inputs.retirementAge,
+                lifeExpectancy: inputs.lifeExpectancy,
+                drawdownRate: inputs.drawdownRate,
+                annuityRate: inputs.annuityRate,
+              });
+              toast.success("Compliant KFI generated", { description: "COBS 13 Annex 2 illustration downloaded" });
+            } catch (e) {
+              toast.error("Failed to generate illustration", { description: String((e as Error).message) });
+            }
+          }}>
+            <FileText className="w-4 h-4 mr-2" />
+            Download Compliant KFI (PDF)
+          </Button>
+        </div>
       </div>
 
       <Card>

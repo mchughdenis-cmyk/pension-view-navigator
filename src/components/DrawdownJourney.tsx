@@ -11,8 +11,9 @@ import { BackButton } from "@/components/ui/back-button";
 import { toast } from "sonner";
 import {
   PiggyBank, TrendingUp, Calculator, Clock, AlertTriangle, CheckCircle,
-  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2,
+  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown,
 } from "lucide-react";
+import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
 import {

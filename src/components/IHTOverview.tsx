@@ -11,7 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PageHeader } from '@/components/nav/PageHeader'
 import { useRole } from '@/contexts/RoleContext'
 import { formatGBP } from '@/lib/pensionCalculations'
-import { Plus, Trash2, AlertTriangle, Info, ScrollText, Home, PiggyBank, Briefcase, Building2 } from 'lucide-react'
+import { Plus, Trash2, AlertTriangle, Info, ScrollText, Home, PiggyBank, Briefcase, Building2, Download } from 'lucide-react'
+import { downloadIHTIllustration } from '@/lib/ihtIllustration'
+import { toast } from 'sonner'
 
 // IHT 2024/25 → post-April 2027 reform
 // From 6 April 2027, most unused pension funds and death benefits will be included
@@ -120,6 +122,38 @@ export default function IHTOverview() {
       <PageHeader
         title="Inheritance Tax overview"
         description={`Modelling the impact of pension inclusion in the estate from ${REFORM_DATE}`}
+        actions={
+          <Button
+            size="sm"
+            onClick={() => {
+              try {
+                downloadIHTIllustration({
+                  assets: assets.map((a) => ({ label: a.label, category: CATEGORY_META[a.category].label, value: a.value })),
+                  marriedSpouse,
+                  transferableNRB,
+                  passesToDescendants,
+                  charityPctOfEstate,
+                  sippToSpouse,
+                  totals: {
+                    grossEstate: calc.grossEstate,
+                    sippTotal: calc.sippTotal,
+                    estatePre: calc.estatePre,
+                    estatePost: calc.estatePost,
+                    baseNRB: calc.baseNRB,
+                    pre: calc.pre,
+                    post: calc.post,
+                    delta: calc.delta,
+                  },
+                })
+                toast.success('IHT illustration downloaded')
+              } catch (e) {
+                toast.error('Could not generate PDF')
+              }
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" /> Download PDF
+          </Button>
+        }
       />
 
       <Alert>

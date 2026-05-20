@@ -11,8 +11,9 @@ import { BackButton } from "@/components/ui/back-button";
 import { toast } from "sonner";
 import {
   PiggyBank, TrendingUp, Calculator, Clock, AlertTriangle, CheckCircle,
-  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2,
+  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown,
 } from "lucide-react";
+import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
 import {
@@ -122,10 +123,78 @@ export default function DrawdownJourney() {
       <div className="max-w-7xl mx-auto space-y-6">
         <BackButton label="Back" />
 
-        <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Pension Drawdown Journey</h1>
-          <p className="text-muted-foreground">UK 2024/25 — flexible drawdown, UFPLS, PCLS with full tax calculations</p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="text-center space-y-2 flex-1">
+            <h1 className="text-3xl font-bold">Pension Drawdown Journey</h1>
+            <p className="text-muted-foreground">UK 2024/25 — flexible drawdown, UFPLS, PCLS with full tax calculations</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!client || !account}
+            onClick={() => {
+              if (!client || !account) return;
+              try {
+                const periodTo = new Date();
+                const periodFrom = new Date(periodTo);
+                periodFrom.setFullYear(periodTo.getFullYear() - 1);
+                const closing = potValue;
+                const opening = closing * 0.94;
+                const charges = closing * 0.0085;
+                const growth = closing - opening - 0 + charges + annualIncome; // implied
+                const grossIncome = mode === "UFPLS" ? ufplsGross * 0.75 : annualIncome;
+                const tax = calculateIncomeTax(grossIncome + otherIncome).totalTax - calculateIncomeTax(otherIncome).totalTax;
+                const pclsTaken = mode === "PCLS_FAD" ? pcls : (mode === "UFPLS" ? ufplsGross * 0.25 : 0);
+                downloadAnnualDrawdownStatement({
+                  clientName: `${client.first_name} ${client.last_name}`,
+                  clientRef: client.id.slice(0, 8).toUpperCase(),
+                  dateOfBirth: client.date_of_birth || undefined,
+                  niNumber: (client as any).ni_number || undefined,
+                  address: (client as any).address || undefined,
+                  productName: `${account.account_type} — Flexi-access drawdown`,
+                  planNumber: account.account_number || account.id.slice(0, 10).toUpperCase(),
+                  adviserName: "Airgead Advisory Team",
+                  adviserFirm: "Airgead Capital Ltd",
+                  statementPeriodFrom: periodFrom.toISOString(),
+                  statementPeriodTo: periodTo.toISOString(),
+                  openingValue: opening,
+                  closingValue: closing,
+                  contributionsIn: 0,
+                  transfersIn: 0,
+                  investmentGrowth: Math.max(0, closing - opening + grossIncome + pclsTaken + charges),
+                  charges,
+                  pclsTakenInPeriod: pclsTaken,
+                  pclsTakenLifetime: pclsTaken,
+                  pclsRemaining: Math.max(0, closing * 0.25 - pclsTaken),
+                  taxableIncomeGross: grossIncome,
+                  paye: Math.max(0, tax),
+                  netIncomePaid: grossIncome - Math.max(0, tax) + pclsTaken,
+                  ufplsTakenInPeriod: mode === "UFPLS" ? ufplsGross : 0,
+                  lsaUsed: pclsTaken,
+                  lsdbaUsed: pclsTaken + grossIncome,
+                  mpaaTriggered: mode !== "PCLS_FAD",
+                  mpaaTriggerDate: mode !== "PCLS_FAD" ? periodFrom.toISOString() : undefined,
+                  currentAnnualIncome: grossIncome,
+                  reviewAgeYears: age,
+                  holdings: [
+                    { name: "Global Equity Index", value: closing * 0.5, allocationPct: 50 },
+                    { name: "UK Gilts (short)", value: closing * 0.2, allocationPct: 20 },
+                    { name: "Corporate Bonds", value: closing * 0.15, allocationPct: 15 },
+                    { name: "Cash & MMF", value: closing * 0.15, allocationPct: 15 },
+                  ],
+                  commentary: `Income drawn this year of ${formatGBP(grossIncome)} represents ${((grossIncome / closing) * 100).toFixed(2)}% of closing fund. Review recommended annually under COBS 19.10.`,
+                });
+                toast.success("Annual drawdown statement downloaded");
+              } catch (e) {
+                console.error(e);
+                toast.error("Could not generate statement");
+              }
+            }}
+          >
+            <FileDown className="w-4 h-4 mr-2" /> Annual statement
+          </Button>
         </div>
+
 
         {/* Client / Account selector */}
         <Card>

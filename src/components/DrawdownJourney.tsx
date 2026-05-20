@@ -143,10 +143,10 @@ export default function DrawdownJourney() {
                 const charges = closing * 0.0085;
                 const growth = closing - opening - 0 + charges + annualIncome; // implied
                 const grossIncome = mode === "UFPLS" ? ufplsGross * 0.75 : annualIncome;
-                const tax = calculateIncomeTax(grossIncome + otherIncome).tax - calculateIncomeTax(otherIncome).tax;
+                const tax = calculateIncomeTax(grossIncome + otherIncome).totalTax - calculateIncomeTax(otherIncome).totalTax;
                 const pclsTaken = mode === "PCLS_FAD" ? pcls : (mode === "UFPLS" ? ufplsGross * 0.25 : 0);
                 downloadAnnualDrawdownStatement({
-                  clientName: client.full_name || "Client",
+                  clientName: `${client.first_name} ${client.last_name}`,
                   clientRef: client.id.slice(0, 8).toUpperCase(),
                   dateOfBirth: client.date_of_birth || undefined,
                   niNumber: (client as any).ni_number || undefined,

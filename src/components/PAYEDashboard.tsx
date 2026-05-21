@@ -60,7 +60,9 @@ export default function PAYEDashboard() {
   useEffect(() => { load() }, [])
 
   const openCreate = async () => {
-    const { data } = await supabase.from('clients').select('id, first_name, last_name').eq('status', 'active').order('last_name')
+    let cq = supabase.from('clients').select('id, first_name, last_name').eq('status', 'active').order('last_name')
+    if (firmId) cq = cq.eq('firm_id', firmId)
+    const { data } = await cq
     const cs = (data as ClientRow[]) || []
     setClients(cs)
     // pull SIPP accounts for these clients

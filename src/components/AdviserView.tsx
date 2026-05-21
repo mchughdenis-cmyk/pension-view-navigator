@@ -327,7 +327,7 @@ export default function AdviserView() {
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       <MobileHeader
         title="Adviser Dashboard"
-        subtitle={`${user?.name} - ${user?.email}`}
+        subtitle={firm ? `${firm.name} · ${adviserStats.totalClients} client${adviserStats.totalClients === 1 ? '' : 's'}` : `${user?.name} - ${user?.email}`}
         badge={<Badge variant="outline">Adviser View</Badge>}
         actions={headerActions}
       />

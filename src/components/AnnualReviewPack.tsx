@@ -109,7 +109,7 @@ export default function AnnualReviewPack() {
 
   const flow = useMemo(() => {
     const cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 1);
-    const window = txns.filter(t => new Date(t.effective_date || t.posted_at || 0) >= cutoff);
+    const window = txns.filter(t => new Date(t.effective_date || 0) >= cutoff);
     const contributions = window.filter(t => /contribution|deposit/i.test(t.transaction_type)).reduce((s, t) => s + Number(t.amount || 0), 0);
     const withdrawals = window.filter(t => /withdrawal|drawdown|ufpls|pcls/i.test(t.transaction_type)).reduce((s, t) => s + Math.abs(Number(t.amount || 0)), 0);
     return { contributions, withdrawals, count: window.length };

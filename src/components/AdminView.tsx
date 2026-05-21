@@ -139,7 +139,7 @@ export default function AdminView() {
           <div className="flex flex-wrap justify-between items-start gap-4 py-4">
             <div className="min-w-0 flex-1 basis-72">
               <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-              <p className="text-muted-foreground truncate">{user?.name} - System Administrator</p>
+              <p className="text-muted-foreground truncate">{firm ? `${firm.name} · ${adminStats.totalClients} client${adminStats.totalClients === 1 ? '' : 's'}` : `${user?.name} - System Administrator`}</p>
               <Badge variant="outline" className="mt-1">Admin View</Badge>
             </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">

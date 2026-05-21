@@ -13,19 +13,23 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText } from "lucide-react";
 import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
+import { useFirm } from "@/contexts/FirmContext";
 
 type Client = { id: string; first_name: string; last_name: string; mpaa_triggered: boolean; annual_allowance_used: number };
 
 export default function ClientServicesHub() {
+  const { firmId } = useFirm();
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState<string>("");
 
   useEffect(() => {
-    supabase.from("clients").select("id, first_name, last_name, mpaa_triggered, annual_allowance_used").order("last_name").then(({ data }) => {
+    let q = supabase.from("clients").select("id, first_name, last_name, mpaa_triggered, annual_allowance_used").order("last_name");
+    if (firmId) q = q.eq("firm_id", firmId);
+    q.then(({ data }) => {
       setClients((data ?? []) as Client[]);
-      if (data?.[0]) setClientId(data[0].id);
+      setClientId(data?.[0]?.id ?? "");
     });
-  }, []);
+  }, [firmId]);
 
   const client = clients.find((c) => c.id === clientId);
 

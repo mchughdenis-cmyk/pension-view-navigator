@@ -69,7 +69,7 @@ export default function AdviserView() {
     (async () => {
       let cq = supabase
         .from('clients')
-        .select('id, first_name, last_name, email, status, attitude_to_risk, last_review_date, next_review_date, mpaa_triggered')
+        .select('id, first_name, last_name, email, status, risk_profile, adviser, mpaa_triggered')
         .order('last_name')
       if (firmId) cq = cq.eq('firm_id', firmId)
       const { data: cs } = await cq

@@ -49,22 +49,71 @@ export default function AdviserView() {
   const navigate = useNavigate()
   const { user, switchRole } = useRole()
   const isMobile = useIsMobile()
+  const { firmId, firm } = useFirm()
   const [activeTab, setActiveTab] = useState('clients')
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
   const handleSignOut = () => { window.location.href = '/' }
 
-  const adviserStats = {
-    totalClients: 47, totalAUM: 8750000, clientsInDrawdown: 12, monthlyReviews: 3, pendingActions: 5
+  type ClientRow = {
+    id: string; name: string; email: string;
+    portfolioValue: number; isaValue: number; giaValue: number;
+    lastContact: string; status: string; riskProfile: string;
+    nextReview: string; pendingActions: number; monthlyDrawdown: number;
+    accounts: string[];
   }
+  const [clients, setClients] = useState<ClientRow[]>([])
 
-  const clients = [
-    { id: 1, name: "John Smith", email: "john.smith@email.com", portfolioValue: 287450, isaValue: 87650, giaValue: 145200, lastContact: "2024-01-15", status: "active", riskProfile: "balanced", nextReview: "2024-03-15", pendingActions: 0, monthlyDrawdown: 2850, accounts: ['SIPP', 'ISA', 'GIA'] },
-    { id: 2, name: "Emma Wilson", email: "emma.wilson@email.com", portfolioValue: 325000, isaValue: 42000, giaValue: 0, lastContact: "2024-01-14", status: "active", riskProfile: "conservative", nextReview: "2024-02-28", pendingActions: 1, monthlyDrawdown: 0, accounts: ['SIPP', 'ISA'] },
-    { id: 3, name: "David Thompson", email: "david.thompson@email.com", portfolioValue: 750000, isaValue: 120000, giaValue: 350000, lastContact: "2024-01-10", status: "review_required", riskProfile: "aggressive", nextReview: "2024-01-20", pendingActions: 2, monthlyDrawdown: 4200, accounts: ['SIPP', 'ISA', 'GIA'] },
-    { id: 4, name: "Lisa Anderson", email: "lisa.anderson@email.com", portfolioValue: 195000, isaValue: 0, giaValue: 28000, lastContact: "2024-01-08", status: "onboarding", riskProfile: "balanced", nextReview: "2024-02-01", pendingActions: 1, monthlyDrawdown: 0, accounts: ['SIPP', 'GIA'] },
-  ]
+  useEffect(() => {
+    (async () => {
+      let cq = supabase
+        .from('clients')
+        .select('id, first_name, last_name, email, status, attitude_to_risk, last_review_date, next_review_date, mpaa_triggered')
+        .order('last_name')
+      if (firmId) cq = cq.eq('firm_id', firmId)
+      const { data: cs } = await cq
+      const ids = (cs ?? []).map((c: any) => c.id)
+      const accountsByClient: Record<string, { account_type: string; total_value: number }[]> = {}
+      if (ids.length) {
+        const { data: accs } = await supabase
+          .from('client_accounts')
+          .select('client_id, account_type, total_value')
+          .in('client_id', ids)
+        ;(accs ?? []).forEach((a: any) => {
+          (accountsByClient[a.client_id] ||= []).push({ account_type: a.account_type, total_value: Number(a.total_value || 0) })
+        })
+      }
+      const rows: ClientRow[] = (cs ?? []).map((c: any) => {
+        const accs = accountsByClient[c.id] ?? []
+        const sumBy = (t: string) => accs.filter(a => a.account_type === t).reduce((s, a) => s + a.total_value, 0)
+        return {
+          id: c.id,
+          name: `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim(),
+          email: c.email ?? '',
+          portfolioValue: sumBy('SIPP'),
+          isaValue: sumBy('ISA'),
+          giaValue: sumBy('GIA'),
+          lastContact: c.last_review_date ?? '',
+          status: c.status ?? 'active',
+          riskProfile: c.attitude_to_risk ?? '—',
+          nextReview: c.next_review_date ?? '—',
+          pendingActions: c.status === 'review_required' ? 1 : 0,
+          monthlyDrawdown: 0,
+          accounts: Array.from(new Set(accs.map(a => a.account_type))),
+        }
+      })
+      setClients(rows)
+    })()
+  }, [firmId])
+
+  const adviserStats = useMemo(() => {
+    const totalAUM = clients.reduce((s, c) => s + c.portfolioValue + c.isaValue + c.giaValue, 0)
+    const clientsInDrawdown = clients.filter(c => c.monthlyDrawdown > 0).length
+    const pendingActions = clients.reduce((s, c) => s + c.pendingActions, 0)
+    return { totalClients: clients.length, totalAUM, clientsInDrawdown, monthlyReviews: 0, pendingActions }
+  }, [clients])
+
 
   const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)

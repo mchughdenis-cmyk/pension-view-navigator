@@ -31,6 +31,7 @@ import { supabase } from '@/integrations/supabase/client'
 export default function AdminView() {
   const navigate = useNavigate()
   const { user, switchRole } = useRole()
+  const { firmId, firm, firms } = useFirm()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
 
@@ -38,86 +39,71 @@ export default function AdminView() {
     window.location.href = '/'
   }
 
-  // Mock admin data - all clients across all advisers
-  const adminStats = {
-    totalClients: 1247,
-    totalAdvisers: 23,
-    totalAUM: 42750000,
-    clientsInDrawdown: 187,
-    pendingActions: 18,
-    overdueReviews: 5,
-    newClientsThisMonth: 12
+  type ClientRow = {
+    id: string; name: string; email: string;
+    portfolioValue: number; status: string; riskProfile: string;
+    adviser: string; pendingActions: number; allowanceUsage: number;
   }
+  const [allClients, setAllClients] = useState<ClientRow[]>([])
+  const [advisers, setAdvisers] = useState<{ name: string; clients: number; aum: number }[]>([])
 
-  const allClients = [
-    {
-      id: 1,
-      name: "John Smith",
-      email: "john.smith@email.com",
-      portfolioValue: 287450,
-      lastContact: "2024-01-15",
-      status: "active",
-      riskProfile: "balanced",
-      adviser: "Sarah Johnson",
-      pendingActions: 0,
-      allowanceUsage: 67
-    },
-    {
-      id: 2,
-      name: "Emma Wilson",
-      email: "emma.wilson@email.com", 
-      portfolioValue: 325000,
-      lastContact: "2024-01-14",
-      status: "active",
-      riskProfile: "conservative",
-      adviser: "Michael Brown",
-      pendingActions: 1,
-      allowanceUsage: 45
-    },
-    {
-      id: 3,
-      name: "David Thompson",
-      email: "david.thompson@email.com",
-      portfolioValue: 750000,
-      lastContact: "2024-01-10",
-      status: "review_required",
-      riskProfile: "aggressive",
-      adviser: "Sarah Johnson",
-      pendingActions: 2,
-      allowanceUsage: 89
-    },
-    {
-      id: 4,
-      name: "Lisa Anderson",
-      email: "lisa.anderson@email.com",
-      portfolioValue: 195000,
-      lastContact: "2024-01-08",
-      status: "onboarding",
-      riskProfile: "balanced",
-      adviser: "Michael Brown",
-      pendingActions: 1,
-      allowanceUsage: 23
-    },
-    {
-      id: 5,
-      name: "Robert Wilson",
-      email: "robert.wilson@email.com",
-      portfolioValue: 450000,
-      lastContact: "2024-01-12",
-      status: "active",
-      riskProfile: "balanced",
-      adviser: "Jennifer Davis",
-      pendingActions: 0,
-      allowanceUsage: 55
+  useEffect(() => {
+    (async () => {
+      let cq = supabase
+        .from('clients')
+        .select('id, first_name, last_name, email, status, risk_profile, adviser, annual_allowance_used, firm_id')
+        .order('last_name')
+      if (firmId) cq = cq.eq('firm_id', firmId)
+      const { data: cs } = await cq
+      const ids = (cs ?? []).map((c: any) => c.id)
+      const totals: Record<string, number> = {}
+      if (ids.length) {
+        const { data: accs } = await supabase
+          .from('client_accounts')
+          .select('client_id, total_value')
+          .in('client_id', ids)
+        ;(accs ?? []).forEach((a: any) => {
+          totals[a.client_id] = (totals[a.client_id] ?? 0) + Number(a.total_value || 0)
+        })
+      }
+      const rows: ClientRow[] = (cs ?? []).map((c: any) => ({
+        id: c.id,
+        name: `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim(),
+        email: c.email ?? '',
+        portfolioValue: totals[c.id] ?? 0,
+        status: c.status ?? 'active',
+        riskProfile: c.risk_profile ?? '—',
+        adviser: c.adviser ?? 'Unassigned',
+        pendingActions: c.status === 'review_required' ? 1 : 0,
+        allowanceUsage: Math.min(100, Math.round((Number(c.annual_allowance_used || 0) / 60000) * 100)),
+      }))
+      setAllClients(rows)
+
+      const byAdviser = new Map<string, { clients: number; aum: number }>()
+      rows.forEach(r => {
+        const k = r.adviser || 'Unassigned'
+        const cur = byAdviser.get(k) ?? { clients: 0, aum: 0 }
+        cur.clients += 1
+        cur.aum += r.portfolioValue
+        byAdviser.set(k, cur)
+      })
+      setAdvisers(Array.from(byAdviser, ([name, v]) => ({ name, ...v })))
+    })()
+  }, [firmId])
+
+  const adminStats = useMemo(() => {
+    const totalAUM = allClients.reduce((s, c) => s + c.portfolioValue, 0)
+    return {
+      totalClients: allClients.length,
+      totalAdvisers: advisers.length,
+      totalAUM,
+      clientsInDrawdown: 0,
+      pendingActions: allClients.reduce((s, c) => s + c.pendingActions, 0),
+      overdueReviews: allClients.filter(c => c.status === 'review_required').length,
+      newClientsThisMonth: 0,
     }
-  ]
+  }, [allClients, advisers])
 
-  const advisers = [
-    { name: "Sarah Johnson", clients: 47, aum: 8750000 },
-    { name: "Michael Brown", clients: 52, aum: 9250000 },
-    { name: "Jennifer Davis", clients: 39, aum: 7100000 },
-    { name: "Alex Turner", clients: 44, aum: 8200000 }
-  ]
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-GB', {

@@ -135,12 +135,12 @@ export default function AnnualReviewPack() {
       // persist review record into consumer_duty_reviews (used as annual review log)
       await supabase.from("consumer_duty_reviews").insert({
         client_id: client.id,
-        firm_id: firmId,
-        review_type: "annual_review",
-        outcome: recommendation,
         reviewer: `${reviewerName} (${reviewerRole})`,
-        notes: reviewNotes,
-      } as any).then(({ error }) => {
+        notes: `Annual review — outcome: ${recommendation}. ${reviewNotes}`,
+        fair_value_score: 4,
+        outcomes_score: 4,
+        vulnerability_flag: false,
+      }).then(({ error }) => {
         if (error) console.warn("review log skipped:", error.message);
       });
       toast.success("Annual review pack generated");

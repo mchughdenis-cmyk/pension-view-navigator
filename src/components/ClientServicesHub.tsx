@@ -43,7 +43,6 @@ export default function ClientServicesHub() {
 
   const client = clients.find((c) => c.id === clientId);
   const totalValue = accounts.reduce((s, a) => s + Number(a.total_value || 0), 0);
-  const totalCash = accounts.reduce((s, a) => s + Number(a.cash_balance || 0), 0);
   const fmt = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
   return (

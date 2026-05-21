@@ -102,7 +102,7 @@ export default function AnnualReviewPack() {
       const cutoff = new Date(); cutoff.setFullYear(cutoff.getFullYear() - 1);
       return d >= cutoff;
     });
-    const total = last12.reduce((s, f) => s + Number(f.total_charge || 0), 0);
+    const total = last12.reduce((s, f) => s + Number(f.total || 0), 0);
     const ocfPct = totals.total > 0 ? (total / totals.total) * 100 : 0;
     return { total, ocfPct, count: last12.length };
   }, [fees, totals.total]);

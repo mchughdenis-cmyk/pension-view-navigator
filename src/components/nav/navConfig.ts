@@ -81,6 +81,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "Client service",
       items: [
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
+        { title: "Annual review pack", url: "/annual-review", icon: FileSignature },
+        { title: "Suitability assessment", url: "/suitability", icon: ClipboardList },
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
         { title: "IHT planning", url: "/iht", icon: ScrollText },

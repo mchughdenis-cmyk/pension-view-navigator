@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -15,6 +15,8 @@ import {
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { useFirm } from '@/contexts/FirmContext'
+import { supabase } from '@/integrations/supabase/client'
 
 const navGroups: NavGroup[] = [
   {

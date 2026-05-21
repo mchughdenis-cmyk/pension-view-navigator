@@ -39,10 +39,15 @@ export default function ReportingSuite() {
 }
 
 function AnnualTaxPack() {
+  const { firmId } = useFirm();
   const [clients, setClients] = useState<any[]>([]); const [clientId, setClientId] = useState<string>("");
   const [taxYear, setTaxYear] = useState("2024/25"); const [generating, setGenerating] = useState(false);
 
-  useEffect(() => { supabase.from("clients").select("id, first_name, last_name").order("last_name").then(({ data }) => { setClients(data ?? []); if (data?.[0]) setClientId(data[0].id); }); }, []);
+  useEffect(() => {
+    let q = supabase.from("clients").select("id, first_name, last_name").order("last_name");
+    if (firmId) q = q.eq("firm_id", firmId);
+    q.then(({ data }) => { setClients(data ?? []); setClientId(data?.[0]?.id ?? ""); });
+  }, [firmId]);
 
   const generate = async () => {
     if (!clientId) return;

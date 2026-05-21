@@ -12,6 +12,7 @@ import { PageHeader, StatCard } from "@/components/ui/page-primitives"
 import { formatGBP, calculateIncomeTax } from "@/lib/pensionCalculations"
 import { toast } from "sonner"
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Plus, TrendingDown } from "lucide-react"
+import { useFirm } from "@/contexts/FirmContext"
 
 interface PayeRun { id: string; period: string; pay_date: string; total_gross: number; total_tax: number; total_ni: number; total_net: number; status: string; fps_ref: string | null }
 interface PayePayment { id: string; run_id: string; client_id: string; gross: number; tax_code: string; paye: number; ni: number; net: number }

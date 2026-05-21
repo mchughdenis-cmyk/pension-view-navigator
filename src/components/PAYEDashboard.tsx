@@ -36,6 +36,7 @@ interface Line {
 type Step = 'select' | 'cashcheck' | 'confirm'
 
 export default function PAYEDashboard() {
+  const { firmId } = useFirm()
   const [runs, setRuns] = useState<PayeRun[]>([])
   const [paymentsByRun, setPaymentsByRun] = useState<Record<string, PayePayment[]>>({})
   const [clients, setClients] = useState<ClientRow[]>([])

@@ -13,6 +13,7 @@ import { Download } from "lucide-react";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
 import { saveAs } from "file-saver";
 import { AsyncState, useAsync } from "@/components/ui/async-state";
+import { useFirm } from "@/contexts/FirmContext";
 
 export default function ReportingSuite() {
   return (

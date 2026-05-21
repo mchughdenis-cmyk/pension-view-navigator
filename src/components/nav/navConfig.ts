@@ -216,6 +216,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System",
       items: [
+        { title: "White-label branding", url: "/branding", icon: Palette },
         { title: "Audit log", url: "/audit-log", icon: History },
         { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "System overview", url: "/system-overview", icon: Building2 },

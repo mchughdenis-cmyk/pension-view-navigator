@@ -5,6 +5,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useRole, Role } from "@/contexts/RoleContext";
+import { useFirm } from "@/contexts/FirmContext";
 import { NAV_BY_ROLE } from "./navConfig";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Coins } from "lucide-react";

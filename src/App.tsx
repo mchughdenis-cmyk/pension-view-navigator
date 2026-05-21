@@ -175,6 +175,7 @@ const AppContent = () => {
               <Route path="/cass-engine" element={<RoleGate allow={['admin']}><CASSReconEngine /></RoleGate>} />
               <Route path="/kyc-verify" element={<RealisticKYC />} />
               <Route path="/suitability" element={<RoleGate allow={['adviser', 'admin']}><SuitabilityAssessment /></RoleGate>} />
+              <Route path="/annual-review" element={<RoleGate allow={['adviser', 'admin']}><AnnualReviewPack /></RoleGate>} />
               <Route path="/cash-warnings" element={<RoleGate allow={['adviser', 'admin']}><CashWarnings /></RoleGate>} />
               <Route path="/sla-tracker" element={<RoleGate allow={['adviser', 'admin']}><SLATracker /></RoleGate>} />
               <Route path="/projection" element={<MonteCarloProjection />} />

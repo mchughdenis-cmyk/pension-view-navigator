@@ -28,8 +28,8 @@ type Client = {
 };
 type Account = { id: string; account_type: string; account_number: string | null; total_value: number | null; cash_balance: number | null };
 type Suitability = { id: string; created_at: string; atr_score: number | null; capacity_for_loss: string | null; objectives: string | null; time_horizon_years: number | null; recommendation: string };
-type FeeCharge = { period_end: string; total_charge: number | null; charge_type: string | null };
-type Txn = { posted_at: string | null; effective_date: string | null; amount: number; transaction_type: string; description: string | null };
+type FeeCharge = { period_end: string | null; total: number | null; fee_type: string | null };
+type Txn = { effective_date: string | null; amount: number; transaction_type: string; description: string | null };
 
 const RISK_TO_ATR: Record<string, number> = { cautious: 2, defensive: 3, "cautious-balanced": 4, balanced: 6, moderate: 6, growth: 8, adventurous: 10 };
 

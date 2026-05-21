@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -25,6 +25,8 @@ import {
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useRole } from '@/contexts/RoleContext'
+import { useFirm } from '@/contexts/FirmContext'
+import { supabase } from '@/integrations/supabase/client'
 
 export default function AdminView() {
   const navigate = useNavigate()

@@ -15,21 +15,29 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { pathname } = useLocation();
   const { role, setRole, user } = useRole();
+  const { firm, branding } = useFirm();
   const groups = NAV_BY_ROLE[role];
 
   const isActive = (url: string) => pathname === url;
+
+  const brandName = firm?.name ?? "Pension Navigator";
+  const brandSub = firm ? "by Airgead" : "by Airgead";
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b">
         <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground grid place-items-center shrink-0">
-            <Coins className="h-4 w-4" />
-          </div>
+          {branding?.logo_url ? (
+            <img src={branding.logo_url} alt={brandName} className="h-7 w-7 rounded-md object-contain shrink-0 bg-background" />
+          ) : (
+            <div className="h-7 w-7 rounded-md bg-primary text-primary-foreground grid place-items-center shrink-0">
+              <Coins className="h-4 w-4" />
+            </div>
+          )}
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">Pension Navigator</p>
-              <p className="text-xs text-muted-foreground truncate">by Airgead</p>
+              <p className="text-sm font-semibold truncate">{brandName}</p>
+              <p className="text-xs text-muted-foreground truncate">{brandSub}</p>
             </div>
           )}
         </div>

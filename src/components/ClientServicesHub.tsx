@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText } from "lucide-react";
+import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText, Wallet } from "lucide-react";
 import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
 import { useFirm } from "@/contexts/FirmContext";
 
@@ -21,6 +21,7 @@ export default function ClientServicesHub() {
   const { firmId } = useFirm();
   const [clients, setClients] = useState<Client[]>([]);
   const [clientId, setClientId] = useState<string>("");
+  const [accounts, setAccounts] = useState<{ account_type: string; total_value: number; cash_balance: number | null }[]>([]);
 
   useEffect(() => {
     let q = supabase.from("clients").select("id, first_name, last_name, mpaa_triggered, annual_allowance_used").order("last_name");
@@ -31,7 +32,18 @@ export default function ClientServicesHub() {
     });
   }, [firmId]);
 
+  useEffect(() => {
+    if (!clientId) { setAccounts([]); return; }
+    supabase
+      .from("client_accounts")
+      .select("account_type, total_value, cash_balance")
+      .eq("client_id", clientId)
+      .then(({ data }) => setAccounts((data ?? []) as any));
+  }, [clientId]);
+
   const client = clients.find((c) => c.id === clientId);
+  const totalValue = accounts.reduce((s, a) => s + Number(a.total_value || 0), 0);
+  const fmt = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP", maximumFractionDigits: 0 }).format(n);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -48,6 +60,31 @@ export default function ClientServicesHub() {
           </div>
         }
       />
+
+      {client && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium flex items-center gap-2"><Wallet className="h-4 w-4 text-primary" />Overall value</CardTitle></CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">{fmt(totalValue)}</div>
+              <p className="text-xs text-muted-foreground">{accounts.length} account{accounts.length === 1 ? "" : "s"}</p>
+            </CardContent>
+          </Card>
+          {["SIPP", "ISA", "GIA"].map((type) => {
+            const total = accounts.filter((a) => a.account_type === type).reduce((s, a) => s + Number(a.total_value || 0), 0);
+            return (
+              <Card key={type}>
+                <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">{type}</CardTitle></CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-foreground">{fmt(total)}</div>
+                  <p className="text-xs text-muted-foreground">{total > 0 ? "Active" : "No holdings"}</p>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
 
       <Tabs defaultValue="contribution">
         <TabsList className="grid grid-cols-5 w-full">

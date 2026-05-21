@@ -3,7 +3,7 @@ import {
   Users, Building2, ClipboardList, TrendingUp, Layers, Calculator, ShieldCheck,
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
-  Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer,
+  Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -216,6 +216,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System",
       items: [
+        { title: "White-label branding", url: "/branding", icon: Palette },
         { title: "Audit log", url: "/audit-log", icon: History },
         { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "System overview", url: "/system-overview", icon: Building2 },

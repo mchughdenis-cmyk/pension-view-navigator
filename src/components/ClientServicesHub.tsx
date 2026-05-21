@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText } from "lucide-react";
+import { ArrowRight, PoundSterling, FileSignature, Users2, Repeat, FileText, Wallet } from "lucide-react";
 import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
 import { useFirm } from "@/contexts/FirmContext";
 

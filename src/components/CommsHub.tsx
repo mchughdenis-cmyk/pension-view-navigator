@@ -13,6 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
 import { Send, Mail, FileText } from "lucide-react";
 import { AsyncState, useAsync, runWithToast } from "@/components/ui/async-state";
+import { useFirm } from "@/contexts/FirmContext";
 
 const TEMPLATES = [
   { key: "welcome", name: "Welcome letter", body: "Dear {{first_name}},\n\nWelcome to Pension Navigator by Airgead. Your account {{account_number}} is now active.\n\nKind regards,\nThe Airgead Team" },

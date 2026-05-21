@@ -84,6 +84,7 @@ import CASSReconEngine from "./components/admin/CASSReconEngine";
 import RealisticKYC from "./components/RealisticKYC";
 import SuitabilityAssessment from "./components/SuitabilityAssessment";
 import AnnualReviewPack from "./components/AnnualReviewPack";
+import WhiteLabelBranding from "./components/WhiteLabelBranding";
 import CashWarnings from "./components/CashWarnings";
 import SLATracker from "./components/SLATracker";
 

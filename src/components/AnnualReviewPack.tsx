@@ -73,16 +73,16 @@ export default function AnnualReviewPack() {
         supabase.from("client_accounts").select("id, account_type, account_number, total_value, cash_balance").eq("client_id", clientId),
         supabase.from("suitability_reports").select("id, created_at, atr_score, capacity_for_loss, objectives, time_horizon_years, recommendation")
           .eq("client_id", clientId).order("created_at", { ascending: false }).limit(1).maybeSingle(),
-        supabase.from("fee_charges").select("period_end, total_charge, charge_type").eq("client_id", clientId)
+        supabase.from("fee_charges").select("period_end, total, fee_type").eq("client_id", clientId)
           .order("period_end", { ascending: false }).limit(12),
-        supabase.from("transactions").select("posted_at, effective_date, amount, transaction_type, description")
+        supabase.from("transactions").select("effective_date, amount, transaction_type, description")
           .eq("client_id", clientId).order("effective_date", { ascending: false }).limit(50),
       ]);
       setClient((c.data ?? null) as Client | null);
       setAccounts((a.data ?? []) as Account[]);
       setSuitability((s.data ?? null) as Suitability | null);
-      setFees((f.data ?? []) as FeeCharge[]);
-      setTxns((t.data ?? []) as Txn[]);
+      setFees((f.data ?? []) as unknown as FeeCharge[]);
+      setTxns((t.data ?? []) as unknown as Txn[]);
     })();
   }, [clientId]);
 

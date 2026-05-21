@@ -83,6 +83,7 @@ import { FirmProvider } from "./contexts/FirmContext";
 import CASSReconEngine from "./components/admin/CASSReconEngine";
 import RealisticKYC from "./components/RealisticKYC";
 import SuitabilityAssessment from "./components/SuitabilityAssessment";
+import AnnualReviewPack from "./components/AnnualReviewPack";
 import CashWarnings from "./components/CashWarnings";
 import SLATracker from "./components/SLATracker";
 

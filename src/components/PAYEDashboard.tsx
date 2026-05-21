@@ -12,6 +12,7 @@ import { PageHeader, StatCard } from "@/components/ui/page-primitives"
 import { formatGBP, calculateIncomeTax } from "@/lib/pensionCalculations"
 import { toast } from "sonner"
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, Plus, TrendingDown } from "lucide-react"
+import { useFirm } from "@/contexts/FirmContext"
 
 interface PayeRun { id: string; period: string; pay_date: string; total_gross: number; total_tax: number; total_ni: number; total_net: number; status: string; fps_ref: string | null }
 interface PayePayment { id: string; run_id: string; client_id: string; gross: number; tax_code: string; paye: number; ni: number; net: number }
@@ -35,6 +36,7 @@ interface Line {
 type Step = 'select' | 'cashcheck' | 'confirm'
 
 export default function PAYEDashboard() {
+  const { firmId } = useFirm()
   const [runs, setRuns] = useState<PayeRun[]>([])
   const [paymentsByRun, setPaymentsByRun] = useState<Record<string, PayePayment[]>>({})
   const [clients, setClients] = useState<ClientRow[]>([])
@@ -58,7 +60,9 @@ export default function PAYEDashboard() {
   useEffect(() => { load() }, [])
 
   const openCreate = async () => {
-    const { data } = await supabase.from('clients').select('id, first_name, last_name').eq('status', 'active').order('last_name')
+    let cq = supabase.from('clients').select('id, first_name, last_name').eq('status', 'active').order('last_name')
+    if (firmId) cq = cq.eq('firm_id', firmId)
+    const { data } = await cq
     const cs = (data as ClientRow[]) || []
     setClients(cs)
     // pull SIPP accounts for these clients

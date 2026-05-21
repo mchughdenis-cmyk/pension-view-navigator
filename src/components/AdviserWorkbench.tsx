@@ -11,17 +11,22 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useFirm } from "@/contexts/FirmContext";
 
 const STEPS = ["Fact-find", "ATR", "Suitability", "Recommendation"];
 
 export default function AdviserWorkbench() {
+  const { firmId } = useFirm();
   const [clients, setClients] = useState<any[]>([]);
   const [clientId, setClientId] = useState<string>("");
   useEffect(() => {
-    supabase.from("clients").select("id, first_name, last_name").order("last_name").then(({ data }) => {
-      setClients(data ?? []); if (data?.[0]) setClientId(data[0].id);
+    let q = supabase.from("clients").select("id, first_name, last_name").order("last_name");
+    if (firmId) q = q.eq("firm_id", firmId);
+    q.then(({ data }) => {
+      setClients(data ?? []);
+      setClientId(data?.[0]?.id ?? "");
     });
-  }, []);
+  }, [firmId]);
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -165,8 +170,13 @@ function CashflowPlanner({ clientId }: { clientId: string }) {
 }
 
 function ConsumerDutyBatch() {
+  const { firmId } = useFirm();
   const [clients, setClients] = useState<any[]>([]); const [running, setRunning] = useState(false);
-  useEffect(() => { supabase.from("clients").select("id, first_name, last_name").limit(20).then(({ data }) => setClients(data ?? [])); }, []);
+  useEffect(() => {
+    let q = supabase.from("clients").select("id, first_name, last_name").limit(20);
+    if (firmId) q = q.eq("firm_id", firmId);
+    q.then(({ data }) => setClients(data ?? []));
+  }, [firmId]);
 
   const runBatch = async () => {
     setRunning(true);

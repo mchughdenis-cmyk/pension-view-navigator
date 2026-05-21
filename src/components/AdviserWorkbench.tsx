@@ -170,8 +170,13 @@ function CashflowPlanner({ clientId }: { clientId: string }) {
 }
 
 function ConsumerDutyBatch() {
+  const { firmId } = useFirm();
   const [clients, setClients] = useState<any[]>([]); const [running, setRunning] = useState(false);
-  useEffect(() => { supabase.from("clients").select("id, first_name, last_name").limit(20).then(({ data }) => setClients(data ?? [])); }, []);
+  useEffect(() => {
+    let q = supabase.from("clients").select("id, first_name, last_name").limit(20);
+    if (firmId) q = q.eq("firm_id", firmId);
+    q.then(({ data }) => setClients(data ?? []));
+  }, [firmId]);
 
   const runBatch = async () => {
     setRunning(true);

@@ -64,6 +64,10 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Life events", url: "/life-events", icon: HeartPulse },
         { title: "Employer matching", url: "/employer-match", icon: Gift },
+        { title: "Contribution manager", url: "/contributions", icon: HandCoins },
+        { title: "State Pension forecast", url: "/state-pension", icon: Crown },
+        { title: "Beneficiaries", url: "/beneficiaries", icon: Heart },
+        { title: "Cost & charges", url: "/costs", icon: Calculator },
       ],
     },
     {

@@ -148,6 +148,7 @@ const AppContent = () => {
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/tour" element={<Tour />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<Navigate to="/site" replace />} />

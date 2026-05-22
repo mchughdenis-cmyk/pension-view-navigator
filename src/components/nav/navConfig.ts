@@ -4,7 +4,7 @@ import {
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
-  HeartPulse, Gift, Plane, Lock, UserCog,
+  HeartPulse, Gift, Plane, Lock, UserCog, Heart, Crown, HandCoins, Accessibility,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -64,6 +64,10 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Life events", url: "/life-events", icon: HeartPulse },
         { title: "Employer matching", url: "/employer-match", icon: Gift },
+        { title: "Contribution manager", url: "/contributions", icon: HandCoins },
+        { title: "State Pension forecast", url: "/state-pension", icon: Crown },
+        { title: "Beneficiaries", url: "/beneficiaries", icon: Heart },
+        { title: "Cost & charges", url: "/costs", icon: Calculator },
       ],
     },
     {
@@ -92,7 +96,10 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
         { title: "Annual review pack", url: "/annual-review", icon: FileSignature },
         { title: "Pension passport", url: "/passport", icon: Plane },
+        { title: "Beneficiaries", url: "/beneficiaries", icon: Heart },
+        { title: "Vulnerable register", url: "/vulnerable", icon: Accessibility },
         { title: "Suitability assessment", url: "/suitability", icon: ClipboardList },
+        { title: "Cost & charges", url: "/costs", icon: Calculator },
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
         { title: "IHT planning", url: "/iht", icon: ScrollText },
@@ -177,6 +184,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "SLA tracker", url: "/sla-tracker", icon: Timer },
         { title: "Audit trail", url: "/audit", icon: ScrollText },
+        { title: "Vulnerable register", url: "/vulnerable", icon: Accessibility },
+        { title: "Cost & charges", url: "/costs", icon: Calculator },
         { title: "Firm hierarchy", url: "/firms", icon: Network },
       ],
     },

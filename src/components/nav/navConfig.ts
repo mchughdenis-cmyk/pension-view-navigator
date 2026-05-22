@@ -121,6 +121,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
         { title: "Origo messages", url: "/origo", icon: Send },
         { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
+        { title: "Equisoft in-specie", url: "/equisoft", icon: RefreshCw },
         { title: "SSAS", url: "/ssas", icon: Building2 },
         { title: "Commercial property", url: "/property", icon: Building2 },
         { title: "Advanced capabilities", url: "/advanced", icon: Sparkles },
@@ -179,6 +180,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
         { title: "Origo messages", url: "/origo", icon: Send },
         { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
+        { title: "Equisoft in-specie", url: "/equisoft", icon: RefreshCw },
       ],
     },
     {

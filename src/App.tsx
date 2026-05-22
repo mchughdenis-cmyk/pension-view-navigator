@@ -244,7 +244,7 @@ const AppContent = () => {
               <Route path="/admin/notifications/routing" element={<RoleGate allow={['admin']}><NotificationRoutingRules /></RoleGate>} />
               <Route path="/employer/bulk" element={<RoleGate allow={['adviser', 'admin']}><EmployerBulkOps /></RoleGate>} />
               <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
-              <Route path="/mobile-showcase" element={<MobileShowcase />
+              <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

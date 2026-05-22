@@ -365,6 +365,9 @@ export function MarketingHome() {
               <Button asChild size="lg">
                 <Link to="/auth">Register & launch <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
+              <Button size="lg" variant="secondary" onClick={startTour}>
+                <Compass className="mr-2 h-4 w-4" /> Take the tour
+              </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/site/platform">Explore the platform</Link>
               </Button>

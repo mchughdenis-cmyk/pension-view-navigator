@@ -9,6 +9,7 @@ import { ViewSwitcher } from "./ViewSwitcher";
 import { FirmSwitcher } from "./FirmSwitcher";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 
 /**
  * Application shell: persistent sidebar (role-aware) + sticky header with
@@ -43,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ViewSwitcher />
             <NotificationsBell />
             <ThemeToggle />
+            <LogoutButton />
           </header>
           <main className="flex-1 min-w-0">{children}</main>
         </div>

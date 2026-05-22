@@ -61,10 +61,8 @@ export default function Auth() {
     if (error) toast.error(error.message)
   }
 
-  const demo = () => {
-    enterDemoMode()
-    toast.success('Demo mode — explore freely')
-    navigate('/dashboard')
+  const takeTour = () => {
+    navigate('/tour')
   }
 
   return (

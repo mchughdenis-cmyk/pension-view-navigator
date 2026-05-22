@@ -60,11 +60,19 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Life & planning",
+      items: [
+        { title: "Life events", url: "/life-events", icon: HeartPulse },
+        { title: "Employer matching", url: "/employer-match", icon: Gift },
+      ],
+    },
+    {
       label: "Account",
       items: [
         { title: "Mobile app view", url: "/m", icon: Smartphone },
         { title: "Notifications", url: "/notifications", icon: Bell },
         { title: "Documents", url: "/documents", icon: FolderArchive },
+        { title: "Privacy centre", url: "/privacy", icon: Lock },
         { title: "Settings", url: "/settings", icon: SettingsIcon },
       ],
     },

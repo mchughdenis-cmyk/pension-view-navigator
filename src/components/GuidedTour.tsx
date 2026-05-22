@@ -57,6 +57,13 @@ export function GuidedTour() {
     localStorage.setItem(TOUR_KEY, "1");
   };
 
+  // Hide on public/marketing/auth/tour pages — the standalone /tour page covers that audience.
+  const onPublic = location.pathname.startsWith("/site")
+    || location.pathname.startsWith("/auth")
+    || location.pathname.startsWith("/tour")
+    || location.pathname === "/";
+  if (onPublic) return null;
+
   if (!active) {
     return (
       <button

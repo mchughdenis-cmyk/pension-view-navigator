@@ -4,7 +4,7 @@ import {
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
-  HeartPulse, Gift, Plane, Lock, UserCog,
+  HeartPulse, Gift, Plane, Lock, UserCog, Heart, Crown, HandCoins, Accessibility,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";

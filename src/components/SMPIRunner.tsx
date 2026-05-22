@@ -22,7 +22,12 @@ const SAMPLE_MEMBERS = [
 
 export default function SMPIRunner() {
   const [member, setMember] = useState(SAMPLE_MEMBERS[0]);
-  const [results, setResults] = useState<SmpiResult[]>([]);
+  const [results, setResults] = useState<SmpiResult[]>(() =>
+    SAMPLE_MEMBERS.map((m) => runSmpi({
+      memberRef: m.ref, memberName: m.name, age: m.age, retirementAge: m.retAge,
+      potValue: m.pot, annualContribution: m.contrib, fundIsin: m.fund,
+    }))
+  );
   const [running, setRunning] = useState(false);
 
   const single = useMemo(() => runSmpi({
@@ -30,6 +35,8 @@ export default function SMPIRunner() {
     retirementAge: member.retAge, potValue: member.pot,
     annualContribution: member.contrib, fundIsin: member.fund,
   }), [member]);
+
+  const [tab, setTab] = useState("batch");
 
   function runBatch() {
     setRunning(true);
@@ -39,6 +46,7 @@ export default function SMPIRunner() {
     }));
     setResults(batch);
     setRunning(false);
+    setTab("batch");
     toast.success(`Generated ${batch.length} SMPIs under ${SMPI_REGULAR_REVIEW}`);
   }
 
@@ -75,7 +83,7 @@ export default function SMPIRunner() {
         }
       />
 
-      <Tabs defaultValue="single">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="single">Single member</TabsTrigger>
           <TabsTrigger value="batch">Batch results</TabsTrigger>

@@ -451,22 +451,82 @@ export function MarketingHome() {
         </div>
       </Section>
 
+      {/* Independent market scoreboard (Claude / Anthropic, May 2026) */}
+      <MarketScoreboard />
+
+      {/* Expanded capabilities — reflects current platform scope */}
+      <Section className="!pt-0">
+        <Eyebrow><Layers className="h-3 w-3" /> What's inside</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          One platform — every pension, every workflow, every stakeholder.
+        </h2>
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {[
+            { icon: Globe, title: "Pensions Dashboards (PDP)", desc: "Live connection to the UK Pensions Dashboard ecosystem — find every pension a client owns, across every provider, in a single view." },
+            { icon: RefreshCw, title: "Origo & Equisoft transfers", desc: "Cash transfers via Origo Options and asset-by-asset in-specie re-registration via Equisoft, with full custodian settlement tracking." },
+            { icon: TrendingUp, title: "Monte Carlo & drawdown", desc: "10,000-scenario projections, fan-chart visualisation, drip-feed drawdown, UFPLS, PCLS and post-2027 IHT modelling." },
+            { icon: Building2, title: "Employer portal & bulk ops", desc: "5-step employer setup wizard, contribution matching visualiser, bulk file uploads and PAYE/RTI reporting." },
+            { icon: Users, title: "Multi-portal architecture", desc: "Distinct workspaces for clients, advisers, employers and administrators — with cross-portal notification routing." },
+            { icon: Sparkles, title: "Ask Navigator (AI)", desc: "Embedded AI assistant grounded in the client's own data and UK 2024/25 tax rules." },
+            { icon: ShieldCheck, title: "Compliance & audit", desc: "HMRC RTI, LSA / LSDBA, CASS reconciliation, vulnerable client register and a full immutable audit trail." },
+            { icon: PiggyBank, title: "Every wrapper", desc: "SIPP, SSAS, Stocks & Shares ISA, GIA and bespoke schemes — in a single ledger with CGT and allowance tracking." },
+            { icon: ScrollText, title: "Operations cockpit", desc: "Real-time SLA monitoring, exceptions, dealing desk, bulk bank reconciliation and document vault." },
+          ].map((m) => (
+            <Card key={m.title} className="hover:border-primary/40 transition-colors">
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
+                  <m.icon className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle className="text-lg">{m.title}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">{m.desc}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Contact us — routed privately, no email shown */}
+      <Section id="contact" className="!pt-0">
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div>
+            <Eyebrow><Mail className="h-3 w-3" /> Contact us</Eyebrow>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+              Talk to the Airgead team.
+            </h2>
+            <p className="mt-4 text-muted-foreground text-lg">
+              Whether you're an adviser, an employer scheme sponsor, or a prospective client —
+              send us a note and a member of the Airgead pensions team will respond within one
+              business day.
+            </p>
+            <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
+              <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-secondary mt-0.5" /> Independent, FCA-aligned operating model</li>
+              <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-secondary mt-0.5" /> Confidential — your message is routed directly to our team inbox</li>
+              <li className="flex gap-2"><CheckCircle2 className="h-4 w-4 text-secondary mt-0.5" /> No call centre, no automated reply chains</li>
+            </ul>
+          </div>
+          <ContactForm />
+        </div>
+      </Section>
+
       {/* CTA */}
       <Section className="!py-16">
         <div className="rounded-2xl border border-border bg-gradient-to-br from-primary to-primary/80 text-primary-foreground p-10 md:p-14 grid md:grid-cols-[1fr_auto] items-center gap-6">
           <div>
             <h3 className="text-2xl md:text-3xl font-bold tracking-tight">See the live platform.</h3>
             <p className="mt-2 text-primary-foreground/80 max-w-xl">
-              Walk through the full administrator, adviser and client experience — including IHT
-              modelling, drawdown, KYC, cash onboarding and the mobile client app.
+              Register an account to walk through the full administrator, adviser and client
+              experience — including IHT modelling, drawdown, KYC, cash onboarding, the Pensions
+              Dashboard integration and the mobile client app.
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button asChild size="lg" variant="secondary">
-              <Link to="/dashboard">Launch app</Link>
+              <Link to="/auth">Register</Link>
             </Button>
-            <Button asChild size="lg" variant="outline" className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
-              <Link to="/site/contact">Book a demo</Link>
+            <Button size="lg" variant="outline" onClick={startTour} className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+              Take the tour
             </Button>
           </div>
         </div>

@@ -77,17 +77,19 @@ export default function PensionPassport() {
         ],
       });
 
+      const headerParas = await createAirgeadDocxHeader();
+      const footerParas = createAirgeadDocxFooter();
+
       const doc = new Document({
         styles: { default: { document: { run: { font: "Calibri", size: 22 } } } },
         sections: [{
           properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } },
-          headers: { default: createAirgeadDocxHeader(firm?.name ?? "Pension Navigator by Airgead") },
-          footers: { default: createAirgeadDocxFooter() },
           children: [
+            ...headerParas,
             new Paragraph({ heading: HeadingLevel.HEADING_1, alignment: AlignmentType.CENTER,
               children: [new TextRun({ text: "Pension Passport", bold: true, size: 36 })] }),
             new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 300 },
-              children: [new TextRun({ text: `${client.first_name} ${client.last_name}  ·  Issued ${new Date().toLocaleDateString("en-GB")}`, color: "555555" })] }),
+              children: [new TextRun({ text: `${client.first_name} ${client.last_name}  ·  Issued ${new Date().toLocaleDateString("en-GB")} · ${firm?.name ?? "Pension Navigator by Airgead"}`, color: "555555" })] }),
 
             new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun({ text: "1. My pensions", bold: true })] }),
             new Table({

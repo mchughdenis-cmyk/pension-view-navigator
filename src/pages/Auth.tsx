@@ -8,19 +8,27 @@ import { Label } from '@/components/ui/label'
 import { supabase } from '@/integrations/supabase/client'
 import { useRole } from '@/contexts/RoleContext'
 import { toast } from 'sonner'
-import { Sparkles, Mail, Lock, User as UserIcon } from 'lucide-react'
+import { Sparkles, Mail, Lock, User as UserIcon, Compass } from 'lucide-react'
 
 export default function Auth() {
   const navigate = useNavigate()
-  const { session, enterDemoMode } = useRole()
+  const { enterDemoMode } = useRole()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Only redirect when there is an actual Supabase session — not a demo role
   useEffect(() => {
-    if (session) navigate('/dashboard', { replace: true })
-  }, [session, navigate])
+    let mounted = true
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted && data.session) navigate('/dashboard', { replace: true })
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      if (s) navigate('/dashboard', { replace: true })
+    })
+    return () => { mounted = false; sub.subscription.unsubscribe() }
+  }, [navigate])
 
   const signIn = async () => {
     setLoading(true)

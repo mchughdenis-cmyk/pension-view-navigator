@@ -112,6 +112,10 @@ import PensionsDashboardIntegration from "./components/PensionsDashboardIntegrat
 import EquisoftTransfers from "./components/EquisoftTransfers";
 import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
+import { AuthGate } from "./components/AuthGate";
+import RegistrationsLog from "./components/admin/RegistrationsLog";
+import { useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -125,6 +129,14 @@ const DashboardRoute = () => {
 };
 
 const AppContent = () => {
+  // Best-effort one-time seed of the system admin account on first boot.
+  useEffect(() => {
+    const KEY = "airgead.seed-admin.attempted.v1";
+    if (typeof window === "undefined" || localStorage.getItem(KEY)) return;
+    localStorage.setItem(KEY, "1");
+    supabase.functions.invoke("seed-admin").catch(() => {/* non-fatal */});
+  }, []);
+
   return (
     <BrowserRouter>
       <FloatingBackButton />
@@ -160,7 +172,8 @@ const AppContent = () => {
 
         {/* App routes — wrapped in shell */}
         <Route path="*" element={
-          <AppShell>
+          <AuthGate>
+            <AppShell>
             <Routes>
               <Route path="/" element={<HomeRedirect />} />
               <Route path="/documentation" element={<SystemDocumentation />} />
@@ -246,12 +259,14 @@ const AppContent = () => {
               <Route path="/admin/notifications/routing" element={<RoleGate allow={['admin']}><NotificationRoutingRules /></RoleGate>} />
               <Route path="/employer/bulk" element={<RoleGate allow={['adviser', 'admin']}><EmployerBulkOps /></RoleGate>} />
               <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
+              <Route path="/admin/registrations" element={<RoleGate allow={['admin']}><RegistrationsLog /></RoleGate>} />
               <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="/pdp" element={<RoleGate allow={['adviser', 'admin']}><PensionsDashboardIntegration /></RoleGate>} />
               <Route path="/equisoft" element={<RoleGate allow={['adviser', 'admin']}><EquisoftTransfers /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>
+          </AuthGate>
         } />
       </Routes>
     </BrowserRouter>

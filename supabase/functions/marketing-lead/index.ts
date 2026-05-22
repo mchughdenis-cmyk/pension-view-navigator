@@ -125,7 +125,7 @@ Deno.serve(async (req) => {
 
   // Confirmation + internal notification (best-effort; non-blocking on failure).
   const fullName = `${data.firstName} ${data.lastName}`.trim()
-  const internalTo = Deno.env.get('LEADS_NOTIFY_EMAIL') ?? 'hello@airgead.co.uk'
+  const internalTo = Deno.env.get('LEADS_NOTIFY_EMAIL') ?? 'mchughdenis@gmail.com'
 
   const confirmHtml = `
     <p>Hi ${escapeHtml(data.firstName)},</p>

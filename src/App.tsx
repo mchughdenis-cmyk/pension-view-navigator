@@ -110,6 +110,7 @@ import AdminProductAnalytics from "./components/AdminProductAnalytics";
 import MobileShowcase from "./components/MobileShowcase";
 import PensionsDashboardIntegration from "./components/PensionsDashboardIntegration";
 import EquisoftTransfers from "./components/EquisoftTransfers";
+import SMPIRunner from "./components/SMPIRunner";
 import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
@@ -213,6 +214,7 @@ const AppContent = () => {
               <Route path="/client-admin/:clientId" element={<RoleGate allow={['adviser', 'admin']}><ClientAdminView /></RoleGate>} />
               <Route path="/operations" element={<RoleGate allow={['adviser', 'admin']}><PensionOperations /></RoleGate>} />
               <Route path="/cockpit" element={<RoleGate allow={['adviser', 'admin']}><OperationsCockpit /></RoleGate>} />
+              <Route path="/smpi" element={<RoleGate allow={['adviser', 'admin']}><SMPIRunner /></RoleGate>} />
               <Route path="/mi" element={<RoleGate allow={['adviser', 'admin']}><MIDashboard /></RoleGate>} />
               <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
               <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />

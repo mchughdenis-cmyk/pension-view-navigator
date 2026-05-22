@@ -69,6 +69,11 @@ const RAW_FUNDS: Omit<Fund, "standardGrowthRate">[] = [
   { isin: "GB00B61RBT12", name: "Ruffer Diversified Return", assetClass: "Alternative", region: "Global", ocf: 1.10, risk: 4, esg: false },
 ];
 
+export const FUND_UNIVERSE: Fund[] = RAW_FUNDS.map((f) => ({
+  ...f,
+  standardGrowthRate: tm1StandardGrowth(f.assetClass, f.risk),
+}));
+
 // Deterministic synthetic 36-month price history per fund.
 // Geometric brownian motion with seeded RNG so the series is stable.
 function seededRandom(seed: number) {

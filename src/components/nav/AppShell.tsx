@@ -44,6 +44,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <ViewSwitcher />
             <NotificationsBell />
             <ThemeToggle />
+            <LogoutButton />
           </header>
           <main className="flex-1 min-w-0">{children}</main>
         </div>

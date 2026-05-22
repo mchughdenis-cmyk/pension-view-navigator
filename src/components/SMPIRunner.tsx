@@ -36,6 +36,8 @@ export default function SMPIRunner() {
     annualContribution: member.contrib, fundIsin: member.fund,
   }), [member]);
 
+  const [tab, setTab] = useState("batch");
+
   function runBatch() {
     setRunning(true);
     const batch = SAMPLE_MEMBERS.map((m) => runSmpi({
@@ -44,6 +46,7 @@ export default function SMPIRunner() {
     }));
     setResults(batch);
     setRunning(false);
+    setTab("batch");
     toast.success(`Generated ${batch.length} SMPIs under ${SMPI_REGULAR_REVIEW}`);
   }
 

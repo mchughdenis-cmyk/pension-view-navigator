@@ -92,6 +92,11 @@ import EmployerMatchingVisualiser from "./components/EmployerMatchingVisualiser"
 import PensionPassport from "./components/PensionPassport";
 import PrivacyCentre from "./components/PrivacyCentre";
 import PersonaSelector from "./components/PersonaSelector";
+import BeneficiaryNominations from "./components/BeneficiaryNominations";
+import ContributionManager from "./components/ContributionManager";
+import CostCharges from "./components/CostCharges";
+import StatePensionForecast from "./components/StatePensionForecast";
+import VulnerableClientRegister from "./components/VulnerableClientRegister";
 
 const HomeRedirect = () => {
   const { role } = useRole();

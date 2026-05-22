@@ -214,6 +214,11 @@ const AppContent = () => {
               <Route path="/passport" element={<RoleGate allow={['adviser', 'admin']}><PensionPassport /></RoleGate>} />
               <Route path="/privacy" element={<PrivacyCentre />} />
               <Route path="/personas" element={<PersonaSelector />} />
+              <Route path="/beneficiaries" element={<RoleGate allow={['client', 'adviser', 'admin']}><BeneficiaryNominations /></RoleGate>} />
+              <Route path="/contributions" element={<ContributionManager />} />
+              <Route path="/costs" element={<CostCharges />} />
+              <Route path="/state-pension" element={<StatePensionForecast />} />
+              <Route path="/vulnerable" element={<RoleGate allow={['adviser', 'admin']}><VulnerableClientRegister /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

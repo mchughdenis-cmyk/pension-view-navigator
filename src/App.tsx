@@ -87,6 +87,11 @@ import AnnualReviewPack from "./components/AnnualReviewPack";
 import WhiteLabelBranding from "./components/WhiteLabelBranding";
 import CashWarnings from "./components/CashWarnings";
 import SLATracker from "./components/SLATracker";
+import LifeEventsEngine from "./components/LifeEventsEngine";
+import EmployerMatchingVisualiser from "./components/EmployerMatchingVisualiser";
+import PensionPassport from "./components/PensionPassport";
+import PrivacyCentre from "./components/PrivacyCentre";
+import PersonaSelector from "./components/PersonaSelector";
 
 const HomeRedirect = () => {
   const { role } = useRole();

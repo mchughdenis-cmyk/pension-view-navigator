@@ -97,6 +97,10 @@ import ContributionManager from "./components/ContributionManager";
 import CostCharges from "./components/CostCharges";
 import StatePensionForecast from "./components/StatePensionForecast";
 import VulnerableClientRegister from "./components/VulnerableClientRegister";
+import PensionHealthScore from "./components/PensionHealthScore";
+import EmployerPortal from "./components/EmployerPortal";
+import MobileSecurityCentre from "./components/MobileSecurityCentre";
+import { GuidedTour } from "./components/GuidedTour";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -114,6 +118,7 @@ const AppContent = () => {
     <BrowserRouter>
       <FloatingBackButton />
       <CommandPalette />
+      <GuidedTour />
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
@@ -219,6 +224,9 @@ const AppContent = () => {
               <Route path="/costs" element={<CostCharges />} />
               <Route path="/state-pension" element={<StatePensionForecast />} />
               <Route path="/vulnerable" element={<RoleGate allow={['adviser', 'admin']}><VulnerableClientRegister /></RoleGate>} />
+              <Route path="/health-score" element={<PensionHealthScore />} />
+              <Route path="/employer-portal" element={<RoleGate allow={['adviser', 'admin']}><EmployerPortal /></RoleGate>} />
+              <Route path="/mobile-security" element={<MobileSecurityCentre />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

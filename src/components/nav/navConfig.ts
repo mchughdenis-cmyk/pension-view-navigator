@@ -184,6 +184,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "SLA tracker", url: "/sla-tracker", icon: Timer },
         { title: "Audit trail", url: "/audit", icon: ScrollText },
+        { title: "Vulnerable register", url: "/vulnerable", icon: Accessibility },
+        { title: "Cost & charges", url: "/costs", icon: Calculator },
         { title: "Firm hierarchy", url: "/firms", icon: Network },
       ],
     },

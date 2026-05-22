@@ -259,12 +259,14 @@ const AppContent = () => {
               <Route path="/admin/notifications/routing" element={<RoleGate allow={['admin']}><NotificationRoutingRules /></RoleGate>} />
               <Route path="/employer/bulk" element={<RoleGate allow={['adviser', 'admin']}><EmployerBulkOps /></RoleGate>} />
               <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
+              <Route path="/admin/registrations" element={<RoleGate allow={['admin']}><RegistrationsLog /></RoleGate>} />
               <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="/pdp" element={<RoleGate allow={['adviser', 'admin']}><PensionsDashboardIntegration /></RoleGate>} />
               <Route path="/equisoft" element={<RoleGate allow={['adviser', 'admin']}><EquisoftTransfers /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>
+          </AuthGate>
         } />
       </Routes>
     </BrowserRouter>

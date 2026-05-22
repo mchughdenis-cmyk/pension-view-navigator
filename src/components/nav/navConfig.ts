@@ -117,6 +117,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Pension operations", url: "/operations", icon: Workflow },
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
         { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
+        { title: "Pensions Dashboards (PDP)", url: "/pdp", icon: Network },
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
         { title: "Origo messages", url: "/origo", icon: Send },
         { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
@@ -212,6 +213,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "Compliance",
       items: [
         { title: "HMRC reporting", url: "/hmrc", icon: FileSignature },
+        { title: "Pensions Dashboards (PDP)", url: "/pdp", icon: Network },
         { title: "LSA / LSDBA", url: "/lsa", icon: ShieldCheck },
         { title: "CASS reconciliation", url: "/cass", icon: ShieldCheck },
         { title: "KYC review queue", url: "/kyc-review", icon: ShieldCheck },

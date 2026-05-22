@@ -22,7 +22,12 @@ const SAMPLE_MEMBERS = [
 
 export default function SMPIRunner() {
   const [member, setMember] = useState(SAMPLE_MEMBERS[0]);
-  const [results, setResults] = useState<SmpiResult[]>([]);
+  const [results, setResults] = useState<SmpiResult[]>(() =>
+    SAMPLE_MEMBERS.map((m) => runSmpi({
+      memberRef: m.ref, memberName: m.name, age: m.age, retirementAge: m.retAge,
+      potValue: m.pot, annualContribution: m.contrib, fundIsin: m.fund,
+    }))
+  );
   const [running, setRunning] = useState(false);
 
   const single = useMemo(() => runSmpi({

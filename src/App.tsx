@@ -102,6 +102,14 @@ import EmployerPortal from "./components/EmployerPortal";
 import MobileSecurityCentre from "./components/MobileSecurityCentre";
 import { GuidedTour } from "./components/GuidedTour";
 import ClientOperationsHub from "./components/ClientOperationsHub";
+import EmployerSetupWizard from "./components/EmployerSetupWizard";
+import AdviserMessaging from "./components/AdviserMessaging";
+import NotificationRoutingRules from "./components/NotificationRoutingRules";
+import EmployerBulkOps from "./components/EmployerBulkOps";
+import AdminProductAnalytics from "./components/AdminProductAnalytics";
+import MobileShowcase from "./components/MobileShowcase";
+import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
+import OfflineBanner from "./components/pwa/OfflineBanner";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -120,6 +128,8 @@ const AppContent = () => {
       <FloatingBackButton />
       <CommandPalette />
       <GuidedTour />
+      <OfflineBanner />
+      <IOSInstallSheet />
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
@@ -229,6 +239,12 @@ const AppContent = () => {
               <Route path="/employer-portal" element={<RoleGate allow={['adviser', 'admin']}><EmployerPortal /></RoleGate>} />
               <Route path="/mobile-security" element={<MobileSecurityCentre />} />
               <Route path="/client-ops" element={<RoleGate allow={['adviser', 'admin']}><ClientOperationsHub /></RoleGate>} />
+              <Route path="/employer/setup" element={<EmployerSetupWizard />} />
+              <Route path="/adviser/messages" element={<RoleGate allow={['adviser', 'admin']}><AdviserMessaging /></RoleGate>} />
+              <Route path="/admin/notifications/routing" element={<RoleGate allow={['admin']}><NotificationRoutingRules /></RoleGate>} />
+              <Route path="/employer/bulk" element={<RoleGate allow={['adviser', 'admin']}><EmployerBulkOps /></RoleGate>} />
+              <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
+              <Route path="/mobile-showcase" element={<MobileShowcase />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

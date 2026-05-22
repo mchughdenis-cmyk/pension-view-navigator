@@ -101,6 +101,7 @@ import PensionHealthScore from "./components/PensionHealthScore";
 import EmployerPortal from "./components/EmployerPortal";
 import MobileSecurityCentre from "./components/MobileSecurityCentre";
 import { GuidedTour } from "./components/GuidedTour";
+import ClientOperationsHub from "./components/ClientOperationsHub";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -227,6 +228,7 @@ const AppContent = () => {
               <Route path="/health-score" element={<PensionHealthScore />} />
               <Route path="/employer-portal" element={<RoleGate allow={['adviser', 'admin']}><EmployerPortal /></RoleGate>} />
               <Route path="/mobile-security" element={<MobileSecurityCentre />} />
+              <Route path="/client-ops" element={<RoleGate allow={['adviser', 'admin']}><ClientOperationsHub /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

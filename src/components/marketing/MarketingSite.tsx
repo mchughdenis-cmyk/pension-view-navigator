@@ -12,7 +12,7 @@ import {
   ShieldCheck, Sparkles, Layers, TrendingUp, Workflow, Building2, Users, Globe,
   ArrowRight, CheckCircle2, ScrollText, BarChart3, Cpu, Lock, Award, BookOpen,
   Mail, Phone, MapPin, Compass, PiggyBank, Briefcase, Calendar, Quote, Scale,
-  GraduationCap, Gauge, Map, Target, ChevronDown, LayoutDashboard,
+  GraduationCap, Gauge, Map, Target, ChevronDown, LayoutDashboard, RefreshCw,
 } from "lucide-react";
 import { ContactForm } from "./ContactForm";
 import { MarketScoreboard } from "./MarketScoreboard";
@@ -488,7 +488,8 @@ export function MarketingHome() {
       </Section>
 
       {/* Contact us — routed privately, no email shown */}
-      <Section id="contact" className="!pt-0">
+      <Section className="!pt-0">
+        <div id="contact" />
         <div className="grid md:grid-cols-2 gap-10 items-start">
           <div>
             <Eyebrow><Mail className="h-3 w-3" /> Contact us</Eyebrow>

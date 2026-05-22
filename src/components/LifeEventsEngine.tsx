@@ -161,9 +161,10 @@ export default function LifeEventsEngine() {
     setBusy(true);
     try {
       await supabase.from("activity_log").insert({
-        action: `Life event recorded: ${selected.title}`,
+        action: "life_event_recorded",
+        description: `Life event recorded: ${selected.title}`,
         entity_type: "life_event",
-        metadata: { event_key: selected.key, event_date: eventDate, answers, completed, notes },
+        new_values: { event_key: selected.key, event_date: eventDate, answers, completed, notes } as any,
       });
       toast.success("Event recorded", { description: "Recommendations saved to your activity log." });
       reset();

@@ -114,6 +114,7 @@ import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
+import Tour from "./pages/Tour";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 

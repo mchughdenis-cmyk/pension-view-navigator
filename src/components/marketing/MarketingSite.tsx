@@ -15,6 +15,8 @@ import {
   GraduationCap, Gauge, Map, Target, ChevronDown, LayoutDashboard,
 } from "lucide-react";
 import { ContactForm } from "./ContactForm";
+import { MarketScoreboard } from "./MarketScoreboard";
+import { useNavigate } from "react-router-dom";
 
 /* --------------------------- Pension Navigator menu ------------------------ */
 
@@ -339,6 +341,12 @@ function Stat({ value, label }: { value: string; label: string }) {
 /* ----------------------------------- Home ---------------------------------- */
 
 export function MarketingHome() {
+  const navigate = useNavigate();
+  const startTour = () => {
+    try { localStorage.removeItem("airgead.tour.completed"); } catch {}
+    navigate("/dashboard");
+  };
+
   return (
     <>
       {/* Hero */}
@@ -358,7 +366,10 @@ export function MarketingHome() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/dashboard">Launch the app <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/auth">Register & launch <ArrowRight className="ml-2 h-4 w-4" /></Link>
+              </Button>
+              <Button size="lg" variant="secondary" onClick={startTour}>
+                <Compass className="mr-2 h-4 w-4" /> Take the tour
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/site/platform">Explore the platform</Link>
@@ -368,6 +379,7 @@ export function MarketingHome() {
               <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-secondary" /> FCA-aligned</span>
               <span className="flex items-center gap-1"><Lock className="h-4 w-4 text-secondary" /> CASS-aware</span>
               <span className="flex items-center gap-1"><Award className="h-4 w-4 text-secondary" /> HMRC ready</span>
+              <span className="flex items-center gap-1"><Sparkles className="h-4 w-4 text-secondary" /> Pensions Dashboard live</span>
             </div>
           </div>
           <div className="relative">

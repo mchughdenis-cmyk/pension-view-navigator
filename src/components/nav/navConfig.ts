@@ -112,6 +112,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Operations",
       items: [
+        { title: "Client operations hub", url: "/client-ops", icon: Users },
         { title: "Operations cockpit", url: "/cockpit", icon: Layers },
         { title: "Pension operations", url: "/operations", icon: Workflow },
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Offline — Pension Navigator</title>
+<style>
+  :root { color-scheme: dark; }
+  html,body { margin:0; padding:0; height:100%; background:#0c2340; color:#fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  main { min-height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; gap:18px; }
+  .logo { width:64px; height:64px; border-radius:16px; background:#2dd4a8; display:flex; align-items:center; justify-content:center; font-weight:800; color:#0c2340; font-size:28px; }
+  h1 { font-size:28px; margin:0; }
+  p { opacity:.8; max-width:380px; line-height:1.45; margin:0; }
+  .score { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.14); padding:12px 16px; border-radius:12px; font-size:14px; }
+  button { background:#2dd4a8; color:#0c2340; font-weight:700; border:0; border-radius:10px; padding:12px 18px; font-size:14px; cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo">A</div>
+  <h1>You're offline</h1>
+  <p>Connect to the internet to access your pension dashboard.</p>
+  <div id="score" class="score" style="display:none"></div>
+  <button onclick="location.reload()">Try again</button>
+</main>
+<script>
+  try {
+    var s = localStorage.getItem('lastHealthScore');
+    if (s) {
+      var el = document.getElementById('score');
+      el.textContent = 'Your last recorded retirement readiness score: ' + s;
+      el.style.display = 'block';
+    }
+  } catch (e) {}
+</script>
+</body>
+</html>

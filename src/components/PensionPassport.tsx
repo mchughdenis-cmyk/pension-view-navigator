@@ -152,9 +152,10 @@ export default function PensionPassport() {
       saveAs(blob, `Pension-Passport-${client.last_name}-${new Date().toISOString().slice(0, 10)}.docx`);
 
       await supabase.from("activity_log").insert({
-        action: "Pension Passport generated",
+        action: "passport_generated",
+        description: "Pension Passport generated",
         entity_type: "passport", entity_id: client.id,
-        metadata: { client_name: `${client.first_name} ${client.last_name}`, total_wealth: totals.total },
+        new_values: { client_name: `${client.first_name} ${client.last_name}`, total_wealth: totals.total } as any,
       });
       toast.success("Passport generated", { description: "Downloaded as .docx" });
     } catch (e: any) {

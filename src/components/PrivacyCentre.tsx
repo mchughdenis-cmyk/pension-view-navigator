@@ -68,9 +68,10 @@ export default function PrivacyCentre() {
     setBusy(true);
     try {
       await supabase.from("activity_log").insert({
-        action: "Subject Access Request submitted",
+        action: "sar_submitted",
+        description: "Subject Access Request submitted",
         entity_type: "sar",
-        metadata: { request_text: sarText, channel: "privacy_centre" },
+        new_values: { request_text: sarText, channel: "privacy_centre" } as any,
       });
       toast.success("Request submitted", { description: "We'll respond within 1 month, per UK GDPR Article 12." });
       setSarText("");
@@ -82,9 +83,10 @@ export default function PrivacyCentre() {
   const deleteAccount = async () => {
     if (!confirm("This starts a 14-day cooling-off period before your account is anonymised and personal data deleted. Continue?")) return;
     await supabase.from("activity_log").insert({
-      action: "Account deletion requested",
+      action: "account_deletion_requested",
+      description: "Account deletion requested",
       entity_type: "account_deletion",
-      metadata: { cooling_off_ends: new Date(Date.now() + 14 * 86400_000).toISOString() },
+      new_values: { cooling_off_ends: new Date(Date.now() + 14 * 86400_000).toISOString() } as any,
     });
     toast.success("Deletion scheduled", { description: "Your data will be removed in 14 days unless you cancel." });
   };

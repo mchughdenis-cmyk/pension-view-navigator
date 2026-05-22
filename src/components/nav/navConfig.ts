@@ -4,6 +4,7 @@ import {
   MessageSquare, BarChart3, Settings as SettingsIcon, BookOpen, Workflow, Send,
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
+  HeartPulse, Gift, Plane, Lock, UserCog,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -59,11 +60,19 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Life & planning",
+      items: [
+        { title: "Life events", url: "/life-events", icon: HeartPulse },
+        { title: "Employer matching", url: "/employer-match", icon: Gift },
+      ],
+    },
+    {
       label: "Account",
       items: [
         { title: "Mobile app view", url: "/m", icon: Smartphone },
         { title: "Notifications", url: "/notifications", icon: Bell },
         { title: "Documents", url: "/documents", icon: FolderArchive },
+        { title: "Privacy centre", url: "/privacy", icon: Lock },
         { title: "Settings", url: "/settings", icon: SettingsIcon },
       ],
     },
@@ -82,6 +91,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
         { title: "Annual review pack", url: "/annual-review", icon: FileSignature },
+        { title: "Pension passport", url: "/passport", icon: Plane },
         { title: "Suitability assessment", url: "/suitability", icon: ClipboardList },
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
@@ -217,6 +227,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "System",
       items: [
         { title: "White-label branding", url: "/branding", icon: Palette },
+        { title: "Persona selector", url: "/personas", icon: UserCog },
         { title: "Audit log", url: "/audit-log", icon: History },
         { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "System overview", url: "/system-overview", icon: Building2 },

@@ -87,6 +87,11 @@ import AnnualReviewPack from "./components/AnnualReviewPack";
 import WhiteLabelBranding from "./components/WhiteLabelBranding";
 import CashWarnings from "./components/CashWarnings";
 import SLATracker from "./components/SLATracker";
+import LifeEventsEngine from "./components/LifeEventsEngine";
+import EmployerMatchingVisualiser from "./components/EmployerMatchingVisualiser";
+import PensionPassport from "./components/PensionPassport";
+import PrivacyCentre from "./components/PrivacyCentre";
+import PersonaSelector from "./components/PersonaSelector";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -199,6 +204,11 @@ const AppContent = () => {
               <Route path="/advanced" element={<RoleGate allow={['adviser', 'admin']}><MarketLeaderHub /></RoleGate>} />
               <Route path="/iht" element={<RoleGate allow={['client', 'adviser', 'admin']}><IHTOverview /></RoleGate>} />
               <Route path="/branding" element={<RoleGate allow={['admin']}><WhiteLabelBranding /></RoleGate>} />
+              <Route path="/life-events" element={<LifeEventsEngine />} />
+              <Route path="/employer-match" element={<EmployerMatchingVisualiser />} />
+              <Route path="/passport" element={<RoleGate allow={['adviser', 'admin']}><PensionPassport /></RoleGate>} />
+              <Route path="/privacy" element={<PrivacyCentre />} />
+              <Route path="/personas" element={<PersonaSelector />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

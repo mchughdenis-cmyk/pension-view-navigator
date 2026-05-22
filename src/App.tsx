@@ -109,6 +109,7 @@ import EmployerBulkOps from "./components/EmployerBulkOps";
 import AdminProductAnalytics from "./components/AdminProductAnalytics";
 import MobileShowcase from "./components/MobileShowcase";
 import PensionsDashboardIntegration from "./components/PensionsDashboardIntegration";
+import EquisoftTransfers from "./components/EquisoftTransfers";
 import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
 
@@ -247,6 +248,7 @@ const AppContent = () => {
               <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
               <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="/pdp" element={<RoleGate allow={['adviser', 'admin']}><PensionsDashboardIntegration /></RoleGate>} />
+              <Route path="/equisoft" element={<RoleGate allow={['adviser', 'admin']}><EquisoftTransfers /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

@@ -1,7 +1,9 @@
-// MP.1 — Multi-role switcher with active_role, role-context banner, request-access flow
-import { useState } from "react";
+// MP.1 — Multi-role switcher gated to actual admin accounts.
+// Newly-registered users only ever see the "Consumer" (client) role and have
+// read-only access until an admin promotes them via the user_roles table.
+import { useEffect, useState } from "react";
 import { useRole, Role } from "@/contexts/RoleContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -14,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { User, Briefcase, Shield, Building2, ChevronDown, Check, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { haptic } from "@/utils/haptic";
+import { supabase } from "@/integrations/supabase/client";
 
 const ICONS: Record<Role, any> = { client: User, adviser: Briefcase, admin: Shield };
 const LABELS: Record<Role, string> = { client: "Consumer", adviser: "Adviser", admin: "Admin" };
@@ -28,26 +31,41 @@ const DEFAULT_ROUTE: Record<Role, string> = {
   admin: "/admin",
 };
 
-const LS_ROLES = "airgead.userRoles";
-
-function getRoles(): Role[] {
-  try {
-    const raw = localStorage.getItem(LS_ROLES);
-    if (raw) return JSON.parse(raw);
-  } catch {}
-  return ["client", "adviser", "admin"]; // demo: all available
-}
-function setRolesLS(roles: Role[]) { localStorage.setItem(LS_ROLES, JSON.stringify(roles)); }
-
 export function RoleSwitcher() {
   const { role, setRole } = useRole();
   const navigate = useNavigate();
-  const [roles, setRoles] = useState<Role[]>(getRoles());
+  const location = useLocation();
+  // Roles the signed-in account actually holds in Supabase user_roles.
+  const [roles, setRoles] = useState<Role[]>(["client"]);
   const [requestOpen, setRequestOpen] = useState(false);
   const [requestRole, setRequestRole] = useState<"adviser" | "admin">("adviser");
   const [companyName, setCompanyName] = useState("");
   const [reference, setReference] = useState("");
   const Icon = ICONS[role];
+
+  // Fetch real roles from Supabase whenever auth state changes.
+  useEffect(() => {
+    const load = async () => {
+      const { data: sess } = await supabase.auth.getSession();
+      const uid = sess.session?.user?.id;
+      if (!uid) { setRoles([]); return; }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", uid);
+      const granted = (data ?? []).map((r: any) => r.role as Role);
+      // Every signed-in user implicitly has the client (consumer) view.
+      setRoles(Array.from(new Set<Role>(["client", ...granted])));
+    };
+    load();
+    const { data: sub } = supabase.auth.onAuthStateChange(() => load());
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  // Hide the switcher on public routes (marketing / auth / tour) where it's irrelevant.
+  const onPublic = location.pathname.startsWith("/site")
+    || location.pathname.startsWith("/auth")
+    || location.pathname.startsWith("/tour")
+    || location.pathname === "/";
+  if (onPublic) return null;
+  if (roles.length === 0) return null;
 
   const switchTo = (r: Role) => {
     if (r === role) return;
@@ -63,10 +81,8 @@ export function RoleSwitcher() {
 
   const submitRequest = () => {
     if (!companyName) return;
-    const next = Array.from(new Set([...roles, requestRole])) as Role[];
-    setRoles(next);
-    setRolesLS(next);
-    toast.success(`Access request submitted${requestRole !== "admin" ? " (auto-approved for demo)" : ""}`);
+    // Access is NOT auto-granted: an admin must approve via Supabase user_roles.
+    toast.success("Access request submitted — an administrator will review and approve");
     setRequestOpen(false);
     setCompanyName("");
     setReference("");

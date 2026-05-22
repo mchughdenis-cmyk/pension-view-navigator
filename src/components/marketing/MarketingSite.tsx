@@ -342,10 +342,7 @@ function Stat({ value, label }: { value: string; label: string }) {
 
 export function MarketingHome() {
   const navigate = useNavigate();
-  const startTour = () => {
-    try { localStorage.removeItem("airgead.tour.completed"); } catch {}
-    navigate("/dashboard");
-  };
+  const startTour = () => navigate("/tour");
 
   return (
     <>
@@ -367,9 +364,6 @@ export function MarketingHome() {
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/auth">Register & launch <ArrowRight className="ml-2 h-4 w-4" /></Link>
-              </Button>
-              <Button size="lg" variant="secondary" onClick={startTour}>
-                <Compass className="mr-2 h-4 w-4" /> Take the tour
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link to="/site/platform">Explore the platform</Link>

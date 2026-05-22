@@ -114,6 +114,7 @@ import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
+import Tour from "./pages/Tour";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -148,6 +149,7 @@ const AppContent = () => {
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
         <Route path="/auth" element={<AuthPage />} />
+        <Route path="/tour" element={<Tour />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<Navigate to="/site" replace />} />

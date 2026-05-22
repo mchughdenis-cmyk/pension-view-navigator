@@ -6,21 +6,28 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/integrations/supabase/client'
-import { useRole } from '@/contexts/RoleContext'
+
 import { toast } from 'sonner'
-import { Sparkles, Mail, Lock, User as UserIcon } from 'lucide-react'
+import { Sparkles, Mail, Lock, User as UserIcon, Compass } from 'lucide-react'
 
 export default function Auth() {
   const navigate = useNavigate()
-  const { session, enterDemoMode } = useRole()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Only redirect when there is an actual Supabase session — not a demo role
   useEffect(() => {
-    if (session) navigate('/dashboard', { replace: true })
-  }, [session, navigate])
+    let mounted = true
+    supabase.auth.getSession().then(({ data }) => {
+      if (mounted && data.session) navigate('/dashboard', { replace: true })
+    })
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      if (s) navigate('/dashboard', { replace: true })
+    })
+    return () => { mounted = false; sub.subscription.unsubscribe() }
+  }, [navigate])
 
   const signIn = async () => {
     setLoading(true)
@@ -53,10 +60,8 @@ export default function Auth() {
     if (error) toast.error(error.message)
   }
 
-  const demo = () => {
-    enterDemoMode()
-    toast.success('Demo mode — explore freely')
-    navigate('/dashboard')
+  const takeTour = () => {
+    navigate('/tour')
   }
 
   return (
@@ -91,10 +96,10 @@ export default function Auth() {
 
           <div className="relative my-4"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Just exploring?</span></div></div>
 
-          <Button variant="secondary" className="w-full" onClick={demo}>
-            <Sparkles className="h-4 w-4 mr-2" /> Continue as Demo Guest
+          <Button variant="secondary" className="w-full" onClick={takeTour}>
+            <Compass className="h-4 w-4 mr-2" /> Take the guided tour
           </Button>
-          <p className="text-xs text-muted-foreground text-center mt-2">No account needed — try all features</p>
+          <p className="text-xs text-muted-foreground text-center mt-2">Preview only — read-only walkthrough, no account needed</p>
         </CardContent>
       </Card>
     </div>

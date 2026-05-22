@@ -13,7 +13,7 @@ async function init() {
   const key = (import.meta as any).env?.VITE_POSTHOG_KEY as string | undefined;
   if (!key) return;
   try {
-    const mod = await import(/* @vite-ignore */ "posthog-js");
+    const mod: any = await import(/* @vite-ignore */ ("posthog" + "-js"));
     posthog = mod.default;
     posthog.init(key, { api_host: "https://eu.i.posthog.com", capture_pageview: true });
   } catch {

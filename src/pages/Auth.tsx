@@ -12,7 +12,6 @@ import { Sparkles, Mail, Lock, User as UserIcon, Compass } from 'lucide-react'
 
 export default function Auth() {
   const navigate = useNavigate()
-  const { enterDemoMode } = useRole()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [displayName, setDisplayName] = useState('')

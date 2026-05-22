@@ -11,9 +11,22 @@ export interface Fund {
   ocf: number; // %
   risk: 1 | 2 | 3 | 4 | 5 | 6 | 7;
   esg: boolean;
+  /** Standardised nominal accumulation rate (FRC AS TM1 v5.0 banded by
+   * asset class & volatility) used for SMPIs and default projections. */
+  standardGrowthRate: number;
 }
 
-export const FUND_UNIVERSE: Fund[] = [
+/** TM1 v5.0 nominal growth band by asset class & risk score (decimal p.a.). */
+export function tm1StandardGrowth(assetClass: Fund["assetClass"], risk: number): number {
+  if (assetClass === "Money market") return 0.035;
+  if (assetClass === "Bond") return risk <= 2 ? 0.04 : 0.045;
+  if (assetClass === "Multi-asset") return risk <= 3 ? 0.045 : risk === 4 ? 0.05 : 0.055;
+  if (assetClass === "Property") return 0.05;
+  if (assetClass === "Alternative") return 0.05;
+  return risk >= 7 ? 0.07 : risk === 6 ? 0.065 : 0.06; // Equity
+}
+
+const RAW_FUNDS: Omit<Fund, "standardGrowthRate">[] = [
   { isin: "GB00B3X7QG63", name: "Vanguard FTSE UK All Share Index", assetClass: "Equity", region: "UK", ocf: 0.06, risk: 5, esg: false },
   { isin: "GB00B5B71Q71", name: "HSBC FTSE 100 Index", assetClass: "Equity", region: "UK", ocf: 0.07, risk: 5, esg: false },
   { isin: "GB00BD3RZ582", name: "Fidelity Index UK", assetClass: "Equity", region: "UK", ocf: 0.06, risk: 5, esg: false },
@@ -55,6 +68,11 @@ export const FUND_UNIVERSE: Fund[] = [
   { isin: "GB00B83DJB22", name: "L&G Cash Trust", assetClass: "Money market", region: "UK", ocf: 0.10, risk: 1, esg: false },
   { isin: "GB00B61RBT12", name: "Ruffer Diversified Return", assetClass: "Alternative", region: "Global", ocf: 1.10, risk: 4, esg: false },
 ];
+
+export const FUND_UNIVERSE: Fund[] = RAW_FUNDS.map((f) => ({
+  ...f,
+  standardGrowthRate: tm1StandardGrowth(f.assetClass, f.risk),
+}));
 
 // Deterministic synthetic 36-month price history per fund.
 // Geometric brownian motion with seeded RNG so the series is stable.

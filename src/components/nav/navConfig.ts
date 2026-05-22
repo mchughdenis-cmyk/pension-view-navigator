@@ -129,6 +129,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "SLA tracker", url: "/sla-tracker", icon: Timer },
         { title: "KYC review queue", url: "/kyc-review", icon: ShieldCheck },
+        { title: "SMPI runner", url: "/smpi", icon: Calculator },
       ],
     },
     {
@@ -182,6 +183,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Origo messages", url: "/origo", icon: Send },
         { title: "Origo transfers", url: "/origo-transfers", icon: ArrowRightLeft },
         { title: "Equisoft in-specie", url: "/equisoft", icon: RefreshCw },
+        { title: "SMPI runner", url: "/smpi", icon: Calculator },
       ],
     },
     {

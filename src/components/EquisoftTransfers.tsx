@@ -469,8 +469,8 @@ function TransferTable({
         {rows.map(t => {
           const meta = STATE_META[t.state]
           return (
-            <>
-              <TableRow key={t.id} className="cursor-pointer" onClick={() => setExpanded(expanded === t.id ? null : t.id)}>
+            <Fragment key={t.id}>
+              <TableRow className="cursor-pointer" onClick={() => setExpanded(expanded === t.id ? null : t.id)}>
                 <TableCell className="font-mono text-xs">{t.equisoft_ref}</TableCell>
                 <TableCell><div className="font-medium">{t.client_name}</div><div className="text-xs text-muted-foreground">{t.client_ref} · {t.wrapper}</div></TableCell>
                 <TableCell><Badge variant="outline" className="capitalize">{t.direction}</Badge></TableCell>
@@ -564,7 +564,7 @@ function TransferTable({
                   </TableCell>
                 </TableRow>
               )}
-            </>
+            </Fragment>
           )
         })}
       </TableBody>

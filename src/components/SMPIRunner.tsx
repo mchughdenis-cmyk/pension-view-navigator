@@ -83,7 +83,7 @@ export default function SMPIRunner() {
         }
       />
 
-      <Tabs defaultValue="single">
+      <Tabs value={tab} onValueChange={setTab}>
         <TabsList>
           <TabsTrigger value="single">Single member</TabsTrigger>
           <TabsTrigger value="batch">Batch results</TabsTrigger>

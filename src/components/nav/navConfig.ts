@@ -62,6 +62,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Life & planning",
       items: [
+        { title: "Pension health score", url: "/health-score", icon: HeartPulse },
         { title: "Life events", url: "/life-events", icon: HeartPulse },
         { title: "Employer matching", url: "/employer-match", icon: Gift },
         { title: "Contribution manager", url: "/contributions", icon: HandCoins },
@@ -74,6 +75,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "Account",
       items: [
         { title: "Mobile app view", url: "/m", icon: Smartphone },
+        { title: "Mobile security", url: "/mobile-security", icon: Lock },
         { title: "Notifications", url: "/notifications", icon: Bell },
         { title: "Documents", url: "/documents", icon: FolderArchive },
         { title: "Privacy centre", url: "/privacy", icon: Lock },
@@ -94,6 +96,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "Client service",
       items: [
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
+        { title: "Pension health score", url: "/health-score", icon: HeartPulse },
+        { title: "Employer portal", url: "/employer-portal", icon: Building2 },
         { title: "Annual review pack", url: "/annual-review", icon: FileSignature },
         { title: "Pension passport", url: "/passport", icon: Plane },
         { title: "Beneficiaries", url: "/beneficiaries", icon: Heart },

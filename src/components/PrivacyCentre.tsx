@@ -68,9 +68,10 @@ export default function PrivacyCentre() {
     setBusy(true);
     try {
       await supabase.from("activity_log").insert({
-        action: "Subject Access Request submitted",
+        action: "sar_submitted",
+        description: "Subject Access Request submitted",
         entity_type: "sar",
-        metadata: { request_text: sarText, channel: "privacy_centre" },
+        new_values: { request_text: sarText, channel: "privacy_centre" } as any,
       });
       toast.success("Request submitted", { description: "We'll respond within 1 month, per UK GDPR Article 12." });
       setSarText("");

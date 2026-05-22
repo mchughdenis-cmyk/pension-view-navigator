@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/integrations/supabase/client'
-import { useRole } from '@/contexts/RoleContext'
+
 import { toast } from 'sonner'
 import { Sparkles, Mail, Lock, User as UserIcon, Compass } from 'lucide-react'
 

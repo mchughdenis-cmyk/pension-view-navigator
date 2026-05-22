@@ -9,6 +9,7 @@ import { ViewSwitcher } from "./ViewSwitcher";
 import { FirmSwitcher } from "./FirmSwitcher";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 
 /**
  * Application shell: persistent sidebar (role-aware) + sticky header with

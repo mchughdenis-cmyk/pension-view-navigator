@@ -97,10 +97,10 @@ export default function Auth() {
 
           <div className="relative my-4"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-card px-2 text-muted-foreground">Just exploring?</span></div></div>
 
-          <Button variant="secondary" className="w-full" onClick={demo}>
-            <Sparkles className="h-4 w-4 mr-2" /> Continue as Demo Guest
+          <Button variant="secondary" className="w-full" onClick={takeTour}>
+            <Compass className="h-4 w-4 mr-2" /> Take the guided tour
           </Button>
-          <p className="text-xs text-muted-foreground text-center mt-2">No account needed — try all features</p>
+          <p className="text-xs text-muted-foreground text-center mt-2">Preview only — read-only walkthrough, no account needed</p>
         </CardContent>
       </Card>
     </div>

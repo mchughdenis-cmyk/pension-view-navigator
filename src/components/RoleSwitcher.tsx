@@ -81,10 +81,8 @@ export function RoleSwitcher() {
 
   const submitRequest = () => {
     if (!companyName) return;
-    const next = Array.from(new Set([...roles, requestRole])) as Role[];
-    setRoles(next);
-    setRolesLS(next);
-    toast.success(`Access request submitted${requestRole !== "admin" ? " (auto-approved for demo)" : ""}`);
+    // Access is NOT auto-granted: an admin must approve via Supabase user_roles.
+    toast.success("Access request submitted — an administrator will review and approve");
     setRequestOpen(false);
     setCompanyName("");
     setReference("");

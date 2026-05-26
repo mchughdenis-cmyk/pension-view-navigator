@@ -147,6 +147,7 @@ const AppContent = () => {
       <GuidedTour />
       <OfflineBanner />
       <IOSInstallSheet />
+      <ContactUsPrompt />
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />

@@ -49,6 +49,17 @@ Deno.serve(async (req) => {
   const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
   try {
+    // Staff-only — clients must not be able to cancel/reject transfers
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: { user } } = await sb.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", user.id);
+    const list = (roles ?? []).map((r: any) => r.role as string);
+    if (!list.includes("admin") && !list.includes("adviser")) {
+      return new Response(JSON.stringify({ error: "Forbidden: staff only" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { transfer_id, action, reject_reason } = await req.json();
     if (!transfer_id || !action) throw new Error("transfer_id and action required");
 

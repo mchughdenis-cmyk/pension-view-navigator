@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react'
+import { supabase } from '@/integrations/supabase/client'
 
 export type Role = 'client' | 'adviser' | 'admin'
 
@@ -13,13 +14,14 @@ interface RoleContextValue {
   role: Role
   user: DemoUser
   session: boolean
+  loading: boolean
   setRole: (r: Role) => void
   switchRole: (r: Role, override?: Partial<DemoUser>) => void
   enterDemoMode: () => void
 }
 
-const STORAGE_KEY = 'pn_demo_role'
-const USER_KEY = 'pn_demo_user'
+// Role precedence when a user has multiple roles
+const ROLE_PRECEDENCE: Role[] = ['admin', 'adviser', 'client']
 
 const DEFAULTS: Record<Role, DemoUser> = {
   client: { id: 'demo-client', name: 'Sarah Thompson', email: 'sarah@example.com', role: 'client' },
@@ -28,44 +30,85 @@ const DEFAULTS: Record<Role, DemoUser> = {
 }
 
 const RoleContext = createContext<RoleContextValue>({
-  role: 'admin', user: DEFAULTS.admin, session: true,
+  role: 'client', user: DEFAULTS.client, session: false, loading: true,
   setRole: () => {}, switchRole: () => {}, enterDemoMode: () => {},
 })
 
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<Role>(() => {
-    if (typeof window === 'undefined') return 'admin'
-    return ((localStorage.getItem(STORAGE_KEY) as Role) || 'admin')
-  })
-  const [user, setUser] = useState<DemoUser>(() => {
-    if (typeof window === 'undefined') return DEFAULTS.admin
-    try {
-      const raw = localStorage.getItem(USER_KEY)
-      if (raw) return JSON.parse(raw) as DemoUser
-    } catch {}
-    return DEFAULTS[((localStorage.getItem(STORAGE_KEY) as Role) || 'admin')]
-  })
+  const [role, setRoleState] = useState<Role>('client')
+  const [user, setUser] = useState<DemoUser>(DEFAULTS.client)
+  const [session, setSession] = useState(false)
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => { localStorage.setItem(STORAGE_KEY, role) }, [role])
-  useEffect(() => { localStorage.setItem(USER_KEY, JSON.stringify(user)) }, [user])
-
-  const setRole = (r: Role) => {
-    setRoleState(r)
-    setUser({ ...DEFAULTS[r] })
+  // Load the authoritative role for the current authenticated user
+  async function loadRoleFor(userId: string, email: string | null, displayName: string | null) {
+    const { data, error } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+    if (error) {
+      console.warn('Failed to load user_roles', error.message)
+      setRoleState('client')
+    } else {
+      const roles = (data ?? []).map(r => r.role as Role)
+      const resolved = ROLE_PRECEDENCE.find(r => roles.includes(r)) ?? 'client'
+      setRoleState(resolved)
+      setUser({
+        id: userId,
+        email: email ?? '',
+        name: displayName ?? (email?.split('@')[0] ?? 'User'),
+        role: resolved,
+      })
+    }
   }
 
+  useEffect(() => {
+    // Subscribe to auth changes synchronously, then fetch state.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
+      if (sess?.user) {
+        setSession(true)
+        // Defer DB call to avoid deadlocks inside the callback
+        setTimeout(() => {
+          loadRoleFor(
+            sess.user.id,
+            sess.user.email ?? null,
+            (sess.user.user_metadata?.display_name as string | undefined) ?? null,
+          )
+        }, 0)
+      } else {
+        setSession(false)
+        setRoleState('client')
+        setUser(DEFAULTS.client)
+      }
+    })
+
+    supabase.auth.getSession().then(({ data: { session: sess } }) => {
+      if (sess?.user) {
+        setSession(true)
+        loadRoleFor(
+          sess.user.id,
+          sess.user.email ?? null,
+          (sess.user.user_metadata?.display_name as string | undefined) ?? null,
+        ).finally(() => setLoading(false))
+      } else {
+        setLoading(false)
+      }
+    })
+
+    return () => { subscription.unsubscribe() }
+  }, [])
+
+  // Role mutation helpers are kept for backward compatibility but are now
+  // local-only UI hints; the real role is enforced server-side via RLS.
+  const setRole = (r: Role) => setRoleState(r)
   const switchRole = (r: Role, override?: Partial<DemoUser>) => {
     setRoleState(r)
-    setUser({ ...DEFAULTS[r], ...override, role: r })
+    setUser(prev => ({ ...prev, ...override, role: r }))
   }
-
-  const enterDemoMode = () => {
-    setRoleState('admin')
-    setUser({ ...DEFAULTS.admin })
-  }
+  const enterDemoMode = () => {} // no-op: demo mode no longer bypasses auth
 
   return (
-    <RoleContext.Provider value={{ role, user, session: true, setRole, switchRole, enterDemoMode }}>
+    <RoleContext.Provider value={{ role, user, session, loading, setRole, switchRole, enterDemoMode }}>
       {children}
     </RoleContext.Provider>
   )

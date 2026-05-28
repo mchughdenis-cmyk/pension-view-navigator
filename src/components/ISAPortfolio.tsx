@@ -119,6 +119,20 @@ export default function ISAPortfolio() {
     toast({ title: 'Contribution added', description: `£${amount.toLocaleString()} subscribed` })
   }
 
+  function handleTransferIn(r: TransferInResult) {
+    setHoldings(prev => applyTransferToHoldings(prev, r))
+    setTransactions(prev => [{
+      date: r.receivedDate,
+      type: 'Transfer In',
+      amount: r.totalValue,
+      description: `${r.cedingProvider} (${r.transferType === 'cash' ? 'cash' : 'in-specie'}) · ${r.trackingRef}`,
+    }, ...prev])
+    toast({
+      title: 'ISA transfer request submitted',
+      description: `£${r.totalValue.toLocaleString()} from ${r.cedingProvider} · ${r.trackingRef}. Does not affect this year's allowance.`,
+    })
+  }
+
   async function downloadTaxPack() {
     await exportAnnualTaxPack({
       clientName: 'Demo Client', taxYear: '2024/25', band: 'higher',

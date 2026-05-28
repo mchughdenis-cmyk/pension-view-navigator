@@ -157,7 +157,10 @@ export default function ISAPortfolio() {
               <p className="text-muted-foreground">Tax-free investment account · {currentYearData.year}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setTransferOpen(true)}>
+              <ArrowDownToLine className="w-4 h-4 mr-2" />Transfer in
+            </Button>
             <Button variant="outline" size="sm" onClick={addContribution}><Plus className="w-4 h-4 mr-2" />Contribute</Button>
             <Button variant="outline" size="sm" onClick={downloadTaxPack}><FileDown className="w-4 h-4 mr-2" />Tax pack</Button>
             <Button size="sm" onClick={() => setDealOpen(true)}>Deal</Button>

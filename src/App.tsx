@@ -133,14 +133,6 @@ const DashboardRoute = () => {
 };
 
 const AppContent = () => {
-  // Best-effort one-time seed of the system admin account on first boot.
-  useEffect(() => {
-    const KEY = "airgead.seed-admin.attempted.v1";
-    if (typeof window === "undefined" || localStorage.getItem(KEY)) return;
-    localStorage.setItem(KEY, "1");
-    supabase.functions.invoke("seed-admin").catch(() => {/* non-fatal */});
-  }, []);
-
   return (
     <BrowserRouter>
       <FloatingBackButton />

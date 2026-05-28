@@ -21,6 +21,7 @@ export default function ISAPortfolio() {
   const { toast } = useToast()
   const [selectedYear, setSelectedYear] = useState('2025/26')
   const [dealOpen, setDealOpen] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
 
   const [holdings, setHoldings] = useState<Holding[]>([
     { name: 'Vanguard FTSE Global All Cap Index', units: 450.23, price: 78.45, value: 35320, gain: 5200, gainPercent: 17.3, allocation: 40.3 },

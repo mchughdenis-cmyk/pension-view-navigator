@@ -22,6 +22,7 @@ export default function GIAPortfolio() {
   const { toast } = useToast()
   const [dealOpen, setDealOpen] = useState(false)
   const [bedIsaOpen, setBedIsaOpen] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
 
   const [holdings, setHoldings] = useState<Holding[]>([
     { name: 'Fundsmith Equity', units: 320, price: 165.50, value: 52960, gain: 7200, gainPercent: 15.7, allocation: 36.5 },

@@ -18,6 +18,17 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
 
+  // Staff-only
+  const authHeader = req.headers.get("Authorization");
+  if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  const { data: { user } } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+  if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+  const list = (roles ?? []).map((r: any) => r.role as string);
+  if (!list.includes("admin") && !list.includes("adviser")) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+  }
+
   const today = new Date().toISOString().slice(0, 10)
   const dailyRate = ANNUAL_RATE_PCT / 100 / 365
 

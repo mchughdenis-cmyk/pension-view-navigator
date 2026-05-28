@@ -9,8 +9,18 @@ const corsHeaders = {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
-    const { scope = "platform" } = await req.json().catch(() => ({}));
     const sb = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    // Staff-only
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: { user } } = await sb.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (!user) return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: roles } = await sb.from("user_roles").select("role").eq("user_id", user.id);
+    const list = (roles ?? []).map((r: any) => r.role as string);
+    if (!list.includes("admin") && !list.includes("adviser")) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { scope = "platform" } = await req.json().catch(() => ({}));
 
     // Pull a tight context: open ops cases, breaches, drift, recent fees
     const [{ data: cases }, { data: breaches }, { data: rebals }] = await Promise.all([

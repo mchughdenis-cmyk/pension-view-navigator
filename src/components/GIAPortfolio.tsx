@@ -365,6 +365,7 @@ export default function GIAPortfolio() {
         giaHoldings={holdings} isaAllowanceRemaining={7500}
         onConfirm={executeBedAndIsa}
       />
+      <TransferInDialog open={transferOpen} onOpenChange={setTransferOpen} wrapper="GIA" onConfirm={handleTransferIn} />
     </div>
   )
 }

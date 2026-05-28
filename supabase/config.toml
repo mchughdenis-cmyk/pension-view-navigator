@@ -9,9 +9,6 @@ verify_jwt = false
 [functions.annual-statements]
 verify_jwt = false
 
-[functions.integration-stub]
-verify_jwt = false
-
 [functions.rebalance-engine]
 verify_jwt = false
 
@@ -23,4 +20,3 @@ verify_jwt = false
 
 [functions.cass-reconciliation]
 verify_jwt = false
-

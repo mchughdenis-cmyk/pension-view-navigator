@@ -118,8 +118,6 @@ import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
 import Tour from "./pages/Tour";
 import { ContactUsPrompt } from "./components/ContactUsPrompt";
-import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const HomeRedirect = () => {
   const { role } = useRole();
@@ -133,14 +131,6 @@ const DashboardRoute = () => {
 };
 
 const AppContent = () => {
-  // Best-effort one-time seed of the system admin account on first boot.
-  useEffect(() => {
-    const KEY = "airgead.seed-admin.attempted.v1";
-    if (typeof window === "undefined" || localStorage.getItem(KEY)) return;
-    localStorage.setItem(KEY, "1");
-    supabase.functions.invoke("seed-admin").catch(() => {/* non-fatal */});
-  }, []);
-
   return (
     <BrowserRouter>
       <FloatingBackButton />

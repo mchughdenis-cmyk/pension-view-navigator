@@ -1,10 +1,21 @@
-// Integration stub — simulates external API calls (Modulr, FE fundinfo, HMRC, DocuSign, Onfido, Calastone)
-// All calls log to integration_log and return realistic mocked responses.
+// Integration stub — simulates external API calls. Staff-only.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
+async function requireStaff(authHeader: string | null, supabase: ReturnType<typeof createClient>) {
+  if (!authHeader) return { ok: false as const, status: 401, error: 'Missing authorization' }
+  const { data: { user }, error } = await supabase.auth.getUser(authHeader.replace('Bearer ', ''))
+  if (error || !user) return { ok: false as const, status: 401, error: 'Invalid token' }
+  const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id)
+  const list = (roles ?? []).map(r => r.role as string)
+  if (!list.includes('admin') && !list.includes('adviser')) {
+    return { ok: false as const, status: 403, error: 'Forbidden: admin or adviser role required' }
+  }
+  return { ok: true as const, user }
 }
 
 Deno.serve(async (req) => {
@@ -14,6 +25,13 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   )
+
+  const auth = await requireStaff(req.headers.get('Authorization'), supabase)
+  if (!auth.ok) {
+    return new Response(JSON.stringify({ error: auth.error }), {
+      status: auth.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    })
+  }
 
   const start = Date.now()
   let response: any = {}

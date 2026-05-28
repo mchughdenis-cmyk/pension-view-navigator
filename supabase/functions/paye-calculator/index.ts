@@ -23,6 +23,18 @@ function emergencyM1(taxable: number) {
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   try {
+    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+    // Staff-only auth check
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return new Response(JSON.stringify({ error: "Missing authorization" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: { user }, error: authErr } = await supabase.auth.getUser(authHeader.replace("Bearer ", ""));
+    if (authErr || !user) return new Response(JSON.stringify({ error: "Invalid token" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    const list = (roles ?? []).map(r => r.role as string);
+    if (!list.includes("admin") && !list.includes("adviser")) {
+      return new Response(JSON.stringify({ error: "Forbidden: admin or adviser role required" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const { client_id, payment_type = "UFPLS", gross_amount, tax_code = "1257L M1", emergency = true } = await req.json();
     if (!client_id || !gross_amount || gross_amount <= 0)
       return new Response(JSON.stringify({ error: "client_id and gross_amount required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -32,7 +44,6 @@ Deno.serve(async (req) => {
     const tax = emergency ? emergencyM1(taxable) : 0;
     const net = gross_amount - tax;
 
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data, error } = await supabase.from("paye_calculations").insert({
       client_id, payment_type, gross_amount, tax_free_amount: tax_free,
       taxable_amount: taxable, tax_code, emergency_basis: emergency,

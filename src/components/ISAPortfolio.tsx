@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   TrendingUp, PiggyBank, Shield, Plus, BarChart3,
-  CheckCircle, Clock, History, FileDown,
+  CheckCircle, Clock, History, FileDown, ArrowDownToLine,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import BuySellDialog, { type Holding, type DealResult } from './BuySellDialog'
+import TransferInDialog, { applyTransferToHoldings, type TransferInResult } from './TransferInDialog'
 import { exportAnnualTaxPack } from '@/lib/taxPackExport'
 
 interface Tx { date: string; type: string; amount: number; description: string }

@@ -137,6 +137,29 @@ export default function GIAPortfolio() {
     toast({ title: 'Tax pack downloaded' })
   }
 
+  function handleTransferIn(r: TransferInResult) {
+    setHoldings(prev => applyTransferToHoldings(prev, r))
+    // Seed s104 pools with in-specie holdings using estimated value as base cost
+    setPools(prev => {
+      const next = { ...prev }
+      for (const line of r.lines) {
+        const existing = next[line.fundName] ?? { units: 0, cost: 0 }
+        next[line.fundName] = addToPool(existing, line.units, line.estimatedValue)
+      }
+      return next
+    })
+    setTransactions(prev => [{
+      date: r.receivedDate,
+      type: 'Transfer In',
+      amount: r.totalValue,
+      description: `${r.cedingProvider} (${r.transferType === 'cash' ? 'cash' : 'in-specie'}) · ${r.trackingRef}`,
+    }, ...prev])
+    toast({
+      title: 'GIA transfer request submitted',
+      description: `£${r.totalValue.toLocaleString()} from ${r.cedingProvider} · ${r.trackingRef}. In-specie cost basis carried over.`,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

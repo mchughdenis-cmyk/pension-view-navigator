@@ -341,6 +341,7 @@ export default function ISAPortfolio() {
         onConfirm={applyDeal}
         allowanceRemaining={remainingAllowance}
       />
+      <TransferInDialog open={transferOpen} onOpenChange={setTransferOpen} wrapper="ISA" onConfirm={handleTransferIn} />
     </div>
   )
 }

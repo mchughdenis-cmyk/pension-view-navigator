@@ -118,8 +118,6 @@ import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
 import Tour from "./pages/Tour";
 import { ContactUsPrompt } from "./components/ContactUsPrompt";
-import { useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 
 const HomeRedirect = () => {
   const { role } = useRole();

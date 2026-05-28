@@ -8,10 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
   TrendingUp, PiggyBank, Shield, Plus, BarChart3,
-  CheckCircle, Clock, History, FileDown,
+  CheckCircle, Clock, History, FileDown, ArrowDownToLine,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import BuySellDialog, { type Holding, type DealResult } from './BuySellDialog'
+import TransferInDialog, { applyTransferToHoldings, type TransferInResult } from './TransferInDialog'
 import { exportAnnualTaxPack } from '@/lib/taxPackExport'
 
 interface Tx { date: string; type: string; amount: number; description: string }
@@ -20,6 +21,7 @@ export default function ISAPortfolio() {
   const { toast } = useToast()
   const [selectedYear, setSelectedYear] = useState('2025/26')
   const [dealOpen, setDealOpen] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
 
   const [holdings, setHoldings] = useState<Holding[]>([
     { name: 'Vanguard FTSE Global All Cap Index', units: 450.23, price: 78.45, value: 35320, gain: 5200, gainPercent: 17.3, allocation: 40.3 },
@@ -117,6 +119,20 @@ export default function ISAPortfolio() {
     toast({ title: 'Contribution added', description: `£${amount.toLocaleString()} subscribed` })
   }
 
+  function handleTransferIn(r: TransferInResult) {
+    setHoldings(prev => applyTransferToHoldings(prev, r))
+    setTransactions(prev => [{
+      date: r.receivedDate,
+      type: 'Transfer In',
+      amount: r.totalValue,
+      description: `${r.cedingProvider} (${r.transferType === 'cash' ? 'cash' : 'in-specie'}) · ${r.trackingRef}`,
+    }, ...prev])
+    toast({
+      title: 'ISA transfer request submitted',
+      description: `£${r.totalValue.toLocaleString()} from ${r.cedingProvider} · ${r.trackingRef}. Does not affect this year's allowance.`,
+    })
+  }
+
   async function downloadTaxPack() {
     await exportAnnualTaxPack({
       clientName: 'Demo Client', taxYear: '2024/25', band: 'higher',
@@ -141,7 +157,10 @@ export default function ISAPortfolio() {
               <p className="text-muted-foreground">Tax-free investment account · {currentYearData.year}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setTransferOpen(true)}>
+              <ArrowDownToLine className="w-4 h-4 mr-2" />Transfer in
+            </Button>
             <Button variant="outline" size="sm" onClick={addContribution}><Plus className="w-4 h-4 mr-2" />Contribute</Button>
             <Button variant="outline" size="sm" onClick={downloadTaxPack}><FileDown className="w-4 h-4 mr-2" />Tax pack</Button>
             <Button size="sm" onClick={() => setDealOpen(true)}>Deal</Button>
@@ -322,6 +341,7 @@ export default function ISAPortfolio() {
         onConfirm={applyDeal}
         allowanceRemaining={remainingAllowance}
       />
+      <TransferInDialog open={transferOpen} onOpenChange={setTransferOpen} wrapper="ISA" onConfirm={handleTransferIn} />
     </div>
   )
 }

@@ -6,11 +6,12 @@ import { BackButton } from '@/components/ui/back-button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   TrendingUp, Landmark, Plus, PiggyBank, BarChart3, AlertCircle,
-  FileDown, ArrowRightLeft, Calculator,
+  FileDown, ArrowRightLeft, Calculator, ArrowDownToLine,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import BuySellDialog, { type Holding, type DealResult } from './BuySellDialog'
 import BedAndISADialog from './BedAndISADialog'
+import TransferInDialog, { applyTransferToHoldings, type TransferInResult } from './TransferInDialog'
 import { matchDisposal, estimateCgt, addToPool, type Disposal, type S104Pool, CGT_ALLOWANCE_2024_25 } from '@/lib/cgt'
 import { estimateDividendTax } from '@/lib/dividendTax'
 import { exportAnnualTaxPack } from '@/lib/taxPackExport'
@@ -21,6 +22,7 @@ export default function GIAPortfolio() {
   const { toast } = useToast()
   const [dealOpen, setDealOpen] = useState(false)
   const [bedIsaOpen, setBedIsaOpen] = useState(false)
+  const [transferOpen, setTransferOpen] = useState(false)
 
   const [holdings, setHoldings] = useState<Holding[]>([
     { name: 'Fundsmith Equity', units: 320, price: 165.50, value: 52960, gain: 7200, gainPercent: 15.7, allocation: 36.5 },
@@ -135,6 +137,29 @@ export default function GIAPortfolio() {
     toast({ title: 'Tax pack downloaded' })
   }
 
+  function handleTransferIn(r: TransferInResult) {
+    setHoldings(prev => applyTransferToHoldings(prev, r))
+    // Seed s104 pools with in-specie holdings using estimated value as base cost
+    setPools(prev => {
+      const next = { ...prev }
+      for (const line of r.lines) {
+        const existing = next[line.fundName] ?? { units: 0, cost: 0 }
+        next[line.fundName] = addToPool(existing, line.units, line.estimatedValue)
+      }
+      return next
+    })
+    setTransactions(prev => [{
+      date: r.receivedDate,
+      type: 'Transfer In',
+      amount: r.totalValue,
+      description: `${r.cedingProvider} (${r.transferType === 'cash' ? 'cash' : 'in-specie'}) · ${r.trackingRef}`,
+    }, ...prev])
+    toast({
+      title: 'GIA transfer request submitted',
+      description: `£${r.totalValue.toLocaleString()} from ${r.cedingProvider} · ${r.trackingRef}. In-specie cost basis carried over.`,
+    })
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-muted via-background to-secondary-muted">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -149,6 +174,9 @@ export default function GIAPortfolio() {
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setTransferOpen(true)}>
+              <ArrowDownToLine className="w-4 h-4 mr-2" />Transfer in
+            </Button>
             <Button variant="outline" size="sm" onClick={() => setBedIsaOpen(true)}>
               <ArrowRightLeft className="w-4 h-4 mr-2" />Bed &amp; ISA
             </Button>
@@ -337,6 +365,7 @@ export default function GIAPortfolio() {
         giaHoldings={holdings} isaAllowanceRemaining={7500}
         onConfirm={executeBedAndIsa}
       />
+      <TransferInDialog open={transferOpen} onOpenChange={setTransferOpen} wrapper="GIA" onConfirm={handleTransferIn} />
     </div>
   )
 }

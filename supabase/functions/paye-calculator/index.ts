@@ -44,7 +44,6 @@ Deno.serve(async (req) => {
     const tax = emergency ? emergencyM1(taxable) : 0;
     const net = gross_amount - tax;
 
-    const supabase = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
     const { data, error } = await supabase.from("paye_calculations").insert({
       client_id, payment_type, gross_amount, tax_free_amount: tax_free,
       taxable_amount: taxable, tax_code, emergency_basis: emergency,

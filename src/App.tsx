@@ -39,6 +39,7 @@ import PaymentProvider from "./components/PaymentProvider";
 import SystemDocumentation from "./components/SystemDocumentation";
 import ISAPortfolio from "./components/ISAPortfolio";
 import GIAPortfolio from "./components/GIAPortfolio";
+import BondPortfolio from "./components/BondPortfolio";
 import ClientAdminView from "./components/ClientAdminView";
 import APIDirectory from "./components/APIDirectory";
 import SystemOverview from "./components/SystemOverview";
@@ -213,6 +214,8 @@ const AppContent = () => {
               <Route path="/payments" element={<PaymentProvider />} />
               <Route path="/isa" element={<ISAPortfolio />} />
               <Route path="/gia" element={<GIAPortfolio />} />
+              <Route path="/onshore-bond" element={<BondPortfolio bondType="onshore" />} />
+              <Route path="/offshore-bond" element={<BondPortfolio bondType="offshore" />} />
               <Route path="/client-admin/:clientId" element={<RoleGate allow={['adviser', 'admin']}><ClientAdminView /></RoleGate>} />
               <Route path="/operations" element={<RoleGate allow={['adviser', 'admin']}><PensionOperations /></RoleGate>} />
               <Route path="/cockpit" element={<RoleGate allow={['adviser', 'admin']}><OperationsCockpit /></RoleGate>} />

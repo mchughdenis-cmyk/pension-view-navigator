@@ -5,6 +5,7 @@ import {
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
   HeartPulse, Gift, Plane, Lock, UserCog, Heart, Crown, HandCoins, Accessibility,
+  Landmark, Globe2,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -21,6 +22,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Portfolio", url: "/portfolio", icon: TrendingUp },
         { title: "ISA", url: "/isa", icon: PiggyBank },
         { title: "GIA", url: "/gia", icon: Wallet },
+        { title: "Onshore bond", url: "/onshore-bond", icon: Landmark },
+        { title: "Offshore bond", url: "/offshore-bond", icon: Globe2 },
         { title: "Annual summary", url: "/annual-summary", icon: FileText },
         { title: "Inheritance Tax", url: "/iht", icon: ScrollText },
       ],
@@ -197,6 +200,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Instrument transfer", url: "/instrument-transfer", icon: RefreshCw },
         { title: "ISA portfolio", url: "/isa", icon: PiggyBank },
         { title: "GIA portfolio", url: "/gia", icon: Wallet },
+        { title: "Onshore bond", url: "/onshore-bond", icon: Landmark },
+        { title: "Offshore bond", url: "/offshore-bond", icon: Globe2 },
         { title: "Annual summary", url: "/annual-summary", icon: FileText },
         { title: "Pension passport", url: "/passport", icon: Plane },
         { title: "Beneficiaries", url: "/beneficiaries", icon: Heart },

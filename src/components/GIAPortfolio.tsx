@@ -6,11 +6,12 @@ import { BackButton } from '@/components/ui/back-button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   TrendingUp, Landmark, Plus, PiggyBank, BarChart3, AlertCircle,
-  FileDown, ArrowRightLeft, Calculator,
+  FileDown, ArrowRightLeft, Calculator, ArrowDownToLine,
 } from 'lucide-react'
 import { useToast } from '@/hooks/use-toast'
 import BuySellDialog, { type Holding, type DealResult } from './BuySellDialog'
 import BedAndISADialog from './BedAndISADialog'
+import TransferInDialog, { applyTransferToHoldings, type TransferInResult } from './TransferInDialog'
 import { matchDisposal, estimateCgt, addToPool, type Disposal, type S104Pool, CGT_ALLOWANCE_2024_25 } from '@/lib/cgt'
 import { estimateDividendTax } from '@/lib/dividendTax'
 import { exportAnnualTaxPack } from '@/lib/taxPackExport'

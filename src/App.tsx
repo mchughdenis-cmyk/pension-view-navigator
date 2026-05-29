@@ -130,6 +130,19 @@ const DashboardRoute = () => {
   return <ClientProductsDashboard />;
 };
 
+const MarketingGate = ({ children }: { children: React.ReactNode }) => {
+  const { enabled, loading } = useMarketingSiteEnabled();
+  if (loading) return null;
+  if (!enabled) return <Navigate to="/auth" replace />;
+  return <>{children}</>;
+};
+
+const RootRedirect = () => {
+  const { enabled, loading } = useMarketingSiteEnabled();
+  if (loading) return null;
+  return <Navigate to={enabled ? "/site" : "/auth"} replace />;
+};
+
 const AppContent = () => {
   return (
     <BrowserRouter>
@@ -146,8 +159,8 @@ const AppContent = () => {
         <Route path="/tour" element={<Tour />} />
         <Route path="/login" element={<Navigate to="/auth" replace />} />
         <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
-        <Route path="/pitch" element={<Navigate to="/site" replace />} />
-        <Route path="/" element={<Navigate to="/site" replace />} />
+        <Route path="/pitch" element={<RootRedirect />} />
+        <Route path="/" element={<RootRedirect />} />
         {/* Dedicated shareable entry points — skip marketing site */}
         <Route path="/app" element={<Navigate to="/dashboard" replace />} />
         <Route path="/home" element={<Navigate to="/dashboard" replace />} />
@@ -156,8 +169,8 @@ const AppContent = () => {
         <Route path="/m" element={<MobileClientApp />} />
         <Route path="/mobile" element={<Navigate to="/m" replace />} />
 
-        {/* Marketing site */}
-        <Route path="/site" element={<MarketingLayout />}>
+        {/* Marketing site (admin-toggleable) */}
+        <Route path="/site" element={<MarketingGate><MarketingLayout /></MarketingGate>}>
           <Route index element={<MarketingHome />} />
           <Route path="about" element={<MarketingAbout />} />
           <Route path="platform" element={<MarketingPlatform />} />
@@ -165,6 +178,7 @@ const AppContent = () => {
           <Route path="market" element={<MarketingMarket />} />
           <Route path="contact" element={<MarketingContact />} />
         </Route>
+
 
         {/* App routes — wrapped in shell */}
         <Route path="*" element={

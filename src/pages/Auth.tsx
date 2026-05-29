@@ -90,7 +90,7 @@ export default function Auth() {
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin" className="space-y-3 pt-4">
-              <div><Label><Mail className="h-3 w-3 inline mr-1" />Email</Label><Input type="email" value={email} onChange={e => setEmail(e.target.value)} /></div>
+              <div><Label><Mail className="h-3 w-3 inline mr-1" />Email or name</Label><Input type="text" placeholder="you@example.com or your name" value={email} onChange={e => setEmail(e.target.value)} /></div>
               <div><Label><Lock className="h-3 w-3 inline mr-1" />Password</Label><Input type="password" value={password} onChange={e => setPassword(e.target.value)} /></div>
               <Button className="w-full" onClick={signIn} disabled={loading || !email || !password}>{loading ? 'Signing in...' : 'Sign In'}</Button>
             </TabsContent>

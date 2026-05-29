@@ -61,7 +61,40 @@ export default function DrawdownJourney() {
   const [growth, setGrowth] = useState(4);
   const [inflation, setInflation] = useState(2.5);
   const [submitting, setSubmitting] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+
+  // FCA mandatory disclosures (COBS 19.7 / 19.7A — Pension Wise stronger nudge + retirement risk warnings)
+  const [journeyType, setJourneyType] = useState<"advised" | "non_advised" | "">("");
+  // Pension Wise / MoneyHelper "stronger nudge" — non-advised only
+  const [pwOffered, setPwOffered] = useState(false);
+  const [pwOutcome, setPwOutcome] = useState<"booked" | "received" | "optout" | "">("");
+  const [pwOptOutReason, setPwOptOutReason] = useState("");
+  // Retirement risk warnings (second line of defence) — both journeys
+  const [rrw, setRrw] = useState<Record<string, boolean>>({
+    health: false, marital: false, otherPensions: false, inflation: false,
+    scams: false, debts: false, sustainability: false, tax: false,
+    dependants: false, meansTested: false, charges: false, investmentChoice: false,
+  });
+  // Advised-journey suitability declarations
+  const [adv, setAdv] = useState({
+    factFind: false, atr: false, capacityForLoss: false, sustainability: false,
+    cashflow: false, mpaaAck: false, lsaAck: false, alternatives: false,
+    chargesDisclosed: false, suitabilityIssued: false,
+  });
+  const [advAtrCategory, setAdvAtrCategory] = useState("Balanced");
+  const [advCfl, setAdvCfl] = useState<"low" | "medium" | "high">("medium");
+  const [advNotes, setAdvNotes] = useState("");
+
+  const rrwAllAck = Object.values(rrw).every(Boolean);
+  const advAllAck = Object.values(adv).every(Boolean);
+  const pwComplete = pwOutcome === "received" || pwOutcome === "booked" ||
+    (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
+  const disclosuresComplete = journeyType === "advised"
+    ? (advAllAck && rrwAllAck)
+    : journeyType === "non_advised"
+      ? (pwOffered && pwComplete && rrwAllAck)
+      : false;
+
 
   // Auto-set max PCLS when pot changes
   const maxPcls = useMemo(() => calculatePCLS(potValue).maxPcls, [potValue]);

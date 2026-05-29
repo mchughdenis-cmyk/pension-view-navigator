@@ -131,7 +131,7 @@ export default function DrawdownJourney() {
       drawdownIncome: mode === "PCLS_FAD" ? annualIncome : undefined,
       ufplsGross: mode === "UFPLS" ? ufplsGross : undefined,
       otherIncome,
-      notes: `Drawdown journey: ${mode} | ${journeyType === "advised" ? "Advised (COBS 9/9A)" : "Non-advised (COBS 19.7A nudge)"} | RRW acknowledged | ${journeyType === "non_advised" ? `PW: ${pwOutcome}${pwOutcome === "optout" ? " — " + pwOptOutReason : ""}` : `ATR: ${advAtrCategory}, CFL: ${advCfl}`}${advNotes ? ` | Notes: ${advNotes}` : ""}`,
+      notes: `Drawdown journey: ${mode} | ${journeyType === "advised" ? "Advised (COBS 9/9A)" : "Non-advised (COBS 19.7A nudge)"} | RRW acknowledged | ${journeyType === "non_advised" ? `PW: ${pwOutcome}${(pwOutcome === "booked" || pwOutcome === "received") ? " — ref " + pwReference : ""}${pwOutcome === "optout" ? " — " + pwOptOutReason : ""}` : `ATR: ${advAtrCategory}, CFL: ${advCfl}`}${advNotes ? ` | Notes: ${advNotes}` : ""}`,
     });
     setSubmitting(false);
     if (result) {

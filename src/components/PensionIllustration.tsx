@@ -25,6 +25,8 @@ import { toast } from "sonner";
 
 interface IllustrationInputs {
   potValue: number;
+  transferIn: number;
+  annualContribution: number;
   currentAge: number;
   retirementAge: number;
   lifeExpectancy: number;
@@ -37,6 +39,8 @@ interface IllustrationInputs {
 const PensionIllustration = () => {
   const [inputs, setInputs] = useState<IllustrationInputs>({
     potValue: 250000,
+    transferIn: 0,
+    annualContribution: 6000,
     currentAge: 55,
     retirementAge: 65,
     lifeExpectancy: 85,
@@ -45,6 +49,7 @@ const PensionIllustration = () => {
     annuityRate: 5.2,
     inflationRate: 2.5
   });
+
 
   const updateInput = (key: keyof IllustrationInputs, value: number) => {
     setInputs(prev => ({ ...prev, [key]: value }));

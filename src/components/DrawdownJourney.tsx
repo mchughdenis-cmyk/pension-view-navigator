@@ -73,8 +73,9 @@ export default function DrawdownJourney() {
   const [rrw, setRrw] = useState<Record<string, boolean>>({
     health: false, marital: false, otherPensions: false, inflation: false,
     scams: false, debts: false, sustainability: false, tax: false,
-    dependants: false, meansTested: false, charges: false, investmentChoice: false,
+    meansTested: false, charges: false, investmentChoice: false,
   });
+  const [pwReference, setPwReference] = useState("");
   // Advised-journey suitability declarations
   const [adv, setAdv] = useState({
     factFind: false, atr: false, capacityForLoss: false, sustainability: false,

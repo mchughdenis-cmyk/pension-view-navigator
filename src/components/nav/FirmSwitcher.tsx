@@ -1,20 +1,33 @@
-import { Building2 } from "lucide-react";
+import { Building2, Globe2 } from "lucide-react";
 import { useFirm } from "@/contexts/FirmContext";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 
-/** Header firm selector — drives simulated multi-tenancy. */
+const ALL = "__all__";
+
+/** Header firm selector — drives simulated multi-tenancy.
+ *  "All firms" puts the platform into cross-firm admin mode. */
 export function FirmSwitcher() {
   const { firms, firmId, setFirmId, loading } = useFirm();
   if (loading || firms.length === 0) return null;
   return (
-    <Select value={firmId ?? undefined} onValueChange={setFirmId}>
-      <SelectTrigger className="h-8 w-[180px] text-xs gap-2">
-        <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+    <Select
+      value={firmId ?? ALL}
+      onValueChange={(v) => setFirmId(v === ALL ? null : v)}
+    >
+      <SelectTrigger className="h-8 w-[200px] text-xs gap-2">
+        {firmId ? (
+          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+        ) : (
+          <Globe2 className="h-3.5 w-3.5 text-primary" />
+        )}
         <SelectValue placeholder="Select firm" />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value={ALL} className="text-xs">
+          <span className="font-semibold">All firms (Platform)</span>
+        </SelectItem>
         {firms.map(f => (
           <SelectItem key={f.id} value={f.id} className="text-xs">
             <span className="font-medium">{f.name}</span>

@@ -2,57 +2,94 @@ import { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, conv
 import { saveAs } from 'file-saver';
 import airgeadLogoUrl from '@/assets/airgead-logo.png';
 
-let cachedLogoBytes: ArrayBuffer | null = null;
+// ---- Active firm branding (set by FirmProvider) -----------------------------
+// Lets every document exporter automatically pick up the current firm's logo,
+// name and primary colour without changing any call sites.
+type ActiveBrand = { logoUrl: string; firmName: string; primaryColor: string };
+const DEFAULT_BRAND: ActiveBrand = {
+  logoUrl: airgeadLogoUrl,
+  firmName: 'Pension Navigator',
+  primaryColor: '#0066cc',
+};
+let activeBrand: ActiveBrand = { ...DEFAULT_BRAND };
 
-async function getLogoBytes(): Promise<ArrayBuffer> {
-  if (cachedLogoBytes) return cachedLogoBytes;
-  const response = await fetch(airgeadLogoUrl);
-  cachedLogoBytes = await response.arrayBuffer();
-  return cachedLogoBytes;
+export function setActiveDocumentBrand(brand: Partial<ActiveBrand> | null) {
+  if (!brand) { activeBrand = { ...DEFAULT_BRAND }; cachedLogo = null; return; }
+  const next = {
+    logoUrl: brand.logoUrl || DEFAULT_BRAND.logoUrl,
+    firmName: brand.firmName || DEFAULT_BRAND.firmName,
+    primaryColor: brand.primaryColor || DEFAULT_BRAND.primaryColor,
+  };
+  if (next.logoUrl !== activeBrand.logoUrl) cachedLogo = null;
+  activeBrand = next;
 }
 
+let cachedLogo: { url: string; bytes: ArrayBuffer } | null = null;
+async function getLogoBytes(): Promise<ArrayBuffer> {
+  const url = activeBrand.logoUrl;
+  if (cachedLogo && cachedLogo.url === url) return cachedLogo.bytes;
+  const response = await fetch(url);
+  const bytes = await response.arrayBuffer();
+  cachedLogo = { url, bytes };
+  return bytes;
+}
+
+function hexNoHash(c: string) { return (c || '').replace('#', '').slice(0, 6) || '0066CC'; }
+
 export function airgeadHtmlHeader(): string {
+  const { logoUrl, firmName, primaryColor } = activeBrand;
   return `
-    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid #0066cc;padding-bottom:20px;margin-bottom:30px;">
-      <img src="${airgeadLogoUrl}" alt="Airgead" style="width:48px;height:48px;border-radius:8px;" />
+    <div style="display:flex;align-items:center;gap:16px;border-bottom:2px solid ${primaryColor};padding-bottom:20px;margin-bottom:30px;">
+      <img src="${logoUrl}" alt="${firmName}" style="width:48px;height:48px;border-radius:8px;object-fit:contain;background:#fff;" />
       <div>
-        <h1 style="margin:0;font-size:28px;">Pension Navigator</h1>
-        <p style="margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:2px;">by Airgead</p>
+        <h1 style="margin:0;font-size:28px;">${firmName}</h1>
+        <p style="margin:0;font-size:11px;color:#888;text-transform:uppercase;letter-spacing:2px;">Pension Navigator · powered by Airgead</p>
       </div>
     </div>`;
 }
 
 export function airgeadHtmlFooter(): string {
+  const { firmName } = activeBrand;
   return `
     <div style="margin-top:40px;padding-top:20px;border-top:1px solid #ddd;text-align:center;color:#888;font-size:11px;">
-      <p>© ${new Date().getFullYear()} Airgead. Pension Navigator — Enterprise Pension Administration Platform.</p>
+      <p>© ${new Date().getFullYear()} ${firmName} · Pension Navigator platform by Airgead.</p>
       <p>This document is for informational purposes only and should not be considered as financial advice.</p>
     </div>`;
 }
 
+function logoImageType(url: string): 'png' | 'jpg' | 'gif' | 'bmp' {
+  const u = url.toLowerCase();
+  if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return 'jpg';
+  if (u.endsWith('.gif')) return 'gif';
+  if (u.endsWith('.bmp')) return 'bmp';
+  return 'png';
+}
+
 export async function createAirgeadDocxHeader(): Promise<Paragraph[]> {
   const logoBytes = await getLogoBytes();
+  const { firmName, primaryColor } = activeBrand;
   return [
     new Paragraph({
       children: [
         new ImageRun({
           data: logoBytes,
           transformation: { width: 60, height: 60 },
-          type: 'png',
+          type: logoImageType(activeBrand.logoUrl),
         }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
     }),
     new Paragraph({
-      text: 'Pension Navigator',
-      heading: HeadingLevel.TITLE,
+      children: [
+        new TextRun({ text: firmName, bold: true, size: 36, color: hexNoHash(primaryColor) }),
+      ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 50 },
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: 'by Airgead', size: 18, color: '888888', allCaps: true }),
+        new TextRun({ text: 'Pension Navigator · powered by Airgead', size: 18, color: '888888', allCaps: true }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 300 },
@@ -61,10 +98,11 @@ export async function createAirgeadDocxHeader(): Promise<Paragraph[]> {
 }
 
 export function createAirgeadDocxFooter(): Paragraph[] {
+  const { firmName } = activeBrand;
   return [
     new Paragraph({
       children: [
-        new TextRun({ text: `© ${new Date().getFullYear()} Airgead. Pension Navigator — Enterprise Pension Administration Platform.`, size: 16, color: '888888' }),
+        new TextRun({ text: `© ${new Date().getFullYear()} ${firmName} · Pension Navigator platform by Airgead.`, size: 16, color: '888888' }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { before: 600 },

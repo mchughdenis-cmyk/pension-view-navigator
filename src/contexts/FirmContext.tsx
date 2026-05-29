@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { setActiveDocumentBrand } from "@/lib/documentUtils";
 
 export type Firm = {
   id: string;
@@ -88,8 +89,8 @@ export function FirmProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const fetchBranding = useCallback(async (id: string | null) => {
-    if (!id) { setBranding(null); applyBranding(null); return; }
+  const fetchBranding = useCallback(async (id: string | null, firmName?: string | null) => {
+    if (!id) { setBranding(null); applyBranding(null); setActiveDocumentBrand(null); return; }
     const { data } = await supabase
       .from("firm_branding")
       .select("firm_id, logo_url, primary_color, accent_color, custom_domain")
@@ -97,9 +98,17 @@ export function FirmProvider({ children }: { children: ReactNode }) {
     const b = (data ?? null) as FirmBranding | null;
     setBranding(b);
     applyBranding(b);
+    setActiveDocumentBrand(b ? {
+      logoUrl: b.logo_url || undefined,
+      primaryColor: b.primary_color || undefined,
+      firmName: firmName || undefined,
+    } : null);
   }, []);
 
-  useEffect(() => { fetchBranding(firmId); }, [firmId, fetchBranding]);
+  useEffect(() => {
+    const name = firms.find(f => f.id === firmId)?.name ?? null;
+    fetchBranding(firmId, name);
+  }, [firmId, firms, fetchBranding]);
 
   const setFirmId = (id: string) => {
     setFirmIdState(id);

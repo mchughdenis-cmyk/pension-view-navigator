@@ -22,7 +22,7 @@ type Ctx = {
   firmId: string | null;
   firm: Firm | null;
   branding: FirmBranding | null;
-  setFirmId: (id: string) => void;
+  setFirmId: (id: string | null) => void;
   refreshBranding: () => Promise<void>;
   loading: boolean;
 };

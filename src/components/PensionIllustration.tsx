@@ -73,40 +73,72 @@ const PensionIllustration = () => {
 
   const loadScenario = (s: IllustrationInputs) => setInputs(s);
 
-  // Calculate projections
+  // Calculate projections — full lifecycle: accumulation (with contributions + transfer-in) then drawdown.
   const calculateProjections = () => {
-    const { potValue, retirementAge, lifeExpectancy, drawdownRate, annualGrowth, annuityRate, inflationRate } = inputs;
-    const years = lifeExpectancy - retirementAge;
-    
-    const projections = [];
-    let drawdownPot = potValue;
-    const annuityIncome = (potValue * annuityRate) / 100;
-    
-    for (let year = 0; year <= years; year++) {
+    const { potValue, transferIn, annualContribution, currentAge, retirementAge, lifeExpectancy, drawdownRate, annualGrowth, annuityRate, inflationRate } = inputs;
+    const accYears = Math.max(0, retirementAge - currentAge);
+    const ddYears = Math.max(0, lifeExpectancy - retirementAge);
+    const g = annualGrowth / 100;
+    const inf = inflationRate / 100;
+
+    const projections: Array<{
+      age: number; year: number; phase: 'accumulation' | 'drawdown';
+      drawdownIncome: number; drawdownPot: number; annuityIncome: number;
+      realDrawdownIncome: number; realAnnuityIncome: number; contributions: number;
+    }> = [];
+
+    // Accumulation phase — pot includes one-off transfer-in at outset plus annual contributions.
+    let pot = potValue + (transferIn || 0);
+    for (let y = 0; y < accYears; y++) {
+      projections.push({
+        age: currentAge + y,
+        year: y - accYears, // negative years = pre-retirement
+        phase: 'accumulation',
+        drawdownIncome: 0,
+        drawdownPot: Math.round(pot),
+        annuityIncome: 0,
+        realDrawdownIncome: 0,
+        realAnnuityIncome: 0,
+        contributions: y === 0 ? (transferIn || 0) + annualContribution : annualContribution,
+      });
+      pot = pot * (1 + g) + annualContribution;
+    }
+
+    // Crystallise — 25% PCLS taken, 75% enters drawdown. Annuity based on full vesting fund.
+    const vestingFund = pot;
+    let drawdownPot = vestingFund * 0.75;
+    const annuityIncome = (vestingFund * annuityRate) / 100;
+
+    for (let year = 0; year <= ddYears; year++) {
       const age = retirementAge + year;
       const drawdownIncome = (drawdownPot * drawdownRate) / 100;
-      
+      const totalYearsFromToday = accYears + year;
       projections.push({
         age,
         year,
+        phase: 'drawdown',
         drawdownIncome: Math.round(drawdownIncome),
         drawdownPot: Math.round(drawdownPot),
         annuityIncome: Math.round(annuityIncome),
-        realDrawdownIncome: Math.round(drawdownIncome / Math.pow(1 + inflationRate/100, year)),
-        realAnnuityIncome: Math.round(annuityIncome / Math.pow(1 + inflationRate/100, year))
+        realDrawdownIncome: Math.round(drawdownIncome / Math.pow(1 + inf, totalYearsFromToday)),
+        realAnnuityIncome: Math.round(annuityIncome / Math.pow(1 + inf, totalYearsFromToday)),
+        contributions: 0,
       });
-      
-      // Update pot for next year
-      drawdownPot = drawdownPot * (1 + annualGrowth/100) - drawdownIncome;
+      drawdownPot = drawdownPot * (1 + g) - drawdownIncome;
       if (drawdownPot < 0) drawdownPot = 0;
     }
-    
+
     return projections;
   };
 
   const projections = calculateProjections();
-  const totalDrawdownIncome = projections.reduce((sum, p) => sum + p.drawdownIncome, 0);
-  const totalAnnuityIncome = projections.reduce((sum, p) => sum + p.annuityIncome, 0);
+  const drawdownRows = projections.filter(p => p.phase === 'drawdown');
+  const accumulationRows = projections.filter(p => p.phase === 'accumulation');
+  const totalDrawdownIncome = drawdownRows.reduce((sum, p) => sum + p.drawdownIncome, 0);
+  const totalAnnuityIncome = drawdownRows.reduce((sum, p) => sum + p.annuityIncome, 0);
+  const totalContributions = accumulationRows.reduce((sum, p) => sum + p.contributions, 0);
+  const vestingFund = drawdownRows[0]?.drawdownPot ? drawdownRows[0].drawdownPot / 0.75 : inputs.potValue + inputs.transferIn;
+
 
   return (
     <div className="space-y-6">

@@ -163,12 +163,13 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
 
   // ── Charges & basis ───────────────────────────────────────────────────────
   const riy = reductionInYield(
-    input.potValue,
+    input.potValue + (input.transferIn ?? 0),
     yearsToRet,
     input.contribution ?? 0,
     5,
     totalCharge,
   );
+
   autoTable(doc, {
     startY: y,
     theme: "grid",

@@ -21,10 +21,12 @@ export interface IllustrationInput {
   annualCharge?: number;    // total annual product + investment charge (RIY input), default 0.75%
   adviserFee?: number;      // ongoing adviser charge %, default 0.50%
   contribution?: number;    // annual regular contribution before retirement
+  transferIn?: number;      // one-off transfer-in added to starting pot at year 0
   clientName?: string;
   clientRef?: string;
   productName?: string;
 }
+
 
 const INFLATION = 2;            // CPI assumption (real-terms basis)
 const RATES = [2, 5, 8] as const;

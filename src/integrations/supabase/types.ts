@@ -5085,12 +5085,15 @@ export type Database = {
         Row: {
           billed_clients: number | null
           fees_charged: number | null
+          firm_id: string | null
           month: string | null
+          total_fees: number | null
         }
         Relationships: []
       }
       mi_net_flows: {
         Row: {
+          firm_id: string | null
           inflows: number | null
           month: string | null
           net_flow: number | null
@@ -5102,6 +5105,7 @@ export type Database = {
       mi_ops_queue_health: {
         Row: {
           case_count: number | null
+          firm_id: string | null
           priority: string | null
           queue: string | null
           sla_breached: number | null

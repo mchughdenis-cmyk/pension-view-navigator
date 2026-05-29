@@ -20,8 +20,12 @@ import {
   RefreshCw,
   CheckCircle,
   AlertTriangle,
+  Eye,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMarketingSiteEnabled, setSiteSetting } from '@/hooks/useSiteSettings'
+import { useRole } from '@/contexts/RoleContext'
+
 
 export default function SystemConfiguration() {
   const [config, setConfig] = useState({

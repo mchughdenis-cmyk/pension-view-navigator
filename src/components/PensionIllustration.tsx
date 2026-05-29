@@ -25,6 +25,8 @@ import { toast } from "sonner";
 
 interface IllustrationInputs {
   potValue: number;
+  transferIn: number;
+  annualContribution: number;
   currentAge: number;
   retirementAge: number;
   lifeExpectancy: number;
@@ -37,6 +39,8 @@ interface IllustrationInputs {
 const PensionIllustration = () => {
   const [inputs, setInputs] = useState<IllustrationInputs>({
     potValue: 250000,
+    transferIn: 0,
+    annualContribution: 6000,
     currentAge: 55,
     retirementAge: 65,
     lifeExpectancy: 85,
@@ -46,61 +50,95 @@ const PensionIllustration = () => {
     inflationRate: 2.5
   });
 
+
   const updateInput = (key: keyof IllustrationInputs, value: number) => {
     setInputs(prev => ({ ...prev, [key]: value }));
   };
 
   const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [
     { name: "Cautious retiree", tag: "Low risk", description: "£250k pot, 4% drawdown, 3% growth — preserves capital.",
-      inputs: { potValue: 250000, currentAge: 60, retirementAge: 65, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 3, annuityRate: 5.4, inflationRate: 2.5 } },
+      inputs: { potValue: 250000, transferIn: 0, annualContribution: 4000, currentAge: 60, retirementAge: 65, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 3, annuityRate: 5.4, inflationRate: 2.5 } },
     { name: "Balanced 65", tag: "Typical", description: "£500k pot retiring at 65 with 5% growth and 4% income.",
-      inputs: { potValue: 500000, currentAge: 60, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 5, annuityRate: 5.6, inflationRate: 2.5 } },
+      inputs: { potValue: 500000, transferIn: 0, annualContribution: 12000, currentAge: 60, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 5, annuityRate: 5.6, inflationRate: 2.5 } },
+    { name: "Transfer-in + contributions", tag: "Consolidation", description: "£200k pot + £150k transfer-in, £15k p.a. contributions to age 67.",
+      inputs: { potValue: 200000, transferIn: 150000, annualContribution: 15000, currentAge: 52, retirementAge: 67, lifeExpectancy: 90, drawdownRate: 4, annualGrowth: 5, annuityRate: 5.6, inflationRate: 2.5 } },
     { name: "Early retiree FIRE", tag: "Aggressive", description: "Retire at 57 with £750k, 3.5% safe-withdrawal rate.",
-      inputs: { potValue: 750000, currentAge: 55, retirementAge: 57, lifeExpectancy: 92, drawdownRate: 3.5, annualGrowth: 6, annuityRate: 4.8, inflationRate: 2.5 } },
-    { name: "High net worth", tag: "Wealth", description: "£1.25m pot, 4.5% drawdown, growth-oriented portfolio.",
-      inputs: { potValue: 1250000, currentAge: 58, retirementAge: 62, lifeExpectancy: 90, drawdownRate: 4.5, annualGrowth: 6, annuityRate: 5.0, inflationRate: 2.5 } },
+      inputs: { potValue: 750000, transferIn: 0, annualContribution: 20000, currentAge: 55, retirementAge: 57, lifeExpectancy: 92, drawdownRate: 3.5, annualGrowth: 6, annuityRate: 4.8, inflationRate: 2.5 } },
     { name: "Modest pot top-up", tag: "Catch-up", description: "£90k pot at 62, conservative growth & sustainable income.",
-      inputs: { potValue: 90000, currentAge: 62, retirementAge: 67, lifeExpectancy: 85, drawdownRate: 5, annualGrowth: 4, annuityRate: 6.0, inflationRate: 2.5 } },
+      inputs: { potValue: 90000, transferIn: 0, annualContribution: 8000, currentAge: 62, retirementAge: 67, lifeExpectancy: 85, drawdownRate: 5, annualGrowth: 4, annuityRate: 6.0, inflationRate: 2.5 } },
     { name: "Annuity comparator", tag: "Secure income", description: "£400k pot, 6% annuity vs 4% drawdown.",
-      inputs: { potValue: 400000, currentAge: 65, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 4.5, annuityRate: 6.0, inflationRate: 2.5 } },
+      inputs: { potValue: 400000, transferIn: 0, annualContribution: 0, currentAge: 65, retirementAge: 65, lifeExpectancy: 88, drawdownRate: 4, annualGrowth: 4.5, annuityRate: 6.0, inflationRate: 2.5 } },
   ];
+
 
   const loadScenario = (s: IllustrationInputs) => setInputs(s);
 
-  // Calculate projections
+  // Calculate projections — full lifecycle: accumulation (with contributions + transfer-in) then drawdown.
   const calculateProjections = () => {
-    const { potValue, retirementAge, lifeExpectancy, drawdownRate, annualGrowth, annuityRate, inflationRate } = inputs;
-    const years = lifeExpectancy - retirementAge;
-    
-    const projections = [];
-    let drawdownPot = potValue;
-    const annuityIncome = (potValue * annuityRate) / 100;
-    
-    for (let year = 0; year <= years; year++) {
+    const { potValue, transferIn, annualContribution, currentAge, retirementAge, lifeExpectancy, drawdownRate, annualGrowth, annuityRate, inflationRate } = inputs;
+    const accYears = Math.max(0, retirementAge - currentAge);
+    const ddYears = Math.max(0, lifeExpectancy - retirementAge);
+    const g = annualGrowth / 100;
+    const inf = inflationRate / 100;
+
+    const projections: Array<{
+      age: number; year: number; phase: 'accumulation' | 'drawdown';
+      drawdownIncome: number; drawdownPot: number; annuityIncome: number;
+      realDrawdownIncome: number; realAnnuityIncome: number; contributions: number;
+    }> = [];
+
+    // Accumulation phase — pot includes one-off transfer-in at outset plus annual contributions.
+    let pot = potValue + (transferIn || 0);
+    for (let y = 0; y < accYears; y++) {
+      projections.push({
+        age: currentAge + y,
+        year: y - accYears, // negative years = pre-retirement
+        phase: 'accumulation',
+        drawdownIncome: 0,
+        drawdownPot: Math.round(pot),
+        annuityIncome: 0,
+        realDrawdownIncome: 0,
+        realAnnuityIncome: 0,
+        contributions: y === 0 ? (transferIn || 0) + annualContribution : annualContribution,
+      });
+      pot = pot * (1 + g) + annualContribution;
+    }
+
+    // Crystallise — 25% PCLS taken, 75% enters drawdown. Annuity based on full vesting fund.
+    const vestingFund = pot;
+    let drawdownPot = vestingFund * 0.75;
+    const annuityIncome = (vestingFund * annuityRate) / 100;
+
+    for (let year = 0; year <= ddYears; year++) {
       const age = retirementAge + year;
       const drawdownIncome = (drawdownPot * drawdownRate) / 100;
-      
+      const totalYearsFromToday = accYears + year;
       projections.push({
         age,
         year,
+        phase: 'drawdown',
         drawdownIncome: Math.round(drawdownIncome),
         drawdownPot: Math.round(drawdownPot),
         annuityIncome: Math.round(annuityIncome),
-        realDrawdownIncome: Math.round(drawdownIncome / Math.pow(1 + inflationRate/100, year)),
-        realAnnuityIncome: Math.round(annuityIncome / Math.pow(1 + inflationRate/100, year))
+        realDrawdownIncome: Math.round(drawdownIncome / Math.pow(1 + inf, totalYearsFromToday)),
+        realAnnuityIncome: Math.round(annuityIncome / Math.pow(1 + inf, totalYearsFromToday)),
+        contributions: 0,
       });
-      
-      // Update pot for next year
-      drawdownPot = drawdownPot * (1 + annualGrowth/100) - drawdownIncome;
+      drawdownPot = drawdownPot * (1 + g) - drawdownIncome;
       if (drawdownPot < 0) drawdownPot = 0;
     }
-    
+
     return projections;
   };
 
   const projections = calculateProjections();
-  const totalDrawdownIncome = projections.reduce((sum, p) => sum + p.drawdownIncome, 0);
-  const totalAnnuityIncome = projections.reduce((sum, p) => sum + p.annuityIncome, 0);
+  const drawdownRows = projections.filter(p => p.phase === 'drawdown');
+  const accumulationRows = projections.filter(p => p.phase === 'accumulation');
+  const totalDrawdownIncome = drawdownRows.reduce((sum, p) => sum + p.drawdownIncome, 0);
+  const totalAnnuityIncome = drawdownRows.reduce((sum, p) => sum + p.annuityIncome, 0);
+  const totalContributions = accumulationRows.reduce((sum, p) => sum + p.contributions, 0);
+  const vestingFund = drawdownRows[0]?.drawdownPot ? drawdownRows[0].drawdownPot / 0.75 : inputs.potValue + inputs.transferIn;
+
 
   return (
     <div className="space-y-6">
@@ -131,6 +169,8 @@ const PensionIllustration = () => {
             try {
               generateCompliantIllustrationPdf({
                 potValue: inputs.potValue,
+                transferIn: inputs.transferIn,
+                contribution: inputs.annualContribution,
                 currentAge: inputs.currentAge,
                 retirementAge: inputs.retirementAge,
                 lifeExpectancy: inputs.lifeExpectancy,
@@ -138,6 +178,7 @@ const PensionIllustration = () => {
                 annuityRate: inputs.annuityRate,
               });
               toast.success("Compliant KFI generated", { description: "COBS 13 Annex 2 illustration downloaded" });
+
             } catch (e) {
               toast.error("Failed to generate illustration", { description: String((e as Error).message) });
             }
@@ -220,6 +261,30 @@ const PensionIllustration = () => {
                 />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="transferIn">Transfer-in (£)</Label>
+                <Input
+                  id="transferIn"
+                  type="number"
+                  value={inputs.transferIn}
+                  onChange={(e) => updateInput('transferIn', Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="annualContribution">Annual Contribution (£)</Label>
+                <Input
+                  id="annualContribution"
+                  type="number"
+                  value={inputs.annualContribution}
+                  onChange={(e) => updateInput('annualContribution', Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Accumulation phase: {Math.max(0, inputs.retirementAge - inputs.currentAge)} yrs · projected vesting fund £{Math.round(vestingFund).toLocaleString()} · total contributions £{totalContributions.toLocaleString()}
+            </p>
 
             <div>
               <Label>Drawdown Rate: {inputs.drawdownRate}%</Label>
@@ -417,7 +482,7 @@ const PensionIllustration = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Initial Annual Income</span>
-                        <span className="font-medium">£{projections[0]?.drawdownIncome.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[0]?.drawdownIncome.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Total Income</span>
@@ -425,7 +490,7 @@ const PensionIllustration = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Remaining Pot</span>
-                        <span className="font-medium">£{projections[projections.length - 1]?.drawdownPot.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[drawdownRows.length - 1]?.drawdownPot.toLocaleString()}</span>
                       </div>
                     </div>
                     <Separator />
@@ -460,7 +525,7 @@ const PensionIllustration = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Guaranteed Annual Income</span>
-                        <span className="font-medium">£{projections[0]?.annuityIncome.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[0]?.annuityIncome.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Total Income</span>

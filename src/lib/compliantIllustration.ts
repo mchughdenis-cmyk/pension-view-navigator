@@ -21,10 +21,12 @@ export interface IllustrationInput {
   annualCharge?: number;    // total annual product + investment charge (RIY input), default 0.75%
   adviserFee?: number;      // ongoing adviser charge %, default 0.50%
   contribution?: number;    // annual regular contribution before retirement
+  transferIn?: number;      // one-off transfer-in added to starting pot at year 0
   clientName?: string;
   clientRef?: string;
   productName?: string;
 }
+
 
 const INFLATION = 2;            // CPI assumption (real-terms basis)
 const RATES = [2, 5, 8] as const;
@@ -65,12 +67,13 @@ function projectDrawdown(input: IllustrationInput, grossRate: number, totalCharg
   const drawdownYears = Math.max(1, input.lifeExpectancy - input.retirementAge);
   const charge = totalCharge;
   const startVesting = projectAccumulation(
-    input.potValue,
+    input.potValue + (input.transferIn ?? 0),
     input.contribution ?? 0,
     yearsToRet,
     grossRate,
     charge,
   );
+
   // 25% PCLS taken at vesting; remainder enters drawdown.
   const drawdownPot0 = startVesting * 0.75;
   const rows: YearRow[] = [];
@@ -146,23 +149,27 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
       ["Client reference", input.clientRef ?? "—"],
       ["Product", input.productName ?? "Airgead SIPP"],
       ["Current age / selected retirement age", `${input.currentAge} / ${input.retirementAge}`],
-      ["Transfer / current fund value", fmtGBP(input.potValue)],
+      ["Current fund value", fmtGBP(input.potValue)],
+      ["Transfer-in at outset", fmtGBP(input.transferIn ?? 0)],
+      ["Starting fund (incl. transfer)", fmtGBP(input.potValue + (input.transferIn ?? 0))],
       ["Regular gross contribution (p.a.)", fmtGBP(input.contribution ?? 0)],
       ["Term to retirement", `${yearsToRet} year(s)`],
     ],
     columnStyles: { 0: { cellWidth: 220, fontStyle: "bold" } },
     margin: { left: M, right: M },
   });
+
   y = (doc as any).lastAutoTable.finalY + 14;
 
   // ── Charges & basis ───────────────────────────────────────────────────────
   const riy = reductionInYield(
-    input.potValue,
+    input.potValue + (input.transferIn ?? 0),
     yearsToRet,
     input.contribution ?? 0,
     5,
     totalCharge,
   );
+
   autoTable(doc, {
     startY: y,
     theme: "grid",
@@ -186,11 +193,13 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
   y = (doc as any).lastAutoTable.finalY + 14;
 
   // ── Projection at retirement (3 rates) ────────────────────────────────────
+  const startPot = input.potValue + (input.transferIn ?? 0);
   const fundAtRet = RATES.map(r => ({
     rate: r,
-    grossFund: projectAccumulation(input.potValue, input.contribution ?? 0, yearsToRet, r, 0),
-    netFund: projectAccumulation(input.potValue, input.contribution ?? 0, yearsToRet, r, totalCharge),
+    grossFund: projectAccumulation(startPot, input.contribution ?? 0, yearsToRet, r, 0),
+    netFund: projectAccumulation(startPot, input.contribution ?? 0, yearsToRet, r, totalCharge),
   }));
+
 
   autoTable(doc, {
     startY: y,

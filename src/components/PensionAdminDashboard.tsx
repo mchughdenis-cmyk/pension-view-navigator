@@ -44,7 +44,7 @@ import {
   Cog,
   KeyRound,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import BankUpload from "./BankUpload";
 import PooledAccount from "./PooledAccount";

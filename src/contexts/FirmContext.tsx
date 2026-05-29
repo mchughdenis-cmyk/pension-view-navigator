@@ -83,7 +83,7 @@ export function FirmProvider({ children }: { children: ReactNode }) {
       const list = (data ?? []) as Firm[];
       setFirms(list);
       const saved = localStorage.getItem(STORAGE_KEY);
-      const initial = saved && list.find(f => f.id === saved) ? saved : list[0]?.id ?? null;
+      const initial = saved === "__all__" ? null : (saved && list.find(f => f.id === saved) ? saved : list[0]?.id ?? null);
       setFirmIdState(initial);
       setLoading(false);
     })();

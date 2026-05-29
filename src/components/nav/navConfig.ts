@@ -281,6 +281,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System",
       items: [
+        { title: "Administration", url: "/admin", icon: Users },
+        { title: "System configuration", url: "/admin?tab=system-config", icon: Cog },
         { title: "White-label branding", url: "/branding", icon: Palette },
         { title: "Persona selector", url: "/personas", icon: UserCog },
         { title: "Audit log", url: "/audit-log", icon: History },
@@ -289,7 +291,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "API directory", url: "/api-directory", icon: Database },
         { title: "Documentation", url: "/documentation", icon: ScrollText },
         { title: "Webhook sandbox", url: "/webhook-sandbox", icon: Database },
-        { title: "Settings", url: "/settings", icon: Cog },
+        { title: "Settings", url: "/settings", icon: SettingsIcon },
       ],
     },
   ],

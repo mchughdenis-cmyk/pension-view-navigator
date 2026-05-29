@@ -57,29 +57,39 @@ export function airgeadHtmlFooter(): string {
     </div>`;
 }
 
+function logoImageType(url: string): 'png' | 'jpg' | 'gif' | 'bmp' {
+  const u = url.toLowerCase();
+  if (u.endsWith('.jpg') || u.endsWith('.jpeg')) return 'jpg';
+  if (u.endsWith('.gif')) return 'gif';
+  if (u.endsWith('.bmp')) return 'bmp';
+  return 'png';
+}
+
 export async function createAirgeadDocxHeader(): Promise<Paragraph[]> {
   const logoBytes = await getLogoBytes();
+  const { firmName, primaryColor } = activeBrand;
   return [
     new Paragraph({
       children: [
         new ImageRun({
           data: logoBytes,
           transformation: { width: 60, height: 60 },
-          type: 'png',
+          type: logoImageType(activeBrand.logoUrl),
         }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 100 },
     }),
     new Paragraph({
-      text: 'Pension Navigator',
-      heading: HeadingLevel.TITLE,
+      children: [
+        new TextRun({ text: firmName, bold: true, size: 36, color: hexNoHash(primaryColor) }),
+      ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 50 },
     }),
     new Paragraph({
       children: [
-        new TextRun({ text: 'by Airgead', size: 18, color: '888888', allCaps: true }),
+        new TextRun({ text: 'Pension Navigator · powered by Airgead', size: 18, color: '888888', allCaps: true }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { after: 300 },
@@ -88,10 +98,11 @@ export async function createAirgeadDocxHeader(): Promise<Paragraph[]> {
 }
 
 export function createAirgeadDocxFooter(): Paragraph[] {
+  const { firmName } = activeBrand;
   return [
     new Paragraph({
       children: [
-        new TextRun({ text: `© ${new Date().getFullYear()} Airgead. Pension Navigator — Enterprise Pension Administration Platform.`, size: 16, color: '888888' }),
+        new TextRun({ text: `© ${new Date().getFullYear()} ${firmName} · Pension Navigator platform by Airgead.`, size: 16, color: '888888' }),
       ],
       alignment: AlignmentType.CENTER,
       spacing: { before: 600 },

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,12 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { BackButton } from "@/components/ui/back-button";
 import { toast } from "sonner";
 import {
   PiggyBank, TrendingUp, Calculator, Clock, AlertTriangle, CheckCircle,
-  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown,
+  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown, ScrollText,
 } from "lucide-react";
+
 import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";

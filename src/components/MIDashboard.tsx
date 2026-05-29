@@ -1,47 +1,92 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client'
+import { useFirm } from '@/contexts/FirmContext'
 import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ChevronRight } from 'lucide-react'
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, Legend, AreaChart, Area } from 'recharts'
 
 const fmtGBP = (n: number) => new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(n)
 
+type Case = {
+  id: string
+  case_ref: string | null
+  case_type: string | null
+  title: string | null
+  queue: string | null
+  status: string | null
+  priority: string | null
+  sla_due_at: string | null
+  client_id: string | null
+}
+
 export default function MIDashboard() {
+  const navigate = useNavigate()
+  const { firmId, firm } = useFirm()
   const [aua, setAua] = useState<any[]>([])
   const [flows, setFlows] = useState<any[]>([])
   const [feeYield, setFeeYield] = useState<any[]>([])
-  const [queueHealth, setQueueHealth] = useState<any[]>([])
+  const [openCases, setOpenCases] = useState<Case[]>([])
 
   useEffect(() => {
+    if (!firmId) return
+
+    // Find which clients belong to this firm so we can scope ops_cases
+    const loadCases = async () => {
+      const { data: assignments } = await supabase
+        .from('agency_assignments')
+        .select('client_id')
+        .eq('firm_id', firmId)
+        .is('assigned_to', null)
+      const clientIds = (assignments ?? []).map(a => a.client_id).filter(Boolean) as string[]
+      if (clientIds.length === 0) { setOpenCases([]); return }
+      const { data: cases } = await supabase
+        .from('ops_cases')
+        .select('id, case_ref, case_type, title, queue, status, priority, sla_due_at, client_id')
+        .in('client_id', clientIds)
+        .not('status', 'in', '(resolved,closed)')
+        .order('sla_due_at', { ascending: true, nullsFirst: false })
+        .limit(25)
+      setOpenCases((cases ?? []) as Case[])
+    }
+
     Promise.all([
-      supabase.from('mi_aua_by_firm').select('*'),
-      supabase.from('mi_net_flows').select('*').limit(12),
-      supabase.from('mi_fee_yield').select('*').limit(12),
-      supabase.from('mi_ops_queue_health').select('*'),
-    ]).then(([a, f, fy, q]) => {
+      supabase.from('mi_aua_by_firm').select('*').eq('firm_id', firmId),
+      supabase.from('mi_net_flows').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12),
+      supabase.from('mi_fee_yield').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12),
+      loadCases(),
+    ]).then(([a, f, fy]) => {
       setAua(a.data || [])
-      setFlows((f.data || []).reverse())
-      setFeeYield((fy.data || []).reverse())
-      setQueueHealth(q.data || [])
+      setFlows((f.data || []).slice().reverse())
+      setFeeYield((fy.data || []).slice().reverse())
     })
-  }, [])
+  }, [firmId])
 
   const totalAua = aua.reduce((s, x) => s + Number(x.aua || 0), 0)
   const totalClients = aua.reduce((s, x) => s + Number(x.client_count || 0), 0)
   const last30Flow = flows.slice(-1)[0]?.net_flow || 0
   const totalFees = feeYield.reduce((s, x) => s + Number(x.total_fees || 0), 0)
 
+  const breached = openCases.filter(c => c.sla_due_at && new Date(c.sla_due_at) < new Date()).length
+
+  const openCase = (c: Case) => navigate(`/cockpit?case=${c.id}`)
+
   return (
     <div className="min-h-screen bg-background text-foreground p-6 space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Management Information</h1>
-        <p className="text-sm text-muted-foreground">Live AUA, net flows, fee yield, and operations health</p>
+        <p className="text-sm text-muted-foreground">
+          Live AUA, net flows, fee yield, and operations health
+          {firm && <> · scoped to <span className="font-medium text-foreground">{firm.name}</span></>}
+        </p>
       </header>
 
       {/* KPI tiles */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="p-4"><div className="text-xs text-muted-foreground">Total AUA</div><div className="text-2xl font-semibold mt-1">{fmtGBP(totalAua)}</div></Card>
         <Card className="p-4"><div className="text-xs text-muted-foreground">Active clients</div><div className="text-2xl font-semibold mt-1">{totalClients.toLocaleString()}</div></Card>
-        <Card className="p-4"><div className="text-xs text-muted-foreground">Latest month net flow</div><div className="text-2xl font-semibold mt-1">{fmtGBP(last30Flow)}</div></Card>
+        <Card className="p-4"><div className="text-xs text-muted-foreground">Latest month net flow</div><div className="text-2xl font-semibold mt-1">{fmtGBP(Number(last30Flow))}</div></Card>
         <Card className="p-4"><div className="text-xs text-muted-foreground">Fees (12m)</div><div className="text-2xl font-semibold mt-1">{fmtGBP(totalFees)}</div></Card>
       </div>
 
@@ -60,7 +105,7 @@ export default function MIDashboard() {
         </Card>
 
         <Card className="p-4">
-          <h2 className="text-sm font-semibold mb-3">AUA by firm</h2>
+          <h2 className="text-sm font-semibold mb-3">AUA</h2>
           <ResponsiveContainer width="100%" height={250}>
             <BarChart data={aua}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
@@ -74,31 +119,53 @@ export default function MIDashboard() {
 
         <Card className="p-4">
           <h2 className="text-sm font-semibold mb-3">Fee yield (12m)</h2>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={feeYield}>
-              <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
-              <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `£${v}`} />
-              <Tooltip formatter={(v: any) => fmtGBP(Number(v))} />
-              <Legend />
-              <Line type="monotone" dataKey="total_fees" stroke="hsl(var(--secondary))" />
-            </LineChart>
-          </ResponsiveContainer>
+          {feeYield.length === 0 ? (
+            <div className="text-sm text-muted-foreground py-12 text-center">No fees billed in the last 12 months for this firm.</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={feeYield}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+                <XAxis dataKey="month" tick={{ fontSize: 10 }} />
+                <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `£${v}`} />
+                <Tooltip formatter={(v: any) => fmtGBP(Number(v))} />
+                <Legend />
+                <Line type="monotone" dataKey="total_fees" stroke="hsl(var(--secondary))" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </Card>
 
         <Card className="p-4">
-          <h2 className="text-sm font-semibold mb-3">Operations queue health</h2>
-          <div className="space-y-2">
-            {queueHealth.length === 0 && <div className="text-sm text-muted-foreground">No active queues</div>}
-            {queueHealth.map((q, i) => (
-              <div key={i} className="flex items-center justify-between text-sm border-b border-border pb-1.5">
-                <span className="font-medium">{q.queue} · {q.status}</span>
-                <div className="flex gap-3 text-xs">
-                  <span>{q.case_count} cases</span>
-                  {Number(q.sla_breached) > 0 && <span className="text-destructive">{q.sla_breached} breached</span>}
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold">Open operations cases</h2>
+            <div className="flex items-center gap-2">
+              {breached > 0 && <Badge variant="destructive" className="text-[10px]">{breached} SLA breached</Badge>}
+              <button onClick={() => navigate('/cockpit')} className="text-xs text-primary hover:underline">View all</button>
+            </div>
+          </div>
+          <div className="space-y-1 max-h-[260px] overflow-y-auto pr-1">
+            {openCases.length === 0 && <div className="text-sm text-muted-foreground py-8 text-center">No open cases for this firm.</div>}
+            {openCases.map(c => {
+              const isBreached = c.sla_due_at && new Date(c.sla_due_at) < new Date()
+              return (
+                <button
+                  key={c.id}
+                  onClick={() => openCase(c)}
+                  className="w-full flex items-center justify-between text-left text-sm border-b border-border px-2 py-2 rounded hover:bg-muted transition-colors group"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium truncate">{c.case_ref || c.title || c.case_type || 'Case'}</span>
+                      {isBreached && <Badge variant="destructive" className="text-[10px]">Breached</Badge>}
+                    </div>
+                    <div className="text-xs text-muted-foreground truncate">
+                      {c.queue ?? '—'} · {c.status ?? '—'}{c.priority ? ` · ${c.priority}` : ''}
+                    </div>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground shrink-0 ml-2" />
+                </button>
+              )
+            })}
           </div>
         </Card>
       </div>

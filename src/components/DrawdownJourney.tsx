@@ -354,6 +354,23 @@ export default function DrawdownJourney() {
                         </SelectContent>
                       </Select>
                     </div>
+                    {(pwOutcome === "booked" || pwOutcome === "received") && (
+                      <div>
+                        <Label className="text-xs">
+                          {pwOutcome === "booked"
+                            ? "Pension Wise appointment reference (mandatory)"
+                            : "Pension Wise / advice reference (mandatory)"}
+                        </Label>
+                        <Input
+                          value={pwReference}
+                          onChange={(e) => setPwReference(e.target.value)}
+                          placeholder="e.g. PW-2025-123456 or MoneyHelper booking ID"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Record the MoneyHelper booking reference, appointment date, or evidence of regulated advice received.
+                        </p>
+                      </div>
+                    )}
                     {pwOutcome === "optout" && (
                       <div>
                         <Label className="text-xs">Opt-out reason (mandatory — must be explicit and recorded)</Label>

@@ -168,7 +168,9 @@ const getPriorityColor = (priority: string) => {
 
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("clients");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "clients";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { clients: dbClients, loading: clientsLoading, addClient: addDbClient, updateClient: updateDbClient } = useClients();
   const { entries: activityEntries } = useAuditTrail();
   const { stats: schemeStats } = useSchemeStats();

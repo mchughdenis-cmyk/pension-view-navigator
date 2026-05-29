@@ -30,15 +30,15 @@ export default function MIDashboard() {
   const [openCases, setOpenCases] = useState<Case[]>([])
 
   useEffect(() => {
-    if (!firmId) return
-
-    // Find which clients belong to this firm so we can scope ops_cases
+    // Find which clients are in-scope so we can scope ops_cases.
+    // Platform mode (firmId === null): include all unassigned cases across every firm.
     const loadCases = async () => {
-      const { data: assignments } = await supabase
+      let aq = supabase
         .from('agency_assignments')
-        .select('client_id')
-        .eq('firm_id', firmId)
+        .select('client_id, firm_id')
         .is('assigned_to', null)
+      if (firmId) aq = aq.eq('firm_id', firmId)
+      const { data: assignments } = await aq
       const clientIds = (assignments ?? []).map(a => a.client_id).filter(Boolean) as string[]
       if (clientIds.length === 0) { setOpenCases([]); return }
       const { data: cases } = await supabase
@@ -51,15 +51,34 @@ export default function MIDashboard() {
       setOpenCases((cases ?? []) as Case[])
     }
 
-    Promise.all([
-      supabase.from('mi_aua_by_firm').select('*').eq('firm_id', firmId),
-      supabase.from('mi_net_flows').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12),
-      supabase.from('mi_fee_yield').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12),
-      loadCases(),
-    ]).then(([a, f, fy]) => {
+    const auaQ = firmId
+      ? supabase.from('mi_aua_by_firm').select('*').eq('firm_id', firmId)
+      : supabase.from('mi_aua_by_firm').select('*')
+    const flowsQ = firmId
+      ? supabase.from('mi_net_flows').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12)
+      : supabase.from('mi_net_flows').select('*').order('month', { ascending: false }).limit(36)
+    const feeQ = firmId
+      ? supabase.from('mi_fee_yield').select('*').eq('firm_id', firmId).order('month', { ascending: false }).limit(12)
+      : supabase.from('mi_fee_yield').select('*').order('month', { ascending: false }).limit(36)
+
+    Promise.all([auaQ, flowsQ, feeQ, loadCases()]).then(([a, f, fy]) => {
       setAua(a.data || [])
-      setFlows((f.data || []).slice().reverse())
-      setFeeYield((fy.data || []).slice().reverse())
+
+      // When in platform mode, sum rows that share the same month across firms
+      const aggregate = (rows: any[], valueKeys: string[]) => {
+        if (firmId) return rows.slice().reverse()
+        const map = new Map<string, any>()
+        for (const r of rows) {
+          const k = r.month
+          const cur = map.get(k) ?? { month: k, ...Object.fromEntries(valueKeys.map(v => [v, 0])) }
+          for (const v of valueKeys) cur[v] = Number(cur[v] || 0) + Number(r[v] || 0)
+          map.set(k, cur)
+        }
+        return Array.from(map.values()).sort((a, b) => String(a.month).localeCompare(String(b.month))).slice(-12)
+      }
+
+      setFlows(aggregate(f.data || [], ['net_flow', 'inflow', 'outflow']))
+      setFeeYield(aggregate(fy.data || [], ['total_fees', 'fees_charged', 'aua']))
     })
   }, [firmId])
 
@@ -78,7 +97,9 @@ export default function MIDashboard() {
         <h1 className="text-2xl font-semibold">Management Information</h1>
         <p className="text-sm text-muted-foreground">
           Live AUA, net flows, fee yield, and operations health
-          {firm && <> · scoped to <span className="font-medium text-foreground">{firm.name}</span></>}
+          {firm
+            ? <> · scoped to <span className="font-medium text-foreground">{firm.name}</span></>
+            : <> · <span className="font-medium text-primary">Platform view — all firms</span></>}
         </p>
       </header>
 

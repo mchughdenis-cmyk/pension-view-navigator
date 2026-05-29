@@ -22,7 +22,7 @@ type Ctx = {
   firmId: string | null;
   firm: Firm | null;
   branding: FirmBranding | null;
-  setFirmId: (id: string) => void;
+  setFirmId: (id: string | null) => void;
   refreshBranding: () => Promise<void>;
   loading: boolean;
 };
@@ -83,7 +83,7 @@ export function FirmProvider({ children }: { children: ReactNode }) {
       const list = (data ?? []) as Firm[];
       setFirms(list);
       const saved = localStorage.getItem(STORAGE_KEY);
-      const initial = saved && list.find(f => f.id === saved) ? saved : list[0]?.id ?? null;
+      const initial = saved === "__all__" ? null : (saved && list.find(f => f.id === saved) ? saved : list[0]?.id ?? null);
       setFirmIdState(initial);
       setLoading(false);
     })();
@@ -110,9 +110,9 @@ export function FirmProvider({ children }: { children: ReactNode }) {
     fetchBranding(firmId, name);
   }, [firmId, firms, fetchBranding]);
 
-  const setFirmId = (id: string) => {
+  const setFirmId = (id: string | null) => {
     setFirmIdState(id);
-    localStorage.setItem(STORAGE_KEY, id);
+    localStorage.setItem(STORAGE_KEY, id ?? "__all__");
   };
 
   const refreshBranding = useCallback(() => fetchBranding(firmId), [fetchBranding, firmId]);

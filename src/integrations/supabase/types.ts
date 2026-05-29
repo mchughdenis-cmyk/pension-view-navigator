@@ -5125,6 +5125,7 @@ export type Database = {
     }
     Functions: {
       current_client_id: { Args: never; Returns: string }
+      email_for_identifier: { Args: { _identifier: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

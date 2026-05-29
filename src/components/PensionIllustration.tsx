@@ -169,6 +169,8 @@ const PensionIllustration = () => {
             try {
               generateCompliantIllustrationPdf({
                 potValue: inputs.potValue,
+                transferIn: inputs.transferIn,
+                contribution: inputs.annualContribution,
                 currentAge: inputs.currentAge,
                 retirementAge: inputs.retirementAge,
                 lifeExpectancy: inputs.lifeExpectancy,
@@ -176,6 +178,7 @@ const PensionIllustration = () => {
                 annuityRate: inputs.annuityRate,
               });
               toast.success("Compliant KFI generated", { description: "COBS 13 Annex 2 illustration downloaded" });
+
             } catch (e) {
               toast.error("Failed to generate illustration", { description: String((e as Error).message) });
             }

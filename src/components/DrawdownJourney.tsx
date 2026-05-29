@@ -601,12 +601,24 @@ export default function DrawdownJourney() {
                     </>
                   )}
                 </div>
-                <Button className="w-full" onClick={handleSubmit} disabled={submitting || !accountId || !eligible || mode === "ANNUITY"}>
+                <div className="rounded-lg border p-3 text-xs bg-muted/30 flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <div><strong>Journey:</strong> {journeyType === "advised" ? "Advised (COBS 9 / 9A)" : journeyType === "non_advised" ? "Non-advised (COBS 19.7A stronger nudge applied)" : "Not set"}</div>
+                    <div><strong>Risk warnings:</strong> {rrwAllAck ? "All acknowledged" : "Incomplete"}</div>
+                    {journeyType === "non_advised" && (
+                      <div><strong>Pension Wise:</strong> {pwOutcome === "received" ? "Already received guidance/advice" : pwOutcome === "booked" ? "Appointment booked" : pwOutcome === "optout" ? "Opted out (reason recorded)" : "Not recorded"}</div>
+                    )}
+                  </div>
+                </div>
+                <Button className="w-full" onClick={handleSubmit} disabled={submitting || !accountId || !eligible || !disclosuresComplete || mode === "ANNUITY"}>
                   {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {mode === "ANNUITY" ? "Annuity purchase — contact provider" : "Process drawdown"}
                 </Button>
                 {!accountId && <p className="text-sm text-destructive">Selected client has no SIPP account.</p>}
                 {!eligible && <p className="text-sm text-destructive">Client is below NMPA ({NMPA}).</p>}
+                {!disclosuresComplete && <p className="text-sm text-destructive">FCA mandatory disclosures (Step 0) must be completed before processing.</p>}
+
               </CardContent>
             </Card>
           </TabsContent>

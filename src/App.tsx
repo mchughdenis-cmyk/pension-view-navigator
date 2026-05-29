@@ -118,6 +118,8 @@ import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
 import Tour from "./pages/Tour";
 import { ContactUsPrompt } from "./components/ContactUsPrompt";
+import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
+
 
 const HomeRedirect = () => {
   const { role } = useRole();

@@ -28,6 +28,22 @@ import { useRole } from '@/contexts/RoleContext'
 
 
 export default function SystemConfiguration() {
+  const { user } = useRole()
+  const { enabled: marketingEnabled, loading: marketingLoading } = useMarketingSiteEnabled()
+  const [savingMarketing, setSavingMarketing] = useState(false)
+
+  const toggleMarketingSite = async (next: boolean) => {
+    setSavingMarketing(true)
+    try {
+      await setSiteSetting('marketing_site_enabled', next, user?.id)
+      toast.success(next ? 'Marketing site enabled — visitors land on /site' : 'Marketing site disabled — visitors redirect to /auth')
+    } catch (e: any) {
+      toast.error(e.message ?? 'Failed to update — admin role required')
+    } finally {
+      setSavingMarketing(false)
+    }
+  }
+
   const [config, setConfig] = useState({
     // Platform
     platformName: 'Pension Navigator by Airgead',

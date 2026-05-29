@@ -262,6 +262,30 @@ const PensionIllustration = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="transferIn">Transfer-in (£)</Label>
+                <Input
+                  id="transferIn"
+                  type="number"
+                  value={inputs.transferIn}
+                  onChange={(e) => updateInput('transferIn', Number(e.target.value))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="annualContribution">Annual Contribution (£)</Label>
+                <Input
+                  id="annualContribution"
+                  type="number"
+                  value={inputs.annualContribution}
+                  onChange={(e) => updateInput('annualContribution', Number(e.target.value))}
+                />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground -mt-2">
+              Accumulation phase: {Math.max(0, inputs.retirementAge - inputs.currentAge)} yrs · projected vesting fund £{Math.round(vestingFund).toLocaleString()} · total contributions £{totalContributions.toLocaleString()}
+            </p>
+
             <div>
               <Label>Drawdown Rate: {inputs.drawdownRate}%</Label>
               <Slider

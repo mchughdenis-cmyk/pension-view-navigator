@@ -193,11 +193,13 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
   y = (doc as any).lastAutoTable.finalY + 14;
 
   // ── Projection at retirement (3 rates) ────────────────────────────────────
+  const startPot = input.potValue + (input.transferIn ?? 0);
   const fundAtRet = RATES.map(r => ({
     rate: r,
-    grossFund: projectAccumulation(input.potValue, input.contribution ?? 0, yearsToRet, r, 0),
-    netFund: projectAccumulation(input.potValue, input.contribution ?? 0, yearsToRet, r, totalCharge),
+    grossFund: projectAccumulation(startPot, input.contribution ?? 0, yearsToRet, r, 0),
+    netFund: projectAccumulation(startPot, input.contribution ?? 0, yearsToRet, r, totalCharge),
   }));
+
 
   autoTable(doc, {
     startY: y,

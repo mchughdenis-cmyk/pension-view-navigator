@@ -97,7 +97,9 @@ export default function MIDashboard() {
         <h1 className="text-2xl font-semibold">Management Information</h1>
         <p className="text-sm text-muted-foreground">
           Live AUA, net flows, fee yield, and operations health
-          {firm && <> · scoped to <span className="font-medium text-foreground">{firm.name}</span></>}
+          {firm
+            ? <> · scoped to <span className="font-medium text-foreground">{firm.name}</span></>
+            : <> · <span className="font-medium text-primary">Platform view — all firms</span></>}
         </p>
       </header>
 

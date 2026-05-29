@@ -110,9 +110,9 @@ export function FirmProvider({ children }: { children: ReactNode }) {
     fetchBranding(firmId, name);
   }, [firmId, firms, fetchBranding]);
 
-  const setFirmId = (id: string) => {
+  const setFirmId = (id: string | null) => {
     setFirmIdState(id);
-    localStorage.setItem(STORAGE_KEY, id);
+    localStorage.setItem(STORAGE_KEY, id ?? "__all__");
   };
 
   const refreshBranding = useCallback(() => fetchBranding(firmId), [fetchBranding, firmId]);

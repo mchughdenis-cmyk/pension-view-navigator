@@ -51,6 +51,8 @@ export default function OperationsCockpit() {
     setLoading(false)
   }
 
+  const [searchParams] = useSearchParams()
+
   useEffect(() => {
     load()
     const ch = supabase
@@ -59,6 +61,14 @@ export default function OperationsCockpit() {
       .subscribe()
     return () => { supabase.removeChannel(ch) }
   }, [])
+
+  // Deep-link: ?case=<id> auto-selects the case once cases have loaded
+  useEffect(() => {
+    const id = searchParams.get('case')
+    if (!id || cases.length === 0) return
+    const found = cases.find(c => c.id === id)
+    if (found && (!selected || selected.id !== id)) setSelected(found)
+  }, [searchParams, cases, selected])
 
   useEffect(() => {
     if (!selected) { setNotes([]); return }

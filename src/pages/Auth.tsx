@@ -29,9 +29,21 @@ export default function Auth() {
     return () => { mounted = false; sub.subscription.unsubscribe() }
   }, [navigate])
 
+  const resolveEmail = async (identifier: string): Promise<string | null> => {
+    const id = identifier.trim()
+    if (!id) return null
+    if (id.includes('@')) return id
+    const { data, error } = await (supabase.rpc as any)('email_for_identifier', { _identifier: id })
+    if (error) { toast.error(error.message); return null }
+    if (!data) { toast.error('No account found with that name'); return null }
+    return data as string
+  }
+
   const signIn = async () => {
     setLoading(true)
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const resolved = await resolveEmail(email)
+    if (!resolved) { setLoading(false); return }
+    const { error } = await supabase.auth.signInWithPassword({ email: resolved, password })
     setLoading(false)
     if (error) toast.error(error.message)
     else { toast.success('Welcome back'); navigate('/dashboard') }

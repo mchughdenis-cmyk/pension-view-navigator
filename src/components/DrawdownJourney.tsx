@@ -73,8 +73,9 @@ export default function DrawdownJourney() {
   const [rrw, setRrw] = useState<Record<string, boolean>>({
     health: false, marital: false, otherPensions: false, inflation: false,
     scams: false, debts: false, sustainability: false, tax: false,
-    dependants: false, meansTested: false, charges: false, investmentChoice: false,
+    meansTested: false, charges: false, investmentChoice: false,
   });
+  const [pwReference, setPwReference] = useState("");
   // Advised-journey suitability declarations
   const [adv, setAdv] = useState({
     factFind: false, atr: false, capacityForLoss: false, sustainability: false,
@@ -87,8 +88,9 @@ export default function DrawdownJourney() {
 
   const rrwAllAck = Object.values(rrw).every(Boolean);
   const advAllAck = Object.values(adv).every(Boolean);
-  const pwComplete = pwOutcome === "received" || pwOutcome === "booked" ||
-    (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
+  const pwComplete = pwOutcome === "received" || pwOutcome === "booked"
+    ? pwReference.trim().length >= 4
+    : (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
   const disclosuresComplete = journeyType === "advised"
     ? (advAllAck && rrwAllAck)
     : journeyType === "non_advised"
@@ -129,7 +131,7 @@ export default function DrawdownJourney() {
       drawdownIncome: mode === "PCLS_FAD" ? annualIncome : undefined,
       ufplsGross: mode === "UFPLS" ? ufplsGross : undefined,
       otherIncome,
-      notes: `Drawdown journey: ${mode} | ${journeyType === "advised" ? "Advised (COBS 9/9A)" : "Non-advised (COBS 19.7A nudge)"} | RRW acknowledged | ${journeyType === "non_advised" ? `PW: ${pwOutcome}${pwOutcome === "optout" ? " — " + pwOptOutReason : ""}` : `ATR: ${advAtrCategory}, CFL: ${advCfl}`}${advNotes ? ` | Notes: ${advNotes}` : ""}`,
+      notes: `Drawdown journey: ${mode} | ${journeyType === "advised" ? "Advised (COBS 9/9A)" : "Non-advised (COBS 19.7A nudge)"} | RRW acknowledged | ${journeyType === "non_advised" ? `PW: ${pwOutcome}${(pwOutcome === "booked" || pwOutcome === "received") ? " — ref " + pwReference : ""}${pwOutcome === "optout" ? " — " + pwOptOutReason : ""}` : `ATR: ${advAtrCategory}, CFL: ${advCfl}`}${advNotes ? ` | Notes: ${advNotes}` : ""}`,
     });
     setSubmitting(false);
     if (result) {
@@ -352,6 +354,23 @@ export default function DrawdownJourney() {
                         </SelectContent>
                       </Select>
                     </div>
+                    {(pwOutcome === "booked" || pwOutcome === "received") && (
+                      <div>
+                        <Label className="text-xs">
+                          {pwOutcome === "booked"
+                            ? "Pension Wise appointment reference (mandatory)"
+                            : "Pension Wise / advice reference (mandatory)"}
+                        </Label>
+                        <Input
+                          value={pwReference}
+                          onChange={(e) => setPwReference(e.target.value)}
+                          placeholder="e.g. PW-2025-123456 or MoneyHelper booking ID"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Record the MoneyHelper booking reference, appointment date, or evidence of regulated advice received.
+                        </p>
+                      </div>
+                    )}
                     {pwOutcome === "optout" && (
                       <div>
                         <Label className="text-xs">Opt-out reason (mandatory — must be explicit and recorded)</Label>

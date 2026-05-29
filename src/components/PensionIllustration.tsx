@@ -482,7 +482,7 @@ const PensionIllustration = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Initial Annual Income</span>
-                        <span className="font-medium">£{projections[0]?.drawdownIncome.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[0]?.drawdownIncome.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Total Income</span>
@@ -490,7 +490,7 @@ const PensionIllustration = () => {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Remaining Pot</span>
-                        <span className="font-medium">£{projections[projections.length - 1]?.drawdownPot.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[drawdownRows.length - 1]?.drawdownPot.toLocaleString()}</span>
                       </div>
                     </div>
                     <Separator />
@@ -525,7 +525,7 @@ const PensionIllustration = () => {
                     <div className="space-y-2">
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Guaranteed Annual Income</span>
-                        <span className="font-medium">£{projections[0]?.annuityIncome.toLocaleString()}</span>
+                        <span className="font-medium">£{drawdownRows[0]?.annuityIncome.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-muted-foreground">Total Income</span>

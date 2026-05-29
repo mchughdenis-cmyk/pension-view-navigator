@@ -149,13 +149,16 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
       ["Client reference", input.clientRef ?? "—"],
       ["Product", input.productName ?? "Airgead SIPP"],
       ["Current age / selected retirement age", `${input.currentAge} / ${input.retirementAge}`],
-      ["Transfer / current fund value", fmtGBP(input.potValue)],
+      ["Current fund value", fmtGBP(input.potValue)],
+      ["Transfer-in at outset", fmtGBP(input.transferIn ?? 0)],
+      ["Starting fund (incl. transfer)", fmtGBP(input.potValue + (input.transferIn ?? 0))],
       ["Regular gross contribution (p.a.)", fmtGBP(input.contribution ?? 0)],
       ["Term to retirement", `${yearsToRet} year(s)`],
     ],
     columnStyles: { 0: { cellWidth: 220, fontStyle: "bold" } },
     margin: { left: M, right: M },
   });
+
   y = (doc as any).lastAutoTable.finalY + 14;
 
   // ── Charges & basis ───────────────────────────────────────────────────────

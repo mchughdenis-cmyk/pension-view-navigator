@@ -119,6 +119,7 @@ export default function DrawdownJourney() {
   const handleSubmit = async () => {
     if (!clientId || !accountId) { toast.error("Select a client and SIPP account"); return; }
     if (!eligible) { toast.error(`Client must be ${NMPA}+ to access drawdown`); return; }
+    if (!disclosuresComplete) { toast.error("Complete the FCA mandatory disclosures (Step 0) first"); return; }
     setSubmitting(true);
     const result = await processDrawdown({
       clientId, accountId,

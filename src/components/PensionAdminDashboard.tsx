@@ -44,7 +44,7 @@ import {
   Cog,
   KeyRound,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import BankUpload from "./BankUpload";
 import PooledAccount from "./PooledAccount";
@@ -168,7 +168,9 @@ const getPriorityColor = (priority: string) => {
 
 export default function PensionAdminDashboard() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("clients");
+  const [searchParams] = useSearchParams();
+  const initialTab = searchParams.get("tab") || "clients";
+  const [activeTab, setActiveTab] = useState(initialTab);
   const { clients: dbClients, loading: clientsLoading, addClient: addDbClient, updateClient: updateDbClient } = useClients();
   const { entries: activityEntries } = useAuditTrail();
   const { stats: schemeStats } = useSchemeStats();

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { setActiveDocumentBrand } from "@/lib/documentUtils";
 
 export type Firm = {
   id: string;

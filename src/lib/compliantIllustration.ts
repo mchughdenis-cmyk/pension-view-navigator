@@ -67,12 +67,13 @@ function projectDrawdown(input: IllustrationInput, grossRate: number, totalCharg
   const drawdownYears = Math.max(1, input.lifeExpectancy - input.retirementAge);
   const charge = totalCharge;
   const startVesting = projectAccumulation(
-    input.potValue,
+    input.potValue + (input.transferIn ?? 0),
     input.contribution ?? 0,
     yearsToRet,
     grossRate,
     charge,
   );
+
   // 25% PCLS taken at vesting; remainder enters drawdown.
   const drawdownPot0 = startVesting * 0.75;
   const rows: YearRow[] = [];

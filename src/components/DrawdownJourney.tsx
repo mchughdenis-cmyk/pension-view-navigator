@@ -88,8 +88,9 @@ export default function DrawdownJourney() {
 
   const rrwAllAck = Object.values(rrw).every(Boolean);
   const advAllAck = Object.values(adv).every(Boolean);
-  const pwComplete = pwOutcome === "received" || pwOutcome === "booked" ||
-    (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
+  const pwComplete = pwOutcome === "received" || pwOutcome === "booked"
+    ? pwReference.trim().length >= 4
+    : (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
   const disclosuresComplete = journeyType === "advised"
     ? (advAllAck && rrwAllAck)
     : journeyType === "non_advised"

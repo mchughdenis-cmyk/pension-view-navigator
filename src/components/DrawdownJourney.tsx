@@ -296,11 +296,11 @@ export default function DrawdownJourney() {
             <TabsTrigger value="step0">
               0. Disclosures {disclosuresComplete && <CheckCircle className="w-3 h-3 ml-1 text-success" />}
             </TabsTrigger>
-            <TabsTrigger value="step1" disabled={!disclosuresComplete}>1. Mode</TabsTrigger>
-            <TabsTrigger value="step2" disabled={!disclosuresComplete}>2. Configure</TabsTrigger>
+            <TabsTrigger value="step1" disabled={!disclosuresComplete}>1. Choose Option</TabsTrigger>
+            <TabsTrigger value="step2" disabled={!disclosuresComplete}>2. Amount & Frequency</TabsTrigger>
             <TabsTrigger value="step3" disabled={!disclosuresComplete}>3. Tax Breakdown</TabsTrigger>
-            <TabsTrigger value="step4" disabled={!disclosuresComplete}>4. Projection</TabsTrigger>
-            <TabsTrigger value="step5" disabled={!disclosuresComplete}>5. Apply</TabsTrigger>
+            <TabsTrigger value="step4" disabled={!disclosuresComplete}>4. Income Projection</TabsTrigger>
+            <TabsTrigger value="step5" disabled={!disclosuresComplete}>5. Review & Apply</TabsTrigger>
           </TabsList>
 
           {/* Step 0: FCA mandatory disclosures (COBS 19.7 / 19.7A) */}

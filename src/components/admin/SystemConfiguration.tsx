@@ -20,10 +20,30 @@ import {
   RefreshCw,
   CheckCircle,
   AlertTriangle,
+  Eye,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useMarketingSiteEnabled, setSiteSetting } from '@/hooks/useSiteSettings'
+import { useRole } from '@/contexts/RoleContext'
+
 
 export default function SystemConfiguration() {
+  const { user } = useRole()
+  const { enabled: marketingEnabled, loading: marketingLoading } = useMarketingSiteEnabled()
+  const [savingMarketing, setSavingMarketing] = useState(false)
+
+  const toggleMarketingSite = async (next: boolean) => {
+    setSavingMarketing(true)
+    try {
+      await setSiteSetting('marketing_site_enabled', next, user?.id)
+      toast.success(next ? 'Marketing site enabled — visitors land on /site' : 'Marketing site disabled — visitors redirect to /auth')
+    } catch (e: any) {
+      toast.error(e.message ?? 'Failed to update — admin role required')
+    } finally {
+      setSavingMarketing(false)
+    }
+  }
+
   const [config, setConfig] = useState({
     // Platform
     platformName: 'Pension Navigator by Airgead',
@@ -168,6 +188,31 @@ export default function SystemConfiguration() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Public Pages */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2"><Eye className="w-5 h-5" /> Public Pages</CardTitle>
+          <CardDescription>Toggle which public-facing pages are reachable by unauthenticated visitors.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between p-3 border rounded-lg">
+            <div>
+              <p className="font-medium text-sm">Marketing site (/site)</p>
+              <p className="text-xs text-muted-foreground">
+                When off, the homepage and all /site/* routes redirect straight to the sign-in page.
+              </p>
+            </div>
+            <Switch
+              checked={marketingEnabled}
+              disabled={marketingLoading || savingMarketing}
+              onCheckedChange={toggleMarketingSite}
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+
 
       {/* Save Button */}
       <div className="flex justify-end gap-2">

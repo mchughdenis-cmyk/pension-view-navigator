@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,12 +7,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { BackButton } from "@/components/ui/back-button";
 import { toast } from "sonner";
 import {
   PiggyBank, TrendingUp, Calculator, Clock, AlertTriangle, CheckCircle,
-  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown,
+  ArrowRight, Banknote, Calendar, Shield, Target, Info, Loader2, FileDown, ScrollText,
 } from "lucide-react";
+
 import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
@@ -57,7 +61,40 @@ export default function DrawdownJourney() {
   const [growth, setGrowth] = useState(4);
   const [inflation, setInflation] = useState(2.5);
   const [submitting, setSubmitting] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0);
+
+  // FCA mandatory disclosures (COBS 19.7 / 19.7A — Pension Wise stronger nudge + retirement risk warnings)
+  const [journeyType, setJourneyType] = useState<"advised" | "non_advised" | "">("");
+  // Pension Wise / MoneyHelper "stronger nudge" — non-advised only
+  const [pwOffered, setPwOffered] = useState(false);
+  const [pwOutcome, setPwOutcome] = useState<"booked" | "received" | "optout" | "">("");
+  const [pwOptOutReason, setPwOptOutReason] = useState("");
+  // Retirement risk warnings (second line of defence) — both journeys
+  const [rrw, setRrw] = useState<Record<string, boolean>>({
+    health: false, marital: false, otherPensions: false, inflation: false,
+    scams: false, debts: false, sustainability: false, tax: false,
+    dependants: false, meansTested: false, charges: false, investmentChoice: false,
+  });
+  // Advised-journey suitability declarations
+  const [adv, setAdv] = useState({
+    factFind: false, atr: false, capacityForLoss: false, sustainability: false,
+    cashflow: false, mpaaAck: false, lsaAck: false, alternatives: false,
+    chargesDisclosed: false, suitabilityIssued: false,
+  });
+  const [advAtrCategory, setAdvAtrCategory] = useState("Balanced");
+  const [advCfl, setAdvCfl] = useState<"low" | "medium" | "high">("medium");
+  const [advNotes, setAdvNotes] = useState("");
+
+  const rrwAllAck = Object.values(rrw).every(Boolean);
+  const advAllAck = Object.values(adv).every(Boolean);
+  const pwComplete = pwOutcome === "received" || pwOutcome === "booked" ||
+    (pwOutcome === "optout" && pwOptOutReason.trim().length > 5);
+  const disclosuresComplete = journeyType === "advised"
+    ? (advAllAck && rrwAllAck)
+    : journeyType === "non_advised"
+      ? (pwOffered && pwComplete && rrwAllAck)
+      : false;
+
 
   // Auto-set max PCLS when pot changes
   const maxPcls = useMemo(() => calculatePCLS(potValue).maxPcls, [potValue]);
@@ -82,6 +119,7 @@ export default function DrawdownJourney() {
   const handleSubmit = async () => {
     if (!clientId || !accountId) { toast.error("Select a client and SIPP account"); return; }
     if (!eligible) { toast.error(`Client must be ${NMPA}+ to access drawdown`); return; }
+    if (!disclosuresComplete) { toast.error("Complete the FCA mandatory disclosures (Step 0) first"); return; }
     setSubmitting(true);
     const result = await processDrawdown({
       clientId, accountId,
@@ -91,7 +129,7 @@ export default function DrawdownJourney() {
       drawdownIncome: mode === "PCLS_FAD" ? annualIncome : undefined,
       ufplsGross: mode === "UFPLS" ? ufplsGross : undefined,
       otherIncome,
-      notes: `Drawdown journey: ${mode}`,
+      notes: `Drawdown journey: ${mode} | ${journeyType === "advised" ? "Advised (COBS 9/9A)" : "Non-advised (COBS 19.7A nudge)"} | RRW acknowledged | ${journeyType === "non_advised" ? `PW: ${pwOutcome}${pwOutcome === "optout" ? " — " + pwOptOutReason : ""}` : `ATR: ${advAtrCategory}, CFL: ${advCfl}`}${advNotes ? ` | Notes: ${advNotes}` : ""}`,
     });
     setSubmitting(false);
     if (result) {
@@ -252,13 +290,180 @@ export default function DrawdownJourney() {
 
         {/* Main flow */}
         <Tabs value={`step${step}`} onValueChange={v => setStep(parseInt(v.replace("step", "")))}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="step1">1. Mode</TabsTrigger>
-            <TabsTrigger value="step2">2. Configure</TabsTrigger>
-            <TabsTrigger value="step3">3. Tax Breakdown</TabsTrigger>
-            <TabsTrigger value="step4">4. Projection</TabsTrigger>
-            <TabsTrigger value="step5">5. Apply</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="step0">
+              0. Disclosures {disclosuresComplete && <CheckCircle className="w-3 h-3 ml-1 text-success" />}
+            </TabsTrigger>
+            <TabsTrigger value="step1" disabled={!disclosuresComplete}>1. Mode</TabsTrigger>
+            <TabsTrigger value="step2" disabled={!disclosuresComplete}>2. Configure</TabsTrigger>
+            <TabsTrigger value="step3" disabled={!disclosuresComplete}>3. Tax Breakdown</TabsTrigger>
+            <TabsTrigger value="step4" disabled={!disclosuresComplete}>4. Projection</TabsTrigger>
+            <TabsTrigger value="step5" disabled={!disclosuresComplete}>5. Apply</TabsTrigger>
           </TabsList>
+
+          {/* Step 0: FCA mandatory disclosures (COBS 19.7 / 19.7A) */}
+          <TabsContent value="step0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><ScrollText className="w-5 h-5" /> FCA mandatory pre-drawdown disclosures</CardTitle>
+                <CardDescription>
+                  COBS 19.7 retirement risk warnings and, for non-advised journeys, the COBS 19.7A Pension Wise / MoneyHelper stronger nudge. All items must be completed before benefits can be crystallised.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Journey type</Label>
+                  <RadioGroup value={journeyType} onValueChange={(v) => setJourneyType(v as any)} className="grid md:grid-cols-2 gap-3">
+                    <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer ${journeyType === "advised" ? "ring-2 ring-primary" : ""}`}>
+                      <RadioGroupItem value="advised" />
+                      <div>
+                        <div className="font-medium">Advised</div>
+                        <p className="text-xs text-muted-foreground">A personal recommendation is being given. Suitability rules (COBS 9 / 9A) apply.</p>
+                      </div>
+                    </label>
+                    <label className={`flex items-start gap-3 rounded-lg border p-4 cursor-pointer ${journeyType === "non_advised" ? "ring-2 ring-primary" : ""}`}>
+                      <RadioGroupItem value="non_advised" />
+                      <div>
+                        <div className="font-medium">Non-advised / Insistent</div>
+                        <p className="text-xs text-muted-foreground">No personal recommendation. Pension Wise stronger nudge and risk warnings are mandatory.</p>
+                      </div>
+                    </label>
+                  </RadioGroup>
+                </div>
+
+                {journeyType === "non_advised" && (
+                  <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-primary" />
+                      <h4 className="font-semibold text-sm">Pension Wise / MoneyHelper stronger nudge (COBS 19.7A)</h4>
+                    </div>
+                    <label className="flex items-start gap-2 text-sm">
+                      <Checkbox checked={pwOffered} onCheckedChange={(c) => setPwOffered(!!c)} className="mt-0.5" />
+                      <span>I confirm the client has been offered a free, impartial Pension Wise appointment (telephone or face-to-face via MoneyHelper).</span>
+                    </label>
+                    <div>
+                      <Label className="text-xs">Outcome</Label>
+                      <Select value={pwOutcome} onValueChange={(v) => setPwOutcome(v as any)}>
+                        <SelectTrigger><SelectValue placeholder="Select outcome" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="received">Client already received Pension Wise / regulated advice</SelectItem>
+                          <SelectItem value="booked">Appointment booked — reference recorded</SelectItem>
+                          <SelectItem value="optout">Client opted out (record reason)</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {pwOutcome === "optout" && (
+                      <div>
+                        <Label className="text-xs">Opt-out reason (mandatory — must be explicit and recorded)</Label>
+                        <Textarea
+                          rows={2}
+                          value={pwOptOutReason}
+                          onChange={(e) => setPwOptOutReason(e.target.value)}
+                          placeholder="E.g. Client confirmed they have already taken regulated advice from another firm on…"
+                        />
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {journeyType && (
+                  <div className="rounded-lg border p-4 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4 text-warning" />
+                      <h4 className="font-semibold text-sm">Retirement risk warnings — second line of defence (COBS 19.7)</h4>
+                    </div>
+                    <p className="text-xs text-muted-foreground">Confirm each risk has been explained to the client and their answers documented:</p>
+                    <div className="grid md:grid-cols-2 gap-2 text-sm">
+                      {([
+                        ["health", "Health & lifestyle (may affect annuity rate / longevity)"],
+                        ["marital", "Marital status, dependants & survivor benefits"],
+                        ["otherPensions", "Other pension provision and aggregate retirement income"],
+                        ["inflation", "Inflation risk on long-term income"],
+                        ["sustainability", "Sustainability of withdrawals vs life expectancy"],
+                        ["investmentChoice", "Investment choice & volatility in drawdown"],
+                        ["tax", "Income tax implications (incl. emergency tax on first payment)"],
+                        ["charges", "Product, platform and adviser charges"],
+                        ["debts", "Impact on debts / bankruptcy exposure"],
+                        ["meansTested", "Effect on means-tested benefits"],
+                        ["scams", "Pension scam awareness (FCA ScamSmart)"],
+                      ] as [string, string][]).map(([k, label]) => (
+                        <label key={k} className="flex items-start gap-2">
+                          <Checkbox checked={!!rrw[k]} onCheckedChange={(c) => setRrw(prev => ({ ...prev, [k]: !!c }))} className="mt-0.5" />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {journeyType === "advised" && (
+                  <div className="rounded-lg border p-4 space-y-4 bg-primary/5">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4 text-primary" />
+                      <h4 className="font-semibold text-sm">Advised suitability declarations (COBS 9 / 9A & PROD 4)</h4>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-3">
+                      <div>
+                        <Label className="text-xs">ATR category</Label>
+                        <Select value={advAtrCategory} onValueChange={setAdvAtrCategory}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["Cautious", "Cautious-Balanced", "Balanced", "Balanced-Growth", "Growth", "Aggressive"].map(c => (
+                              <SelectItem key={c} value={c}>{c}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label className="text-xs">Capacity for loss</Label>
+                        <Select value={advCfl} onValueChange={(v) => setAdvCfl(v as any)}>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {["low", "medium", "high"].map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div className="grid md:grid-cols-2 gap-2 text-sm">
+                      {([
+                        ["factFind", "Fact-find current within 12 months"],
+                        ["atr", "Attitude to risk re-assessed for decumulation"],
+                        ["capacityForLoss", "Capacity for loss assessed and documented"],
+                        ["sustainability", "Sustainable withdrawal rate stress-tested"],
+                        ["cashflow", "Cashflow plan produced and shared with client"],
+                        ["mpaaAck", "MPAA implications discussed & acknowledged"],
+                        ["lsaAck", "LSA / LSDBA position checked (£268,275 / £1,073,100)"],
+                        ["alternatives", "Alternatives considered (annuity, blended, defer)"],
+                        ["chargesDisclosed", "All charges (product, platform, adviser) disclosed"],
+                        ["suitabilityIssued", "Suitability report will be issued before transaction"],
+                      ] as [keyof typeof adv, string][]).map(([k, label]) => (
+                        <label key={k} className="flex items-start gap-2">
+                          <Checkbox checked={adv[k]} onCheckedChange={(c) => setAdv(prev => ({ ...prev, [k]: !!c }))} className="mt-0.5" />
+                          <span>{label}</span>
+                        </label>
+                      ))}
+                    </div>
+                    <div>
+                      <Label className="text-xs">Adviser notes (rationale for recommendation)</Label>
+                      <Textarea rows={3} value={advNotes} onChange={(e) => setAdvNotes(e.target.value)} placeholder="E.g. Client requires £25k pa flexible income to bridge to State Pension at 67…" />
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between border-t pt-4">
+                  <div className="text-xs text-muted-foreground">
+                    {disclosuresComplete
+                      ? <span className="text-success inline-flex items-center gap-1"><CheckCircle className="w-3 h-3" /> All mandatory disclosures complete</span>
+                      : "Complete all required items above to proceed."}
+                  </div>
+                  <Button onClick={() => setStep(1)} disabled={!disclosuresComplete}>
+                    Continue to mode<ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
 
           {/* Step 1: Mode */}
           <TabsContent value="step1">
@@ -396,12 +601,24 @@ export default function DrawdownJourney() {
                     </>
                   )}
                 </div>
-                <Button className="w-full" onClick={handleSubmit} disabled={submitting || !accountId || !eligible || mode === "ANNUITY"}>
+                <div className="rounded-lg border p-3 text-xs bg-muted/30 flex items-start gap-2">
+                  <Shield className="w-4 h-4 text-primary mt-0.5 shrink-0" />
+                  <div>
+                    <div><strong>Journey:</strong> {journeyType === "advised" ? "Advised (COBS 9 / 9A)" : journeyType === "non_advised" ? "Non-advised (COBS 19.7A stronger nudge applied)" : "Not set"}</div>
+                    <div><strong>Risk warnings:</strong> {rrwAllAck ? "All acknowledged" : "Incomplete"}</div>
+                    {journeyType === "non_advised" && (
+                      <div><strong>Pension Wise:</strong> {pwOutcome === "received" ? "Already received guidance/advice" : pwOutcome === "booked" ? "Appointment booked" : pwOutcome === "optout" ? "Opted out (reason recorded)" : "Not recorded"}</div>
+                    )}
+                  </div>
+                </div>
+                <Button className="w-full" onClick={handleSubmit} disabled={submitting || !accountId || !eligible || !disclosuresComplete || mode === "ANNUITY"}>
                   {submitting && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   {mode === "ANNUITY" ? "Annuity purchase — contact provider" : "Process drawdown"}
                 </Button>
                 {!accountId && <p className="text-sm text-destructive">Selected client has no SIPP account.</p>}
                 {!eligible && <p className="text-sm text-destructive">Client is below NMPA ({NMPA}).</p>}
+                {!disclosuresComplete && <p className="text-sm text-destructive">FCA mandatory disclosures (Step 0) must be completed before processing.</p>}
+
               </CardContent>
             </Card>
           </TabsContent>

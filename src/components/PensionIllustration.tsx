@@ -521,26 +521,57 @@ const PensionIllustration = () => {
             </TabsContent>
 
             <TabsContent value="summary" className="space-y-4">
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={() => {
-                  generateSummaryPdf({
-                    potValue: inputs.potValue,
-                    transferIn: inputs.transferIn,
-                    annualContribution: inputs.annualContribution,
-                    currentAge: inputs.currentAge,
-                    retirementAge: inputs.retirementAge,
-                    lifeExpectancy: inputs.lifeExpectancy,
-                    drawdownRate: inputs.drawdownRate,
-                    annualGrowth: inputs.annualGrowth,
-                    annuityRate: inputs.annuityRate,
-                    inflationRate: inputs.inflationRate,
-                  });
-                  toast.success("Summary PDF generated", { description: "Your illustration summary is downloading" });
-                }}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Download Summary PDF
-                </Button>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Save className="w-5 h-5" /> Save & share this illustration</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor="memberEmail">Member email *</Label>
+                      <Input id="memberEmail" type="email" placeholder="member@example.com"
+                        value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="memberName">Member name (optional)</Label>
+                      <Input id="memberName" placeholder="Jane Smith"
+                        value={memberName} onChange={(e) => setMemberName(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="scenarioName">Scenario name</Label>
+                      <Input id="scenarioName" value={scenarioName}
+                        onChange={(e) => setScenarioName(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button onClick={handleSaveToPortal} disabled={saving}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {saving ? "Saving..." : "Save to adviser portal"}
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      generateSummaryPdf({
+                        potValue: inputs.potValue,
+                        transferIn: inputs.transferIn,
+                        annualContribution: inputs.annualContribution,
+                        currentAge: inputs.currentAge,
+                        retirementAge: inputs.retirementAge,
+                        lifeExpectancy: inputs.lifeExpectancy,
+                        drawdownRate: inputs.drawdownRate,
+                        annualGrowth: inputs.annualGrowth,
+                        annuityRate: inputs.annuityRate,
+                        inflationRate: inputs.inflationRate,
+                      });
+                      toast.success("Summary PDF generated", { description: "Your illustration summary is downloading" });
+                    }}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Download Summary PDF
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Saved illustrations appear in the adviser portal under "Saved Illustrations", filtered to advisers and admins only.
+                  </p>
+                </CardContent>
+              </Card>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>

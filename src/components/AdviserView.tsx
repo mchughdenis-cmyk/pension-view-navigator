@@ -40,6 +40,7 @@ const navGroups: NavGroup[] = [
     items: [
       { value: "onboarding", label: "Client Onboarding", icon: UserPlus },
       { value: "illustrations", label: "Illustrations", icon: FileText },
+      { value: "saved-illustrations", label: "Saved Illustrations", icon: FileText },
       { value: "reports", label: "Generate Reports", icon: ClipboardList },
     ],
   },
@@ -147,6 +148,7 @@ export default function AdviserView() {
     // For tool items, navigate directly
     if (value === 'onboarding') { navigate('/onboarding'); return }
     if (value === 'illustrations') { navigate('/illustration'); return }
+    if (value === 'saved-illustrations') { navigate('/saved-illustrations'); return }
     if (value === 'reports') { navigate('/annual-summary'); return }
     setActiveTab(value)
   }

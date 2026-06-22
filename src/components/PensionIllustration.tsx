@@ -16,12 +16,15 @@ import {
   ArrowRight,
   RefreshCw,
   FileText,
-  Download
+  Download,
+  Save
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { downloadAirgeadHtml } from "@/lib/documentUtils";
 import { generateCompliantIllustrationPdf, generateSummaryPdf } from "@/lib/compliantIllustration";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 interface IllustrationInputs {
   potValue: number;
@@ -50,9 +53,57 @@ const PensionIllustration = () => {
     inflationRate: 2.5
   });
 
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const [scenarioName, setScenarioName] = useState("Pension Illustration");
+  const [saving, setSaving] = useState(false);
 
   const updateInput = (key: keyof IllustrationInputs, value: number) => {
     setInputs(prev => ({ ...prev, [key]: value }));
+  };
+
+  const saveSchema = z.object({
+    member_email: z.string().trim().email("Enter a valid member email").max(255),
+    member_name: z.string().trim().max(120).optional(),
+    scenario_name: z.string().trim().min(1, "Scenario name required").max(120),
+  });
+
+  const handleSaveToPortal = async () => {
+    const parsed = saveSchema.safeParse({
+      member_email: memberEmail,
+      member_name: memberName || undefined,
+      scenario_name: scenarioName,
+    });
+    if (!parsed.success) {
+      toast.error("Cannot save", { description: parsed.error.errors[0]?.message });
+      return;
+    }
+    setSaving(true);
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      setSaving(false);
+      toast.error("Sign in required to save illustrations");
+      return;
+    }
+    const { error } = await (supabase as any).from("saved_illustrations").insert({
+      adviser_id: userData.user.id,
+      member_email: parsed.data.member_email,
+      member_name: parsed.data.member_name ?? null,
+      scenario_name: parsed.data.scenario_name,
+      inputs,
+      summary: {
+        totalDrawdownIncome,
+        totalAnnuityIncome,
+        vestingFund: Math.round(vestingFund),
+        totalContributions,
+      },
+    });
+    setSaving(false);
+    if (error) {
+      toast.error("Save failed", { description: error.message });
+      return;
+    }
+    toast.success("Illustration saved to adviser portal", { description: `Linked to ${parsed.data.member_email}` });
   };
 
   const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [

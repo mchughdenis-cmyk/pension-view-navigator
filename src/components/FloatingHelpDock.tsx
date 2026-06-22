@@ -8,9 +8,10 @@ const DOCK_KEY = "airgead.help-dock.expanded";
 
 export function FloatingHelpDock() {
   const [expanded, setExpanded] = useState(() => {
-    if (typeof window === "undefined") return true;
+    if (typeof window === "undefined") return false;
     const saved = localStorage.getItem(DOCK_KEY);
-    return saved === null ? true : saved === "1";
+    // Default to minimized so the help buttons never cover page content
+    return saved === "1";
   });
 
   useEffect(() => {

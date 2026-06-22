@@ -3976,6 +3976,45 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_illustrations: {
+        Row: {
+          adviser_id: string
+          created_at: string
+          id: string
+          inputs: Json
+          member_email: string
+          member_name: string | null
+          notes: string | null
+          scenario_name: string
+          summary: Json
+          updated_at: string
+        }
+        Insert: {
+          adviser_id: string
+          created_at?: string
+          id?: string
+          inputs: Json
+          member_email: string
+          member_name?: string | null
+          notes?: string | null
+          scenario_name?: string
+          summary: Json
+          updated_at?: string
+        }
+        Update: {
+          adviser_id?: string
+          created_at?: string
+          id?: string
+          inputs?: Json
+          member_email?: string
+          member_name?: string | null
+          notes?: string | null
+          scenario_name?: string
+          summary?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       scheme_pensions: {
         Row: {
           client_id: string

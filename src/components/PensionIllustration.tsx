@@ -16,12 +16,15 @@ import {
   ArrowRight,
   RefreshCw,
   FileText,
-  Download
+  Download,
+  Save
 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 import { downloadAirgeadHtml } from "@/lib/documentUtils";
 import { generateCompliantIllustrationPdf, generateSummaryPdf } from "@/lib/compliantIllustration";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
 
 interface IllustrationInputs {
   potValue: number;
@@ -50,9 +53,57 @@ const PensionIllustration = () => {
     inflationRate: 2.5
   });
 
+  const [memberEmail, setMemberEmail] = useState("");
+  const [memberName, setMemberName] = useState("");
+  const [scenarioName, setScenarioName] = useState("Pension Illustration");
+  const [saving, setSaving] = useState(false);
 
   const updateInput = (key: keyof IllustrationInputs, value: number) => {
     setInputs(prev => ({ ...prev, [key]: value }));
+  };
+
+  const saveSchema = z.object({
+    member_email: z.string().trim().email("Enter a valid member email").max(255),
+    member_name: z.string().trim().max(120).optional(),
+    scenario_name: z.string().trim().min(1, "Scenario name required").max(120),
+  });
+
+  const handleSaveToPortal = async () => {
+    const parsed = saveSchema.safeParse({
+      member_email: memberEmail,
+      member_name: memberName || undefined,
+      scenario_name: scenarioName,
+    });
+    if (!parsed.success) {
+      toast.error("Cannot save", { description: parsed.error.errors[0]?.message });
+      return;
+    }
+    setSaving(true);
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) {
+      setSaving(false);
+      toast.error("Sign in required to save illustrations");
+      return;
+    }
+    const { error } = await (supabase as any).from("saved_illustrations").insert({
+      adviser_id: userData.user.id,
+      member_email: parsed.data.member_email,
+      member_name: parsed.data.member_name ?? null,
+      scenario_name: parsed.data.scenario_name,
+      inputs,
+      summary: {
+        totalDrawdownIncome,
+        totalAnnuityIncome,
+        vestingFund: Math.round(vestingFund),
+        totalContributions,
+      },
+    });
+    setSaving(false);
+    if (error) {
+      toast.error("Save failed", { description: error.message });
+      return;
+    }
+    toast.success("Illustration saved to adviser portal", { description: `Linked to ${parsed.data.member_email}` });
   };
 
   const SCENARIOS: { name: string; tag: string; description: string; inputs: IllustrationInputs }[] = [
@@ -470,26 +521,57 @@ const PensionIllustration = () => {
             </TabsContent>
 
             <TabsContent value="summary" className="space-y-4">
-              <div className="flex justify-end">
-                <Button variant="outline" onClick={() => {
-                  generateSummaryPdf({
-                    potValue: inputs.potValue,
-                    transferIn: inputs.transferIn,
-                    annualContribution: inputs.annualContribution,
-                    currentAge: inputs.currentAge,
-                    retirementAge: inputs.retirementAge,
-                    lifeExpectancy: inputs.lifeExpectancy,
-                    drawdownRate: inputs.drawdownRate,
-                    annualGrowth: inputs.annualGrowth,
-                    annuityRate: inputs.annuityRate,
-                    inflationRate: inputs.inflationRate,
-                  });
-                  toast.success("Summary PDF generated", { description: "Your illustration summary is downloading" });
-                }}>
-                  <FileText className="w-4 h-4 mr-2" />
-                  Download Summary PDF
-                </Button>
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Save className="w-5 h-5" /> Save & share this illustration</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <Label htmlFor="memberEmail">Member email *</Label>
+                      <Input id="memberEmail" type="email" placeholder="member@example.com"
+                        value={memberEmail} onChange={(e) => setMemberEmail(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="memberName">Member name (optional)</Label>
+                      <Input id="memberName" placeholder="Jane Smith"
+                        value={memberName} onChange={(e) => setMemberName(e.target.value)} />
+                    </div>
+                    <div>
+                      <Label htmlFor="scenarioName">Scenario name</Label>
+                      <Input id="scenarioName" value={scenarioName}
+                        onChange={(e) => setScenarioName(e.target.value)} />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button onClick={handleSaveToPortal} disabled={saving}>
+                      <Save className="w-4 h-4 mr-2" />
+                      {saving ? "Saving..." : "Save to adviser portal"}
+                    </Button>
+                    <Button variant="outline" onClick={() => {
+                      generateSummaryPdf({
+                        potValue: inputs.potValue,
+                        transferIn: inputs.transferIn,
+                        annualContribution: inputs.annualContribution,
+                        currentAge: inputs.currentAge,
+                        retirementAge: inputs.retirementAge,
+                        lifeExpectancy: inputs.lifeExpectancy,
+                        drawdownRate: inputs.drawdownRate,
+                        annualGrowth: inputs.annualGrowth,
+                        annuityRate: inputs.annuityRate,
+                        inflationRate: inputs.inflationRate,
+                      });
+                      toast.success("Summary PDF generated", { description: "Your illustration summary is downloading" });
+                    }}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Download Summary PDF
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Saved illustrations appear in the adviser portal under "Saved Illustrations", filtered to advisers and admins only.
+                  </p>
+                </CardContent>
+              </Card>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>

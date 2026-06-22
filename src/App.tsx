@@ -116,6 +116,7 @@ import IOSInstallSheet from "./components/pwa/IOSInstallSheet";
 import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
+import SavedIllustrations from "./components/SavedIllustrations";
 import Tour from "./pages/Tour";
 import { FloatingHelpDock } from "./components/FloatingHelpDock";
 import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
@@ -194,6 +195,7 @@ const AppContent = () => {
               <Route path="/portfolio" element={<Index />} />
               <Route path="/admin" element={<RoleGate allow={['admin']}><Admin /></RoleGate>} />
               <Route path="/illustration" element={<PensionIllustration />} />
+              <Route path="/saved-illustrations" element={<RoleGate allow={['adviser', 'admin']}><SavedIllustrations /></RoleGate>} />
               <Route path="/welcome-pack" element={<DigitalWelcomePack />} />
               <Route path="/transfer" element={<PensionTransferJourney />} />
               <Route path="/onboarding" element={<ClientOnboarding />} />

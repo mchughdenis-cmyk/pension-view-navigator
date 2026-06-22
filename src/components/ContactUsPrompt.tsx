@@ -11,7 +11,7 @@ export function ContactUsPrompt() {
       <Button
         onClick={() => setOpen(true)}
         size="sm"
-        className="fixed bottom-4 right-4 z-40 shadow-lg rounded-full h-12 px-4 gap-2"
+        className="shadow-lg rounded-full h-12 px-4 gap-2"
         aria-label="Contact us"
       >
         <MessageSquare className="h-4 w-4" />

@@ -66,9 +66,9 @@ export function GuidedTour() {
 
   if (!active) {
     return (
-      <button
+    <button
         onClick={() => { setActive(true); setStep(0); }}
-        className="fixed bottom-20 right-4 z-40 h-10 px-4 rounded-full bg-primary text-primary-foreground shadow-lg text-xs font-medium flex items-center gap-2 hover:scale-105 transition-transform"
+        className="h-10 px-4 rounded-full bg-primary text-primary-foreground shadow-lg text-xs font-medium flex items-center gap-2 hover:scale-105 transition-transform"
       >
         <Presentation className="h-3.5 w-3.5" /> Take the tour
       </button>

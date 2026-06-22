@@ -305,3 +305,150 @@ export function generateCompliantIllustrationPdf(input: IllustrationInput) {
   const safeName = (input.clientName ?? "Member").replace(/[^a-z0-9]+/gi, "-");
   doc.save(`KFI-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
 }
+
+export function generateSummaryPdf(params: {
+  potValue: number;
+  transferIn: number;
+  annualContribution: number;
+  currentAge: number;
+  retirementAge: number;
+  lifeExpectancy: number;
+  drawdownRate: number;
+  annualGrowth: number;
+  annuityRate: number;
+  inflationRate: number;
+  clientName?: string;
+}) {
+  const g = params.annualGrowth / 100;
+  const accYears = Math.max(0, params.retirementAge - params.currentAge);
+  const ddYears = Math.max(0, params.lifeExpectancy - params.retirementAge);
+  const startPot = params.potValue + params.transferIn;
+
+  // Accumulation phase (mirrors component logic — no charges)
+  let pot = startPot;
+  for (let y = 0; y < accYears; y++) {
+    pot = pot * (1 + g) + params.annualContribution;
+  }
+  const vestingFund = pot;
+  const drawdownPot0 = vestingFund * 0.75;
+  const annuityIncome = (vestingFund * params.annuityRate) / 100;
+
+  // Drawdown schedule (mirrors component logic)
+  let drawdownPot = drawdownPot0;
+  const schedule: { age: number; pot: number; income: number }[] = [];
+  let totalDrawdownIncome = 0;
+  for (let y = 0; y <= ddYears; y++) {
+    const income = drawdownPot * (params.drawdownRate / 100);
+    totalDrawdownIncome += income;
+    schedule.push({ age: params.retirementAge + y, pot: drawdownPot, income });
+    drawdownPot = Math.max(0, drawdownPot * (1 + g) - income);
+  }
+  const initialDrawdownIncome = schedule[0]?.income ?? 0;
+  const finalDrawdownPot = schedule[schedule.length - 1]?.pot ?? 0;
+  const totalAnnuityIncome = annuityIncome * (ddYears + 1);
+
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const W = doc.internal.pageSize.getWidth();
+  const M = 40;
+  let y = M;
+
+  // Header
+  doc.setFillColor(15, 23, 42);
+  doc.rect(0, 0, W, 60, "F");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(14).setFont("helvetica", "bold");
+  doc.text("Pension Illustration Summary", M, 30);
+  doc.setFontSize(9).setFont("helvetica", "normal");
+  doc.text("Pension Navigator by Airgead", M, 46);
+  doc.setTextColor(0, 0, 0);
+  y = 80;
+
+  // Assumptions
+  autoTable(doc, {
+    startY: y,
+    theme: "grid",
+    styles: { fontSize: 9, cellPadding: 4 },
+    head: [["Assumptions", ""]],
+    headStyles: { fillColor: [30, 41, 59], textColor: 255 },
+    body: [
+      ["Member name", params.clientName ?? "—"],
+      ["Current age / selected retirement age", `${params.currentAge} / ${params.retirementAge}`],
+      ["Life expectancy", `${params.lifeExpectancy}`],
+      ["Starting fund (incl. transfer)", fmtGBP(startPot)],
+      ["Annual contribution", fmtGBP(params.annualContribution)],
+      ["Annual growth rate", `${params.annualGrowth}%`],
+      ["Drawdown rate", `${params.drawdownRate}%`],
+      ["Annuity rate", `${params.annuityRate}%`],
+      ["Inflation assumption", `${params.inflationRate}%`],
+    ],
+    columnStyles: { 0: { cellWidth: 220, fontStyle: "bold" } },
+    margin: { left: M, right: M },
+  });
+  y = (doc as any).lastAutoTable.finalY + 14;
+
+  // Comparison table
+  autoTable(doc, {
+    startY: y,
+    theme: "striped",
+    styles: { fontSize: 9, cellPadding: 4 },
+    head: [["", "Flexible Drawdown", "Annuity"]],
+    headStyles: { fillColor: [30, 41, 59], textColor: 255 },
+    body: [
+      ["Initial annual income", fmtGBP(initialDrawdownIncome), fmtGBP(annuityIncome)],
+      ["Total lifetime income", fmtGBP(totalDrawdownIncome), fmtGBP(totalAnnuityIncome)],
+      ["Remaining pot at end", fmtGBP(finalDrawdownPot), "£0"],
+      ["Winner", totalDrawdownIncome > totalAnnuityIncome ? "Drawdown" : "Annuity", ""],
+    ],
+    margin: { left: M, right: M },
+  });
+  y = (doc as any).lastAutoTable.finalY + 14;
+
+  // Year-by-year schedule
+  if (y > 500) { doc.addPage(); y = M; }
+  doc.setFont("helvetica", "bold").setFontSize(11);
+  doc.text("Year-by-year drawdown schedule", M, y);
+  y += 6;
+  autoTable(doc, {
+    startY: y + 4,
+    theme: "grid",
+    styles: { fontSize: 8, cellPadding: 3 },
+    head: [["Age", "Fund", "Income"]],
+    headStyles: { fillColor: [30, 41, 59], textColor: 255 },
+    body: schedule.map(r => [r.age, fmtGBP(r.pot), fmtGBP(r.income)]),
+    margin: { left: M, right: M },
+  });
+  y = (doc as any).lastAutoTable.finalY + 14;
+
+  // Important notes
+  if (y > 650) { doc.addPage(); y = M; }
+  doc.setFont("helvetica", "bold").setFontSize(10);
+  doc.text("Important notes", M, y);
+  y += 12;
+  doc.setFont("helvetica", "normal").setFontSize(8);
+  const notes = [
+    "These figures are examples only and are not guaranteed.",
+    "All projections use the growth rate selected by the user; actual returns may differ.",
+    "Drawdown income is not guaranteed and the fund could run out before life expectancy.",
+    "Annuity rates are illustrative and will depend on rates available at purchase.",
+    "Tax treatment depends on individual circumstances and may change in future.",
+    "You should seek regulated financial advice before making decisions.",
+  ];
+  notes.forEach(t => {
+    const lines = doc.splitTextToSize("• " + t, W - M * 2);
+    if (y + lines.length * 10 > 780) { doc.addPage(); y = M; }
+    doc.text(lines, M, y);
+    y += lines.length * 10 + 2;
+  });
+
+  // Footer
+  const pageCount = doc.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setFontSize(8).setTextColor(120);
+    doc.text("Pension Navigator by Airgead · FCA COBS 13 compliant", M, doc.internal.pageSize.getHeight() - 18);
+    doc.text(`Page ${p} of ${pageCount}`, W - M, doc.internal.pageSize.getHeight() - 18, { align: "right" });
+  }
+
+  const safeName = (params.clientName ?? "Member").replace(/[^a-z0-9]+/gi, "-");
+  doc.save(`Illustration-Summary-${safeName}-${new Date().toISOString().slice(0, 10)}.pdf`);
+}

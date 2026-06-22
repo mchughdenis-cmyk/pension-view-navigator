@@ -101,7 +101,7 @@ import VulnerableClientRegister from "./components/VulnerableClientRegister";
 import PensionHealthScore from "./components/PensionHealthScore";
 import EmployerPortal from "./components/EmployerPortal";
 import MobileSecurityCentre from "./components/MobileSecurityCentre";
-import { GuidedTour } from "./components/GuidedTour";
+
 import ClientOperationsHub from "./components/ClientOperationsHub";
 import EmployerSetupWizard from "./components/EmployerSetupWizard";
 import AdviserMessaging from "./components/AdviserMessaging";
@@ -117,7 +117,7 @@ import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
 import Tour from "./pages/Tour";
-import { ContactUsPrompt } from "./components/ContactUsPrompt";
+import { FloatingHelpDock } from "./components/FloatingHelpDock";
 import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
 
 
@@ -150,10 +150,9 @@ const AppContent = () => {
     <BrowserRouter>
       <FloatingBackButton />
       <CommandPalette />
-      <GuidedTour />
+      <FloatingHelpDock />
       <OfflineBanner />
       <IOSInstallSheet />
-      <ContactUsPrompt />
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />

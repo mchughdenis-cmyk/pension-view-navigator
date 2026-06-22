@@ -101,7 +101,7 @@ import VulnerableClientRegister from "./components/VulnerableClientRegister";
 import PensionHealthScore from "./components/PensionHealthScore";
 import EmployerPortal from "./components/EmployerPortal";
 import MobileSecurityCentre from "./components/MobileSecurityCentre";
-import { GuidedTour } from "./components/GuidedTour";
+
 import ClientOperationsHub from "./components/ClientOperationsHub";
 import EmployerSetupWizard from "./components/EmployerSetupWizard";
 import AdviserMessaging from "./components/AdviserMessaging";

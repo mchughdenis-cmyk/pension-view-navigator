@@ -470,6 +470,26 @@ const PensionIllustration = () => {
             </TabsContent>
 
             <TabsContent value="summary" className="space-y-4">
+              <div className="flex justify-end">
+                <Button variant="outline" onClick={() => {
+                  generateSummaryPdf({
+                    potValue: inputs.potValue,
+                    transferIn: inputs.transferIn,
+                    annualContribution: inputs.annualContribution,
+                    currentAge: inputs.currentAge,
+                    retirementAge: inputs.retirementAge,
+                    lifeExpectancy: inputs.lifeExpectancy,
+                    drawdownRate: inputs.drawdownRate,
+                    annualGrowth: inputs.annualGrowth,
+                    annuityRate: inputs.annuityRate,
+                    inflationRate: inputs.inflationRate,
+                  });
+                  toast.success("Summary PDF generated", { description: "Your illustration summary is downloading" });
+                }}>
+                  <FileText className="w-4 h-4 mr-2" />
+                  Download Summary PDF
+                </Button>
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                   <CardHeader>

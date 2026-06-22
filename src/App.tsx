@@ -150,10 +150,9 @@ const AppContent = () => {
     <BrowserRouter>
       <FloatingBackButton />
       <CommandPalette />
-      <GuidedTour />
+      <FloatingHelpDock />
       <OfflineBanner />
       <IOSInstallSheet />
-      <ContactUsPrompt />
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />

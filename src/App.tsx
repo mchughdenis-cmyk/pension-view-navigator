@@ -131,6 +131,8 @@ import EmployerRegister from "./pages/admin/EmployerRegister";
 import CETVQuotes from "./pages/admin/CETVQuotes";
 import RetirementQuotes from "./pages/admin/RetirementQuotes";
 import BreachRegister from "./pages/admin/BreachRegister";
+import DeathClaims from "./pages/admin/DeathClaims";
+import PensionSharingOrders from "./pages/admin/PensionSharingOrders";
 import TrusteeMeetings from "./pages/admin/TrusteeMeetings";
 import DataQuality from "./pages/admin/DataQuality";
 import CaseInbox from "./pages/admin/CaseInbox";

@@ -98,6 +98,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Client service",
       items: [
+        { title: "Client onboarding journey", url: "/onboarding", icon: ClipboardList },
+        { title: "Onboarding progress tracker", url: "/onboarding-progress", icon: ClipboardList },
         { title: "Client services hub", url: "/client-services", icon: PoundSterling },
         { title: "Pension health score", url: "/health-score", icon: HeartPulse },
         { title: "Employer portal", url: "/employer-portal", icon: Building2 },
@@ -206,6 +208,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "Client-level daily desk",
       items: [
+        { title: "Client onboarding journey", url: "/onboarding", icon: ClipboardList },
+        { title: "Onboarding progress tracker", url: "/onboarding-progress", icon: ClipboardList },
         { title: "Initial cash funding", url: "/cash-onboarding", icon: ArrowDownToLine },
         { title: "Ad-hoc top-up", url: "/instant-deposit", icon: ArrowDownToLine },
         { title: "Joiners & leavers", url: "/joiners-leavers", icon: UserCog },

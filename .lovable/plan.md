@@ -1,68 +1,64 @@
-## Goal
-Align the Admin daily desks with mainstream pension admin systems (Bravura Sonata, Aquila Heywood, Procentia IntelliPen, Civica UPM, Delta Financial Systems). Reposition payroll as a full process (not just a file import), give the bank reconciliation a proper file upload entry, and fill the gaps at book-of-business and client level.
+## Gap review — payroll processing & admin daily desks
 
-## 1. Payroll — process, not "import"
+Benchmarked the new `PayrollProcessing` workflow and the two Admin daily-desk groups against Bravura Sonata, Aquila Heywood Altair, Procentia IntelliPen, Civica UPM and Delta Financial Systems. Below are the missing pieces worth building next, grouped by where they belong.
 
-Rename `Payroll file import & run` → **`Payroll processing`** (route unchanged at `/payroll-processing`, page already implements a 6-step process).
+### A. Payroll processing workflow — gaps
 
-Add sibling items so the payroll workflow reads as a process, matching how Bravura/Heywood expose it:
+1. **Pre-run comparison to last period** — variance report (headcount, £ pay, £ contribs) vs previous run; flag >10% swings before approval.
+2. **Contribution cap checks** — Annual Allowance (£60k), MPAA (£10k) and tapered AA screening per member using `aa_carry_forward`; block or warn.
+3. **Salary sacrifice handling** — when sal-sac is on, the employee amount should move to the employer column and NI saving surfaces; currently the flag is captured but not applied to totals.
+4. **Refunds & adjustments line type** — negative contribution lines for short-service refunds, over-payments and prior-period corrections.
+5. **New joiner / leaver detection** — members enrolled or left mid-period should appear as flagged rows with pro-rata pay prompts.
+6. **Opt-in / opt-out register** — capture opt-out dates against members excluded with reason `opt_out`, and auto-refund contributions if within the 1-month opt-out window.
+7. **Persist the run reference / preparer / checker** — currently preparer & checker names are captured but not stored; add columns and audit-log entries.
+8. **Draft resume** — save a run in progress and resume; today the wizard is in-memory only.
+9. **Cash collection instruction** — actually create a `payment_initiations` / `dd_mandates` collection row for the total, rather than only linking to the dealing desk.
+10. **RTI FPS payload build** — hand-off currently just navigates to /paye; should insert an `rti_submissions` draft row with the payroll totals attached.
 
-- **Payroll processing** (`/payroll-processing`) — end-to-end run
-- **Contribution schedules** (`/contributions`) — expected vs received, chase overdue schedules
-- **RAS reclaim (monthly)** (`/paye`) — HMRC tax relief at source claim
-- **Late-payment monitoring** — new small view flagged against `contributions` (SLA / TPR reportable breach)
-- **Refunds of contributions** — short-service refunds / over-limit refunds
+### B. Book-of-business daily desk — still missing
 
-## 2. Bank reconciliation — add upload
+11. **Chase overdue contribution schedules** — TPR requires reporting late payments; needs an overdue tracker with 90-day materiality flag.
+12. **Unallocated cash / suspense clearing** — daily task; surface `transactions` where `client_id` is null.
+13. **Employer / scheme onboarding & terminations** — new employer setup and scheme wind-up tasks.
+14. **Bulk transfer-out (bulk annuity / buy-in / bulk transfer)** — scheme-level exit event.
+15. **Corporate governance calendar** — trustee meetings, actuarial valuation prompts, statement of investment principles reviews.
+16. **Reg breach register & TPR reportable events** — separate from CASS breaches.
 
-Split the current single "Bank file import"/"Bank reconciliation (CASS)" entry (both pointed at `/cass`) into a clean two-step flow:
+### C. Client-level daily desk — still missing
 
-- **Bank statement upload** → `/cass?tab=upload` (opens the existing `BankUpload` component within CASSReconciliation, no new route needed)
-- **Bank reconciliation (CASS 7/8)** → `/cass` (match / break / clear)
-- **Cash breaks & CASS breaches** → `/cass?tab=breaches`
+17. **Retirement quotes / benefit projections queue** — quotes requested by members awaiting production.
+18. **Divorce PSO calculations** — pension debit / credit calc, not just tracking.
+19. **Transfer value quotations (CETV)** — separate from the transfer-out execution.
+20. **Nominee / successor drawdown setup** — post-death continuation, distinct from death claims.
+21. **GDPR requests (SAR, erasure, portability)** — mentioned in the nav under member details but no queue/workflow.
+22. **Trace / gone-away members** — reunification workflow.
+23. **Small pot commutation & trivial commutation** — separate journey from UFPLS/drawdown.
 
-CASSReconciliation already has tabs; wire the sidebar links to open the right tab via query string. No schema changes.
+### D. Recommended first slice to build now
 
-## 3. Book-of-business daily desk — gaps vs peer systems
+Rather than 23 changes at once, propose implementing the highest-value payroll gaps + one new desk workflow:
 
-Add items commonly present in Bravura Sonata / Heywood Altair / Procentia:
+- **A1** period-vs-period variance panel on step 4
+- **A2** AA/MPAA cap checks on step 4
+- **A3** salary-sacrifice recalculation on step 3
+- **A4** negative/refund line type on step 3
+- **A7** persist preparer/checker + audit log entry on approval
+- **A9** create `payment_initiations` row on approval
+- **A10** create `rti_submissions` draft row on approval
+- **B11** new "Contribution schedule chaser" view listing `contributions` with status `expected` and effective_date older than 22nd of the month
+- **B12** new "Unallocated cash" queue view
 
-- **Contribution schedules** (expected vs received tracker)
-- **Direct debit collections run** (`/dealing` placeholder or new stub) — bulk DD sweep
-- **Bulk valuation / unit pricing run** — nightly NAV / price import monitor (surfaces `market_prices` + `daily-valuations` edge fn)
-- **Corporate actions processing** (`/admin?tab=corporate-actions`) — elections deadline queue
-- **Rebalance runs** (`/admin?tab=rebalancing`) — scheme-wide model drift
-- **Fee run (monthly)** (`/admin?tab=fees`) — periodic fee engine
-- **Statement production run** — batch ABS / SMPI generation
-- **Regulator returns** (`/admin?tab=regulatory`) — TPR scheme return, FCA RegData
-- **Four-eyes approvals queue** (`/admin?tab=approvals`) — maker/checker for bulk ops
+### Files (first-slice implementation)
 
-## 4. Client-level daily desk — gaps vs peer systems
+- `src/pages/PayrollProcessing.tsx` — add variance card, AA/MPAA screening, sal-sac recalculation, refund line UI, persist approvers, insert `payment_initiations` and `rti_submissions` rows on approval.
+- `src/pages/admin/ContributionChaser.tsx` (new) — overdue schedule list with chase-email action; add nav item under Book-of-business desk.
+- `src/pages/admin/UnallocatedCash.tsx` (new) — suspense queue reading `transactions` with null `client_id`; add nav item.
+- `src/App.tsx` — routes for the two new pages.
+- `src/components/nav/navConfig.ts` — two new sidebar entries in the book-of-business group.
+- No schema migration required (all target tables already exist: `aa_carry_forward`, `payment_initiations`, `rti_submissions`, `contributions`, `transactions`).
 
-Add member-record tasks standard in the same peer systems:
+### Out of scope this pass
 
-- **Beneficiary nominations** (`/beneficiaries`)
-- **Expression of wish updates** — grouped with beneficiaries
-- **Death claims / bereavement** (`/admin?tab=death-claims`) — already have `death_claims` and `death_benefit_payments` tables
-- **Pension sharing orders (divorce)** (`/admin?tab=psos`) — table exists
-- **Complaints handling** — add as ops case type; link to `ops_cases`
-- **Tax code changes / P45/P46 handling** — sub-view of member details
-- **Address / bank / GDPR requests** — grouped under member details
-- **Vulnerable customer flags** (`/vulnerable`) — surface at client level too
-- **Annual allowance / carry-forward checks** (`aa_carry_forward` table exists)
-- **Crystallisation events review** — LSA/LSDBA already there, add BCE event log
+Items C17–C23 and B13–B16 — larger new journeys; flag as backlog and pick individually next.
 
-## 5. What actually changes in this pass
-
-Nav-only restructure of `src/components/nav/navConfig.ts` (Admin role). No new pages required — every target route already exists or is a tab on an existing page. Files:
-
-- `src/components/nav/navConfig.ts` — rewrite Admin "Book-of-business daily desk" and "Client-level daily desk" groups per sections 1–4; rename payroll; split bank into upload + recon.
-- `src/components/CASSReconciliation.tsx` — read `?tab=` query param and select the matching tab on mount (small change so the two sidebar entries land on the right sub-view).
-
-No database migrations, no auth changes, no removal of existing pages.
-
-## Out of scope
-- Building brand-new pages for items that already have a home (they're linked via existing routes/tabs).
-- Any adviser/client sidebar changes — this pass is Admin-only per the request.
-
-Shall I proceed?
+Approve to build the first slice, or tell me which of the 23 you want prioritised.

@@ -339,6 +339,13 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Finance",
+      items: [
+        { title: "Fee schedules", url: "/admin?tab=fees", icon: Calculator },
+        { title: "Invoicing (Xero/Sage)", url: "/invoicing", icon: Receipt },
+      ],
+    },
+    {
       label: "System",
       items: [
         { title: "Administration", url: "/admin", icon: Users },

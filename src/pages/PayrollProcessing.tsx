@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Papa from "papaparse";
-import * as XLSX from "xlsx";
 import {
-  FileSpreadsheet, Upload, CheckCircle2, AlertTriangle, Users, Calculator,
-  ShieldCheck, Send, ArrowRight, RefreshCw,
+  Users, Calculator, ShieldCheck, Send, ArrowRight, ArrowLeft,
+  CheckCircle2, AlertTriangle, Building2, Settings2, ClipboardList,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -12,215 +10,186 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/use-toast";
 
 type Step = 1 | 2 | 3 | 4 | 5 | 6;
 
-interface ParsedRow {
-  raw: Record<string, string>;
-  niNumber: string;
+interface Member {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  ni_number: string | null;
+  employment_status: string | null;
+}
+interface Line {
+  clientId: string;
   fullName: string;
-  pensionablePay: number; // pence
-  employeeContrib: number;
-  employerContrib: number;
-  avc: number;
+  niNumber: string;
+  included: boolean;
+  excludeReason?: "leaver" | "opt_out" | "absent" | "other";
+  pensionablePayPence: number;
+  employeeContribPence: number;
+  employerContribPence: number;
+  avcPence: number;
   salarySacrifice: boolean;
-  taxReliefMethod: "ras" | "net_pay";
-  taxRelief: number;
-  matchStatus: "matched" | "unmatched" | "excluded";
-  memberClientId?: string;
-  exceptionReason?: string;
+  taxReliefPence: number;
 }
 
-const REQUIRED_FIELDS = [
-  { key: "niNumber", label: "NI number" },
-  { key: "fullName", label: "Full name" },
-  { key: "pensionablePay", label: "Pensionable pay" },
-  { key: "employeeContrib", label: "Employee contribution" },
-  { key: "employerContrib", label: "Employer contribution" },
-  { key: "avc", label: "AVC (optional)" },
-  { key: "salarySacrifice", label: "Salary sacrifice flag (optional)" },
-] as const;
-
-const toPence = (v: string | number | undefined): number => {
-  if (v === undefined || v === null || v === "") return 0;
-  const n = typeof v === "number" ? v : parseFloat(String(v).replace(/[£,\s]/g, ""));
-  if (isNaN(n)) return 0;
-  return Math.round(n * 100);
-};
-
-const gbp = (pence: number) =>
-  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format(pence / 100);
+const toPence = (v: number) => Math.round((Number(v) || 0) * 100);
+const gbp = (p: number) =>
+  new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format((p || 0) / 100);
 
 const STEPS: { id: Step; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
-  { id: 1, label: "Upload", icon: Upload },
-  { id: 2, label: "Parse & validate", icon: FileSpreadsheet },
-  { id: 3, label: "Match members", icon: Users },
-  { id: 4, label: "Calculate", icon: Calculator },
-  { id: 5, label: "Review & approve", icon: ShieldCheck },
-  { id: 6, label: "Hand off", icon: Send },
+  { id: 1, label: "Setup", icon: Settings2 },
+  { id: 2, label: "Members in scope", icon: Users },
+  { id: 3, label: "Contribution inputs", icon: ClipboardList },
+  { id: 4, label: "Calculate & validate", icon: Calculator },
+  { id: 5, label: "Four-eyes approval", icon: ShieldCheck },
+  { id: 6, label: "Outputs & hand-off", icon: Send },
 ];
 
 export default function PayrollProcessing() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
 
-  // Step 1
-  const [file, setFile] = useState<File | null>(null);
+  // ── Step 1: setup ──
   const [employerName, setEmployerName] = useState("");
-  const [schemeName, setSchemeName] = useState("");
+  const [schemeName, setSchemeName] = useState("Group SIPP");
   const [frequency, setFrequency] = useState("monthly");
   const [periodStart, setPeriodStart] = useState("");
   const [periodEnd, setPeriodEnd] = useState("");
   const [payDate, setPayDate] = useState("");
+  const [reliefMethod, setReliefMethod] = useState<"ras" | "net_pay">("ras");
+  const [eeDefaultPct, setEeDefaultPct] = useState(5);
+  const [erDefaultPct, setErDefaultPct] = useState(3);
+  const [runReference, setRunReference] = useState("");
 
-  // Step 2
-  const [headers, setHeaders] = useState<string[]>([]);
-  const [rawRows, setRawRows] = useState<Record<string, string>[]>([]);
-  const [mapping, setMapping] = useState<Record<string, string>>({});
+  // ── Members ──
+  const [members, setMembers] = useState<Member[]>([]);
+  const [lines, setLines] = useState<Line[]>([]);
 
-  // Steps 3–5
-  const [rows, setRows] = useState<ParsedRow[]>([]);
-  const [members, setMembers] = useState<{ id: string; full_name: string | null; ni_number: string | null }[]>([]);
-  const [runId, setRunId] = useState<string | null>(null);
+  // ── Approval ──
+  const [preparer, setPreparer] = useState("");
+  const [checker, setChecker] = useState("");
+  const [checkerConfirmed, setCheckerConfirmed] = useState(false);
+
+  // ── Output ──
   const [posting, setPosting] = useState(false);
+  const [runId, setRunId] = useState<string | null>(null);
+  const [handoff, setHandoff] = useState<{ contribs: number; rti: boolean; cash: boolean } | null>(null);
 
-  // Load candidate members for matching
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("clients").select("id, full_name, ni_number").limit(500);
+      const { data } = await supabase
+        .from("clients")
+        .select("id, first_name, last_name, ni_number, employment_status")
+        .eq("status", "active")
+        .order("last_name")
+        .limit(500);
       if (data) setMembers(data as any);
     })();
   }, []);
 
-  const totals = useMemo(() => {
-    const active = rows.filter((r) => r.matchStatus !== "excluded");
-    return {
-      count: active.length,
-      pensionablePay: active.reduce((s, r) => s + r.pensionablePay, 0),
-      employee: active.reduce((s, r) => s + r.employeeContrib, 0),
-      employer: active.reduce((s, r) => s + r.employerContrib, 0),
-      avc: active.reduce((s, r) => s + r.avc, 0),
-      taxRelief: active.reduce((s, r) => s + r.taxRelief, 0),
-    };
-  }, [rows]);
+  const canAdvanceFromSetup = employerName.trim() && periodStart && periodEnd && payDate && runReference.trim();
 
-  // -------------------- STEP 1 --------------------
-  const handleFile = async (f: File) => {
-    setFile(f);
-    const ext = f.name.toLowerCase().split(".").pop();
-    if (ext === "csv") {
-      Papa.parse(f, {
-        header: true, skipEmptyLines: true,
-        complete: (res) => {
-          const rs = res.data as Record<string, string>[];
-          setHeaders(res.meta.fields ?? []);
-          setRawRows(rs);
-          autoMap(res.meta.fields ?? []);
-        },
-      });
-    } else if (ext === "xlsx" || ext === "xls") {
-      const buf = await f.arrayBuffer();
-      const wb = XLSX.read(buf, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const json = XLSX.utils.sheet_to_json<Record<string, string>>(ws, { defval: "" });
-      const hs = json.length ? Object.keys(json[0]) : [];
-      setHeaders(hs);
-      setRawRows(json.map((r) => Object.fromEntries(Object.entries(r).map(([k, v]) => [k, String(v)]))));
-      autoMap(hs);
-    } else {
-      toast({ title: "Unsupported file", description: "Upload a CSV or XLSX payroll file.", variant: "destructive" });
-    }
-  };
-
-  const autoMap = (hs: string[]) => {
-    const guess = (patterns: RegExp[]) => hs.find((h) => patterns.some((p) => p.test(h))) ?? "";
-    setMapping({
-      niNumber: guess([/^ni\b/i, /national insurance/i, /nino/i]),
-      fullName: guess([/name/i]),
-      pensionablePay: guess([/pensionable/i, /^pay\b/i, /salary/i, /gross/i]),
-      employeeContrib: guess([/ee\s*cont/i, /employee/i, /member/i]),
-      employerContrib: guess([/er\s*cont/i, /employer/i, /company/i]),
-      avc: guess([/avc/i]),
-      salarySacrifice: guess([/sacrifice/i, /sal\s*sac/i]),
-    });
-  };
-
-  const canStart = file && employerName && periodStart && periodEnd && payDate;
-
-  // -------------------- STEP 2 -> 3 --------------------
-  const commitMapping = () => {
-    const missing = ["niNumber", "fullName", "pensionablePay", "employeeContrib", "employerContrib"]
-      .filter((k) => !mapping[k]);
-    if (missing.length) {
-      toast({ title: "Mapping incomplete", description: `Map: ${missing.join(", ")}`, variant: "destructive" });
+  const goToMembers = () => {
+    if (!canAdvanceFromSetup) {
+      toast({ title: "Missing setup", description: "Complete employer, period, pay date and run reference.", variant: "destructive" });
       return;
     }
-    const parsed: ParsedRow[] = rawRows.map((r) => {
-      const ss = mapping.salarySacrifice ? /^(y|yes|true|1)$/i.test(r[mapping.salarySacrifice] ?? "") : false;
-      return {
-        raw: r,
-        niNumber: (r[mapping.niNumber] ?? "").trim().toUpperCase(),
-        fullName: (r[mapping.fullName] ?? "").trim(),
-        pensionablePay: toPence(r[mapping.pensionablePay]),
-        employeeContrib: toPence(r[mapping.employeeContrib]),
-        employerContrib: toPence(r[mapping.employerContrib]),
-        avc: mapping.avc ? toPence(r[mapping.avc]) : 0,
-        salarySacrifice: ss,
-        taxReliefMethod: "ras",
-        taxRelief: 0,
-        matchStatus: "unmatched",
-      };
-    });
-    // auto-match
-    const byNi = new Map(members.filter((m) => m.ni_number).map((m) => [m.ni_number!.toUpperCase(), m]));
-    const byName = new Map(members.filter((m) => m.full_name).map((m) => [m.full_name!.toLowerCase(), m]));
-    parsed.forEach((p) => {
-      const m = byNi.get(p.niNumber) ?? byName.get(p.fullName.toLowerCase());
-      if (m) { p.memberClientId = m.id; p.matchStatus = "matched"; }
-    });
-    setRows(parsed);
-    setStep(3);
+    const seeded: Line[] = members.map((m) => ({
+      clientId: m.id,
+      fullName: [m.first_name, m.last_name].filter(Boolean).join(" ") || "Unnamed",
+      niNumber: (m.ni_number || "").toUpperCase(),
+      included: (m.employment_status || "").toLowerCase() !== "leaver",
+      pensionablePayPence: 0,
+      employeeContribPence: 0,
+      employerContribPence: 0,
+      avcPence: 0,
+      salarySacrifice: false,
+      taxReliefPence: 0,
+    }));
+    setLines(seeded);
+    setStep(2);
   };
+
+  const setLine = (i: number, patch: Partial<Line>) =>
+    setLines((prev) => prev.map((l, idx) => (idx === i ? { ...l, ...patch } : l)));
+
+  const applyDefaults = () => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (!l.included || l.pensionablePayPence <= 0) return l;
+        const ee = Math.round((l.pensionablePayPence * eeDefaultPct) / 100);
+        const er = Math.round((l.pensionablePayPence * erDefaultPct) / 100);
+        return { ...l, employeeContribPence: ee, employerContribPence: er };
+      })
+    );
+    toast({ title: "Defaults applied", description: `EE ${eeDefaultPct}% / ER ${erDefaultPct}% applied to included members.` });
+  };
+
+  const calculate = () => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (!l.included) return { ...l, taxReliefPence: 0 };
+        // RAS: 20% relief added to net; net_pay: taken pre-tax so relief = 0 here
+        const relief =
+          reliefMethod === "ras" ? Math.round((l.employeeContribPence + l.avcPence) * 0.25) : 0;
+        return { ...l, taxReliefPence: relief };
+      })
+    );
+    setStep(4);
+  };
+
+  const included = lines.filter((l) => l.included);
+  const totals = useMemo(() => {
+    return {
+      count: included.length,
+      pay: included.reduce((s, l) => s + l.pensionablePayPence, 0),
+      ee: included.reduce((s, l) => s + l.employeeContribPence, 0),
+      er: included.reduce((s, l) => s + l.employerContribPence, 0),
+      avc: included.reduce((s, l) => s + l.avcPence, 0),
+      relief: included.reduce((s, l) => s + l.taxReliefPence, 0),
+    };
+  }, [lines]);
 
   const validation = useMemo(() => {
-    const missingNi = rawRows.filter((r) => !((r[mapping.niNumber] ?? "").trim())).length;
-    const dups = new Set<string>();
+    const missingNi = included.filter((l) => !l.niNumber).map((l) => l.fullName);
+    const zeroPay = included.filter((l) => l.pensionablePayPence <= 0).map((l) => l.fullName);
+    const aeShortfall = included.filter((l) => {
+      if (l.pensionablePayPence <= 0) return false;
+      const totalPct = ((l.employeeContribPence + l.employerContribPence) / l.pensionablePayPence) * 100;
+      return totalPct < 8;
+    }).map((l) => l.fullName);
+    const dupNis = new Set<string>();
     const seen = new Set<string>();
-    rawRows.forEach((r) => {
-      const ni = (r[mapping.niNumber] ?? "").trim().toUpperCase();
-      if (!ni) return;
-      if (seen.has(ni)) dups.add(ni); else seen.add(ni);
+    included.forEach((l) => {
+      if (!l.niNumber) return;
+      if (seen.has(l.niNumber)) dupNis.add(l.niNumber);
+      else seen.add(l.niNumber);
     });
-    return { total: rawRows.length, missingNi, duplicates: dups.size };
-  }, [rawRows, mapping.niNumber]);
+    return { missingNi, zeroPay, aeShortfall, duplicates: Array.from(dupNis) };
+  }, [lines]);
 
-  // -------------------- STEP 4: Calculate --------------------
-  const runCalculations = () => {
-    const updated = rows.map((r) => {
-      // RAS: gross-up 20% on employee net contribution (member contributes net; provider reclaims 20%)
-      const taxRelief = r.taxReliefMethod === "ras" && !r.salarySacrifice
-        ? Math.round(r.employeeContrib * 0.25) // 20% of gross = 25% of net
-        : 0;
-      return { ...r, taxRelief };
-    });
-    setRows(updated);
-    setStep(5);
-  };
+  const hasBlockingIssues = validation.missingNi.length > 0 || validation.duplicates.length > 0;
 
-  // -------------------- STEP 5 -> 6: Persist run + post contributions --------------------
-  const approveAndPost = async () => {
+  const postRun = async () => {
     setPosting(true);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-
-      const { data: run, error: runErr } = await supabase
+      const totalsJson = {
+        member_count: totals.count,
+        pensionable_pay_pence: totals.pay,
+        employee_contrib_pence: totals.ee,
+        employer_contrib_pence: totals.er,
+        avc_pence: totals.avc,
+        tax_relief_pence: totals.relief,
+      };
+      const { data: run, error } = await supabase
         .from("payroll_runs")
         .insert({
           scheme_name: schemeName || employerName,
@@ -228,408 +197,381 @@ export default function PayrollProcessing() {
           period_end: periodEnd,
           pay_date: payDate,
           frequency,
-          source_file_name: file?.name,
           status: "approved",
-          totals: totals as any,
-          column_mapping: mapping as any,
-          uploaded_by: uid,
-          approved_by: uid,
-          approved_at: new Date().toISOString(),
+          totals: totalsJson,
+          source_file_name: runReference,
         } as any)
         .select()
         .single();
-      if (runErr) throw runErr;
-      setRunId(run.id);
+      if (error || !run) throw error || new Error("Failed to create run");
 
-      const active = rows.filter((r) => r.matchStatus !== "excluded");
-      const lines = active.map((r) => ({
+      const lineRows = included.map((l) => ({
         payroll_run_id: run.id,
-        member_client_id: r.memberClientId ?? null,
-        raw_row: r.raw as any,
-        ni_number: r.niNumber,
-        full_name: r.fullName,
-        pensionable_pay_pence: r.pensionablePay,
-        employee_contrib_pence: r.employeeContrib,
-        employer_contrib_pence: r.employerContrib,
-        avc_pence: r.avc,
-        tax_relief_pence: r.taxRelief,
-        salary_sacrifice: r.salarySacrifice,
-        tax_relief_method: r.taxReliefMethod,
-        match_status: r.matchStatus,
+        member_client_id: l.clientId,
+        ni_number: l.niNumber || null,
+        full_name: l.fullName,
+        pensionable_pay_pence: l.pensionablePayPence,
+        employee_contrib_pence: l.employeeContribPence,
+        employer_contrib_pence: l.employerContribPence,
+        avc_pence: l.avcPence,
+        tax_relief_pence: l.taxReliefPence,
+        salary_sacrifice: l.salarySacrifice,
+        tax_relief_method: reliefMethod,
+        match_status: "matched",
       }));
-      if (lines.length) {
-        const { error: linesErr } = await supabase.from("payroll_run_lines").insert(lines as any);
-        if (linesErr) throw linesErr;
+      if (lineRows.length) {
+        const { error: lErr } = await supabase.from("payroll_run_lines").insert(lineRows as any);
+        if (lErr) throw lErr;
       }
 
-      // Hand off matched members into contributions
-      const contribRows = active
-        .filter((r) => r.memberClientId)
-        .map((r) => ({
-          client_id: r.memberClientId!,
-          contribution_type: "employer_payroll",
-          amount: (r.employeeContrib + r.employerContrib + r.avc) / 100,
-          tax_year: `${new Date(payDate).getFullYear()}/${(new Date(payDate).getFullYear() + 1).toString().slice(-2)}`,
-          contribution_date: payDate,
-          payroll_run_id: run.id,
-        }));
-      if (contribRows.length) {
-        await supabase.from("contributions").insert(contribRows as any);
-      }
+      // Contribution schedule postings (per member)
+      const taxYear = payDate.slice(0, 4) + "/" + String((Number(payDate.slice(0, 4)) + 1) % 100).padStart(2, "0");
+      const contribRows = included.flatMap((l) => {
+        const rows: any[] = [];
+        const net = l.employeeContribPence / 100;
+        if (net > 0) {
+          rows.push({
+            client_id: l.clientId,
+            contribution_type: "employee",
+            gross_amount: (l.employeeContribPence + l.taxReliefPence) / 100,
+            net_amount: net,
+            tax_relief: l.taxReliefPence / 100,
+            relief_method: reliefMethod,
+            tax_year: taxYear,
+            effective_date: payDate,
+            status: "expected",
+            reference: `${runReference}-EE`,
+            payroll_run_id: run.id,
+          });
+        }
+        if (l.employerContribPence > 0) {
+          rows.push({
+            client_id: l.clientId,
+            contribution_type: "employer",
+            gross_amount: l.employerContribPence / 100,
+            net_amount: l.employerContribPence / 100,
+            tax_relief: 0,
+            relief_method: reliefMethod,
+            tax_year: taxYear,
+            effective_date: payDate,
+            status: "expected",
+            reference: `${runReference}-ER`,
+            payroll_run_id: run.id,
+          });
+        }
+        if (l.avcPence > 0) {
+          rows.push({
+            client_id: l.clientId,
+            contribution_type: "avc",
+            gross_amount: l.avcPence / 100,
+            net_amount: l.avcPence / 100,
+            tax_relief: 0,
+            relief_method: reliefMethod,
+            tax_year: taxYear,
+            effective_date: payDate,
+            status: "expected",
+            reference: `${runReference}-AVC`,
+            payroll_run_id: run.id,
+          });
+        }
+        return rows;
+      });
+      if (contribRows.length) await supabase.from("contributions").insert(contribRows);
 
-      await supabase.from("payroll_runs").update({ status: "posted" } as any).eq("id", run.id);
-      toast({ title: "Payroll posted", description: `${active.length} lines handed off to Contributions.` });
+      setRunId(run.id);
+      setHandoff({ contribs: contribRows.length, rti: true, cash: true });
       setStep(6);
+      toast({ title: "Payroll approved", description: `Run ${runReference} posted with ${lineRows.length} lines.` });
     } catch (e: any) {
-      toast({ title: "Failed to post payroll", description: e.message ?? String(e), variant: "destructive" });
+      toast({ title: "Post failed", description: e.message || String(e), variant: "destructive" });
     } finally {
       setPosting(false);
     }
   };
 
-  const reset = () => {
-    setStep(1); setFile(null); setEmployerName(""); setSchemeName("");
-    setPeriodStart(""); setPeriodEnd(""); setPayDate("");
-    setHeaders([]); setRawRows([]); setMapping({}); setRows([]); setRunId(null);
-  };
+  // ── Step chrome ──
+  const Stepper = () => (
+    <div className="flex items-center justify-between overflow-x-auto pb-2">
+      {STEPS.map((s, i) => {
+        const active = step === s.id;
+        const done = step > s.id;
+        const Icon = s.icon;
+        return (
+          <div key={s.id} className="flex items-center gap-2 min-w-fit">
+            <div
+              className={`h-9 w-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 ${
+                done ? "bg-primary text-primary-foreground" : active ? "bg-primary text-primary-foreground ring-4 ring-primary/20" : "bg-muted text-muted-foreground"
+              }`}
+            >
+              {done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+            </div>
+            <div className="text-xs">
+              <div className="font-medium">{s.label}</div>
+              <div className="text-muted-foreground">Step {s.id}</div>
+            </div>
+            {i < STEPS.length - 1 && <ArrowRight className="h-4 w-4 text-muted-foreground mx-3" />}
+          </div>
+        );
+      })}
+    </div>
+  );
 
   return (
-    <div className="container mx-auto p-6 space-y-6 max-w-7xl">
+    <div className="container mx-auto p-6 space-y-6 max-w-6xl">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileSpreadsheet className="h-7 w-7" /> Payroll processing
+            <Building2 className="h-7 w-7" /> Payroll processing
           </h1>
           <p className="text-muted-foreground mt-1">
-            End-to-end employer payroll workflow — upload, validate, match, calculate, approve and hand off to Contributions.
+            Book-of-business workflow: setup → members → inputs → calculate → approve → outputs. No file import needed.
           </p>
         </div>
-        {step > 1 && (
-          <Button variant="outline" size="sm" onClick={reset}>
-            <RefreshCw className="h-4 w-4 mr-2" /> New run
-          </Button>
-        )}
+        <Button variant="outline" size="sm" onClick={() => navigate(-1)}>Back</Button>
       </div>
 
-      {/* Stepper */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-2">
-            {STEPS.map((s) => {
-              const Icon = s.icon;
-              const done = step > s.id;
-              const active = step === s.id;
-              return (
-                <button
-                  key={s.id}
-                  onClick={() => s.id <= step && setStep(s.id)}
-                  className={`flex items-center gap-2 p-3 rounded-lg border text-left transition-colors ${
-                    active ? "border-primary bg-primary/5" : done ? "border-primary/40 bg-muted/40" : "border-border"
-                  }`}
-                >
-                  <div className={`p-2 rounded-md ${active ? "bg-primary text-primary-foreground" : done ? "bg-primary/20" : "bg-muted"}`}>
-                    {done ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="text-xs text-muted-foreground">Step {s.id}</div>
-                    <div className="text-sm font-medium truncate">{s.label}</div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-          <Progress value={(step / 6) * 100} className="mt-4" />
-        </CardContent>
-      </Card>
+      <Card><CardContent className="pt-6"><Stepper /></CardContent></Card>
 
-      {/* STEP 1 */}
+      {/* ── STEP 1: SETUP ── */}
       {step === 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>1. Upload employer payroll file</CardTitle>
-            <CardDescription>Accepts CSV or XLSX. All figures are held in pence internally.</CardDescription>
+            <CardTitle>Run setup</CardTitle>
+            <CardDescription>Define the employer, scheme, pay period and scheme defaults for this run.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Employer</Label>
-                <Input value={employerName} onChange={(e) => setEmployerName(e.target.value)} placeholder="Acme Ltd" />
-              </div>
-              <div className="space-y-2">
-                <Label>Scheme name (optional)</Label>
-                <Input value={schemeName} onChange={(e) => setSchemeName(e.target.value)} placeholder="Acme Group SIPP" />
-              </div>
-              <div className="space-y-2">
-                <Label>Frequency</Label>
-                <Select value={frequency} onValueChange={setFrequency}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="fortnightly">Fortnightly</SelectItem>
-                    <SelectItem value="four_weekly">Four-weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Pay date</Label>
-                <Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Period start</Label>
-                <Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} />
-              </div>
-              <div className="space-y-2">
-                <Label>Period end</Label>
-                <Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} />
-              </div>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div><Label>Employer</Label><Input value={employerName} onChange={(e) => setEmployerName(e.target.value)} placeholder="Acme Ltd" /></div>
+            <div><Label>Scheme</Label><Input value={schemeName} onChange={(e) => setSchemeName(e.target.value)} placeholder="Group SIPP" /></div>
+            <div><Label>Run reference</Label><Input value={runReference} onChange={(e) => setRunReference(e.target.value)} placeholder="ACME-2026-07" /></div>
+            <div>
+              <Label>Frequency</Label>
+              <Select value={frequency} onValueChange={setFrequency}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="weekly">Weekly</SelectItem>
+                  <SelectItem value="fortnightly">Fortnightly</SelectItem>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="quarterly">Quarterly</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="border-2 border-dashed rounded-lg p-8 text-center">
-              <Upload className="h-8 w-8 mx-auto text-muted-foreground mb-2" />
-              <Label htmlFor="payroll-file" className="cursor-pointer">
-                <span className="text-primary underline">Choose payroll file</span>
-                <span className="text-muted-foreground"> or drag & drop</span>
-              </Label>
-              <Input
-                id="payroll-file" type="file" accept=".csv,.xlsx,.xls" className="hidden"
-                onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
-              />
-              {file && <div className="mt-2 text-sm">Selected: <strong>{file.name}</strong> ({rawRows.length} rows)</div>}
+            <div><Label>Period start</Label><Input type="date" value={periodStart} onChange={(e) => setPeriodStart(e.target.value)} /></div>
+            <div><Label>Period end</Label><Input type="date" value={periodEnd} onChange={(e) => setPeriodEnd(e.target.value)} /></div>
+            <div><Label>Pay date</Label><Input type="date" value={payDate} onChange={(e) => setPayDate(e.target.value)} /></div>
+            <div>
+              <Label>Tax relief method</Label>
+              <Select value={reliefMethod} onValueChange={(v: any) => setReliefMethod(v)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ras">Relief at source (RAS)</SelectItem>
+                  <SelectItem value="net_pay">Net pay arrangement</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="flex justify-end">
-              <Button disabled={!canStart} onClick={() => setStep(2)}>
-                Continue <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
+            <div><Label>Default EE contribution (%)</Label><Input type="number" step="0.1" value={eeDefaultPct} onChange={(e) => setEeDefaultPct(Number(e.target.value))} /></div>
+            <div><Label>Default ER contribution (%)</Label><Input type="number" step="0.1" value={erDefaultPct} onChange={(e) => setErDefaultPct(Number(e.target.value))} /></div>
+            <div className="md:col-span-2 flex justify-end pt-2">
+              <Button onClick={goToMembers} disabled={!canAdvanceFromSetup}>Continue to members <ArrowRight className="h-4 w-4 ml-1" /></Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* STEP 2 */}
+      {/* ── STEP 2: MEMBERS ── */}
       {step === 2 && (
         <Card>
           <CardHeader>
-            <CardTitle>2. Parse & validate</CardTitle>
-            <CardDescription>Map columns from the source file to payroll fields.</CardDescription>
+            <CardTitle>Members in scope</CardTitle>
+            <CardDescription>Include or exclude members from this pay run. Leavers are excluded by default.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-3 gap-3">
-              {REQUIRED_FIELDS.map((f) => (
-                <div key={f.key} className="space-y-1">
-                  <Label>{f.label}</Label>
-                  <Select value={mapping[f.key] ?? ""} onValueChange={(v) => setMapping((m) => ({ ...m, [f.key]: v }))}>
-                    <SelectTrigger><SelectValue placeholder="— unmapped —" /></SelectTrigger>
-                    <SelectContent>
-                      {headers.map((h) => <SelectItem key={h} value={h}>{h}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-              ))}
+            <div className="flex items-center gap-3 text-sm">
+              <Badge variant="outline">{lines.length} enrolled</Badge>
+              <Badge>{lines.filter((l) => l.included).length} included</Badge>
+              <Badge variant="secondary">{lines.filter((l) => !l.included).length} excluded</Badge>
             </div>
-            <Separator />
-            <div className="grid grid-cols-3 gap-3">
-              <div className="p-3 rounded-md bg-muted"><div className="text-xs text-muted-foreground">Rows</div><div className="text-xl font-semibold">{validation.total}</div></div>
-              <div className="p-3 rounded-md bg-muted"><div className="text-xs text-muted-foreground">Missing NI</div><div className="text-xl font-semibold">{validation.missingNi}</div></div>
-              <div className="p-3 rounded-md bg-muted"><div className="text-xs text-muted-foreground">Duplicates</div><div className="text-xl font-semibold">{validation.duplicates}</div></div>
+            <div className="border rounded-md max-h-[480px] overflow-auto">
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead className="w-16">Include</TableHead><TableHead>Member</TableHead><TableHead>NI number</TableHead><TableHead>Status</TableHead><TableHead>Exclude reason</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {lines.map((l, i) => (
+                    <TableRow key={l.clientId}>
+                      <TableCell><Checkbox checked={l.included} onCheckedChange={(v) => setLine(i, { included: !!v })} /></TableCell>
+                      <TableCell className="font-medium">{l.fullName}</TableCell>
+                      <TableCell className="font-mono text-xs">{l.niNumber || <span className="text-destructive">missing</span>}</TableCell>
+                      <TableCell><Badge variant={l.included ? "default" : "outline"}>{l.included ? "In" : "Out"}</Badge></TableCell>
+                      <TableCell>
+                        {!l.included && (
+                          <Select value={l.excludeReason || ""} onValueChange={(v: any) => setLine(i, { excludeReason: v })}>
+                            <SelectTrigger className="h-8 w-40"><SelectValue placeholder="Reason" /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="leaver">Leaver</SelectItem>
+                              <SelectItem value="opt_out">Opt-out</SelectItem>
+                              <SelectItem value="absent">Unpaid absence</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {!lines.length && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No enrolled members found.</TableCell></TableRow>}
+                </TableBody>
+              </Table>
             </div>
-            {(validation.missingNi > 0 || validation.duplicates > 0) && (
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Validation warnings</AlertTitle>
-                <AlertDescription>Rows with missing NI or duplicates can still proceed — resolve during matching.</AlertDescription>
-              </Alert>
-            )}
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(1)}>Back</Button>
-              <Button onClick={commitMapping}>Continue <ArrowRight className="h-4 w-4 ml-2" /></Button>
+              <Button variant="outline" onClick={() => setStep(1)}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
+              <Button onClick={() => setStep(3)} disabled={!lines.some((l) => l.included)}>Continue to inputs <ArrowRight className="h-4 w-4 ml-1" /></Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* STEP 3 */}
+      {/* ── STEP 3: INPUTS ── */}
       {step === 3 && (
         <Card>
           <CardHeader>
-            <CardTitle>3. Match members</CardTitle>
-            <CardDescription>
-              Matched: <Badge variant="secondary">{rows.filter((r) => r.matchStatus === "matched").length}</Badge>{" "}
-              Unmatched: <Badge variant="destructive">{rows.filter((r) => r.matchStatus === "unmatched").length}</Badge>{" "}
-              Excluded: <Badge variant="outline">{rows.filter((r) => r.matchStatus === "excluded").length}</Badge>
-            </CardDescription>
+            <CardTitle>Contribution inputs</CardTitle>
+            <CardDescription>Enter pensionable pay; apply scheme defaults or override per member.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="max-h-96 overflow-auto border rounded-md">
+            <div className="flex flex-wrap items-end gap-3 text-sm">
+              <div className="text-muted-foreground">Defaults: EE {eeDefaultPct}% · ER {erDefaultPct}%</div>
+              <Button variant="secondary" size="sm" onClick={applyDefaults}>Apply defaults from pensionable pay</Button>
+            </div>
+            <div className="border rounded-md max-h-[480px] overflow-auto">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>NI</TableHead>
-                    <TableHead>Pay</TableHead>
-                    <TableHead>Member link</TableHead>
-                    <TableHead>Status</TableHead>
-                  </TableRow>
-                </TableHeader>
+                <TableHeader><TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead className="text-right">Pensionable pay (£)</TableHead>
+                  <TableHead className="text-right">EE (£)</TableHead>
+                  <TableHead className="text-right">ER (£)</TableHead>
+                  <TableHead className="text-right">AVC (£)</TableHead>
+                  <TableHead>Sal-sac</TableHead>
+                </TableRow></TableHeader>
                 <TableBody>
-                  {rows.map((r, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{r.fullName || <em className="text-muted-foreground">unknown</em>}</TableCell>
-                      <TableCell className="font-mono text-xs">{r.niNumber || "—"}</TableCell>
-                      <TableCell>{gbp(r.pensionablePay)}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={r.memberClientId ?? "none"}
-                          onValueChange={(v) => setRows((rs) => rs.map((x, idx) => idx === i ? {
-                            ...x, memberClientId: v === "none" ? undefined : v,
-                            matchStatus: v === "none" ? "unmatched" : "matched",
-                          } : x))}
-                        >
-                          <SelectTrigger className="w-56"><SelectValue placeholder="Select member" /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="none">— unmatched —</SelectItem>
-                            {members.map((m) => (
-                              <SelectItem key={m.id} value={m.id}>
-                                {m.full_name ?? m.id.slice(0, 8)}{m.ni_number ? ` (${m.ni_number})` : ""}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                      <TableCell>
-                        {r.matchStatus === "matched" && <Badge variant="secondary">Matched</Badge>}
-                        {r.matchStatus === "unmatched" && <Badge variant="destructive">Unmatched</Badge>}
-                        {r.matchStatus === "excluded" && <Badge variant="outline">Excluded</Badge>}
-                        <Button
-                          variant="ghost" size="sm" className="ml-2"
-                          onClick={() => setRows((rs) => rs.map((x, idx) => idx === i ? {
-                            ...x, matchStatus: x.matchStatus === "excluded" ? "unmatched" : "excluded",
-                          } : x))}
-                        >
-                          {r.matchStatus === "excluded" ? "Include" : "Exclude"}
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {lines.map((l, i) =>
+                    !l.included ? null : (
+                      <TableRow key={l.clientId}>
+                        <TableCell className="font-medium">{l.fullName}</TableCell>
+                        <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.pensionablePayPence / 100 || ""} onChange={(e) => setLine(i, { pensionablePayPence: toPence(Number(e.target.value)) })} /></TableCell>
+                        <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.employeeContribPence / 100 || ""} onChange={(e) => setLine(i, { employeeContribPence: toPence(Number(e.target.value)) })} /></TableCell>
+                        <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.employerContribPence / 100 || ""} onChange={(e) => setLine(i, { employerContribPence: toPence(Number(e.target.value)) })} /></TableCell>
+                        <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.avcPence / 100 || ""} onChange={(e) => setLine(i, { avcPence: toPence(Number(e.target.value)) })} /></TableCell>
+                        <TableCell><Checkbox checked={l.salarySacrifice} onCheckedChange={(v) => setLine(i, { salarySacrifice: !!v })} /></TableCell>
+                      </TableRow>
+                    )
+                  )}
                 </TableBody>
               </Table>
             </div>
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(2)}>Back</Button>
-              <Button onClick={() => setStep(4)}>Continue <ArrowRight className="h-4 w-4 ml-2" /></Button>
+              <Button variant="outline" onClick={() => setStep(2)}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
+              <Button onClick={calculate}>Calculate <ArrowRight className="h-4 w-4 ml-1" /></Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* STEP 4 */}
+      {/* ── STEP 4: CALCULATE & VALIDATE ── */}
       {step === 4 && (
         <Card>
           <CardHeader>
-            <CardTitle>4. Calculate contributions</CardTitle>
-            <CardDescription>Choose tax relief method per member. RAS grosses up 20% (25% of net) on non–salary-sacrifice contributions.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="max-h-96 overflow-auto border rounded-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Member</TableHead>
-                    <TableHead>Employee</TableHead>
-                    <TableHead>Employer</TableHead>
-                    <TableHead>AVC</TableHead>
-                    <TableHead>Sal-Sac</TableHead>
-                    <TableHead>Relief method</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {rows.filter((r) => r.matchStatus !== "excluded").map((r, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{r.fullName}</TableCell>
-                      <TableCell>{gbp(r.employeeContrib)}</TableCell>
-                      <TableCell>{gbp(r.employerContrib)}</TableCell>
-                      <TableCell>{gbp(r.avc)}</TableCell>
-                      <TableCell>{r.salarySacrifice ? "Yes" : "No"}</TableCell>
-                      <TableCell>
-                        <Select
-                          value={r.taxReliefMethod}
-                          onValueChange={(v) => setRows((rs) => rs.map((x) => x === r ? { ...x, taxReliefMethod: v as any } : x))}
-                        >
-                          <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="ras">RAS</SelectItem>
-                            <SelectItem value="net_pay">Net pay</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(3)}>Back</Button>
-              <Button onClick={runCalculations}><Calculator className="h-4 w-4 mr-2" /> Run calculations</Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* STEP 5 */}
-      {step === 5 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>5. Review & approve</CardTitle>
-            <CardDescription>Confirm scheme-level totals before handoff.</CardDescription>
+            <CardTitle>Calculate & validate</CardTitle>
+            <CardDescription>Totals, tax relief and validation checks before approval.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
               {[
-                ["Members", String(totals.count)],
-                ["Pensionable pay", gbp(totals.pensionablePay)],
-                ["Employee", gbp(totals.employee)],
-                ["Employer", gbp(totals.employer)],
-                ["AVC", gbp(totals.avc)],
-                ["Tax relief (RAS)", gbp(totals.taxRelief)],
-              ].map(([k, v]) => (
-                <div key={k} className="p-3 rounded-md bg-muted">
-                  <div className="text-xs text-muted-foreground">{k}</div>
-                  <div className="text-lg font-semibold">{v}</div>
+                { label: "Members", value: totals.count },
+                { label: "Pensionable pay", value: gbp(totals.pay) },
+                { label: "Employee", value: gbp(totals.ee) },
+                { label: "Employer", value: gbp(totals.er) },
+                { label: "AVC", value: gbp(totals.avc) },
+                { label: `Tax relief (${reliefMethod.toUpperCase()})`, value: gbp(totals.relief) },
+              ].map((s) => (
+                <div key={s.label} className="border rounded-md p-3">
+                  <div className="text-xs text-muted-foreground">{s.label}</div>
+                  <div className="text-lg font-semibold">{s.value}</div>
                 </div>
               ))}
             </div>
-            <Alert>
-              <ShieldCheck className="h-4 w-4" />
-              <AlertTitle>Four-eyes approval</AlertTitle>
-              <AlertDescription>
-                Approving posts contribution rows into the Contributions ledger and queues any RAS reclaim for HMRC.
-              </AlertDescription>
-            </Alert>
+
+            {validation.missingNi.length > 0 && (
+              <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Missing NI numbers</AlertTitle><AlertDescription>{validation.missingNi.length} member(s): {validation.missingNi.slice(0, 5).join(", ")}{validation.missingNi.length > 5 ? "…" : ""}</AlertDescription></Alert>
+            )}
+            {validation.duplicates.length > 0 && (
+              <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Duplicate NI numbers</AlertTitle><AlertDescription>{validation.duplicates.join(", ")}</AlertDescription></Alert>
+            )}
+            {validation.zeroPay.length > 0 && (
+              <Alert><AlertTriangle className="h-4 w-4" /><AlertTitle>Zero pensionable pay</AlertTitle><AlertDescription>{validation.zeroPay.length} included member(s) have zero pay.</AlertDescription></Alert>
+            )}
+            {validation.aeShortfall.length > 0 && (
+              <Alert><AlertTriangle className="h-4 w-4" /><AlertTitle>AE minimum not met (8% combined)</AlertTitle><AlertDescription>{validation.aeShortfall.length} member(s) below the auto-enrolment minimum.</AlertDescription></Alert>
+            )}
+            {!hasBlockingIssues && !validation.zeroPay.length && !validation.aeShortfall.length && (
+              <Alert><CheckCircle2 className="h-4 w-4" /><AlertTitle>All checks passed</AlertTitle><AlertDescription>Run is ready for approval.</AlertDescription></Alert>
+            )}
+
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(4)}>Back</Button>
-              <Button disabled={posting} onClick={approveAndPost}>
-                {posting ? "Posting…" : <>Approve & post <ArrowRight className="h-4 w-4 ml-2" /></>}
+              <Button variant="outline" onClick={() => setStep(3)}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
+              <Button onClick={() => setStep(5)} disabled={hasBlockingIssues}>Send for approval <ArrowRight className="h-4 w-4 ml-1" /></Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ── STEP 5: APPROVAL ── */}
+      {step === 5 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Four-eyes approval</CardTitle>
+            <CardDescription>Preparer and checker sign-off before posting to member accounts.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div><Label>Preparer name</Label><Input value={preparer} onChange={(e) => setPreparer(e.target.value)} placeholder="e.g. Sam Preparer" /></div>
+              <div><Label>Checker name</Label><Input value={checker} onChange={(e) => setChecker(e.target.value)} placeholder="e.g. Alex Checker" /></div>
+            </div>
+            <Separator />
+            <div className="text-sm space-y-1">
+              <div><span className="text-muted-foreground">Run:</span> <b>{runReference}</b> · {employerName} · {schemeName}</div>
+              <div><span className="text-muted-foreground">Period:</span> {periodStart} → {periodEnd} · pay date {payDate}</div>
+              <div><span className="text-muted-foreground">Members:</span> {totals.count} · <span className="text-muted-foreground">Total contributions:</span> {gbp(totals.ee + totals.er + totals.avc)} (relief {gbp(totals.relief)})</div>
+            </div>
+            <div className="flex items-start gap-2 border rounded-md p-3">
+              <Checkbox id="chk" checked={checkerConfirmed} onCheckedChange={(v) => setCheckerConfirmed(!!v)} />
+              <label htmlFor="chk" className="text-sm">Checker confirms totals reconcile to the contribution schedule and cash collection is authorised.</label>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setStep(4)}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
+              <Button onClick={postRun} disabled={!preparer || !checker || !checkerConfirmed || posting}>
+                {posting ? "Posting…" : "Approve & post"} <ArrowRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
           </CardContent>
         </Card>
       )}
 
-      {/* STEP 6 */}
+      {/* ── STEP 6: OUTPUTS ── */}
       {step === 6 && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-primary" /> Payroll run posted
-            </CardTitle>
-            <CardDescription>Run reference: <span className="font-mono">{runId}</span></CardDescription>
+            <CardTitle>Outputs & hand-off</CardTitle>
+            <CardDescription>Payroll run posted. Downstream tasks are queued for the daily desk.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p>
-              {totals.count} lines have been handed off to the Contributions ledger and are ready for reconciliation.
-            </p>
-            <div className="flex gap-2">
-              <Button onClick={() => navigate("/contributions")}>Open Contributions</Button>
-              <Button variant="outline" onClick={reset}>Process another run</Button>
+            <Alert><CheckCircle2 className="h-4 w-4" /><AlertTitle>Run {runReference} approved</AlertTitle><AlertDescription>Run ID {runId?.slice(0, 8)} · {handoff?.contribs ?? 0} contribution schedule row(s) created.</AlertDescription></Alert>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">HMRC RTI (FPS)</div><div className="text-xs text-muted-foreground">Ready to submit for period ending {periodEnd}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/paye")}>Open PAYE / RTI</Button></CardContent></Card>
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Cash collection</div><div className="text-xs text-muted-foreground">Direct debit sweep for {gbp(totals.ee + totals.er + totals.avc)}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/dealing")}>Open dealing desk</Button></CardContent></Card>
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Contribution allocation</div><div className="text-xs text-muted-foreground">Allocate expected contributions to member accounts.</div><Button size="sm" variant="secondary" onClick={() => navigate("/contributions")}>Open contributions</Button></CardContent></Card>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => { setStep(1); setRunId(null); setHandoff(null); setCheckerConfirmed(false); }}>Start another run</Button>
+              <Button onClick={() => navigate("/admin")}>Back to admin console</Button>
             </div>
           </CardContent>
         </Card>

@@ -49,6 +49,7 @@ import OperationsCockpit from "./components/OperationsCockpit";
 import MIDashboard from "./components/MIDashboard";
 import ModelPortfolios from "./components/ModelPortfolios";
 import CASSReconciliation from "./components/CASSReconciliation";
+import BankUpload from "./components/BankUpload";
 import MonteCarloProjection from "./components/MonteCarloProjection";
 import FirmHierarchy from "./components/FirmHierarchy";
 import { CommandPalette } from "./components/CommandPalette";
@@ -236,6 +237,7 @@ const AppContent = () => {
               <Route path="/models" element={<RoleGate allow={['adviser', 'admin']}><ModelPortfolios /></RoleGate>} />
               <Route path="/cass" element={<RoleGate allow={['admin']}><CASSReconciliation /></RoleGate>} />
               <Route path="/cass-engine" element={<RoleGate allow={['admin']}><CASSReconEngine /></RoleGate>} />
+              <Route path="/bank-upload" element={<RoleGate allow={['admin']}><BankUpload /></RoleGate>} />
               <Route path="/kyc-verify" element={<RealisticKYC />} />
               <Route path="/suitability" element={<RoleGate allow={['adviser', 'admin']}><SuitabilityAssessment /></RoleGate>} />
               <Route path="/annual-review" element={<RoleGate allow={['adviser', 'admin']}><AnnualReviewPack /></RoleGate>} />

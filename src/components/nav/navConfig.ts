@@ -5,7 +5,7 @@ import {
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
   HeartPulse, Gift, Plane, Lock, UserCog, Heart, Crown, HandCoins, Accessibility,
-  Landmark, Globe2, FileSpreadsheet,
+  Landmark, Globe2, FileSpreadsheet, Upload, AlertTriangle,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";

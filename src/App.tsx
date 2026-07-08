@@ -269,6 +269,10 @@ const AppContent = () => {
               <Route path="/beneficiaries" element={<RoleGate allow={['client', 'adviser', 'admin']}><BeneficiaryNominations /></RoleGate>} />
               <Route path="/contributions" element={<ContributionManager />} />
               <Route path="/payroll-processing" element={<RoleGate allow={['admin']}><PayrollProcessing /></RoleGate>} />
+              <Route path="/joiners-leavers" element={<RoleGate allow={['admin']}><JoinersLeavers /></RoleGate>} />
+              <Route path="/member-details" element={<RoleGate allow={['admin']}><MemberDetails /></RoleGate>} />
+              <Route path="/member-queries" element={<RoleGate allow={['admin']}><MemberQueries /></RoleGate>} />
+              <Route path="/benefit-statements" element={<RoleGate allow={['admin']}><BenefitStatements /></RoleGate>} />
               <Route path="/costs" element={<CostCharges />} />
               <Route path="/state-pension" element={<StatePensionForecast />} />
               <Route path="/vulnerable" element={<RoleGate allow={['adviser', 'admin']}><VulnerableClientRegister /></RoleGate>} />

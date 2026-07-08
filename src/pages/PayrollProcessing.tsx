@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users, Calculator, ShieldCheck, Send, ArrowRight, ArrowLeft,
-  CheckCircle2, AlertTriangle, Building2, Settings2, ClipboardList,
+  CheckCircle2, AlertTriangle, Building2, Settings2, ClipboardList, MinusCircle,
 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,8 @@ interface Member {
   last_name: string | null;
   ni_number: string | null;
   employment_status: string | null;
+  mpaa_triggered: boolean | null;
+  annual_allowance_used: number | null;
 }
 interface Line {
   clientId: string;
@@ -32,17 +34,32 @@ interface Line {
   niNumber: string;
   included: boolean;
   excludeReason?: "leaver" | "opt_out" | "absent" | "other";
+  isAdjustment: boolean;                 // A4: negative/refund/prior-period line
+  adjustmentReason?: string;
   pensionablePayPence: number;
   employeeContribPence: number;
   employerContribPence: number;
   avcPence: number;
   salarySacrifice: boolean;
   taxReliefPence: number;
+  mpaaTriggered: boolean;
+  aaUsedYtd: number;                     // £, current tax year prior to this run
+}
+
+interface PriorRun {
+  member_count: number;
+  pay: number;
+  employee: number;
+  employer: number;
+  avc: number;
 }
 
 const toPence = (v: number) => Math.round((Number(v) || 0) * 100);
 const gbp = (p: number) =>
   new Intl.NumberFormat("en-GB", { style: "currency", currency: "GBP" }).format((p || 0) / 100);
+const pct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
+const AA_LIMIT = 60000;
+const MPAA_LIMIT = 10000;
 
 const STEPS: { id: Step; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
   { id: 1, label: "Setup", icon: Settings2 },
@@ -57,7 +74,7 @@ export default function PayrollProcessing() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>(1);
 
-  // ── Step 1: setup ──
+  // Step 1
   const [employerName, setEmployerName] = useState("");
   const [schemeName, setSchemeName] = useState("Group SIPP");
   const [frequency, setFrequency] = useState("monthly");
@@ -69,25 +86,25 @@ export default function PayrollProcessing() {
   const [erDefaultPct, setErDefaultPct] = useState(3);
   const [runReference, setRunReference] = useState("");
 
-  // ── Members ──
   const [members, setMembers] = useState<Member[]>([]);
   const [lines, setLines] = useState<Line[]>([]);
+  const [priorRun, setPriorRun] = useState<PriorRun | null>(null);   // A1
 
-  // ── Approval ──
+  // Approval
   const [preparer, setPreparer] = useState("");
   const [checker, setChecker] = useState("");
   const [checkerConfirmed, setCheckerConfirmed] = useState(false);
 
-  // ── Output ──
+  // Output
   const [posting, setPosting] = useState(false);
   const [runId, setRunId] = useState<string | null>(null);
-  const [handoff, setHandoff] = useState<{ contribs: number; rti: boolean; cash: boolean } | null>(null);
+  const [handoff, setHandoff] = useState<{ contribs: number; rtiId?: string; paymentIds: string[] } | null>(null);
 
   useEffect(() => {
     (async () => {
       const { data } = await supabase
         .from("clients")
-        .select("id, first_name, last_name, ni_number, employment_status")
+        .select("id, first_name, last_name, ni_number, employment_status, mpaa_triggered, annual_allowance_used")
         .eq("status", "active")
         .order("last_name")
         .limit(500);
@@ -95,26 +112,70 @@ export default function PayrollProcessing() {
     })();
   }, []);
 
+  const currentTaxYear = useMemo(() => {
+    // UK tax year runs 6 Apr → 5 Apr
+    if (!payDate) return "";
+    const d = new Date(payDate);
+    const y = d.getMonth() < 3 || (d.getMonth() === 3 && d.getDate() < 6) ? d.getFullYear() - 1 : d.getFullYear();
+    return `${y}/${String((y + 1) % 100).padStart(2, "0")}`;
+  }, [payDate]);
+
   const canAdvanceFromSetup = employerName.trim() && periodStart && periodEnd && payDate && runReference.trim();
 
-  const goToMembers = () => {
+  const goToMembers = async () => {
     if (!canAdvanceFromSetup) {
       toast({ title: "Missing setup", description: "Complete employer, period, pay date and run reference.", variant: "destructive" });
       return;
     }
+
+    // Pull latest carry-forward for members in current tax year
+    const memberIds = members.map((m) => m.id);
+    const { data: aa } = await supabase
+      .from("aa_carry_forward")
+      .select("client_id, used_this_year")
+      .in("client_id", memberIds)
+      .eq("tax_year", currentTaxYear);
+    const aaByMember = new Map((aa || []).map((r: any) => [r.client_id, Number(r.used_this_year || 0)]));
+
     const seeded: Line[] = members.map((m) => ({
       clientId: m.id,
       fullName: [m.first_name, m.last_name].filter(Boolean).join(" ") || "Unnamed",
       niNumber: (m.ni_number || "").toUpperCase(),
       included: (m.employment_status || "").toLowerCase() !== "leaver",
+      isAdjustment: false,
       pensionablePayPence: 0,
       employeeContribPence: 0,
       employerContribPence: 0,
       avcPence: 0,
       salarySacrifice: false,
       taxReliefPence: 0,
+      mpaaTriggered: !!m.mpaa_triggered,
+      aaUsedYtd: aaByMember.get(m.id) ?? Number(m.annual_allowance_used || 0),
     }));
     setLines(seeded);
+
+    // A1: fetch prior run for variance
+    const { data: prior } = await supabase
+      .from("payroll_runs")
+      .select("totals")
+      .eq("scheme_name", schemeName || employerName)
+      .lt("period_end", periodStart)
+      .order("period_end", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (prior?.totals) {
+      const t = prior.totals as any;
+      setPriorRun({
+        member_count: t.member_count ?? 0,
+        pay: (t.pensionable_pay_pence ?? 0) / 100,
+        employee: (t.employee_contrib_pence ?? 0) / 100,
+        employer: (t.employer_contrib_pence ?? 0) / 100,
+        avc: (t.avc_pence ?? 0) / 100,
+      });
+    } else {
+      setPriorRun(null);
+    }
+
     setStep(2);
   };
 
@@ -124,7 +185,7 @@ export default function PayrollProcessing() {
   const applyDefaults = () => {
     setLines((prev) =>
       prev.map((l) => {
-        if (!l.included || l.pensionablePayPence <= 0) return l;
+        if (!l.included || l.isAdjustment || l.pensionablePayPence <= 0) return l;
         const ee = Math.round((l.pensionablePayPence * eeDefaultPct) / 100);
         const er = Math.round((l.pensionablePayPence * erDefaultPct) / 100);
         return { ...l, employeeContribPence: ee, employerContribPence: er };
@@ -137,10 +198,17 @@ export default function PayrollProcessing() {
     setLines((prev) =>
       prev.map((l) => {
         if (!l.included) return { ...l, taxReliefPence: 0 };
-        // RAS: 20% relief added to net; net_pay: taken pre-tax so relief = 0 here
+        let ee = l.employeeContribPence;
+        let er = l.employerContribPence;
+        // A3: Salary sacrifice — reclassify EE contribution as ER (sacrificed pay)
+        if (l.salarySacrifice && ee > 0) {
+          er += ee;
+          ee = 0;
+        }
+        // RAS: 25% grossed-up on EE + AVC net (equivalent to 20% relief on gross)
         const relief =
-          reliefMethod === "ras" ? Math.round((l.employeeContribPence + l.avcPence) * 0.25) : 0;
-        return { ...l, taxReliefPence: relief };
+          reliefMethod === "ras" ? Math.round((ee + l.avcPence) * 0.25) : 0;
+        return { ...l, employeeContribPence: ee, employerContribPence: er, taxReliefPence: relief };
       })
     );
     setStep(4);
@@ -155,13 +223,46 @@ export default function PayrollProcessing() {
       er: included.reduce((s, l) => s + l.employerContribPence, 0),
       avc: included.reduce((s, l) => s + l.avcPence, 0),
       relief: included.reduce((s, l) => s + l.taxReliefPence, 0),
+      adjustments: included.filter((l) => l.isAdjustment).length,
     };
   }, [lines]);
 
+  // A1 variance vs prior run
+  const variance = useMemo(() => {
+    if (!priorRun) return null;
+    const currPay = totals.pay / 100;
+    const currContribs = (totals.ee + totals.er + totals.avc) / 100;
+    const priorContribs = priorRun.employee + priorRun.employer + priorRun.avc;
+    const pctChange = (a: number, b: number) => (b === 0 ? (a === 0 ? 0 : 100) : ((a - b) / b) * 100);
+    return {
+      headcount: { curr: totals.count, prior: priorRun.member_count, delta: totals.count - priorRun.member_count, pct: pctChange(totals.count, priorRun.member_count) },
+      pay: { curr: currPay, prior: priorRun.pay, delta: currPay - priorRun.pay, pct: pctChange(currPay, priorRun.pay) },
+      contribs: { curr: currContribs, prior: priorContribs, delta: currContribs - priorContribs, pct: pctChange(currContribs, priorContribs) },
+    };
+  }, [priorRun, totals]);
+
+  const varianceFlagged = variance && (
+    Math.abs(variance.headcount.pct) > 10 || Math.abs(variance.pay.pct) > 10 || Math.abs(variance.contribs.pct) > 10
+  );
+
+  // A2 AA / MPAA breaches
+  const aaBreaches = useMemo(() => {
+    return included
+      .filter((l) => !l.isAdjustment)
+      .map((l) => {
+        const runContribs = (l.employeeContribPence + l.employerContribPence + l.avcPence + l.taxReliefPence) / 100;
+        const projected = l.aaUsedYtd + runContribs;
+        const limit = l.mpaaTriggered ? MPAA_LIMIT : AA_LIMIT;
+        return { line: l, projected, limit, breach: projected > limit };
+      })
+      .filter((x) => x.breach);
+  }, [lines]);
+
   const validation = useMemo(() => {
-    const missingNi = included.filter((l) => !l.niNumber).map((l) => l.fullName);
-    const zeroPay = included.filter((l) => l.pensionablePayPence <= 0).map((l) => l.fullName);
+    const missingNi = included.filter((l) => !l.niNumber && !l.isAdjustment).map((l) => l.fullName);
+    const zeroPay = included.filter((l) => !l.isAdjustment && l.pensionablePayPence <= 0).map((l) => l.fullName);
     const aeShortfall = included.filter((l) => {
+      if (l.isAdjustment) return false;
       if (l.pensionablePayPence <= 0) return false;
       const totalPct = ((l.employeeContribPence + l.employerContribPence) / l.pensionablePayPence) * 100;
       return totalPct < 8;
@@ -169,14 +270,14 @@ export default function PayrollProcessing() {
     const dupNis = new Set<string>();
     const seen = new Set<string>();
     included.forEach((l) => {
-      if (!l.niNumber) return;
+      if (!l.niNumber || l.isAdjustment) return;
       if (seen.has(l.niNumber)) dupNis.add(l.niNumber);
       else seen.add(l.niNumber);
     });
     return { missingNi, zeroPay, aeShortfall, duplicates: Array.from(dupNis) };
   }, [lines]);
 
-  const hasBlockingIssues = validation.missingNi.length > 0 || validation.duplicates.length > 0;
+  const hasBlockingIssues = validation.missingNi.length > 0 || validation.duplicates.length > 0 || aaBreaches.length > 0;
 
   const postRun = async () => {
     setPosting(true);
@@ -188,7 +289,16 @@ export default function PayrollProcessing() {
         employer_contrib_pence: totals.er,
         avc_pence: totals.avc,
         tax_relief_pence: totals.relief,
+        adjustments: totals.adjustments,
       };
+      const notesBody = [
+        `Reference: ${runReference}`,
+        `Employer: ${employerName}`,
+        `Preparer: ${preparer}`,
+        `Checker: ${checker}`,
+        variance ? `Variance vs prior — headcount ${pct(variance.headcount.pct)}, pay ${pct(variance.pay.pct)}, contribs ${pct(variance.contribs.pct)}` : "No prior run for variance",
+      ].join("\n");
+
       const { data: run, error } = await supabase
         .from("payroll_runs")
         .insert({
@@ -200,6 +310,8 @@ export default function PayrollProcessing() {
           status: "approved",
           totals: totalsJson,
           source_file_name: runReference,
+          notes: notesBody,               // A7
+          approved_at: new Date().toISOString(),
         } as any)
         .select()
         .single();
@@ -218,36 +330,37 @@ export default function PayrollProcessing() {
         salary_sacrifice: l.salarySacrifice,
         tax_relief_method: reliefMethod,
         match_status: "matched",
+        exception_reason: l.isAdjustment ? `adjustment: ${l.adjustmentReason || "prior-period"}` : null,
       }));
       if (lineRows.length) {
         const { error: lErr } = await supabase.from("payroll_run_lines").insert(lineRows as any);
         if (lErr) throw lErr;
       }
 
-      // Contribution schedule postings (per member)
-      const taxYear = payDate.slice(0, 4) + "/" + String((Number(payDate.slice(0, 4)) + 1) % 100).padStart(2, "0");
+      // Contribution schedule postings (per member) — supports negative refund lines
+      const taxYear = currentTaxYear;
       const contribRows = included.flatMap((l) => {
         const rows: any[] = [];
-        const net = l.employeeContribPence / 100;
-        if (net > 0) {
+        const eeNet = l.employeeContribPence / 100;
+        if (eeNet !== 0) {
           rows.push({
             client_id: l.clientId,
-            contribution_type: "employee",
+            contribution_type: l.isAdjustment ? "refund" : "employee",
             gross_amount: (l.employeeContribPence + l.taxReliefPence) / 100,
-            net_amount: net,
+            net_amount: eeNet,
             tax_relief: l.taxReliefPence / 100,
             relief_method: reliefMethod,
             tax_year: taxYear,
             effective_date: payDate,
             status: "expected",
-            reference: `${runReference}-EE`,
+            reference: `${runReference}-EE${l.isAdjustment ? "-ADJ" : ""}`,
             payroll_run_id: run.id,
           });
         }
-        if (l.employerContribPence > 0) {
+        if (l.employerContribPence !== 0) {
           rows.push({
             client_id: l.clientId,
-            contribution_type: "employer",
+            contribution_type: l.isAdjustment ? "refund" : "employer",
             gross_amount: l.employerContribPence / 100,
             net_amount: l.employerContribPence / 100,
             tax_relief: 0,
@@ -255,11 +368,11 @@ export default function PayrollProcessing() {
             tax_year: taxYear,
             effective_date: payDate,
             status: "expected",
-            reference: `${runReference}-ER`,
+            reference: `${runReference}-ER${l.isAdjustment ? "-ADJ" : ""}`,
             payroll_run_id: run.id,
           });
         }
-        if (l.avcPence > 0) {
+        if (l.avcPence !== 0) {
           rows.push({
             client_id: l.clientId,
             contribution_type: "avc",
@@ -270,7 +383,7 @@ export default function PayrollProcessing() {
             tax_year: taxYear,
             effective_date: payDate,
             status: "expected",
-            reference: `${runReference}-AVC`,
+            reference: `${runReference}-AVC${l.isAdjustment ? "-ADJ" : ""}`,
             payroll_run_id: run.id,
           });
         }
@@ -278,10 +391,60 @@ export default function PayrollProcessing() {
       });
       if (contribRows.length) await supabase.from("contributions").insert(contribRows);
 
+      // A9: create per-member cash collection instructions
+      const paymentInits = included
+        .filter((l) => (l.employeeContribPence + l.employerContribPence + l.avcPence) > 0)
+        .map((l) => ({
+          client_id: l.clientId,
+          amount: (l.employeeContribPence + l.employerContribPence + l.avcPence) / 100,
+          reference: `${runReference}-COLL`,
+          status: "initiated",
+          provider: "Bacs DD (payroll sweep)",
+        }));
+      let paymentIds: string[] = [];
+      if (paymentInits.length) {
+        const { data: pi } = await supabase.from("payment_initiations").insert(paymentInits).select("id");
+        paymentIds = (pi || []).map((p: any) => p.id);
+      }
+
+      // A10: create draft RTI FPS submission
+      const { data: rti } = await supabase
+        .from("rti_submissions")
+        .insert({
+          submission_type: "FPS",
+          tax_year: taxYear,
+          period_end: periodEnd,
+          client_count: totals.count,
+          total_gross: (totals.pay) / 100,
+          total_tax: 0,
+          status: "draft",
+          payload: {
+            run_id: run.id,
+            reference: runReference,
+            employer: employerName,
+            scheme: schemeName,
+            pay_date: payDate,
+            totals: totalsJson,
+          },
+        } as any)
+        .select("id")
+        .single();
+
+      // Audit log entry
+      try {
+        await supabase.from("activity_log").insert({
+          entity_type: "payroll_run",
+          entity_id: run.id,
+          action: "approved",
+          actor: preparer,
+          description: `Payroll ${runReference} approved by ${checker} — ${totals.count} members, ${gbp(totals.ee + totals.er + totals.avc)} contributions`,
+        } as any);
+      } catch { /* activity_log optional */ }
+
       setRunId(run.id);
-      setHandoff({ contribs: contribRows.length, rti: true, cash: true });
+      setHandoff({ contribs: contribRows.length, rtiId: rti?.id, paymentIds });
       setStep(6);
-      toast({ title: "Payroll approved", description: `Run ${runReference} posted with ${lineRows.length} lines.` });
+      toast({ title: "Payroll approved", description: `Run ${runReference} posted with ${lineRows.length} line(s), ${paymentIds.length} collection(s), 1 RTI draft.` });
     } catch (e: any) {
       toast({ title: "Post failed", description: e.message || String(e), variant: "destructive" });
     } finally {
@@ -289,7 +452,6 @@ export default function PayrollProcessing() {
     }
   };
 
-  // ── Step chrome ──
   const Stepper = () => (
     <div className="flex items-center justify-between overflow-x-auto pb-2">
       {STEPS.map((s, i) => {
@@ -324,7 +486,7 @@ export default function PayrollProcessing() {
             <Building2 className="h-7 w-7" /> Payroll processing
           </h1>
           <p className="text-muted-foreground mt-1">
-            Book-of-business workflow: setup → members → inputs → calculate → approve → outputs. No file import needed.
+            Book-of-business workflow: setup → members → inputs → calculate → approve → outputs.
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => navigate(-1)}>Back</Button>
@@ -332,7 +494,7 @@ export default function PayrollProcessing() {
 
       <Card><CardContent className="pt-6"><Stepper /></CardContent></Card>
 
-      {/* ── STEP 1: SETUP ── */}
+      {/* STEP 1 */}
       {step === 1 && (
         <Card>
           <CardHeader>
@@ -377,7 +539,7 @@ export default function PayrollProcessing() {
         </Card>
       )}
 
-      {/* ── STEP 2: MEMBERS ── */}
+      {/* STEP 2 */}
       {step === 2 && (
         <Card>
           <CardHeader>
@@ -393,7 +555,7 @@ export default function PayrollProcessing() {
             <div className="border rounded-md max-h-[480px] overflow-auto">
               <Table>
                 <TableHeader><TableRow>
-                  <TableHead className="w-16">Include</TableHead><TableHead>Member</TableHead><TableHead>NI number</TableHead><TableHead>Status</TableHead><TableHead>Exclude reason</TableHead>
+                  <TableHead className="w-16">Include</TableHead><TableHead>Member</TableHead><TableHead>NI number</TableHead><TableHead>MPAA</TableHead><TableHead>AA used YTD</TableHead><TableHead>Exclude reason</TableHead>
                 </TableRow></TableHeader>
                 <TableBody>
                   {lines.map((l, i) => (
@@ -401,7 +563,8 @@ export default function PayrollProcessing() {
                       <TableCell><Checkbox checked={l.included} onCheckedChange={(v) => setLine(i, { included: !!v })} /></TableCell>
                       <TableCell className="font-medium">{l.fullName}</TableCell>
                       <TableCell className="font-mono text-xs">{l.niNumber || <span className="text-destructive">missing</span>}</TableCell>
-                      <TableCell><Badge variant={l.included ? "default" : "outline"}>{l.included ? "In" : "Out"}</Badge></TableCell>
+                      <TableCell>{l.mpaaTriggered ? <Badge variant="destructive">MPAA</Badge> : "—"}</TableCell>
+                      <TableCell className="text-xs">{gbp(l.aaUsedYtd * 100)}</TableCell>
                       <TableCell>
                         {!l.included && (
                           <Select value={l.excludeReason || ""} onValueChange={(v: any) => setLine(i, { excludeReason: v })}>
@@ -417,7 +580,7 @@ export default function PayrollProcessing() {
                       </TableCell>
                     </TableRow>
                   ))}
-                  {!lines.length && <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-8">No enrolled members found.</TableCell></TableRow>}
+                  {!lines.length && <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">No enrolled members found.</TableCell></TableRow>}
                 </TableBody>
               </Table>
             </div>
@@ -429,12 +592,12 @@ export default function PayrollProcessing() {
         </Card>
       )}
 
-      {/* ── STEP 3: INPUTS ── */}
+      {/* STEP 3 */}
       {step === 3 && (
         <Card>
           <CardHeader>
             <CardTitle>Contribution inputs</CardTitle>
-            <CardDescription>Enter pensionable pay; apply scheme defaults or override per member.</CardDescription>
+            <CardDescription>Enter pensionable pay; mark refund/adjustment lines to allow negative amounts (short-service refunds, over-payments, prior-period corrections).</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap items-end gap-3 text-sm">
@@ -445,6 +608,7 @@ export default function PayrollProcessing() {
               <Table>
                 <TableHeader><TableRow>
                   <TableHead>Member</TableHead>
+                  <TableHead className="w-24">Adjustment</TableHead>
                   <TableHead className="text-right">Pensionable pay (£)</TableHead>
                   <TableHead className="text-right">EE (£)</TableHead>
                   <TableHead className="text-right">ER (£)</TableHead>
@@ -454,8 +618,17 @@ export default function PayrollProcessing() {
                 <TableBody>
                   {lines.map((l, i) =>
                     !l.included ? null : (
-                      <TableRow key={l.clientId}>
-                        <TableCell className="font-medium">{l.fullName}</TableCell>
+                      <TableRow key={l.clientId} className={l.isAdjustment ? "bg-destructive/5" : ""}>
+                        <TableCell className="font-medium">
+                          {l.fullName}
+                          {l.isAdjustment && <div className="text-[10px] text-destructive uppercase mt-0.5">Refund / adjustment</div>}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Checkbox checked={l.isAdjustment} onCheckedChange={(v) => setLine(i, { isAdjustment: !!v })} />
+                            {l.isAdjustment && <MinusCircle className="h-3 w-3 text-destructive" />}
+                          </div>
+                        </TableCell>
                         <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.pensionablePayPence / 100 || ""} onChange={(e) => setLine(i, { pensionablePayPence: toPence(Number(e.target.value)) })} /></TableCell>
                         <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.employeeContribPence / 100 || ""} onChange={(e) => setLine(i, { employeeContribPence: toPence(Number(e.target.value)) })} /></TableCell>
                         <TableCell><Input type="number" step="0.01" className="h-8 text-right" value={l.employerContribPence / 100 || ""} onChange={(e) => setLine(i, { employerContribPence: toPence(Number(e.target.value)) })} /></TableCell>
@@ -467,6 +640,9 @@ export default function PayrollProcessing() {
                 </TableBody>
               </Table>
             </div>
+            <div className="text-xs text-muted-foreground">
+              Salary sacrifice on = employee amount will be reclassified as employer at calculate step (no RAS relief on sacrificed portion).
+            </div>
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => setStep(2)}><ArrowLeft className="h-4 w-4 mr-1" /> Back</Button>
               <Button onClick={calculate}>Calculate <ArrowRight className="h-4 w-4 ml-1" /></Button>
@@ -475,12 +651,12 @@ export default function PayrollProcessing() {
         </Card>
       )}
 
-      {/* ── STEP 4: CALCULATE & VALIDATE ── */}
+      {/* STEP 4 */}
       {step === 4 && (
         <Card>
           <CardHeader>
             <CardTitle>Calculate & validate</CardTitle>
-            <CardDescription>Totals, tax relief and validation checks before approval.</CardDescription>
+            <CardDescription>Totals, variance vs prior run, tax relief and validation checks before approval.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -498,6 +674,41 @@ export default function PayrollProcessing() {
                 </div>
               ))}
             </div>
+
+            {/* A1 Variance panel */}
+            {variance && (
+              <Card className={varianceFlagged ? "border-amber-500" : ""}>
+                <CardHeader className="pb-2"><CardTitle className="text-base">Variance vs prior run</CardTitle></CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Metric</TableHead><TableHead className="text-right">Prior</TableHead><TableHead className="text-right">This run</TableHead><TableHead className="text-right">Δ</TableHead><TableHead className="text-right">%</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      <TableRow><TableCell>Headcount</TableCell><TableCell className="text-right">{variance.headcount.prior}</TableCell><TableCell className="text-right">{variance.headcount.curr}</TableCell><TableCell className="text-right">{variance.headcount.delta}</TableCell><TableCell className={`text-right ${Math.abs(variance.headcount.pct) > 10 ? "text-amber-600 font-medium" : ""}`}>{pct(variance.headcount.pct)}</TableCell></TableRow>
+                      <TableRow><TableCell>Pensionable pay</TableCell><TableCell className="text-right">{gbp(variance.pay.prior * 100)}</TableCell><TableCell className="text-right">{gbp(variance.pay.curr * 100)}</TableCell><TableCell className="text-right">{gbp(variance.pay.delta * 100)}</TableCell><TableCell className={`text-right ${Math.abs(variance.pay.pct) > 10 ? "text-amber-600 font-medium" : ""}`}>{pct(variance.pay.pct)}</TableCell></TableRow>
+                      <TableRow><TableCell>Contributions</TableCell><TableCell className="text-right">{gbp(variance.contribs.prior * 100)}</TableCell><TableCell className="text-right">{gbp(variance.contribs.curr * 100)}</TableCell><TableCell className="text-right">{gbp(variance.contribs.delta * 100)}</TableCell><TableCell className={`text-right ${Math.abs(variance.contribs.pct) > 10 ? "text-amber-600 font-medium" : ""}`}>{pct(variance.contribs.pct)}</TableCell></TableRow>
+                    </TableBody>
+                  </Table>
+                  {varianceFlagged && <div className="text-xs text-amber-700 mt-2">One or more metrics differ from the prior run by more than 10%. Review before approval.</div>}
+                </CardContent>
+              </Card>
+            )}
+            {!variance && (
+              <div className="text-xs text-muted-foreground">No prior run found for {schemeName || employerName} — first run in this scheme.</div>
+            )}
+
+            {/* A2 AA / MPAA */}
+            {aaBreaches.length > 0 && (
+              <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Annual Allowance breach ({aaBreaches.length} member(s))</AlertTitle><AlertDescription>
+                <div className="text-xs mt-1 space-y-0.5">
+                  {aaBreaches.slice(0, 6).map((b) => (
+                    <div key={b.line.clientId}>
+                      {b.line.fullName}: projected {gbp(b.projected * 100)} vs limit {gbp(b.limit * 100)} ({b.line.mpaaTriggered ? "MPAA" : "AA"})
+                    </div>
+                  ))}
+                  {aaBreaches.length > 6 && <div>…and {aaBreaches.length - 6} more</div>}
+                </div>
+              </AlertDescription></Alert>
+            )}
 
             {validation.missingNi.length > 0 && (
               <Alert variant="destructive"><AlertTriangle className="h-4 w-4" /><AlertTitle>Missing NI numbers</AlertTitle><AlertDescription>{validation.missingNi.length} member(s): {validation.missingNi.slice(0, 5).join(", ")}{validation.missingNi.length > 5 ? "…" : ""}</AlertDescription></Alert>
@@ -523,12 +734,12 @@ export default function PayrollProcessing() {
         </Card>
       )}
 
-      {/* ── STEP 5: APPROVAL ── */}
+      {/* STEP 5 */}
       {step === 5 && (
         <Card>
           <CardHeader>
             <CardTitle>Four-eyes approval</CardTitle>
-            <CardDescription>Preparer and checker sign-off before posting to member accounts.</CardDescription>
+            <CardDescription>Preparer and checker sign-off before posting to member accounts. Names are stored on the run and in the activity log.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -540,6 +751,7 @@ export default function PayrollProcessing() {
               <div><span className="text-muted-foreground">Run:</span> <b>{runReference}</b> · {employerName} · {schemeName}</div>
               <div><span className="text-muted-foreground">Period:</span> {periodStart} → {periodEnd} · pay date {payDate}</div>
               <div><span className="text-muted-foreground">Members:</span> {totals.count} · <span className="text-muted-foreground">Total contributions:</span> {gbp(totals.ee + totals.er + totals.avc)} (relief {gbp(totals.relief)})</div>
+              {variance && <div><span className="text-muted-foreground">Variance vs prior:</span> headcount {pct(variance.headcount.pct)}, pay {pct(variance.pay.pct)}, contribs {pct(variance.contribs.pct)}</div>}
             </div>
             <div className="flex items-start gap-2 border rounded-md p-3">
               <Checkbox id="chk" checked={checkerConfirmed} onCheckedChange={(v) => setCheckerConfirmed(!!v)} />
@@ -555,19 +767,19 @@ export default function PayrollProcessing() {
         </Card>
       )}
 
-      {/* ── STEP 6: OUTPUTS ── */}
+      {/* STEP 6 */}
       {step === 6 && (
         <Card>
           <CardHeader>
             <CardTitle>Outputs & hand-off</CardTitle>
-            <CardDescription>Payroll run posted. Downstream tasks are queued for the daily desk.</CardDescription>
+            <CardDescription>Payroll run posted. Downstream artefacts created and available on the daily desk.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Alert><CheckCircle2 className="h-4 w-4" /><AlertTitle>Run {runReference} approved</AlertTitle><AlertDescription>Run ID {runId?.slice(0, 8)} · {handoff?.contribs ?? 0} contribution schedule row(s) created.</AlertDescription></Alert>
+            <Alert><CheckCircle2 className="h-4 w-4" /><AlertTitle>Run {runReference} approved</AlertTitle><AlertDescription>Run ID {runId?.slice(0, 8)} · {handoff?.contribs ?? 0} contribution row(s), {handoff?.paymentIds.length ?? 0} cash collection(s), {handoff?.rtiId ? "1 RTI FPS draft" : "no RTI draft"}.</AlertDescription></Alert>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">HMRC RTI (FPS)</div><div className="text-xs text-muted-foreground">Ready to submit for period ending {periodEnd}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/paye")}>Open PAYE / RTI</Button></CardContent></Card>
-              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Cash collection</div><div className="text-xs text-muted-foreground">Direct debit sweep for {gbp(totals.ee + totals.er + totals.avc)}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/dealing")}>Open dealing desk</Button></CardContent></Card>
-              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Contribution allocation</div><div className="text-xs text-muted-foreground">Allocate expected contributions to member accounts.</div><Button size="sm" variant="secondary" onClick={() => navigate("/contributions")}>Open contributions</Button></CardContent></Card>
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">HMRC RTI (FPS)</div><div className="text-xs text-muted-foreground">Draft submission created for period ending {periodEnd}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/paye")}>Open PAYE / RTI</Button></CardContent></Card>
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Cash collection</div><div className="text-xs text-muted-foreground">{handoff?.paymentIds.length ?? 0} collection instruction(s) totalling {gbp(totals.ee + totals.er + totals.avc)}.</div><Button size="sm" variant="secondary" onClick={() => navigate("/dealing")}>Open dealing desk</Button></CardContent></Card>
+              <Card><CardContent className="pt-4 space-y-2"><div className="font-medium">Contribution allocation</div><div className="text-xs text-muted-foreground">Expected contributions posted, awaiting allocation on receipt of cash.</div><Button size="sm" variant="secondary" onClick={() => navigate("/contributions")}>Open contributions</Button></CardContent></Card>
             </div>
             <div className="flex justify-between">
               <Button variant="outline" onClick={() => { setStep(1); setRunId(null); setHandoff(null); setCheckerConfirmed(false); }}>Start another run</Button>

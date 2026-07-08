@@ -306,6 +306,15 @@ const AppContent = () => {
               <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="/pdp" element={<RoleGate allow={['adviser', 'admin']}><PensionsDashboardIntegration /></RoleGate>} />
               <Route path="/equisoft" element={<RoleGate allow={['adviser', 'admin']}><EquisoftTransfers /></RoleGate>} />
+              <Route path="/schemes" element={<RoleGate allow={['adviser', 'admin']}><SchemeRegister /></RoleGate>} />
+              <Route path="/employers" element={<RoleGate allow={['adviser', 'admin']}><EmployerRegister /></RoleGate>} />
+              <Route path="/cetv" element={<RoleGate allow={['adviser', 'admin']}><CETVQuotes /></RoleGate>} />
+              <Route path="/retirement-quotes" element={<RoleGate allow={['adviser', 'admin']}><RetirementQuotes /></RoleGate>} />
+              <Route path="/breach-register" element={<RoleGate allow={['admin']}><BreachRegister /></RoleGate>} />
+              <Route path="/trustee-meetings" element={<RoleGate allow={['adviser', 'admin']}><TrusteeMeetings /></RoleGate>} />
+              <Route path="/data-quality" element={<RoleGate allow={['admin']}><DataQuality /></RoleGate>} />
+              <Route path="/cases" element={<RoleGate allow={['adviser', 'admin']}><CaseInbox /></RoleGate>} />
+              <Route path="/invoicing" element={<RoleGate allow={['admin']}><Invoicing /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

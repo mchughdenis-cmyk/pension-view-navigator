@@ -1,113 +1,106 @@
-# Market-Leader Build-Out — Closing All Gaps
+# Reorganise Admin navigation around daily pension-admin work
 
-Delivers every gap identified in the WealthOS / Platinum~Pro comparison in one coordinated build. Each module gets: schema (tables + RLS), seed demo data, UI screen, and where appropriate an edge function.
+Right now the Admin sidebar leads with "Workspace", "Operations", "Client modules (act on behalf)", "Compliance" etc. The tasks a pensions administrator actually performs every day are scattered across three or four groups (Operations, Money in & out, Client modules). This plan pulls those daily tasks to the top of the sidebar as a clearly labelled block, then keeps everything else beneath it in a logical order.
 
-## P1 — Regulatory & Operational Core
+## Daily pension-administrator tasks to call out
 
-### 1. HMRC Reporting Pack
-- **Tables:** `hmrc_submissions` (type: ras_reclaim | event_report | aft | psr | rti_paye, period, payload, status, ref, response), `ras_reclaim_lines`, `event_report_lines`
-- **Edge fn:** `hmrc-submit` → routes by type, calls integration-stub HMRC, records response
-- **UI:** `/hmrc` — tabs RAS / Event Report / AFT / PSR / RTI; submission history; download XML
+These are the activities a scheme/SIPP administrator typically works through each day. They will form a new top group in the Admin nav called **"Daily admin desk"**:
 
-### 2. LSA / LSDBA Tracking (post-LTA)
-- **Tables:** `lsa_lsdba_ledger` (client_id, event_type, lsa_used, lsdba_used, running_lsa, running_lsdba, source_event_id)
-- **Logic:** `src/lib/lsaLsdba.ts` — £268,275 / £1,073,100 caps, transitional cert logic
-- **UI:** allowance widget on client admin
+1. **Bank reconciliation** — `/cass` (CASS reconciliation) — match internal cash vs bank file, clear breaks.
+2. **Cash onboarding / allocate incoming cash** — `/cash-onboarding` — apply received money to member accounts.
+3. **Bank file upload & allocation** — (BankUpload) — ingest bank statements, match to expected items.
+4. **Contribution processing (all types)** — `/contributions` — regular, single, employer, third-party, in-specie; includes PAYE/RTI feed at `/paye`.
+5. **Transfers in (request & track)** — `/transfer` (client-side request on behalf) + `/origo-transfers` + `/equisoft` (in-specie) — raise, chase, book.
+6. **Transfers out** — `/transfer-out` + `/origo-transfers` — discharge, CETV, Origo out.
+7. **Drawdown processing** — `/drawdown` (crystallisation / PCLS / income) + `/drip-feed` (drip-feed drawdown) + `/instant-withdrawal` (UFPLS / one-off).
+8. **Dealing / trade execution** — `/dealing` — place buys, sells, switches raised overnight.
+9. **Instrument transfers / re-registrations** — `/instrument-transfer`.
+10. **Cash warnings & SLA queue** — `/cash-warnings`, `/sla-tracker` — daily worklist triage.
+11. **KYC review queue** — `/kyc-review` — clear pending identity checks.
+12. **Origo message inbox** — `/origo` — action inbound Origo messages.
+13. **HMRC / regulatory day-to-day filings** — `/hmrc` (event reports, RAS claims), `/lsa` (LSA/LSDBA checks at BCE).
+14. **Transaction history / audit lookup** — `/transactions`, `/audit` — used constantly for enquiries.
+15. **Illustrations & SMPI runs on request** — `/illustration`, `/smpi`.
 
-### 3. PAYE / RTI Engine
-- **Tables:** `paye_runs` (period, total_gross, total_tax, ni, status), `paye_payments` (run_id, client_id, gross, tax_code, paye, ni, net)
-- **Edge fn:** extend `paye-calculator` to produce FPS/EPS-shaped output, emit `rti_paye` HMRC submission
-- **UI:** `/paye` payroll dashboard
+Anything not on this list (Model portfolios, Monte Carlo, White-label branding, System configuration, Firm hierarchy, Enterprise suite, API directory, Webhook sandbox, Documentation, MI dashboard, Adviser workbench, etc.) is not a daily admin task and moves further down.
 
-### 4. Origo Options Real Messaging
-- **Tables:** `origo_messages` (transfer_id, direction in/out, message_type, status, payload, ack_ref)
-- **States:** initial → in-progress → ceding-confirmed → settled
-- **UI:** thread view inside transfer journey
+## Proposed new Admin sidebar order
 
-### 5. CASS 6 & 7 Automated Recs
-- **Extend** existing `cass_reconciliations` with breach auto-detection, daily cron schedule, materiality thresholds
-- **Edge fn:** keep existing `cass-reconciliation`, add `cass_settings` table
+Only the Admin role in `src/components/nav/navConfig.ts` changes. Client and Adviser navs are untouched.
 
-## P2 — Product Breadth
+```text
+Workspace
+  Dashboard, Admin console, Registration log
 
-### 6. SSAS Module
-- **Tables:** `ssas_schemes` (sponsoring_employer, scheme_ref, registration_date, member_trustees jsonb, professional_trustee), `ssas_members` (scheme_id, client_id, trustee bool, share_pct), `ssas_loanbacks` (scheme_id, employer, principal, rate, charge_secured, repayment_schedule, repayment_actual jsonb, fifty_pct_test_pass)
-- **Logic:** 50% loanback rule, charge register
-- **UI:** `/ssas` — schemes list, scheme detail with members + loanbacks
+Daily admin desk                         ← NEW, top-of-mind
+  Bank reconciliation (CASS)             /cass
+  Cash onboarding                        /cash-onboarding
+  Contribution manager                   /contributions
+  PAYE / RTI                             /paye
+  Transfers in                           /transfer
+  Transfers out                          /transfer-out
+  Origo transfers                        /origo-transfers
+  Equisoft in-specie                     /equisoft
+  Drawdown processing                    /drawdown
+  Drip-feed drawdown                     /drip-feed
+  Instant withdrawal (UFPLS)             /instant-withdrawal
+  Dealing desk                           /dealing
+  Instrument transfer                    /instrument-transfer
+  Origo message inbox                    /origo
+  KYC review queue                       /kyc-review
+  Cash warnings                          /cash-warnings
+  SLA tracker                            /sla-tracker
+  HMRC event reporting                   /hmrc
+  LSA / LSDBA checks                     /lsa
+  Transaction history                    /transactions
+  Illustration                           /illustration
+  SMPI runner                            /smpi
 
-### 7. Commercial Property
-- **Tables:** `commercial_properties` (scheme_id, address, valuation, valuation_date, vat_registered, lease_id), `property_leases` (property_id, tenant_name, rent_pa, frequency, next_review, deposit), `property_rent_ledger` (lease_id, due_date, amount_due, amount_received, status), `property_insurance` (property_id, provider, premium, renewal_date)
-- **UI:** `/property` — portfolio, rent collection, insurance renewals
+Operations (periodic / oversight)
+  Client operations hub, Operations cockpit, Pension operations,
+  Pensions Dashboards (PDP)
 
-### 8. Scheme Pension / Annuity Admin
-- **Tables:** `scheme_pensions` (client_id, type in_house|open_market, provider, gross_annual, escalation_pct, guarantee_period, spouse_pct, commencement_date, paid_to_date)
-- **UI:** `/scheme-pension` admin
+Compliance (periodic)
+  CASS reconciliation history, Audit trail, Vulnerable register,
+  Cost & charges, Firm hierarchy
 
-### 9. Capped Drawdown Legacy
-- **Tables:** `capped_drawdown_segments` (client_id, gad_basis_amount, gad_cap_pct=150, last_review_date, next_review_date, current_max)
-- **Logic:** GAD lookup table + tri-annual review trigger
-- **UI:** review dashboard
+Client modules (act on behalf)          ← trimmed: items promoted to Daily desk removed
+  ISA, GIA, Onshore bond, Offshore bond, Annual summary,
+  Pension passport, Beneficiaries, Pension health score, Life events,
+  Employer matching, State Pension forecast, Onboarding,
+  Onboarding tracker, Identity check (KYC), Welcome pack,
+  Learning centre, Mobile app view, Ask Navigator (AI), Privacy centre
 
-### 10. Pension Sharing Orders
-- **Tables:** `pension_sharing_orders` (member_client_id, ex_partner_name, court_order_date, percentage, transfer_value, status, implementation_date), `in_specie_transfers` (transfer_id, asset_list jsonb, valuation_basis)
-- **UI:** `/sharing-orders`
+Products
+  SSAS, Commercial property, Advanced capabilities
 
-## P3 — Platform & Integrations
+Investments
+  Model portfolios, Monte Carlo
 
-### 11. Bulk Dealing Engine
-- **Tables:** `bulk_orders` (model_id, trade_date, status, total_value), `bulk_order_lines` (bulk_id, client_id, account_id, symbol, side, units, price)
-- **Edge fn:** `bulk-deal-aggregator` — aggregates rebalance trades, allocates fills pro-rata
-- **UI:** `/bulk-dealing`
+Insights
+  MI dashboard, Enterprise suite
 
-### 12. Public REST API + Webhooks
-- **Tables:** `webhook_subscriptions` (api_key_id, url, events[], secret, status), `webhook_deliveries` (subscription_id, event, status, attempts, last_attempt_at, response)
-- **Edge fn:** `public-api` (read-only endpoints: clients, accounts, valuations, transactions) with API-key auth + rate limiting
-- **Edge fn:** `webhook-dispatcher` (cron, fires queued events)
-- **UI:** `/api-directory` extended with webhook config
+Client service
+  Adviser workbench, Client services hub, Annual review pack,
+  Suitability assessment, Reporting suite, Communications
 
-### 13. Open Banking AISP / PISP
-- **Tables:** `open_banking_consents` (client_id, bank, consent_ref, scope, expires_at, status), `open_banking_accounts` (consent_id, account_id, balance, last_synced)
-- **Edge fn:** `open-banking-stub` — simulates AISP balance fetch + PISP payment initiation
-- **UI:** `/open-banking`
+System
+  Administration, System configuration, White-label branding,
+  Persona selector, Audit log, Documents, System overview,
+  API directory, Documentation, Webhook sandbox, Settings
+```
 
-### 14. JISA + LISA Wrappers
-- **Extend** `client_accounts` to support `jisa` and `lisa` types
-- **Tables:** `lisa_bonus_claims` (client_id, account_id, tax_year, contributions, bonus_25pct, claim_status), `jisa_holders` (account_id, registered_contact_id, child_dob)
-- **Logic:** £4k LISA cap, 25% bonus, age 60 access; JISA £9k cap, age 18 conversion
-- **UI:** new tabs on portfolio page
+Notes:
+- `/cass` appears once in "Daily admin desk" (the working screen); the Compliance group keeps the historical/oversight framing but I'll relabel to avoid a duplicate entry — either keep only in Daily desk or point Compliance to an archive route if one exists. Confirmation below.
+- No routes, components, or business logic change — this is a nav reorder only.
 
-## P4 — Enterprise Readiness
+## Technical detail
 
-### 15. SSO / White-Label / DR
-- **Tables:** `sso_configurations` (firm_id, provider saml|oidc, metadata_xml, domain), `firm_branding` (firm_id, logo_url, primary_color, accent_color, custom_domain), `dr_drills` (drill_date, scenario, rto_minutes, rpo_minutes, status)
-- **UI:** `/enterprise` extended with SSO config + branding + DR drill log
+- Single file edit: `src/components/nav/navConfig.ts`, `NAV_BY_ROLE.admin` array.
+- No new icons needed; reuse existing lucide icons already imported.
+- No changes to `AppSidebar.tsx` — it renders whatever groups are provided.
+- No route or component changes; `findNavLabel` continues to resolve because URLs are unchanged.
 
-### 16. HMRC Test Harness
-- **Table:** `hmrc_test_runs` (submission_type, payload, expected, actual, passed, run_at)
-- **UI:** `/hmrc` "Test Harness" tab — run sandbox submissions
+## One thing to confirm before I build
 
-## Navigation
-Add to `navConfig.ts` (admin/adviser): HMRC, PAYE, SSAS, Property, Scheme Pension, Sharing Orders, Bulk Dealing, Open Banking. Keep client-side simple.
-
-## Technical notes
-- All tables get RLS with permissive policies (matches existing demo posture per memory)
-- All money in pence-safe NUMERIC, all dates DATE
-- Audit-log triggers piggyback on existing `activity_log` pattern via app code (not DB triggers — none exist now)
-- Single migration file for schema, then `supabase--insert` for seed data per module
-- Edge functions all use existing `corsHeaders` + integration-stub pattern
-- UI pages are read-mostly dashboards with one or two action buttons (create submission, run rec, etc.) — full CRUD is deferred where it adds little demo value
-
-## Out of scope (intentionally)
-- ISO 27001 paperwork (not buildable in code)
-- Real Origo network connection (stubbed)
-- Real HMRC sandbox keys (stubbed; harness is offline)
-- Real Open Banking TPP licence (stubbed)
-
-## Build order
-1. One migration with all 30+ tables
-2. Seed data via insert tool (one batch per module)
-3. Library files (`lsaLsdba.ts`, `gadLookup.ts`)
-4. Edge functions (`hmrc-submit`, `bulk-deal-aggregator`, `public-api`, `webhook-dispatcher`, `open-banking-stub`)
-5. UI pages (~12 new screens)
-6. App.tsx routes + navConfig
-7. Smoke test: visit each new route, fire one action per module
+Do you want `/cass` listed **only** in "Daily admin desk" (cleaner), or kept in both Daily desk and Compliance (redundant but discoverable)? Default in the plan above: only in Daily desk.

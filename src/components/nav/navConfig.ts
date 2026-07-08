@@ -190,7 +190,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "HMRC — payroll (RTI) submission", url: "/paye", icon: Receipt },
         { title: "HMRC — pension events (AFT/BCE)", url: "/hmrc", icon: FileSignature },
         { title: "Dealing desk (bulked orders)", url: "/dealing", icon: TrendingUp },
-        { title: "Direct debit collections", url: "/dealing", icon: ArrowDownToLine },
+        { title: "Direct debit collections", url: "/direct-debit-collections", icon: ArrowDownToLine },
         { title: "Unit pricing / valuation run", url: "/models", icon: TrendingUp },
         { title: "Corporate actions", url: "/admin?tab=corporate-actions", icon: RefreshCw },
         { title: "Rebalance runs", url: "/admin?tab=rebalancing", icon: RefreshCw },

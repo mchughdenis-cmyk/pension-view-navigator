@@ -317,6 +317,8 @@ const AppContent = () => {
               <Route path="/data-quality" element={<RoleGate allow={['admin']}><DataQuality /></RoleGate>} />
               <Route path="/cases" element={<RoleGate allow={['adviser', 'admin']}><CaseInbox /></RoleGate>} />
               <Route path="/invoicing" element={<RoleGate allow={['admin']}><Invoicing /></RoleGate>} />
+              <Route path="/death-claims" element={<RoleGate allow={['adviser', 'admin']}><DeathClaims /></RoleGate>} />
+              <Route path="/pension-sharing" element={<RoleGate allow={['adviser', 'admin']}><PensionSharingOrders /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

@@ -184,6 +184,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Cash warnings (book)", url: "/cash-warnings", icon: Bell },
         { title: "Payroll processing", url: "/payroll-processing", icon: Receipt },
         { title: "Contribution schedules", url: "/contributions", icon: HandCoins },
+        { title: "Contribution chaser (overdue)", url: "/contribution-chaser", icon: AlertTriangle },
+        { title: "Unallocated cash / suspense", url: "/unallocated-cash", icon: Wallet },
         { title: "RAS reclaim (monthly)", url: "/paye", icon: HandCoins },
         { title: "HMRC — payroll (RTI) submission", url: "/paye", icon: Receipt },
         { title: "HMRC — pension events (AFT/BCE)", url: "/hmrc", icon: FileSignature },

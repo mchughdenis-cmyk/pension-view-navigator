@@ -123,6 +123,8 @@ import JoinersLeavers from "./pages/admin/JoinersLeavers";
 import MemberDetails from "./pages/admin/MemberDetails";
 import MemberQueries from "./pages/admin/MemberQueries";
 import BenefitStatements from "./pages/admin/BenefitStatements";
+import ContributionChaser from "./pages/admin/ContributionChaser";
+import UnallocatedCash from "./pages/admin/UnallocatedCash";
 import Tour from "./pages/Tour";
 import { FloatingHelpDock } from "./components/FloatingHelpDock";
 import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
@@ -275,6 +277,8 @@ const AppContent = () => {
               <Route path="/member-details" element={<RoleGate allow={['admin']}><MemberDetails /></RoleGate>} />
               <Route path="/member-queries" element={<RoleGate allow={['admin']}><MemberQueries /></RoleGate>} />
               <Route path="/benefit-statements" element={<RoleGate allow={['admin']}><BenefitStatements /></RoleGate>} />
+              <Route path="/contribution-chaser" element={<RoleGate allow={['admin']}><ContributionChaser /></RoleGate>} />
+              <Route path="/unallocated-cash" element={<RoleGate allow={['admin']}><UnallocatedCash /></RoleGate>} />
               <Route path="/costs" element={<CostCharges />} />
               <Route path="/state-pension" element={<StatePensionForecast />} />
               <Route path="/vulnerable" element={<RoleGate allow={['adviser', 'admin']}><VulnerableClientRegister /></RoleGate>} />

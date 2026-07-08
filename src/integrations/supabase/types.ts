@@ -921,6 +921,75 @@ export type Database = {
         }
         Relationships: []
       }
+      cetv_quotes: {
+        Row: {
+          advice_required: boolean
+          approved_by: string | null
+          client_id: string | null
+          created_at: string
+          guarantee_end_date: string | null
+          id: string
+          notes: string | null
+          quote_date: string | null
+          request_date: string
+          requested_by: string | null
+          safeguarded_benefits: boolean
+          scheme_id: string | null
+          status: string
+          transfer_value: number | null
+          updated_at: string
+        }
+        Insert: {
+          advice_required?: boolean
+          approved_by?: string | null
+          client_id?: string | null
+          created_at?: string
+          guarantee_end_date?: string | null
+          id?: string
+          notes?: string | null
+          quote_date?: string | null
+          request_date?: string
+          requested_by?: string | null
+          safeguarded_benefits?: boolean
+          scheme_id?: string | null
+          status?: string
+          transfer_value?: number | null
+          updated_at?: string
+        }
+        Update: {
+          advice_required?: boolean
+          approved_by?: string | null
+          client_id?: string | null
+          created_at?: string
+          guarantee_end_date?: string | null
+          id?: string
+          notes?: string | null
+          quote_date?: string | null
+          request_date?: string
+          requested_by?: string | null
+          safeguarded_benefits?: boolean
+          scheme_id?: string | null
+          status?: string
+          transfer_value?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cetv_quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cetv_quotes_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cgt_disposals: {
         Row: {
           account_id: string
@@ -1546,6 +1615,56 @@ export type Database = {
           },
         ]
       }
+      data_quality_scores: {
+        Row: {
+          as_at_date: string
+          common_score: number | null
+          created_at: string
+          id: string
+          members_total: number | null
+          members_with_gaps: number | null
+          remediation_plan: string | null
+          scheme_id: string | null
+          scheme_specific_score: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          as_at_date?: string
+          common_score?: number | null
+          created_at?: string
+          id?: string
+          members_total?: number | null
+          members_with_gaps?: number | null
+          remediation_plan?: string | null
+          scheme_id?: string | null
+          scheme_specific_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          as_at_date?: string
+          common_score?: number | null
+          created_at?: string
+          id?: string
+          members_total?: number | null
+          members_with_gaps?: number | null
+          remediation_plan?: string | null
+          scheme_id?: string | null
+          scheme_specific_score?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "data_quality_scores_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dd_mandates: {
         Row: {
           account_holder: string | null
@@ -1759,6 +1878,63 @@ export type Database = {
           rto_minutes?: number
           scenario?: string
           status?: string
+        }
+        Relationships: []
+      }
+      employers: {
+        Row: {
+          accounts_office_ref: string | null
+          created_at: string
+          duties_date: string | null
+          employee_contribution_pct: number | null
+          employer_contribution_pct: number | null
+          id: string
+          name: string
+          notes: string | null
+          pay_reference_period: string | null
+          paye_reference: string | null
+          salary_sacrifice: boolean
+          staging_date: string | null
+          status: string
+          tpr_contact_email: string | null
+          tpr_contact_name: string | null
+          updated_at: string
+        }
+        Insert: {
+          accounts_office_ref?: string | null
+          created_at?: string
+          duties_date?: string | null
+          employee_contribution_pct?: number | null
+          employer_contribution_pct?: number | null
+          id?: string
+          name: string
+          notes?: string | null
+          pay_reference_period?: string | null
+          paye_reference?: string | null
+          salary_sacrifice?: boolean
+          staging_date?: string | null
+          status?: string
+          tpr_contact_email?: string | null
+          tpr_contact_name?: string | null
+          updated_at?: string
+        }
+        Update: {
+          accounts_office_ref?: string | null
+          created_at?: string
+          duties_date?: string | null
+          employee_contribution_pct?: number | null
+          employer_contribution_pct?: number | null
+          id?: string
+          name?: string
+          notes?: string | null
+          pay_reference_period?: string | null
+          paye_reference?: string | null
+          salary_sacrifice?: boolean
+          staging_date?: string | null
+          status?: string
+          tpr_contact_email?: string | null
+          tpr_contact_name?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -2472,6 +2648,126 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_lines: {
+        Row: {
+          created_at: string
+          description: string
+          fee_schedule_id: string | null
+          id: string
+          invoice_id: string
+          line_total: number
+          quantity: number
+          unit_amount: number
+          vat_rate: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          fee_schedule_id?: string | null
+          id?: string
+          invoice_id: string
+          line_total?: number
+          quantity?: number
+          unit_amount?: number
+          vat_rate?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          fee_schedule_id?: string | null
+          id?: string
+          invoice_id?: string
+          line_total?: number
+          quantity?: number
+          unit_amount?: number
+          vat_rate?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_lines_fee_schedule_id_fkey"
+            columns: ["fee_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "fee_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_lines_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          client_id: string | null
+          created_at: string
+          due_date: string | null
+          exported_to: string | null
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          paid_date: string | null
+          scheme_id: string | null
+          status: string
+          subtotal: number
+          total: number
+          updated_at: string
+          vat: number
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          exported_to?: string | null
+          id?: string
+          invoice_number: string
+          issue_date?: string
+          notes?: string | null
+          paid_date?: string | null
+          scheme_id?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          vat?: number
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string
+          due_date?: string | null
+          exported_to?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          paid_date?: string | null
+          scheme_id?: string | null
+          status?: string
+          subtotal?: number
+          total?: number
+          updated_at?: string
+          vat?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
             referencedColumns: ["id"]
           },
         ]
@@ -4095,6 +4391,75 @@ export type Database = {
         }
         Relationships: []
       }
+      retirement_quotes: {
+        Row: {
+          annuity_gross: number | null
+          client_id: string | null
+          created_at: string
+          drawdown_income: number | null
+          fund_value: number | null
+          id: string
+          options: Json | null
+          pcls_amount: number | null
+          quote_date: string
+          scheme_id: string | null
+          status: string
+          target_retirement_date: string | null
+          ufpls_amount: number | null
+          updated_at: string
+          wake_up_stage: string | null
+        }
+        Insert: {
+          annuity_gross?: number | null
+          client_id?: string | null
+          created_at?: string
+          drawdown_income?: number | null
+          fund_value?: number | null
+          id?: string
+          options?: Json | null
+          pcls_amount?: number | null
+          quote_date?: string
+          scheme_id?: string | null
+          status?: string
+          target_retirement_date?: string | null
+          ufpls_amount?: number | null
+          updated_at?: string
+          wake_up_stage?: string | null
+        }
+        Update: {
+          annuity_gross?: number | null
+          client_id?: string | null
+          created_at?: string
+          drawdown_income?: number | null
+          fund_value?: number | null
+          id?: string
+          options?: Json | null
+          pcls_amount?: number | null
+          quote_date?: string
+          scheme_id?: string | null
+          status?: string
+          target_retirement_date?: string | null
+          ufpls_amount?: number | null
+          updated_at?: string
+          wake_up_stage?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "retirement_quotes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "retirement_quotes_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rti_submissions: {
         Row: {
           client_count: number
@@ -4179,6 +4544,48 @@ export type Database = {
         }
         Relationships: []
       }
+      scheme_employers: {
+        Row: {
+          created_at: string
+          employer_id: string
+          id: string
+          joined_date: string | null
+          left_date: string | null
+          scheme_id: string
+        }
+        Insert: {
+          created_at?: string
+          employer_id: string
+          id?: string
+          joined_date?: string | null
+          left_date?: string | null
+          scheme_id: string
+        }
+        Update: {
+          created_at?: string
+          employer_id?: string
+          id?: string
+          joined_date?: string | null
+          left_date?: string | null
+          scheme_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheme_employers_employer_id_fkey"
+            columns: ["employer_id"]
+            isOneToOne: false
+            referencedRelation: "employers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheme_employers_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scheme_pensions: {
         Row: {
           client_id: string
@@ -4224,6 +4631,51 @@ export type Database = {
           provider?: string
           spouse_pct?: number
           status?: string
+        }
+        Relationships: []
+      }
+      schemes: {
+        Row: {
+          benefit_basis: string | null
+          created_at: string
+          established_date: string | null
+          id: string
+          name: string
+          notes: string | null
+          psr_number: string | null
+          pstr: string | null
+          scheme_type: string
+          status: string
+          trust_deed_ref: string | null
+          updated_at: string
+        }
+        Insert: {
+          benefit_basis?: string | null
+          created_at?: string
+          established_date?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          psr_number?: string | null
+          pstr?: string | null
+          scheme_type?: string
+          status?: string
+          trust_deed_ref?: string | null
+          updated_at?: string
+        }
+        Update: {
+          benefit_basis?: string | null
+          created_at?: string
+          established_date?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          psr_number?: string | null
+          pstr?: string | null
+          scheme_type?: string
+          status?: string
+          trust_deed_ref?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4684,6 +5136,71 @@ export type Database = {
           },
         ]
       }
+      tpr_breaches: {
+        Row: {
+          category: string
+          cause: string | null
+          created_at: string
+          description: string
+          effect: string | null
+          id: string
+          identified_by: string | null
+          identified_date: string
+          materiality: string
+          reaction: string | null
+          reference: string | null
+          reportable_to_tpr: boolean
+          reported_date: string | null
+          scheme_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          cause?: string | null
+          created_at?: string
+          description: string
+          effect?: string | null
+          id?: string
+          identified_by?: string | null
+          identified_date?: string
+          materiality?: string
+          reaction?: string | null
+          reference?: string | null
+          reportable_to_tpr?: boolean
+          reported_date?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          cause?: string | null
+          created_at?: string
+          description?: string
+          effect?: string | null
+          id?: string
+          identified_by?: string | null
+          identified_date?: string
+          materiality?: string
+          reaction?: string | null
+          reference?: string | null
+          reportable_to_tpr?: boolean
+          reported_date?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tpr_breaches_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trade_allocations: {
         Row: {
           account_id: string
@@ -4972,6 +5489,113 @@ export type Database = {
         }
         Relationships: []
       }
+      trustee_actions: {
+        Row: {
+          completed_date: string | null
+          created_at: string
+          description: string
+          due_date: string | null
+          id: string
+          meeting_id: string | null
+          owner: string | null
+          scheme_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          completed_date?: string | null
+          created_at?: string
+          description: string
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          owner?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          completed_date?: string | null
+          created_at?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          meeting_id?: string | null
+          owner?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trustee_actions_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "trustee_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trustee_actions_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trustee_meetings: {
+        Row: {
+          agenda: Json | null
+          attendees: string[] | null
+          chair: string | null
+          created_at: string
+          id: string
+          location: string | null
+          meeting_date: string
+          meeting_type: string
+          minutes: string | null
+          scheme_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          agenda?: Json | null
+          attendees?: string[] | null
+          chair?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          meeting_date: string
+          meeting_type?: string
+          minutes?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          agenda?: Json | null
+          attendees?: string[] | null
+          chair?: string | null
+          created_at?: string
+          id?: string
+          location?: string | null
+          meeting_date?: string
+          meeting_type?: string
+          minutes?: string | null
+          scheme_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trustee_meetings_scheme_id_fkey"
+            columns: ["scheme_id"]
+            isOneToOne: false
+            referencedRelation: "schemes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -5061,6 +5685,53 @@ export type Database = {
           vote?: string
         }
         Relationships: []
+      }
+      wake_up_events: {
+        Row: {
+          age_trigger: number
+          channel: string | null
+          client_id: string | null
+          created_at: string
+          due_date: string
+          id: string
+          issued_date: string | null
+          pension_wise_offered: boolean
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          age_trigger: number
+          channel?: string | null
+          client_id?: string | null
+          created_at?: string
+          due_date: string
+          id?: string
+          issued_date?: string | null
+          pension_wise_offered?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          age_trigger?: number
+          channel?: string | null
+          client_id?: string | null
+          created_at?: string
+          due_date?: string
+          id?: string
+          issued_date?: string | null
+          pension_wise_offered?: boolean
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wake_up_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       webhook_deliveries: {
         Row: {

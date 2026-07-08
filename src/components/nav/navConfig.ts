@@ -178,6 +178,22 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       ],
     },
     {
+      label: "Registers",
+      items: [
+        { title: "Scheme register", url: "/schemes", icon: Building2 },
+        { title: "Employer register", url: "/employers", icon: Briefcase },
+        { title: "Case inbox (all work)", url: "/cases", icon: ClipboardList },
+      ],
+    },
+    {
+      label: "Governance & compliance",
+      items: [
+        { title: "TPR breach register (s.70)", url: "/breach-register", icon: ShieldCheck },
+        { title: "Trustee meetings & actions", url: "/trustee-meetings", icon: Users },
+        { title: "Data quality (TPR)", url: "/data-quality", icon: ClipboardList },
+      ],
+    },
+    {
       label: "Book-of-business daily desk",
       items: [
         { title: "Bank statement upload", url: "/bank-upload", icon: Upload },
@@ -212,6 +228,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Onboarding progress tracker", url: "/onboarding-progress", icon: ClipboardList },
         { title: "Initial cash funding", url: "/cash-onboarding", icon: ArrowDownToLine },
         { title: "Ad-hoc top-up", url: "/instant-deposit", icon: ArrowDownToLine },
+        { title: "CETV quotations", url: "/cetv", icon: ArrowRightLeft },
+        { title: "Retirement quotes & wake-up packs", url: "/retirement-quotes", icon: PoundSterling },
         { title: "Joiners & leavers", url: "/joiners-leavers", icon: UserCog },
         { title: "Member details (address / bank / GDPR)", url: "/member-details", icon: UserCog },
         { title: "Tax code / P45 / P46 changes", url: "/member-details", icon: Receipt },
@@ -318,6 +336,13 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Suitability assessment", url: "/suitability", icon: ClipboardList },
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
+      ],
+    },
+    {
+      label: "Finance",
+      items: [
+        { title: "Fee schedules", url: "/admin?tab=fees", icon: Calculator },
+        { title: "Invoicing (Xero/Sage)", url: "/invoicing", icon: Receipt },
       ],
     },
     {

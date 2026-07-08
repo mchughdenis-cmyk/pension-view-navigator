@@ -117,6 +117,7 @@ import OfflineBanner from "./components/pwa/OfflineBanner";
 import { AuthGate } from "./components/AuthGate";
 import RegistrationsLog from "./components/admin/RegistrationsLog";
 import SavedIllustrations from "./components/SavedIllustrations";
+import PayrollProcessing from "./pages/PayrollProcessing";
 import Tour from "./pages/Tour";
 import { FloatingHelpDock } from "./components/FloatingHelpDock";
 import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";

@@ -1,80 +1,68 @@
-## Add Payroll processing to Admin Daily admin desk
+## Goal
+Align the Admin daily desks with mainstream pension admin systems (Bravura Sonata, Aquila Heywood, Procentia IntelliPen, Civica UPM, Delta Financial Systems). Reposition payroll as a full process (not just a file import), give the bank reconciliation a proper file upload entry, and fill the gaps at book-of-business and client level.
 
-Add a new **Payroll processing** item at the top of the Admin "Daily admin desk" group with a dedicated route and an end-to-end workflow page that flows from employer file upload through to contribution handoff.
+## 1. Payroll — process, not "import"
 
-### 1. Navigation
+Rename `Payroll file import & run` → **`Payroll processing`** (route unchanged at `/payroll-processing`, page already implements a 6-step process).
 
-Edit `src/components/nav/navConfig.ts`:
-- Insert a new item in `NAV_BY_ROLE.admin` "Daily admin desk" group, positioned just above **Contributions**:
-  - Label: `Payroll processing`
-  - Route: `/payroll-processing`
-  - Icon: `FileSpreadsheet` (lucide)
+Add sibling items so the payroll workflow reads as a process, matching how Bravura/Heywood expose it:
 
-### 2. New route
+- **Payroll processing** (`/payroll-processing`) — end-to-end run
+- **Contribution schedules** (`/contributions`) — expected vs received, chase overdue schedules
+- **RAS reclaim (monthly)** (`/paye`) — HMRC tax relief at source claim
+- **Late-payment monitoring** — new small view flagged against `contributions` (SLA / TPR reportable breach)
+- **Refunds of contributions** — short-service refunds / over-limit refunds
 
-Register `/payroll-processing` in `src/App.tsx` (Admin/Adviser only, gated same as other admin pages) pointing to a new `PayrollProcessing` page.
+## 2. Bank reconciliation — add upload
 
-### 3. New page: `src/pages/PayrollProcessing.tsx`
+Split the current single "Bank file import"/"Bank reconciliation (CASS)" entry (both pointed at `/cass`) into a clean two-step flow:
 
-A single-page workflow with a stepper showing progress and the ability to jump between steps:
+- **Bank statement upload** → `/cass?tab=upload` (opens the existing `BankUpload` component within CASSReconciliation, no new route needed)
+- **Bank reconciliation (CASS 7/8)** → `/cass` (match / break / clear)
+- **Cash breaks & CASS breaches** → `/cass?tab=breaches`
 
-```text
-1. Upload  →  2. Parse & validate  →  3. Match members  →  4. Calculate  →  5. Review & approve  →  6. Hand off to Contributions
-```
+CASSReconciliation already has tabs; wire the sidebar links to open the right tab via query string. No schema changes.
 
-**Step 1 – Upload**
-- Drag-and-drop area accepting `.csv`, `.xlsx` payroll files
-- Employer/scheme selector (dropdown of clients with an employer flag)
-- Pay period (month/year), pay frequency, pay date
-- File stored in the existing `client-documents` bucket under `payroll/{scheme}/{period}/`
+## 3. Book-of-business daily desk — gaps vs peer systems
 
-**Step 2 – Parse & validate**
-- Client-side CSV/XLSX parse (existing `xlsx` skill patterns; use SheetJS already common in the project or add `papaparse` for CSV)
-- Column mapping UI (NI number, name, pensionable pay, employee contrib, employer contrib, AVC, salary sacrifice flag)
-- Validation summary: row count, totals, duplicates, missing NI numbers, negative values
+Add items commonly present in Bravura Sonata / Heywood Altair / Procentia:
 
-**Step 3 – Match members**
-- Auto-match rows to scheme members by NI number, then name fallback
-- Unmatched rows list with actions: link to existing member, create new member stub, or exclude
+- **Contribution schedules** (expected vs received tracker)
+- **Direct debit collections run** (`/dealing` placeholder or new stub) — bulk DD sweep
+- **Bulk valuation / unit pricing run** — nightly NAV / price import monitor (surfaces `market_prices` + `daily-valuations` edge fn)
+- **Corporate actions processing** (`/admin?tab=corporate-actions`) — elections deadline queue
+- **Rebalance runs** (`/admin?tab=rebalancing`) — scheme-wide model drift
+- **Fee run (monthly)** (`/admin?tab=fees`) — periodic fee engine
+- **Statement production run** — batch ABS / SMPI generation
+- **Regulator returns** (`/admin?tab=regulatory`) — TPR scheme return, FCA RegData
+- **Four-eyes approvals queue** (`/admin?tab=approvals`) — maker/checker for bulk ops
 
-**Step 4 – Calculate**
-- Apply tax relief method per member (RAS vs net pay) — read from scheme config
-- Compute grossed-up amounts for RAS, apply salary sacrifice logic, split employee/employer/AVC
-- Show per-member breakdown and scheme-level totals; flag members over £60k annual allowance (link to AA carry-forward)
+## 4. Client-level daily desk — gaps vs peer systems
 
-**Step 5 – Review & approve**
-- Summary card: total employee, employer, AVC, tax relief reclaim, member count
-- Four-eyes approval hook (uses existing `four_eyes_approvals` table pattern)
-- Discrepancy report vs previous period
+Add member-record tasks standard in the same peer systems:
 
-**Step 6 – Hand off to Contributions**
-- On approve, insert rows into existing `contributions` table (one per member) with `source = 'payroll'` and a shared `payroll_run_id`
-- Queue RAS reclaim lines in `ras_reclaim_lines` for RAS members
-- Redirect to `/contributions` filtered to the new run; show a toast with the run id
+- **Beneficiary nominations** (`/beneficiaries`)
+- **Expression of wish updates** — grouped with beneficiaries
+- **Death claims / bereavement** (`/admin?tab=death-claims`) — already have `death_claims` and `death_benefit_payments` tables
+- **Pension sharing orders (divorce)** (`/admin?tab=psos`) — table exists
+- **Complaints handling** — add as ops case type; link to `ops_cases`
+- **Tax code changes / P45/P46 handling** — sub-view of member details
+- **Address / bank / GDPR requests** — grouped under member details
+- **Vulnerable customer flags** (`/vulnerable`) — surface at client level too
+- **Annual allowance / carry-forward checks** (`aa_carry_forward` table exists)
+- **Crystallisation events review** — LSA/LSDBA already there, add BCE event log
 
-### 4. Data model (migration)
+## 5. What actually changes in this pass
 
-Two new tables to track the run itself (contribution rows continue to live in `contributions`):
+Nav-only restructure of `src/components/nav/navConfig.ts` (Admin role). No new pages required — every target route already exists or is a tab on an existing page. Files:
 
-- `payroll_runs` — scheme_id, employer_client_id, period_start, period_end, pay_date, frequency, source_file_path, status (`draft` | `parsed` | `matched` | `calculated` | `approved` | `posted`), totals jsonb, uploaded_by, approved_by, created_at, updated_at
-- `payroll_run_lines` — payroll_run_id, member_client_id (nullable until matched), raw_row jsonb, ni_number, full_name, pensionable_pay, employee_contrib, employer_contrib, avc, salary_sacrifice bool, match_status, exception_reason, contribution_id (set after post), created_at
+- `src/components/nav/navConfig.ts` — rewrite Admin "Book-of-business daily desk" and "Client-level daily desk" groups per sections 1–4; rename payroll; split bank into upload + recon.
+- `src/components/CASSReconciliation.tsx` — read `?tab=` query param and select the matching tab on mount (small change so the two sidebar entries land on the right sub-view).
 
-Both with standard grants (`authenticated`, `service_role`), RLS enabled, policies restricted to users with `admin` role via `public.has_role(auth.uid(), 'admin')`, and `updated_at` trigger on `payroll_runs`.
+No database migrations, no auth changes, no removal of existing pages.
 
-Add `payroll_run_id uuid` nullable column to `contributions` to link posted rows back to their run.
+## Out of scope
+- Building brand-new pages for items that already have a home (they're linked via existing routes/tabs).
+- Any adviser/client sidebar changes — this pass is Admin-only per the request.
 
-### 5. Supporting components
-
-- `src/components/payroll/PayrollUpload.tsx`
-- `src/components/payroll/PayrollColumnMapper.tsx`
-- `src/components/payroll/PayrollMemberMatch.tsx`
-- `src/components/payroll/PayrollCalculation.tsx`
-- `src/components/payroll/PayrollReview.tsx`
-- `src/lib/payroll.ts` — parsing, validation, RAS/net-pay/salary-sacrifice calculations, handoff helper
-
-### Technical notes
-
-- All amounts stored in pence (bigint) consistent with the rest of the codebase; UI formats as GBP.
-- Uses existing `useClientData` audit-log pattern so every step writes to `activity_log`.
-- No changes to existing Contributions page beyond it picking up rows tagged with `source = 'payroll'`.
-- UK 2024/25 rules: £60k AA, MPAA £10k, RAS at 20% basic rate.
+Shall I proceed?

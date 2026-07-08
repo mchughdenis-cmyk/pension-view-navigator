@@ -5,7 +5,7 @@ import {
   ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, RefreshCw, FileSignature, ScrollText, Receipt,
   Sparkles, Database, Network, Cog, History, FolderArchive, Bell, Smartphone, Timer, Palette,
   HeartPulse, Gift, Plane, Lock, UserCog, Heart, Crown, HandCoins, Accessibility,
-  Landmark, Globe2,
+  Landmark, Globe2, FileSpreadsheet,
 } from "lucide-react";
 import type { Role } from "@/contexts/RoleContext";
 import type { LucideIcon } from "lucide-react";
@@ -181,6 +181,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Bank reconciliation (CASS)", url: "/cass", icon: ShieldCheck },
         { title: "Cash onboarding", url: "/cash-onboarding", icon: ArrowDownToLine },
         { title: "Add money (deposit)", url: "/instant-deposit", icon: ArrowDownToLine },
+        { title: "Payroll processing", url: "/payroll-processing", icon: FileSpreadsheet },
         { title: "Contribution manager", url: "/contributions", icon: HandCoins },
         { title: "PAYE / RTI", url: "/paye", icon: Receipt },
         { title: "Transfers in", url: "/transfer", icon: ArrowDownToLine },

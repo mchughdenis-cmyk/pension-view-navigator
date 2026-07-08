@@ -1281,6 +1281,7 @@ export type Database = {
           id: string
           net_amount: number
           notes: string | null
+          payroll_run_id: string | null
           reference: string | null
           relief_method: string
           status: string
@@ -1298,6 +1299,7 @@ export type Database = {
           id?: string
           net_amount?: number
           notes?: string | null
+          payroll_run_id?: string | null
           reference?: string | null
           relief_method?: string
           status?: string
@@ -1315,6 +1317,7 @@ export type Database = {
           id?: string
           net_amount?: number
           notes?: string | null
+          payroll_run_id?: string | null
           reference?: string | null
           relief_method?: string
           status?: string
@@ -1322,7 +1325,15 @@ export type Database = {
           tax_year?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "contributions_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       corporate_action_elections: {
         Row: {
@@ -3546,6 +3557,159 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      payroll_run_lines: {
+        Row: {
+          avc_pence: number
+          contribution_id: string | null
+          created_at: string
+          employee_contrib_pence: number
+          employer_contrib_pence: number
+          exception_reason: string | null
+          full_name: string | null
+          id: string
+          match_status: string
+          member_client_id: string | null
+          ni_number: string | null
+          payroll_run_id: string
+          pensionable_pay_pence: number
+          raw_row: Json
+          salary_sacrifice: boolean
+          tax_relief_method: string
+          tax_relief_pence: number
+        }
+        Insert: {
+          avc_pence?: number
+          contribution_id?: string | null
+          created_at?: string
+          employee_contrib_pence?: number
+          employer_contrib_pence?: number
+          exception_reason?: string | null
+          full_name?: string | null
+          id?: string
+          match_status?: string
+          member_client_id?: string | null
+          ni_number?: string | null
+          payroll_run_id: string
+          pensionable_pay_pence?: number
+          raw_row?: Json
+          salary_sacrifice?: boolean
+          tax_relief_method?: string
+          tax_relief_pence?: number
+        }
+        Update: {
+          avc_pence?: number
+          contribution_id?: string | null
+          created_at?: string
+          employee_contrib_pence?: number
+          employer_contrib_pence?: number
+          exception_reason?: string | null
+          full_name?: string | null
+          id?: string
+          match_status?: string
+          member_client_id?: string | null
+          ni_number?: string | null
+          payroll_run_id?: string
+          pensionable_pay_pence?: number
+          raw_row?: Json
+          salary_sacrifice?: boolean
+          tax_relief_method?: string
+          tax_relief_pence?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_run_lines_contribution_id_fkey"
+            columns: ["contribution_id"]
+            isOneToOne: false
+            referencedRelation: "contributions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_lines_member_client_id_fkey"
+            columns: ["member_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payroll_run_lines_payroll_run_id_fkey"
+            columns: ["payroll_run_id"]
+            isOneToOne: false
+            referencedRelation: "payroll_runs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payroll_runs: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          column_mapping: Json
+          created_at: string
+          employer_client_id: string | null
+          frequency: string
+          id: string
+          notes: string | null
+          pay_date: string
+          period_end: string
+          period_start: string
+          scheme_name: string | null
+          source_file_name: string | null
+          source_file_path: string | null
+          status: string
+          totals: Json
+          updated_at: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          column_mapping?: Json
+          created_at?: string
+          employer_client_id?: string | null
+          frequency?: string
+          id?: string
+          notes?: string | null
+          pay_date: string
+          period_end: string
+          period_start: string
+          scheme_name?: string | null
+          source_file_name?: string | null
+          source_file_path?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          column_mapping?: Json
+          created_at?: string
+          employer_client_id?: string | null
+          frequency?: string
+          id?: string
+          notes?: string | null
+          pay_date?: string
+          period_end?: string
+          period_start?: string
+          scheme_name?: string | null
+          source_file_name?: string | null
+          source_file_path?: string | null
+          status?: string
+          totals?: Json
+          updated_at?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payroll_runs_employer_client_id_fkey"
+            columns: ["employer_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pension_sharing_orders: {
         Row: {

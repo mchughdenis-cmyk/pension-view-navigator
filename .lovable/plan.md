@@ -1,106 +1,80 @@
-# Reorganise Admin navigation around daily pension-admin work
+## Add Payroll processing to Admin Daily admin desk
 
-Right now the Admin sidebar leads with "Workspace", "Operations", "Client modules (act on behalf)", "Compliance" etc. The tasks a pensions administrator actually performs every day are scattered across three or four groups (Operations, Money in & out, Client modules). This plan pulls those daily tasks to the top of the sidebar as a clearly labelled block, then keeps everything else beneath it in a logical order.
+Add a new **Payroll processing** item at the top of the Admin "Daily admin desk" group with a dedicated route and an end-to-end workflow page that flows from employer file upload through to contribution handoff.
 
-## Daily pension-administrator tasks to call out
+### 1. Navigation
 
-These are the activities a scheme/SIPP administrator typically works through each day. They will form a new top group in the Admin nav called **"Daily admin desk"**:
+Edit `src/components/nav/navConfig.ts`:
+- Insert a new item in `NAV_BY_ROLE.admin` "Daily admin desk" group, positioned just above **Contributions**:
+  - Label: `Payroll processing`
+  - Route: `/payroll-processing`
+  - Icon: `FileSpreadsheet` (lucide)
 
-1. **Bank reconciliation** — `/cass` (CASS reconciliation) — match internal cash vs bank file, clear breaks.
-2. **Cash onboarding / allocate incoming cash** — `/cash-onboarding` — apply received money to member accounts.
-3. **Bank file upload & allocation** — (BankUpload) — ingest bank statements, match to expected items.
-4. **Contribution processing (all types)** — `/contributions` — regular, single, employer, third-party, in-specie; includes PAYE/RTI feed at `/paye`.
-5. **Transfers in (request & track)** — `/transfer` (client-side request on behalf) + `/origo-transfers` + `/equisoft` (in-specie) — raise, chase, book.
-6. **Transfers out** — `/transfer-out` + `/origo-transfers` — discharge, CETV, Origo out.
-7. **Drawdown processing** — `/drawdown` (crystallisation / PCLS / income) + `/drip-feed` (drip-feed drawdown) + `/instant-withdrawal` (UFPLS / one-off).
-8. **Dealing / trade execution** — `/dealing` — place buys, sells, switches raised overnight.
-9. **Instrument transfers / re-registrations** — `/instrument-transfer`.
-10. **Cash warnings & SLA queue** — `/cash-warnings`, `/sla-tracker` — daily worklist triage.
-11. **KYC review queue** — `/kyc-review` — clear pending identity checks.
-12. **Origo message inbox** — `/origo` — action inbound Origo messages.
-13. **HMRC / regulatory day-to-day filings** — `/hmrc` (event reports, RAS claims), `/lsa` (LSA/LSDBA checks at BCE).
-14. **Transaction history / audit lookup** — `/transactions`, `/audit` — used constantly for enquiries.
-15. **Illustrations & SMPI runs on request** — `/illustration`, `/smpi`.
+### 2. New route
 
-Anything not on this list (Model portfolios, Monte Carlo, White-label branding, System configuration, Firm hierarchy, Enterprise suite, API directory, Webhook sandbox, Documentation, MI dashboard, Adviser workbench, etc.) is not a daily admin task and moves further down.
+Register `/payroll-processing` in `src/App.tsx` (Admin/Adviser only, gated same as other admin pages) pointing to a new `PayrollProcessing` page.
 
-## Proposed new Admin sidebar order
+### 3. New page: `src/pages/PayrollProcessing.tsx`
 
-Only the Admin role in `src/components/nav/navConfig.ts` changes. Client and Adviser navs are untouched.
+A single-page workflow with a stepper showing progress and the ability to jump between steps:
 
 ```text
-Workspace
-  Dashboard, Admin console, Registration log
-
-Daily admin desk                         ← NEW, top-of-mind
-  Bank reconciliation (CASS)             /cass
-  Cash onboarding                        /cash-onboarding
-  Contribution manager                   /contributions
-  PAYE / RTI                             /paye
-  Transfers in                           /transfer
-  Transfers out                          /transfer-out
-  Origo transfers                        /origo-transfers
-  Equisoft in-specie                     /equisoft
-  Drawdown processing                    /drawdown
-  Drip-feed drawdown                     /drip-feed
-  Instant withdrawal (UFPLS)             /instant-withdrawal
-  Dealing desk                           /dealing
-  Instrument transfer                    /instrument-transfer
-  Origo message inbox                    /origo
-  KYC review queue                       /kyc-review
-  Cash warnings                          /cash-warnings
-  SLA tracker                            /sla-tracker
-  HMRC event reporting                   /hmrc
-  LSA / LSDBA checks                     /lsa
-  Transaction history                    /transactions
-  Illustration                           /illustration
-  SMPI runner                            /smpi
-
-Operations (periodic / oversight)
-  Client operations hub, Operations cockpit, Pension operations,
-  Pensions Dashboards (PDP)
-
-Compliance (periodic)
-  CASS reconciliation history, Audit trail, Vulnerable register,
-  Cost & charges, Firm hierarchy
-
-Client modules (act on behalf)          ← trimmed: items promoted to Daily desk removed
-  ISA, GIA, Onshore bond, Offshore bond, Annual summary,
-  Pension passport, Beneficiaries, Pension health score, Life events,
-  Employer matching, State Pension forecast, Onboarding,
-  Onboarding tracker, Identity check (KYC), Welcome pack,
-  Learning centre, Mobile app view, Ask Navigator (AI), Privacy centre
-
-Products
-  SSAS, Commercial property, Advanced capabilities
-
-Investments
-  Model portfolios, Monte Carlo
-
-Insights
-  MI dashboard, Enterprise suite
-
-Client service
-  Adviser workbench, Client services hub, Annual review pack,
-  Suitability assessment, Reporting suite, Communications
-
-System
-  Administration, System configuration, White-label branding,
-  Persona selector, Audit log, Documents, System overview,
-  API directory, Documentation, Webhook sandbox, Settings
+1. Upload  →  2. Parse & validate  →  3. Match members  →  4. Calculate  →  5. Review & approve  →  6. Hand off to Contributions
 ```
 
-Notes:
-- `/cass` appears once in "Daily admin desk" (the working screen); the Compliance group keeps the historical/oversight framing but I'll relabel to avoid a duplicate entry — either keep only in Daily desk or point Compliance to an archive route if one exists. Confirmation below.
-- No routes, components, or business logic change — this is a nav reorder only.
+**Step 1 – Upload**
+- Drag-and-drop area accepting `.csv`, `.xlsx` payroll files
+- Employer/scheme selector (dropdown of clients with an employer flag)
+- Pay period (month/year), pay frequency, pay date
+- File stored in the existing `client-documents` bucket under `payroll/{scheme}/{period}/`
 
-## Technical detail
+**Step 2 – Parse & validate**
+- Client-side CSV/XLSX parse (existing `xlsx` skill patterns; use SheetJS already common in the project or add `papaparse` for CSV)
+- Column mapping UI (NI number, name, pensionable pay, employee contrib, employer contrib, AVC, salary sacrifice flag)
+- Validation summary: row count, totals, duplicates, missing NI numbers, negative values
 
-- Single file edit: `src/components/nav/navConfig.ts`, `NAV_BY_ROLE.admin` array.
-- No new icons needed; reuse existing lucide icons already imported.
-- No changes to `AppSidebar.tsx` — it renders whatever groups are provided.
-- No route or component changes; `findNavLabel` continues to resolve because URLs are unchanged.
+**Step 3 – Match members**
+- Auto-match rows to scheme members by NI number, then name fallback
+- Unmatched rows list with actions: link to existing member, create new member stub, or exclude
 
-## One thing to confirm before I build
+**Step 4 – Calculate**
+- Apply tax relief method per member (RAS vs net pay) — read from scheme config
+- Compute grossed-up amounts for RAS, apply salary sacrifice logic, split employee/employer/AVC
+- Show per-member breakdown and scheme-level totals; flag members over £60k annual allowance (link to AA carry-forward)
 
-Do you want `/cass` listed **only** in "Daily admin desk" (cleaner), or kept in both Daily desk and Compliance (redundant but discoverable)? Default in the plan above: only in Daily desk.
+**Step 5 – Review & approve**
+- Summary card: total employee, employer, AVC, tax relief reclaim, member count
+- Four-eyes approval hook (uses existing `four_eyes_approvals` table pattern)
+- Discrepancy report vs previous period
+
+**Step 6 – Hand off to Contributions**
+- On approve, insert rows into existing `contributions` table (one per member) with `source = 'payroll'` and a shared `payroll_run_id`
+- Queue RAS reclaim lines in `ras_reclaim_lines` for RAS members
+- Redirect to `/contributions` filtered to the new run; show a toast with the run id
+
+### 4. Data model (migration)
+
+Two new tables to track the run itself (contribution rows continue to live in `contributions`):
+
+- `payroll_runs` — scheme_id, employer_client_id, period_start, period_end, pay_date, frequency, source_file_path, status (`draft` | `parsed` | `matched` | `calculated` | `approved` | `posted`), totals jsonb, uploaded_by, approved_by, created_at, updated_at
+- `payroll_run_lines` — payroll_run_id, member_client_id (nullable until matched), raw_row jsonb, ni_number, full_name, pensionable_pay, employee_contrib, employer_contrib, avc, salary_sacrifice bool, match_status, exception_reason, contribution_id (set after post), created_at
+
+Both with standard grants (`authenticated`, `service_role`), RLS enabled, policies restricted to users with `admin` role via `public.has_role(auth.uid(), 'admin')`, and `updated_at` trigger on `payroll_runs`.
+
+Add `payroll_run_id uuid` nullable column to `contributions` to link posted rows back to their run.
+
+### 5. Supporting components
+
+- `src/components/payroll/PayrollUpload.tsx`
+- `src/components/payroll/PayrollColumnMapper.tsx`
+- `src/components/payroll/PayrollMemberMatch.tsx`
+- `src/components/payroll/PayrollCalculation.tsx`
+- `src/components/payroll/PayrollReview.tsx`
+- `src/lib/payroll.ts` — parsing, validation, RAS/net-pay/salary-sacrifice calculations, handoff helper
+
+### Technical notes
+
+- All amounts stored in pence (bigint) consistent with the rest of the codebase; UI formats as GBP.
+- Uses existing `useClientData` audit-log pattern so every step writes to `activity_log`.
+- No changes to existing Contributions page beyond it picking up rows tagged with `source = 'payroll'`.
+- UK 2024/25 rules: £60k AA, MPAA £10k, RAS at 20% basic rate.

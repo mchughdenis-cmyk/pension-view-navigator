@@ -1,64 +1,117 @@
-## Gap review — payroll processing & admin daily desks
 
-Benchmarked the new `PayrollProcessing` workflow and the two Admin daily-desk groups against Bravura Sonata, Aquila Heywood Altair, Procentia IntelliPen, Civica UPM and Delta Financial Systems. Below are the missing pieces worth building next, grouped by where they belong.
+# Gap analysis — Pension Navigator vs full-function pension admin
 
-### A. Payroll processing workflow — gaps
+Benchmarked against Bravura Sonata, Heywood Altair, Procentia IntelliPen, Civica UPM and Delta. The system already covers the majority of daily desk, member events, CASS, HMRC, Origo, drawdown, KYC and MI. The list below is what a fully-functional UK SIPP/SSAS/occupational admin platform still needs.
 
-1. **Pre-run comparison to last period** — variance report (headcount, £ pay, £ contribs) vs previous run; flag >10% swings before approval.
-2. **Contribution cap checks** — Annual Allowance (£60k), MPAA (£10k) and tapered AA screening per member using `aa_carry_forward`; block or warn.
-3. **Salary sacrifice handling** — when sal-sac is on, the employee amount should move to the employer column and NI saving surfaces; currently the flag is captured but not applied to totals.
-4. **Refunds & adjustments line type** — negative contribution lines for short-service refunds, over-payments and prior-period corrections.
-5. **New joiner / leaver detection** — members enrolled or left mid-period should appear as flagged rows with pro-rata pay prompts.
-6. **Opt-in / opt-out register** — capture opt-out dates against members excluded with reason `opt_out`, and auto-refund contributions if within the 1-month opt-out window.
-7. **Persist the run reference / preparer / checker** — currently preparer & checker names are captured but not stored; add columns and audit-log entries.
-8. **Draft resume** — save a run in progress and resume; today the wizard is in-memory only.
-9. **Cash collection instruction** — actually create a `payment_initiations` / `dd_mandates` collection row for the total, rather than only linking to the dealing desk.
-10. **RTI FPS payload build** — hand-off currently just navigates to /paye; should insert an `rti_submissions` draft row with the payroll totals attached.
+## A. Scheme & product engine (missing)
+1. **Scheme register** — schemes, sections, employers, participating employers, PSTR/PSR numbers, trust deed & rules, effective-dated benefit basis.
+2. **Employer register** — PAYE ref, staging/duties date, TPR contact, contribution rates, salary-sacrifice flag, pay reference periods.
+3. **Product rules engine** — per-product limits (MPAA, tapered AA, PCLS entitlement, protected TFC, protected pension age, protected retirement age).
+4. **Contribution matrix** — employee %/£, employer %/£, matching bands, salary-sacrifice reversal rules, tiered contributions.
 
-### B. Book-of-business daily desk — still missing
+## B. Benefit administration (partial → missing)
+5. **DB benefit calculator** — CARE and Final Salary revaluation, GMP equalisation, CPI/RPI orders, late-retirement factors.
+6. **CETV / transfer value quotation** — trustee-approved factors, guarantee period tracker, safeguarded benefits & advice requirement (>£30k) gate.
+7. **Retirement quote pack** — full options illustration (annuity, drawdown, UFPLS, small pots), risk warnings, wake-up packs (age 50/55/60/65).
+8. **Small pot commutation (triviality)** — £10k pot rules, three-pot lifetime limit tracker.
+9. **Serious ill-health lump sum** — pre-75 tax-free / post-75 marginal, evidence workflow.
+10. **Nominee & successor drawdown setup** — separate arrangements, LSDBA tracking.
+11. **Pension sharing on divorce (PSO)** — pension debit / credit, external transfer, implementation period, s.24 order register.
+12. **Earmarking / attachment orders** — periodic payment schedule, court order register.
 
-11. **Chase overdue contribution schedules** — TPR requires reporting late payments; needs an overdue tracker with 90-day materiality flag.
-12. **Unallocated cash / suspense clearing** — daily task; surface `transactions` where `client_id` is null.
-13. **Employer / scheme onboarding & terminations** — new employer setup and scheme wind-up tasks.
-14. **Bulk transfer-out (bulk annuity / buy-in / bulk transfer)** — scheme-level exit event.
-15. **Corporate governance calendar** — trustee meetings, actuarial valuation prompts, statement of investment principles reviews.
-16. **Reg breach register & TPR reportable events** — separate from CASS breaches.
+## C. Regulatory & statutory (missing / thin)
+13. **Event Report (AFT)** — full event catalogue, quarterly submission workflow, HMRC portal file.
+14. **Scheme Return (TPR)** — annual return dataset, scheme funding stats, MNT/MND compliance.
+15. **Pensions Regulator breach register (s.70)** — decision tree, materiality, submission log.
+16. **Chair's Statement / Value for Members** assessment (occupational DC).
+17. **Own-risk assessment (ORA)** — for schemes >100 members.
+18. **Trustee meeting pack builder** — agenda, minutes, action tracker, conflicts register.
+19. **PPF levy data submission** — s179 valuation inputs, contingent asset log.
 
-### C. Client-level daily desk — still missing
+## D. Money & CASS (partial)
+20. **Trustee bank account register** — per-scheme designated & pooled accounts, mandate list, signatory matrix.
+21. **Daily CASS internal reconciliation** vs external, break aging & escalation ladder, CMAR return.
+22. **Bank payment authorisations** — Faster Payments / CHAPS / Bacs runs with dual authorisation and payment cut-off calendar.
+23. **Unclaimed / gone-away money register** — tracing workflow, dormancy timers, dispersal rules.
 
-17. **Retirement quotes / benefit projections queue** — quotes requested by members awaiting production.
-18. **Divorce PSO calculations** — pension debit / credit calc, not just tracking.
-19. **Transfer value quotations (CETV)** — separate from the transfer-out execution.
-20. **Nominee / successor drawdown setup** — post-death continuation, distinct from death claims.
-21. **GDPR requests (SAR, erasure, portability)** — mentioned in the nav under member details but no queue/workflow.
-22. **Trace / gone-away members** — reunification workflow.
-23. **Small pot commutation & trivial commutation** — separate journey from UFPLS/drawdown.
+## E. Investments & assets (partial)
+24. **Order management (OMS)** — placement to dealing counterparty, allocation, best-execution evidence, RTS 27/28.
+25. **Custody & settlement** — trade confirmations, settlement fails, corporate action elections capture.
+26. **Unit-linked pricing** — box management, dilution levy, dual pricing (bid/offer), swing pricing.
+27. **Direct property administration** — rent roll, service charge, tenant register, VAT option, dilapidations, insurance.
+28. **Loanbacks (SSAS)** — 50% net-assets rule, 5-year amortisation, 1% above base, first-charge register.
 
-### D. Recommended first slice to build now
+## F. Member communications (partial)
+29. **Statutory Money Purchase Illustration (SMPI)** — already have runner; need bulk-annual production, AS TM1 v5.0 assumptions library, error/exception queue.
+30. **Wake-up packs** — age-triggered issuance calendar, Pension Wise stronger-nudge workflow.
+31. **Annual benefit statement (occupational)** — simpler statement template, two-page rule.
+32. **Correspondence library** — template versioning, merge fields, print/email/portal channel, delivery evidence, dead-letter handling.
+33. **Complaints — IDRP two-stage** — SLA clocks per stage, Ombudsman referral pack builder.
 
-Rather than 23 changes at once, propose implementing the highest-value payroll gaps + one new desk workflow:
+## G. Data quality & governance (missing)
+34. **Common & scheme-specific data score** (TPR data quality) — automated scoring, remediation queues.
+35. **GDPR request desk** — SAR, erasure, portability with 30-day SLA and evidence pack.
+36. **Trace / gone-away workflow** — tracing bureau integration, LOA, evidence log.
+37. **Data cleanse projects** — bulk update jobs with maker-checker and rollback.
+38. **Benefit rectification projects** — GMP eq, PPF, McCloud-style bulk recalcs with per-member audit.
 
-- **A1** period-vs-period variance panel on step 4
-- **A2** AA/MPAA cap checks on step 4
-- **A3** salary-sacrifice recalculation on step 3
-- **A4** negative/refund line type on step 3
-- **A7** persist preparer/checker + audit log entry on approval
-- **A9** create `payment_initiations` row on approval
-- **A10** create `rti_submissions` draft row on approval
-- **B11** new "Contribution schedule chaser" view listing `contributions` with status `expected` and effective_date older than 22nd of the month
-- **B12** new "Unallocated cash" queue view
+## H. Workflow & operating model (partial)
+39. **Case management** — one queue per work-type, SLA per case, ownership, hand-offs, pause reasons, RCA codes.
+40. **Digital forms designer** — member self-service forms with e-sign and evidence upload.
+41. **Bulk operations console** — bulk transfer out, bulk revaluation, bulk fee change, bulk correspondence run.
+42. **Scheme events calendar** — trustee, corporate governance, regulatory deadlines, fund-manager reviews.
+43. **Third-party register** — actuary, auditor, custodian, investment consultant with contract & fee tracker.
 
-### Files (first-slice implementation)
+## I. Finance (missing)
+44. **Fee scheduler** — per-scheme fee model, tiered ad valorem, activity-based, minimum fees, VAT.
+45. **Invoicing & billing** — invoice generation, Xero/Sage export, sales-ledger reconciliation.
+46. **Adviser remuneration** — initial/ongoing/ad-hoc fees, VAT, adviser statements, clawback rules.
 
-- `src/pages/PayrollProcessing.tsx` — add variance card, AA/MPAA screening, sal-sac recalculation, refund line UI, persist approvers, insert `payment_initiations` and `rti_submissions` rows on approval.
-- `src/pages/admin/ContributionChaser.tsx` (new) — overdue schedule list with chase-email action; add nav item under Book-of-business desk.
-- `src/pages/admin/UnallocatedCash.tsx` (new) — suspense queue reading `transactions` with null `client_id`; add nav item.
-- `src/App.tsx` — routes for the two new pages.
-- `src/components/nav/navConfig.ts` — two new sidebar entries in the book-of-business group.
-- No schema migration required (all target tables already exist: `aa_carry_forward`, `payment_initiations`, `rti_submissions`, `contributions`, `transactions`).
+## J. Security, tenancy & platform (partial)
+47. **Role & permission matrix UI** — task-level entitlements, four-eyes rule config, delegation.
+48. **Multi-tenant scheme partitioning** — data segregation by trustee/scheme, per-tenant branding & templates.
+49. **Session security posture** — MFA enrolment, IP allow-list, session length, break-glass access log.
+50. **Disaster recovery runbook & data export** — evidenced monthly backup restore.
 
-### Out of scope this pass
+---
 
-Items C17–C23 and B13–B16 — larger new journeys; flag as backlog and pick individually next.
+## Recommended Phase-1 slice (proposed to build first)
 
-Approve to build the first slice, or tell me which of the 23 you want prioritised.
+The most impactful gaps that align with what's already scaffolded and unlock several other items:
+
+1. **Scheme register** (A1) + **Employer register** (A2) — foundational, everything else keys off these.
+2. **CETV quotation** (B6) — high-frequency member journey, complements existing transfer-out.
+3. **Retirement quote pack** (B7) with wake-up pack triggers (F30).
+4. **Pensions Regulator breach register** (C15) — small but statutory.
+5. **Trustee meeting pack builder** (C18) — high visibility to trustee clients.
+6. **Common & scheme-specific data score** (G34) — plugs into existing member data.
+7. **Case management inbox** (H39) — consolidates the many task-based pages behind one queue per user.
+8. **Fee scheduler + invoicing** (I44 + I45) — revenue-critical.
+
+Each ships as one page + one Cloud table (or a small set), reusing the existing `useClientData` pattern, four-eyes approval flow, audit trail and Airgead branding. No breaking changes to existing routes.
+
+## Technical outline (for the phase-1 slice)
+
+```text
+New routes                 New tables (public schema, RLS + GRANTs)
+/schemes                   schemes, scheme_employers
+/employers                 employers
+/cetv                      cetv_quotes
+/retirement-quotes         retirement_quotes, wake_up_events
+/breach-register           tpr_breaches
+/trustee-meetings          trustee_meetings, trustee_actions
+/data-quality              data_quality_scores
+/cases                     cases, case_events (feeds all task pages)
+/fees                      fee_schedules, invoices, invoice_lines
+```
+
+Each table follows the standard: CREATE → GRANT SELECT/INSERT/UPDATE/DELETE to authenticated + ALL to service_role → ENABLE RLS → policies keyed to `auth.uid()` via `has_role`.
+
+## Out of scope for phase-1
+- DB benefit engine (A5) — heavy actuarial work, deferred.
+- Direct property admin (E27), loanbacks (E28) — SSAS-specific, staged after core.
+- OMS / custody (E24, E25) — usually integrated with a third party; scaffold API stubs only.
+- PPF levy (C19), Chair's statement (C16), ORA (C17) — annual/periodic, deferred.
+
+## Ask
+Confirm the Phase-1 slice (or tell me which numbered items you want swapped in/out) and I'll build it in the next turn.

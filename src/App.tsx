@@ -264,6 +264,7 @@ const AppContent = () => {
               <Route path="/personas" element={<PersonaSelector />} />
               <Route path="/beneficiaries" element={<RoleGate allow={['client', 'adviser', 'admin']}><BeneficiaryNominations /></RoleGate>} />
               <Route path="/contributions" element={<ContributionManager />} />
+              <Route path="/payroll-processing" element={<RoleGate allow={['admin']}><PayrollProcessing /></RoleGate>} />
               <Route path="/costs" element={<CostCharges />} />
               <Route path="/state-pension" element={<StatePensionForecast />} />
               <Route path="/vulnerable" element={<RoleGate allow={['adviser', 'admin']}><VulnerableClientRegister /></RoleGate>} />

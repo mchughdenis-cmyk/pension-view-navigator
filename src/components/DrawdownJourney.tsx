@@ -476,7 +476,7 @@ export default function DrawdownJourney() {
                       : "Complete all required items above to proceed."}
                   </div>
                   <Button onClick={() => setStep(1)} disabled={!disclosuresComplete}>
-                    Continue to mode<ArrowRight className="w-4 h-4 ml-2" />
+                    Continue to mode selection<ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
               </CardContent>

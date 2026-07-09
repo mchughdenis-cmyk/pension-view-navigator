@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
+import { generateCompliantIllustrationPdf } from "@/lib/compliantIllustration";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
 import {

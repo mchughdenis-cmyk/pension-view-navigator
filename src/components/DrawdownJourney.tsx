@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 
 import { downloadAnnualDrawdownStatement } from "@/lib/annualDrawdownStatement";
+import { generateCompliantIllustrationPdf } from "@/lib/compliantIllustration";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useClients, useClientDetail, processDrawdown } from "@/hooks/useClientData";
 import {
@@ -475,9 +476,30 @@ export default function DrawdownJourney() {
                       ? <span className="text-success inline-flex items-center gap-1"><CheckCircle className="w-3 h-3" /> All mandatory disclosures complete</span>
                       : "Complete all required items above to proceed."}
                   </div>
-                  <Button onClick={() => setStep(1)} disabled={!disclosuresComplete}>
-                    Continue to mode<ArrowRight className="w-4 h-4 ml-2" />
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        generateCompliantIllustrationPdf({
+                          potValue,
+                          currentAge: age,
+                          retirementAge: Math.max(age, 55),
+                          lifeExpectancy: 90,
+                          drawdownRate: 4,
+                          annuityRate: 6,
+                          clientName: client ? `${client.first_name} ${client.last_name}` : undefined,
+                          clientRef: client?.id,
+                          productName: "Airgead SIPP — Drawdown",
+                        });
+                        toast.success("Standard KFI illustration generated");
+                      }}
+                    >
+                      <FileDown className="w-4 h-4 mr-2" /> Standard illustration (KFI)
+                    </Button>
+                    <Button onClick={() => setStep(1)} disabled={!disclosuresComplete}>
+                      Continue to mode selection<ArrowRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

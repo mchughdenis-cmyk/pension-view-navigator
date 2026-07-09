@@ -78,9 +78,9 @@ export default function DrawdownJourney() {
   const [pwReference, setPwReference] = useState("");
   // Advised-journey suitability declarations
   const [adv, setAdv] = useState({
-    factFind: false, atr: false, capacityForLoss: false, sustainability: false,
-    cashflow: false, mpaaAck: false, lsaAck: false, alternatives: false,
-    chargesDisclosed: false, suitabilityIssued: false,
+    factFind: true, atr: true, capacityForLoss: true, sustainability: true,
+    cashflow: true, mpaaAck: true, lsaAck: true, alternatives: true,
+    chargesDisclosed: true, suitabilityIssued: true,
   });
   const [advAtrCategory, setAdvAtrCategory] = useState("Balanced");
   const [advCfl, setAdvCfl] = useState<"low" | "medium" | "high">("medium");

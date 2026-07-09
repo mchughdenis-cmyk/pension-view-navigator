@@ -71,9 +71,9 @@ export default function DrawdownJourney() {
   const [pwOptOutReason, setPwOptOutReason] = useState("");
   // Retirement risk warnings (second line of defence) — both journeys
   const [rrw, setRrw] = useState<Record<string, boolean>>({
-    health: false, marital: false, otherPensions: false, inflation: false,
-    scams: false, debts: false, sustainability: false, tax: false,
-    meansTested: false, charges: false, investmentChoice: false,
+    health: true, marital: true, otherPensions: true, inflation: true,
+    scams: true, debts: true, sustainability: true, tax: true,
+    meansTested: true, charges: true, investmentChoice: true,
   });
   const [pwReference, setPwReference] = useState("");
   // Advised-journey suitability declarations

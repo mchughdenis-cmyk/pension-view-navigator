@@ -156,14 +156,14 @@ const DashboardRoute = () => {
 const MarketingGate = ({ children }: { children: React.ReactNode }) => {
   const { enabled, loading } = useMarketingSiteEnabled();
   if (loading) return null;
-  if (!enabled) return <Navigate to="/auth" replace />;
+  if (!enabled) return <Navigate to="/dashboard" replace />;
   return <>{children}</>;
 };
 
 const RootRedirect = () => {
   const { enabled, loading } = useMarketingSiteEnabled();
   if (loading) return null;
-  return <Navigate to={enabled ? "/site" : "/auth"} replace />;
+  return <Navigate to={enabled ? "/site" : "/dashboard"} replace />;
 };
 
 const AppContent = () => {

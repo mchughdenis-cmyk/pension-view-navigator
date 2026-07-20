@@ -14,9 +14,10 @@ interface RoleGateProps {
 }
 
 export function RoleGate({ allow, children, redirectTo }: RoleGateProps) {
-  const { role } = useRole()
+  const { role, loading } = useRole()
   const navigate = useNavigate()
 
+  if (loading) return null
   if (allow.includes(role)) return <>{children}</>
   if (redirectTo) return <Navigate to={redirectTo} replace />
 

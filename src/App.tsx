@@ -143,12 +143,14 @@ import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
 
 
 const HomeRedirect = () => {
-  const { role } = useRole();
+  const { role, loading } = useRole();
+  if (loading) return null;
   return <Navigate to={role === 'client' ? '/client-services' : '/dashboard'} replace />;
 };
 
 const DashboardRoute = () => {
-  const { role } = useRole();
+  const { role, loading } = useRole();
+  if (loading) return null;
   if (role === 'client') return <Navigate to="/client-services" replace />;
   return <ClientProductsDashboard />;
 };
@@ -177,10 +179,10 @@ const AppContent = () => {
       <Routes>
         {/* Public / full-screen routes — no shell */}
         <Route path="/overview" element={<ShowcaseWebsite />} />
-        <Route path="/auth" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/auth" element={<AuthPage />} />
         <Route path="/tour" element={<Tour />} />
-        <Route path="/login" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/admin-login" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/login" element={<Navigate to="/auth" replace />} />
+        <Route path="/admin-login" element={<Navigate to="/auth" replace />} />
         <Route path="/pitch" element={<RootRedirect />} />
         <Route path="/" element={<RootRedirect />} />
         {/* Dedicated shareable entry points — skip marketing site */}

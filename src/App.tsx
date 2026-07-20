@@ -143,12 +143,14 @@ import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
 
 
 const HomeRedirect = () => {
-  const { role } = useRole();
+  const { role, loading } = useRole();
+  if (loading) return null;
   return <Navigate to={role === 'client' ? '/client-services' : '/dashboard'} replace />;
 };
 
 const DashboardRoute = () => {
-  const { role } = useRole();
+  const { role, loading } = useRole();
+  if (loading) return null;
   if (role === 'client') return <Navigate to="/client-services" replace />;
   return <ClientProductsDashboard />;
 };

@@ -217,6 +217,7 @@ const AppContent = () => {
               <Route path="/dashboard" element={<DashboardRoute />} />
               <Route path="/portfolio" element={<Index />} />
               <Route path="/admin" element={<RoleGate allow={['admin']}><Admin /></RoleGate>} />
+              <Route path="/admin/console" element={<RoleGate allow={['admin']}><OperatorConsole /></RoleGate>} />
               <Route path="/illustration" element={<PensionIllustration />} />
               <Route path="/saved-illustrations" element={<RoleGate allow={['adviser', 'admin']}><SavedIllustrations /></RoleGate>} />
               <Route path="/welcome-pack" element={<DigitalWelcomePack />} />

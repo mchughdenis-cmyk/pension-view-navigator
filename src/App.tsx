@@ -9,6 +9,7 @@ import { AppShell } from "./components/nav/AppShell";
 import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import OperatorConsole from "./pages/admin/OperatorConsole";
 import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";

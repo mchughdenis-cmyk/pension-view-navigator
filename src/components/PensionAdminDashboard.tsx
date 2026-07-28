@@ -409,8 +409,8 @@ export default function PensionAdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <MobileHeader
-        title="Pension Administration"
-        subtitle="Manage client portfolios and administrative tasks"
+        title="Daily admin desk"
+        subtitle="Book-of-business and per-member operations — reconciliation, contributions, transfers, drawdown, payroll & compliance"
         actions={headerActions}
       />
 

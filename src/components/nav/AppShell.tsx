@@ -8,16 +8,24 @@ import { ChatLauncher } from "@/components/chat/ChatLauncher";
 import { ViewSwitcher } from "./ViewSwitcher";
 import { FirmSwitcher } from "./FirmSwitcher";
 import { Button } from "@/components/ui/button";
-import { Search } from "lucide-react";
+import { Search, Keyboard } from "lucide-react";
 import { LogoutButton } from "@/components/LogoutButton";
+import { DensityToggle } from "@/components/DensityToggle";
+import { KeyboardHelpDialog } from "@/components/KeyboardHelpDialog";
+import { useJumpShortcuts } from "@/hooks/useJumpShortcuts";
 
 /**
  * Application shell: persistent sidebar (role-aware) + sticky header with
  * breadcrumbs, theme toggle, and ⌘K hint. Wraps every authenticated/demo page.
  */
 export function AppShell({ children }: { children: ReactNode }) {
+  useJumpShortcuts();
   const triggerSearch = () => {
     const ev = new KeyboardEvent("keydown", { key: "k", metaKey: true, bubbles: true });
+    document.dispatchEvent(ev);
+  };
+  const triggerHelp = () => {
+    const ev = new KeyboardEvent("keydown", { key: "?", bubbles: true });
     document.dispatchEvent(ev);
   };
 
@@ -49,13 +57,19 @@ export function AppShell({ children }: { children: ReactNode }) {
             <FirmSwitcher />
             <ViewSwitcher />
             <NotificationsBell />
+            <DensityToggle />
+            <Button variant="ghost" size="icon" onClick={triggerHelp} className="h-8 w-8" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
+              <Keyboard className="h-4 w-4" />
+            </Button>
             <ThemeToggle />
             <LogoutButton />
           </header>
           <main className="flex-1 min-w-0">{children}</main>
         </div>
         <ChatLauncher />
+        <KeyboardHelpDialog />
       </div>
     </SidebarProvider>
   );
 }
+

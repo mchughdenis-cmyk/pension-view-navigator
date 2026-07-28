@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useEffect } from "react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarHeader, SidebarFooter,
@@ -6,9 +7,12 @@ import {
 } from "@/components/ui/sidebar";
 import { useRole, Role } from "@/contexts/RoleContext";
 import { useFirm } from "@/contexts/FirmContext";
-import { NAV_BY_ROLE } from "./navConfig";
+import { NAV_BY_ROLE, findNavLabel } from "./navConfig";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Coins } from "lucide-react";
+import { Coins, Star, StarOff, Clock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { useFavourites, useRecents } from "@/hooks/useFavourites";
+import { useNavBadges, badgeForUrl } from "@/hooks/useNavBadges";
 
 export function AppSidebar() {
   const { state } = useSidebar();
@@ -17,11 +21,54 @@ export function AppSidebar() {
   const { role, setRole, user } = useRole();
   const { firm, branding } = useFirm();
   const groups = NAV_BY_ROLE[role];
+  const { favs, toggle, isFav } = useFavourites();
+  const { recents, push } = useRecents();
+  const badges = useNavBadges();
+
+  useEffect(() => { if (pathname && pathname !== "/") push(pathname); }, [pathname, push]);
 
   const isActive = (url: string) => pathname === url;
-
   const brandName = firm?.name ?? "Pension Navigator";
-  const brandSub = firm ? "by Airgead" : "by Airgead";
+  const brandSub = "by Airgead";
+
+  // Build flat lookup from all role groups so favourites/recents can render any item
+  const allItems = groups.flatMap((g) => g.items);
+  const findItem = (url: string) => allItems.find((i) => i.url === url);
+
+  const favItems = favs.map(findItem).filter(Boolean) as typeof allItems;
+  const recentItems = recents
+    .filter((u) => !favs.includes(u))
+    .map(findItem).filter(Boolean).slice(0, 5) as typeof allItems;
+
+  const renderItem = (item: typeof allItems[number], withPin = true) => {
+    const b = badgeForUrl(item.url, badges);
+    const fav = isFav(item.url);
+    return (
+      <SidebarMenuItem key={item.url}>
+        <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
+          <NavLink to={item.url} className="flex items-center gap-2">
+            <item.icon className="h-4 w-4 shrink-0" />
+            {!collapsed && <span className="truncate flex-1">{item.title}</span>}
+            {!collapsed && b !== undefined && (
+              <Badge variant="secondary" className="h-4 min-w-[1.25rem] px-1 text-[10px] tabular-nums">
+                {b > 99 ? "99+" : b}
+              </Badge>
+            )}
+            {!collapsed && withPin && (
+              <button
+                onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(item.url); }}
+                className="opacity-0 group-hover/menu-item:opacity-100 hover:text-foreground text-muted-foreground"
+                title={fav ? "Unpin" : "Pin to favourites"}
+                aria-label={fav ? "Unpin" : "Pin"}
+              >
+                {fav ? <Star className="h-3 w-3 fill-current" /> : <StarOff className="h-3 w-3" />}
+              </button>
+            )}
+          </NavLink>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -47,27 +94,38 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {groups.map((g) => {
-          return (
-            <SidebarGroup key={g.label}>
-              {!collapsed && <SidebarGroupLabel>{g.label}</SidebarGroupLabel>}
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {g.items.map((item) => (
-                    <SidebarMenuItem key={item.url}>
-                      <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                        <NavLink to={item.url} className="flex items-center gap-2">
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!collapsed && <span className="truncate">{item.title}</span>}
-                        </NavLink>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          );
-        })}
+        {favItems.length > 0 && (
+          <SidebarGroup>
+            {!collapsed && (
+              <SidebarGroupLabel className="flex items-center gap-1.5">
+                <Star className="h-3 w-3 fill-current text-warning" /> Pinned
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu className="group/menu-item">{favItems.map((i) => renderItem(i))}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {recentItems.length > 0 && !collapsed && (
+          <SidebarGroup>
+            <SidebarGroupLabel className="flex items-center gap-1.5">
+              <Clock className="h-3 w-3" /> Recent
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu className="group/menu-item">{recentItems.map((i) => renderItem(i, false))}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {groups.map((g) => (
+          <SidebarGroup key={g.label}>
+            {!collapsed && <SidebarGroupLabel>{g.label}</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu className="group/menu-item">{g.items.map((i) => renderItem(i))}</SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
       </SidebarContent>
 
       <SidebarFooter className="border-t">

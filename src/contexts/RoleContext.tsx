@@ -34,9 +34,20 @@ const RoleContext = createContext<RoleContextValue>({
   setRole: () => {}, switchRole: () => {}, enterDemoMode: () => {},
 })
 
+const DEMO_ROLE_KEY = 'airgead:demoRole'
+function readDemoRole(): Role {
+  try {
+    const r = localStorage.getItem(DEMO_ROLE_KEY) as Role | null
+    if (r === 'client' || r === 'adviser' || r === 'admin') return r
+  } catch { /* ignore */ }
+  // Default to admin so the operator console + all daily-desk pages
+  // are reachable without signing in (auth wall is currently disabled).
+  return 'admin'
+}
+
 export function RoleProvider({ children }: { children: ReactNode }) {
-  const [role, setRoleState] = useState<Role>('client')
-  const [user, setUser] = useState<DemoUser>(DEFAULTS.client)
+  const [role, setRoleState] = useState<Role>(() => readDemoRole())
+  const [user, setUser] = useState<DemoUser>(() => DEFAULTS[readDemoRole()])
   const [session, setSession] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -48,10 +59,10 @@ export function RoleProvider({ children }: { children: ReactNode }) {
       .eq('user_id', userId)
     if (error) {
       console.warn('Failed to load user_roles', error.message)
-      setRoleState('client')
+      setRoleState(readDemoRole())
     } else {
       const roles = (data ?? []).map(r => r.role as Role)
-      const resolved = ROLE_PRECEDENCE.find(r => roles.includes(r)) ?? 'client'
+      const resolved = ROLE_PRECEDENCE.find(r => roles.includes(r)) ?? readDemoRole()
       setRoleState(resolved)
       setUser({
         id: userId,
@@ -63,11 +74,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Subscribe to auth changes synchronously, then fetch state.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
       if (sess?.user) {
         setSession(true)
-        // Defer DB call to avoid deadlocks inside the callback
         setTimeout(() => {
           loadRoleFor(
             sess.user.id,
@@ -77,8 +86,9 @@ export function RoleProvider({ children }: { children: ReactNode }) {
         }, 0)
       } else {
         setSession(false)
-        setRoleState('client')
-        setUser(DEFAULTS.client)
+        const demo = readDemoRole()
+        setRoleState(demo)
+        setUser(DEFAULTS[demo])
       }
     })
 
@@ -98,12 +108,13 @@ export function RoleProvider({ children }: { children: ReactNode }) {
     return () => { subscription.unsubscribe() }
   }, [])
 
-  // Role mutation helpers are kept for backward compatibility but are now
-  // local-only UI hints; the real role is enforced server-side via RLS.
-  const setRole = (r: Role) => setRoleState(r)
+  // Persist demo role so the sidebar/route gates stay stable across reloads.
+  const persist = (r: Role) => { try { localStorage.setItem(DEMO_ROLE_KEY, r) } catch { /* ignore */ } }
+  const setRole = (r: Role) => { persist(r); setRoleState(r) }
   const switchRole = (r: Role, override?: Partial<DemoUser>) => {
+    persist(r)
     setRoleState(r)
-    setUser(prev => ({ ...prev, ...override, role: r }))
+    setUser(prev => ({ ...(DEFAULTS[r]), ...prev, ...override, role: r }))
   }
   const enterDemoMode = () => {} // no-op: demo mode no longer bypasses auth
 

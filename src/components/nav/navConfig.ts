@@ -230,6 +230,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Pension sharing (divorce)", url: "/pension-sharing", icon: ArrowRightLeft },
         { title: "AA / carry-forward", url: "/contributions", icon: Calculator },
         { title: "LSA / LSDBA / BCE", url: "/lsa", icon: ShieldCheck },
+        { title: "IHT planning", url: "/iht", icon: ScrollText },
         { title: "Transaction history", url: "/transactions", icon: History },
       ],
     },

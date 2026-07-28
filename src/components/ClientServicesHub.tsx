@@ -47,6 +47,9 @@ export default function ClientServicesHub() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+        <span className="font-semibold text-primary">Member self-service portal</span> — part of Pension Navigator administration.
+      </div>
       <PageHeader
         title="Client services"
         description="Self-service wizards: contributions, drawdown, transfers, beneficiaries and documents."

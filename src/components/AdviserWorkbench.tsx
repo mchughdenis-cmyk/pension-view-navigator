@@ -30,6 +30,9 @@ export default function AdviserWorkbench() {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <div className="rounded-md border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+        <span className="font-semibold text-primary">Adviser workbench</span> — part of Pension Navigator administration.
+      </div>
       <PageHeader
         title="Adviser workbench"
         description="Guided journey from fact-find to recommendation, plus cashflow planning and Consumer Duty review."

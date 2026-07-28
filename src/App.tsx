@@ -137,6 +137,7 @@ import TrusteeMeetings from "./pages/admin/TrusteeMeetings";
 import DataQuality from "./pages/admin/DataQuality";
 import CaseInbox from "./pages/admin/CaseInbox";
 import Invoicing from "./pages/admin/Invoicing";
+import Roadmap from "./pages/admin/Roadmap";
 import Tour from "./pages/Tour";
 import { FloatingHelpDock } from "./components/FloatingHelpDock";
 import { useMarketingSiteEnabled } from "./hooks/useSiteSettings";
@@ -307,6 +308,7 @@ const AppContent = () => {
               <Route path="/employer/bulk" element={<RoleGate allow={['adviser', 'admin']}><EmployerBulkOps /></RoleGate>} />
               <Route path="/admin/analytics" element={<RoleGate allow={['admin']}><AdminProductAnalytics /></RoleGate>} />
               <Route path="/admin/registrations" element={<RoleGate allow={['admin']}><RegistrationsLog /></RoleGate>} />
+              <Route path="/admin/roadmap" element={<Roadmap />} />
               <Route path="/mobile-showcase" element={<MobileShowcase />} />
               <Route path="/pdp" element={<RoleGate allow={['adviser', 'admin']}><PensionsDashboardIntegration /></RoleGate>} />
               <Route path="/equisoft" element={<RoleGate allow={['adviser', 'admin']}><EquisoftTransfers /></RoleGate>} />

@@ -4,14 +4,15 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput,
   CommandItem, CommandList, CommandSeparator,
 } from '@/components/ui/command'
-import { Sun, ArrowRight, Clock, Users } from 'lucide-react'
+import { Sun, ArrowRight, Clock, Users, Pin } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useRole } from '@/contexts/RoleContext'
 import { NAV_BY_ROLE } from '@/components/nav/navConfig'
 import { useRecents } from '@/hooks/useFavourites'
+import { useActiveClient } from '@/hooks/useActiveClient'
 import { supabase } from '@/integrations/supabase/client'
 
-interface Client { id: string; name: string | null; email?: string | null }
+interface Client { id: string; name: string; email?: string | null }
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
@@ -21,6 +22,7 @@ export function CommandPalette() {
   const { toggle } = useTheme()
   const { role } = useRole()
   const { recents } = useRecents()
+  const { pin } = useActiveClient()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -39,9 +41,15 @@ export function CommandPalette() {
       try {
         const { data } = await (supabase as any)
           .from('clients')
-          .select('id, name, email')
+          .select('id, first_name, last_name, email')
           .limit(100)
-        if (data) setClients(data as Client[])
+        if (data) {
+          setClients((data as any[]).map((c) => ({
+            id: c.id,
+            name: `${c.first_name ?? ''} ${c.last_name ?? ''}`.trim() || 'Unnamed client',
+            email: c.email,
+          })))
+        }
       } catch { /* ignore */ }
     })()
   }, [open, clients.length])
@@ -90,11 +98,20 @@ export function CommandPalette() {
           <>
             <CommandGroup heading="Clients">
               {filteredClients.map((c) => (
-                <CommandItem key={c.id} onSelect={() => go(`/client-services?client=${c.id}`)}>
-                  <Users className="mr-2 h-4 w-4" />
-                  {c.name || 'Unnamed client'}
-                  {c.email && <span className="ml-2 text-xs text-muted-foreground">{c.email}</span>}
-                </CommandItem>
+                <div key={c.id} className="flex items-center">
+                  <CommandItem className="flex-1" onSelect={() => go(`/client/${c.id}`)}>
+                    <Users className="mr-2 h-4 w-4" />
+                    {c.name}
+                    {c.email && <span className="ml-2 text-xs text-muted-foreground">{c.email}</span>}
+                  </CommandItem>
+                  <button
+                    className="mr-2 inline-flex items-center gap-1 rounded border px-2 py-1 text-xs hover:bg-accent"
+                    onClick={() => { pin({ id: c.id, name: c.name }); setOpen(false) }}
+                    title="Pin as active client"
+                  >
+                    <Pin className="h-3 w-3" /> Pin
+                  </button>
+                </div>
               ))}
             </CommandGroup>
             <CommandSeparator />

@@ -1,81 +1,133 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList, CommandSeparator } from '@/components/ui/command'
-import { Briefcase, Users, FileText, TrendingUp, PoundSterling, Settings as SettingsIcon, Activity, Building2, Layers, ShieldCheck, Calculator, Sun, Moon } from 'lucide-react'
+import {
+  CommandDialog, CommandEmpty, CommandGroup, CommandInput,
+  CommandItem, CommandList, CommandSeparator,
+} from '@/components/ui/command'
+import { Sun, ArrowRight, Clock, Users } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
-import { useRole, Role } from '@/contexts/RoleContext'
+import { useRole } from '@/contexts/RoleContext'
+import { NAV_BY_ROLE } from '@/components/nav/navConfig'
+import { useRecents } from '@/hooks/useFavourites'
+import { supabase } from '@/integrations/supabase/client'
 
-interface CommandItem {
-  label: string
-  icon: any
-  action: () => void
-  group: string
-  keywords?: string
-  roles?: Role[]
-}
+interface Client { id: string; name: string | null; email?: string | null }
 
 export function CommandPalette() {
   const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const [clients, setClients] = useState<Client[]>([])
   const navigate = useNavigate()
   const { toggle } = useTheme()
   const { role } = useRole()
+  const { recents } = useRecents()
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault()
-        setOpen(o => !o)
+        e.preventDefault(); setOpen((o) => !o)
       }
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
 
-  const go = (path: string) => () => { navigate(path); setOpen(false) }
+  // Lazy-load clients only when opened
+  useEffect(() => {
+    if (!open || clients.length) return
+    (async () => {
+      try {
+        const { data } = await (supabase as any)
+          .from('clients')
+          .select('id, name, email')
+          .limit(100)
+        if (data) setClients(data as Client[])
+      } catch { /* ignore */ }
+    })()
+  }, [open, clients.length])
 
-  const items: CommandItem[] = ([
-    { label: 'Dashboard', icon: Briefcase, action: go('/dashboard'), group: 'Navigate' },
-    { label: 'Admin', icon: Users, action: go('/admin'), group: 'Navigate', roles: ['admin'] as Role[] },
-    { label: 'Operations Cockpit', icon: Layers, action: go('/cockpit'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Pension Operations', icon: FileText, action: go('/operations'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'MI Dashboard', icon: TrendingUp, action: go('/mi'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Model Portfolios', icon: Layers, action: go('/models'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'CASS Reconciliation', icon: ShieldCheck, action: go('/cass'), group: 'Navigate', roles: ['admin'] as Role[] },
-    { label: 'Client Services Hub', icon: PoundSterling, action: go('/client-services'), group: 'Navigate' },
-    { label: 'Adviser Workbench', icon: Briefcase, action: go('/workbench'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Dealing Desk', icon: TrendingUp, action: go('/dealing'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Reporting Suite', icon: FileText, action: go('/reporting'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Communications Hub', icon: Activity, action: go('/comms'), group: 'Navigate', roles: ['adviser', 'admin'] as Role[] },
-    { label: 'Settings', icon: SettingsIcon, action: go('/settings'), group: 'Navigate' },
+  const go = (path: string) => { navigate(path); setOpen(false); setQuery('') }
 
-    { label: 'New transfer in', icon: Building2, action: go('/transfer'), group: 'Actions' },
-    { label: 'Process drawdown', icon: PoundSterling, action: go('/drawdown'), group: 'Actions' },
-    { label: 'Run Monte Carlo projection', icon: Calculator, action: go('/projection'), group: 'Actions' },
-    { label: 'View activity log', icon: Activity, action: go('/admin'), group: 'Actions', roles: ['admin'] as Role[] },
+  const navItems = NAV_BY_ROLE[role].flatMap((g) =>
+    g.items.map((i) => ({ ...i, group: g.label }))
+  )
+  const findItem = (url: string) => navItems.find((i) => i.url === url)
+  const recentItems = recents.map(findItem).filter(Boolean).slice(0, 5) as typeof navItems
 
-    { label: 'Toggle dark / light mode', icon: Sun, action: () => { toggle(); setOpen(false) }, group: 'Theme' },
-  ] as CommandItem[]).filter(i => !i.roles || i.roles.includes(role))
-
-  const groups = Array.from(new Set(items.map(i => i.group)))
+  const q = query.trim().toLowerCase()
+  const filteredClients = q
+    ? clients.filter((c) =>
+        (c.name || '').toLowerCase().includes(q) || (c.email || '').toLowerCase().includes(q)
+      ).slice(0, 8)
+    : []
 
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
-      <CommandInput placeholder="Search clients, actions, pages... (⌘K)" />
+      <CommandInput
+        placeholder="Search pages, clients, actions…  (⌘K)"
+        value={query}
+        onValueChange={setQuery}
+      />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        {groups.map((g, gi) => (
-          <div key={g}>
-            {gi > 0 && <CommandSeparator />}
-            <CommandGroup heading={g}>
-              {items.filter(i => i.group === g).map(i => (
-                <CommandItem key={i.label} onSelect={i.action}>
-                  <i.icon className="mr-2 h-4 w-4" />
-                  {i.label}
+
+        {recentItems.length > 0 && !q && (
+          <>
+            <CommandGroup heading="Recent">
+              {recentItems.map((i) => (
+                <CommandItem key={`r-${i.url}`} onSelect={() => go(i.url)}>
+                  <Clock className="mr-2 h-4 w-4 text-muted-foreground" />
+                  {i.title}
+                  <span className="ml-auto text-xs text-muted-foreground">{i.group}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
-          </div>
+            <CommandSeparator />
+          </>
+        )}
+
+        {filteredClients.length > 0 && (
+          <>
+            <CommandGroup heading="Clients">
+              {filteredClients.map((c) => (
+                <CommandItem key={c.id} onSelect={() => go(`/client-services?client=${c.id}`)}>
+                  <Users className="mr-2 h-4 w-4" />
+                  {c.name || 'Unnamed client'}
+                  {c.email && <span className="ml-2 text-xs text-muted-foreground">{c.email}</span>}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+            <CommandSeparator />
+          </>
+        )}
+
+        <CommandGroup heading="Quick actions">
+          <CommandItem onSelect={() => go('/admin/console')}><ArrowRight className="mr-2 h-4 w-4" />Open operator console</CommandItem>
+          <CommandItem onSelect={() => go('/payroll-processing')}><ArrowRight className="mr-2 h-4 w-4" />Start payroll run</CommandItem>
+          <CommandItem onSelect={() => go('/bank-upload')}><ArrowRight className="mr-2 h-4 w-4" />Upload bank file</CommandItem>
+          <CommandItem onSelect={() => go('/cases')}><ArrowRight className="mr-2 h-4 w-4" />Open case inbox</CommandItem>
+          <CommandItem onSelect={() => go('/drawdown')}><ArrowRight className="mr-2 h-4 w-4" />Process drawdown</CommandItem>
+          <CommandItem onSelect={() => go('/transfer')}><ArrowRight className="mr-2 h-4 w-4" />New transfer in</CommandItem>
+        </CommandGroup>
+        <CommandSeparator />
+
+        {NAV_BY_ROLE[role].map((g) => (
+          <CommandGroup key={g.label} heading={g.label}>
+            {g.items.map((i) => (
+              <CommandItem key={i.url} onSelect={() => go(i.url)} keywords={[i.title, g.label]}>
+                <i.icon className="mr-2 h-4 w-4" />
+                {i.title}
+              </CommandItem>
+            ))}
+          </CommandGroup>
         ))}
+
+        <CommandSeparator />
+        <CommandGroup heading="Theme">
+          <CommandItem onSelect={() => { toggle(); setOpen(false) }}>
+            <Sun className="mr-2 h-4 w-4" /> Toggle dark / light mode
+          </CommandItem>
+        </CommandGroup>
       </CommandList>
     </CommandDialog>
   )

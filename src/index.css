@@ -114,3 +114,12 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+/* Density toggle — compact mode tightens tables and cards */
+html[data-density="compact"] table td,
+html[data-density="compact"] table th { padding-top: 0.35rem; padding-bottom: 0.35rem; }
+html[data-density="compact"] .card,
+html[data-density="compact"] [data-slot="card"] { padding: 0.75rem; }
+html[data-density="compact"] .space-y-6 > * + * { margin-top: 1rem; }
+
+/* Sticky table headers everywhere by default */
+table thead th { position: sticky; top: 0; background: hsl(var(--background)); z-index: 1; }

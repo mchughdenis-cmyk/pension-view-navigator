@@ -74,14 +74,17 @@ export function AppSidebar() {
         {!collapsed ? (
           <div className="px-2 py-1.5 space-y-1.5">
             <p className="text-xs text-muted-foreground truncate">{user.name}</p>
-            <Select value={role} onValueChange={(v) => setRole(v as Role)}>
-              <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="client">Client view</SelectItem>
-                <SelectItem value="adviser">Adviser view</SelectItem>
-                <SelectItem value="admin">Admin view</SelectItem>
-              </SelectContent>
-            </Select>
+            <div>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Viewing as</p>
+              <Select value={role} onValueChange={(v) => setRole(v as Role)}>
+                <SelectTrigger className="h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="client">Client view</SelectItem>
+                  <SelectItem value="adviser">Adviser view</SelectItem>
+                  <SelectItem value="admin">Admin view</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         ) : (
           <div className="px-2 py-1.5 text-[10px] text-muted-foreground text-center uppercase">{role[0]}</div>

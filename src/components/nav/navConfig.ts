@@ -175,6 +175,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
         { title: "Admin console", url: "/admin", icon: Users },
         { title: "Registration log", url: "/admin/registrations", icon: UserCog },
+        { title: "Roadmap & known gaps", url: "/admin/roadmap", icon: ClipboardList },
       ],
     },
     {

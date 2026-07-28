@@ -31,6 +31,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="flex-1 min-w-0">
               <Breadcrumbs />
             </div>
+            <span
+              className="hidden md:inline-flex items-center gap-1 rounded-full border border-warning/40 bg-warning/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-warning-foreground"
+              title="Environment"
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-warning" /> Demo
+            </span>
             <Button
               variant="outline" size="sm"
               onClick={triggerSearch}

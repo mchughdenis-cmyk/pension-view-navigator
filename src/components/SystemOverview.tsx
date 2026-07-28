@@ -13,25 +13,31 @@ import {
 
 const roleCards = [
   {
-    role: 'Client',
-    icon: Users,
-    description: 'Self-service portal for scheme members to view balances, request drawdowns, and manage beneficiaries.',
-    features: ['Portfolio dashboard', 'Drawdown requests', 'Contribution history', 'Beneficiary management', 'Annual statements', 'Welcome pack'],
-    color: 'bg-primary/10 text-primary',
+    role: 'Administrator',
+    subtitle: 'Core product',
+    icon: Shield,
+    description: 'The daily admin desk: reconciliation, contributions, transfers, drawdown, payroll, PAYE/RAS, CASS 7/8, HMRC reporting and TPR compliance.',
+    features: ['Scheme dashboard', 'Bank recon & CASS', 'Payroll processing', 'Trade management', 'Regulatory reporting', 'Four-eyes workflow'],
+    color: 'bg-primary text-primary-foreground',
+    tone: 'border-primary/40 bg-gradient-to-br from-primary/5 to-transparent',
   },
   {
     role: 'Adviser',
+    subtitle: 'Portal · included',
     icon: Briefcase,
-    description: 'Practice management tools for financial advisers overseeing client portfolios and pension transfers.',
-    features: ['Client book overview', 'Fee management', 'Transfer initiation', 'Risk profiling', 'Illustration generator', 'Bulk operations'],
+    description: 'Adviser workbench that plugs into the same ledger — fact-find, suitability, cashflow, Consumer Duty review, fee agreements.',
+    features: ['Client book overview', 'Suitability journey', 'Cashflow planning', 'Fee management', 'Illustration generator', 'Bulk operations'],
     color: 'bg-secondary/10 text-secondary',
+    tone: '',
   },
   {
-    role: 'Administrator',
-    icon: Shield,
-    description: 'Full platform control for pension scheme operators, trustees, and compliance teams.',
-    features: ['Scheme dashboard', 'Trade management', 'Regulatory reporting', 'Fee engine', 'Workflow automation', 'Audit trail'],
-    color: 'bg-warning/10 text-warning-foreground',
+    role: 'Client',
+    subtitle: 'Portal · included',
+    icon: Users,
+    description: 'Member self-service: balances, drawdown requests, contribution history, beneficiaries and annual statements.',
+    features: ['Portfolio dashboard', 'Drawdown requests', 'Contribution history', 'Beneficiary management', 'Annual statements', 'Welcome pack'],
+    color: 'bg-secondary/10 text-secondary',
+    tone: '',
   },
 ]
 
@@ -91,16 +97,19 @@ export default function SystemOverview() {
       <main className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8 space-y-12">
         {/* User Roles */}
         <section>
-          <h2 className="text-2xl font-semibold text-foreground mb-1">User Roles</h2>
-          <p className="text-muted-foreground mb-6">Three distinct portals tailored to each stakeholder's needs.</p>
+          <h2 className="text-2xl font-semibold text-foreground mb-1">Administration core, portals included</h2>
+          <p className="text-muted-foreground mb-6">The admin console is the product. Client and adviser portals ship with it.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {roleCards.map(r => (
-              <Card key={r.role} className="flex flex-col">
+              <Card key={r.role} className={`flex flex-col ${r.tone}`}>
                 <CardHeader>
                   <div className={`w-10 h-10 rounded-lg flex items-center justify-center mb-2 ${r.color}`}>
                     <r.icon className="w-5 h-5" />
                   </div>
-                  <CardTitle>{r.role} Portal</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    {r.role} {r.role === 'Administrator' ? 'console' : 'portal'}
+                    <Badge variant={r.role === 'Administrator' ? 'default' : 'outline'} className="text-[10px]">{r.subtitle}</Badge>
+                  </CardTitle>
                   <CardDescription>{r.description}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1">

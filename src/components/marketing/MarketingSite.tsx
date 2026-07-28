@@ -351,32 +351,32 @@ export function MarketingHome() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-secondary/10 pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-20 md:py-32 grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <Badge variant="secondary" className="mb-4"><Sparkles className="h-3 w-3 mr-1" /> Next-generation pensions infrastructure</Badge>
+            <Badge variant="secondary" className="mb-4"><ShieldCheck className="h-3 w-3 mr-1" /> UK Pension Administration Platform</Badge>
             <h1 className="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05]">
-              Pensions, modernised.
-              <span className="block text-primary mt-2">Engineered by experts.</span>
+              Pension administration,
+              <span className="block text-primary mt-2">end-to-end.</span>
             </h1>
             <p className="mt-6 text-lg text-muted-foreground max-w-xl">
-              Pension Navigator is Airgead's end-to-end platform for SIPP, SSAS, ISA and GIA
-              administration — uniting deep pensions expertise with a modern, real-time,
-              compliance-first technology stack.
+              The administration engine behind modern SIPP, ISA and GIA books — bank
+              reconciliation, contributions, transfers, drawdown, payroll, PAYE/RAS,
+              CASS 7/8 and HMRC reporting. Client and adviser portals included.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
-                <Link to="/auth">Register & launch <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                <Link to="/admin">Launch admin desk <ArrowRight className="ml-2 h-4 w-4" /></Link>
               </Button>
-              <Button size="lg" variant="secondary" onClick={startTour}>
+              <Button asChild size="lg" variant="secondary">
+                <a href="#portals">See client & adviser portals</a>
+              </Button>
+              <Button size="lg" variant="outline" onClick={startTour}>
                 <Compass className="mr-2 h-4 w-4" /> Take the tour
               </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link to="/site/platform">Explore the platform</Link>
-              </Button>
             </div>
-            <div className="mt-8 flex flex-wrap gap-6 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-secondary" /> FCA-aligned</span>
-              <span className="flex items-center gap-1"><Lock className="h-4 w-4 text-secondary" /> CASS-aware</span>
-              <span className="flex items-center gap-1"><Award className="h-4 w-4 text-secondary" /> HMRC ready</span>
-              <span className="flex items-center gap-1"><Sparkles className="h-4 w-4 text-secondary" /> Pensions Dashboard live</span>
+            <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><ShieldCheck className="h-4 w-4 text-secondary" /> CASS 7/8 aware</span>
+              <span className="flex items-center gap-1"><Lock className="h-4 w-4 text-secondary" /> HMRC RAS / RTI</span>
+              <span className="flex items-center gap-1"><Award className="h-4 w-4 text-secondary" /> TPR contribution monitoring</span>
+              <span className="flex items-center gap-1"><RefreshCw className="h-4 w-4 text-secondary" /> Origo & Bacs</span>
             </div>
           </div>
           <div className="relative">
@@ -385,15 +385,15 @@ export function MarketingHome() {
                 <span className="h-2.5 w-2.5 rounded-full bg-destructive/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
                 <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-                <span className="ml-3 text-xs text-muted-foreground">navigator.airgead.app</span>
+                <span className="ml-3 text-xs text-muted-foreground">navigator.airgead.app / admin</span>
               </div>
               <div className="p-6 grid grid-cols-2 gap-3">
-                <Stat value="£487k" label="Total wealth" />
-                <Stat value="+8.4%" label="YTD growth" />
-                <Stat value="3" label="Wrappers" />
-                <Stat value="A+" label="Compliance" />
+                <Stat value="14" label="Unallocated cash items" />
+                <Stat value="7" label="Four-eyes queue" />
+                <Stat value="£1.24m" label="Contributions this week" />
+                <Stat value="9" label="Transfers in-flight" />
                 <div className="col-span-2 rounded-lg border border-border p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
-                  <div className="text-xs uppercase text-muted-foreground tracking-wider mb-2">Live drawdown</div>
+                  <div className="text-xs uppercase text-muted-foreground tracking-wider mb-2">Daily desk throughput</div>
                   <div className="h-20 flex items-end gap-1">
                     {[40, 55, 48, 62, 70, 65, 78, 84, 80, 92, 88, 96].map((h, i) => (
                       <div key={i} className="flex-1 rounded-t bg-gradient-to-t from-primary to-secondary" style={{ height: `${h}%` }} />
@@ -406,47 +406,150 @@ export function MarketingHome() {
         </div>
       </section>
 
-      {/* Trust strip */}
+      {/* Administration metrics strip */}
       <Section className="!py-12">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Stat value="30+ yrs" label="Combined pensions expertise" />
+          <Stat value="17" label="Backend services" />
+          <Stat value="60+" label="Admin workflows" />
           <Stat value="100%" label="HMRC RTI / Origo coverage" />
           <Stat value="Real-time" label="CASS-aware reconciliation" />
-          <Stat value="2027-ready" label="IHT-on-pensions modelling" />
         </div>
       </Section>
 
-      {/* Why */}
+      {/* What the admin does today */}
       <Section>
         <div className="max-w-3xl">
-          <Eyebrow><Sparkles className="h-3 w-3" /> Why Pension Navigator</Eyebrow>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Built by pension specialists. Engineered for the next decade.</h2>
+          <Eyebrow><Workflow className="h-3 w-3" /> Inside the daily admin desk</Eyebrow>
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Every workflow a pensions admin runs — in one console.</h2>
           <p className="mt-4 text-muted-foreground text-lg">
-            Most pensions platforms were designed in the 2000s and patched ever since. We rebuilt
-            from first principles around modern wrappers, real-time data, and the regulatory
-            reality of post-2027 IHT, MPAA, LSA / LSDBA and SDR.
+            Not a member app with an admin bolt-on. Pension Navigator was designed around
+            the operations team first, with client and adviser experiences layered on top.
           </p>
         </div>
-        <div className="mt-12 grid md:grid-cols-3 gap-6">
+        <div className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-5">
           {[
-            { icon: ShieldCheck, title: "Compliance-first", desc: "HMRC RTI, PAYE, LSA / LSDBA, CASS reconciliation and a full audit trail are built-in — not bolted-on." },
-            { icon: Cpu, title: "Modern architecture", desc: "Event-driven, API-native, real-time valuations, role-based portals and embedded AI assistance." },
-            { icon: Users, title: "Adviser & client first", desc: "Distinct workspaces for clients, advisers and administrators — including a mobile-native client app." },
-          ].map((f) => (
-            <Card key={f.title}>
-              <CardHeader>
-                <div className="h-10 w-10 rounded-lg bg-primary/10 grid place-items-center mb-3">
-                  <f.icon className="h-5 w-5 text-primary" />
-                </div>
-                <CardTitle className="text-xl">{f.title}</CardTitle>
+            { title: "Book-of-business daily desk", items: ["Bank statement upload", "CASS 7/8 reconciliation", "Payroll processing", "Contribution schedules", "RAS reclaim", "Dealing desk", "Direct debit collections", "Corporate actions"] },
+            { title: "Client-level daily desk", items: ["Contributions & expectations", "Transfers in (Origo)", "Transfers out", "Drawdown & UFPLS", "Death benefit claims", "Pension sharing orders", "Retirement quotes", "CETV quotes"] },
+            { title: "Member management", items: ["Joiners & leavers", "Member details & queries", "Benefit statements", "Onboarding tracker", "KYC / AML", "Vulnerable client register", "Beneficiary nominations"] },
+            { title: "Compliance & regulation", items: ["TPR breach register", "Trustee meetings", "Data quality (TPR)", "HMRC AFT / BCE", "LSA / LSDBA tracking", "Audit trail", "Four-eyes approvals", "SLA tracker"] },
+          ].map((c) => (
+            <Card key={c.title} className="border-border">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base">{c.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{f.desc}</p>
+                <ul className="space-y-1.5">
+                  {c.items.map((i) => (
+                    <li key={i} className="text-sm text-muted-foreground flex gap-2">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-secondary shrink-0 mt-0.5" /> {i}
+                    </li>
+                  ))}
+                </ul>
               </CardContent>
             </Card>
           ))}
         </div>
       </Section>
+
+      {/* Admin core + two portals */}
+      <Section className="!pt-0">
+        <div id="portals" />
+        <Eyebrow><Layers className="h-3 w-3" /> Admin core, portals included</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          One administration platform. Two portals in the box.
+        </h2>
+        <p className="mt-4 text-muted-foreground text-lg max-w-3xl">
+          The administration console is the product. The client and adviser portals ship
+          with it — sharing the same ledger, permissions and audit trail.
+        </p>
+        <div className="mt-8 space-y-4">
+          <Card className="border-primary/40 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardHeader>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-primary text-primary-foreground grid place-items-center">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+                <div>
+                  <CardTitle className="text-xl">Administration console <Badge variant="secondary" className="ml-2 align-middle">Core</Badge></CardTitle>
+                  <CardDescription>Book-of-business and per-member operations for pensions administrators, trustees and compliance teams.</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Button asChild size="sm"><Link to="/admin">Open admin console <ArrowRight className="ml-1.5 h-3.5 w-3.5" /></Link></Button>
+            </CardContent>
+          </Card>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-secondary/10 text-secondary grid place-items-center">
+                    <Users className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Client portal <Badge variant="outline" className="ml-2 align-middle text-xs">Included</Badge></CardTitle>
+                    <CardDescription>Member self-service: balances, drawdown requests, beneficiaries, statements.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Button asChild size="sm" variant="outline"><Link to="/client-services">Open client portal</Link></Button>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-secondary/10 text-secondary grid place-items-center">
+                    <Briefcase className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg">Adviser portal <Badge variant="outline" className="ml-2 align-middle text-xs">Included</Badge></CardTitle>
+                    <CardDescription>Fact-find, suitability, cashflow, Consumer Duty review and fee agreements.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Button asChild size="sm" variant="outline"><Link to="/workbench">Open adviser portal</Link></Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </Section>
+
+      {/* Roadmap / known gaps — transparency */}
+      <Section className="!pt-0">
+        <Eyebrow><Target className="h-3 w-3" /> Roadmap & known gaps</Eyebrow>
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight max-w-3xl">
+          Transparent about what's partial and what's next.
+        </h2>
+        <p className="mt-4 text-muted-foreground text-lg max-w-3xl">
+          We publish the shortcomings alongside the strengths. Full detail — with target
+          releases — is available in the operator console at{" "}
+          <Link to="/admin/roadmap" className="underline text-primary">/admin/roadmap</Link>.
+        </p>
+        <div className="mt-8 grid md:grid-cols-3 gap-4">
+          {[
+            { s: "Partial", items: ["Four-eyes queue (payroll only today)", "RAS monthly reclaim submission", "Death benefits payout workflow", "Origo transfer exception handling", "Immutable signed audit export"] },
+            { s: "Missing", items: ["Unit tests for src/lib/", "SSO / SCIM for enterprise tenants", "DR / RPO/RTO documentation", "WCAG 2.2 AA audit"] },
+            { s: "Not connected", items: ["Pensions Dashboards Programme (PDP)", "Load-tested at 100k+ members", "Corporate actions UI workflow"] },
+          ].map((col) => (
+            <Card key={col.s}>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <span className={`h-2 w-2 rounded-full ${col.s === "Partial" ? "bg-warning" : col.s === "Missing" ? "bg-destructive" : "bg-muted-foreground"}`} />
+                  {col.s}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ul className="space-y-1.5 text-sm text-muted-foreground">
+                  {col.items.map((i) => <li key={i}>· {i}</li>)}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
 
       {/* Independent market scoreboard (Claude / Anthropic, May 2026) */}
       <MarketScoreboard />

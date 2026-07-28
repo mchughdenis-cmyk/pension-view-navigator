@@ -13,6 +13,8 @@ import { LogoutButton } from "@/components/LogoutButton";
 import { DensityToggle } from "@/components/DensityToggle";
 import { KeyboardHelpDialog } from "@/components/KeyboardHelpDialog";
 import { useJumpShortcuts } from "@/hooks/useJumpShortcuts";
+import { ActiveClientChip } from "./ActiveClientChip";
+import { WhatsNextBar } from "@/components/WhatsNextBar";
 
 /**
  * Application shell: persistent sidebar (role-aware) + sticky header with
@@ -56,6 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Button>
             <FirmSwitcher />
             <ViewSwitcher />
+            <ActiveClientChip />
             <NotificationsBell />
             <DensityToggle />
             <Button variant="ghost" size="icon" onClick={triggerHelp} className="h-8 w-8" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">
@@ -65,6 +68,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <LogoutButton />
           </header>
           <main className="flex-1 min-w-0">{children}</main>
+          <WhatsNextBar />
         </div>
         <ChatLauncher />
         <KeyboardHelpDialog />

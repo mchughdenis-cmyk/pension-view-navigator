@@ -174,8 +174,9 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Operator console", url: "/admin/console", icon: LayoutDashboard },
         { title: "Work queue (all cases)", url: "/admin", icon: ClipboardList },
-
+        { title: "Four-eyes approvals", url: "/admin?tab=approvals", icon: ShieldCheck },
         { title: "SLA tracker", url: "/sla-tracker", icon: Timer },
+
         { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "Case inbox", url: "/cases", icon: ClipboardList },
         { title: "Roadmap & known gaps", url: "/admin/roadmap", icon: ClipboardList },

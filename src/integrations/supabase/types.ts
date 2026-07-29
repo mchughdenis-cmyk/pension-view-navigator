@@ -83,6 +83,57 @@ export type Database = {
         }
         Relationships: []
       }
+      adviser_fee_schedules: {
+        Row: {
+          adviser_id: string | null
+          basis: string
+          client_id: string | null
+          created_at: string
+          fee_type: string
+          frequency: string | null
+          id: string
+          last_paid_date: string | null
+          next_due_date: string | null
+          notes: string | null
+          rate_or_amount: number
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          adviser_id?: string | null
+          basis: string
+          client_id?: string | null
+          created_at?: string
+          fee_type: string
+          frequency?: string | null
+          id?: string
+          last_paid_date?: string | null
+          next_due_date?: string | null
+          notes?: string | null
+          rate_or_amount: number
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          adviser_id?: string | null
+          basis?: string
+          client_id?: string | null
+          created_at?: string
+          fee_type?: string
+          frequency?: string | null
+          id?: string
+          last_paid_date?: string | null
+          next_due_date?: string | null
+          notes?: string | null
+          rate_or_amount?: number
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       adviser_fees: {
         Row: {
           adviser_name: string
@@ -966,6 +1017,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cash_forecast_entries: {
+        Row: {
+          amount: number
+          category: string
+          confidence: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          direction: string
+          forecast_date: string
+          id: string
+          notes: string | null
+          reference: string | null
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category: string
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          direction: string
+          forecast_date: string
+          id?: string
+          notes?: string | null
+          reference?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category?: string
+          confidence?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          direction?: string
+          forecast_date?: string
+          id?: string
+          notes?: string | null
+          reference?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       cash_forecasts: {
         Row: {
@@ -5131,6 +5230,57 @@ export type Database = {
           rate_value?: number
           tax_year?: string
           unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reg_reporting_calendar: {
+        Row: {
+          created_at: string
+          due_date: string
+          id: string
+          notes: string | null
+          period_end: string | null
+          period_start: string | null
+          reference: string | null
+          regulator: string
+          return_name: string
+          status: string
+          submitted_by: string | null
+          submitted_date: string | null
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          regulator: string
+          return_name: string
+          status?: string
+          submitted_by?: string | null
+          submitted_date?: string | null
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          id?: string
+          notes?: string | null
+          period_end?: string | null
+          period_start?: string | null
+          reference?: string | null
+          regulator?: string
+          return_name?: string
+          status?: string
+          submitted_by?: string | null
+          submitted_date?: string | null
+          tenant_id?: string | null
           updated_at?: string
         }
         Relationships: []

@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import OperatorConsole from "./pages/admin/OperatorConsole";
 import PaymentsHub from "./pages/admin/PaymentsHub";
+import PaymentFiles from "./pages/admin/PaymentFiles";
 import GeneralLedger from "./pages/admin/GeneralLedger";
 import CaseWorkbench from "./pages/admin/CaseWorkbench";
 import ReferenceData from "./pages/admin/ReferenceData";

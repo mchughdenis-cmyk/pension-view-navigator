@@ -11,7 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, ShieldCheck, Send, XCircle } from "lucide-react";
+import { Plus, ShieldCheck, Send, XCircle, FileDown } from "lucide-react";
+import { downloadBacsXml } from "@/lib/bacsXml";
 
 type Payment = {
   id: string;

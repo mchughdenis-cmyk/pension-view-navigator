@@ -199,7 +199,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Dealing desk", url: "/dealing", icon: TrendingUp },
         { title: "Unit pricing / valuation", url: "/models", icon: TrendingUp },
         { title: "Rebalance runs", url: "/admin?tab=rebalancing", icon: RefreshCw },
-        { title: "Corporate actions", url: "/admin?tab=corporate-actions", icon: RefreshCw },
+        { title: "Corporate actions", url: "/admin/corporate-actions", icon: RefreshCw },
         { title: "Fee run (monthly)", url: "/admin?tab=fees", icon: Calculator },
         { title: "Statement production", url: "/benefit-statements", icon: FileText },
       ],

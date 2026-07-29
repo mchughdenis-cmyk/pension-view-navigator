@@ -318,6 +318,17 @@ export default function AdminView() {
                     <SelectItem value="onboarding">Onboarding</SelectItem>
                   </SelectContent>
                 </Select>
+                <Select value={adviserFilter} onValueChange={setAdviserFilter}>
+                  <SelectTrigger className="w-52">
+                    <SelectValue placeholder="Filter by adviser" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All advisers</SelectItem>
+                    {advisers.map((a) => (
+                      <SelectItem key={a.name} value={a.name}>{a.name} ({a.clients})</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button>
                   <UserPlus className="w-4 h-4 mr-2" />
                   Add Client

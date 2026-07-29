@@ -175,6 +175,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Operator console", url: "/admin/console", icon: LayoutDashboard },
         { title: "Case workbench", url: "/admin/case-workbench", icon: ClipboardList },
         { title: "Payments hub", url: "/admin/payments", icon: Send },
+        { title: "Payment file store (downloads)", url: "/admin/payment-files", icon: FolderArchive },
         { title: "General ledger", url: "/admin/ledger", icon: Calculator },
         { title: "Expected receipts", url: "/admin/expected-receipts", icon: ArrowDownToLine },
         { title: "Work queue (all cases)", url: "/admin", icon: ClipboardList },

@@ -67,6 +67,8 @@ export default function PaymentsHub() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [files, setFiles] = useState<PaymentFile[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));

@@ -7,33 +7,33 @@ import { ArrowRight } from "lucide-react";
  * steps so admins move through end-to-end processes without hunting the sidebar.
  */
 const CHAINS: Record<string, { label: string; to: string; hint?: string }[]> = {
-  "/admin/bank-statement-upload": [
-    { label: "Reconcile bank feed", to: "/admin/bank-reconciliation" },
-    { label: "Allocate unallocated cash", to: "/admin/unallocated-cash" },
+  "/bank-upload": [
+    { label: "CASS 7/8 reconciliation", to: "/cass" },
+    { label: "Allocate unallocated cash", to: "/unallocated-cash" },
   ],
-  "/admin/bank-reconciliation": [
-    { label: "CASS 7/8 review", to: "/admin/cass-review" },
-    { label: "Unallocated cash queue", to: "/admin/unallocated-cash" },
+  "/cass": [
+    { label: "CASS 7 daily recon", to: "/admin/cass7-daily-recon" },
+    { label: "Unallocated cash queue", to: "/unallocated-cash" },
   ],
   "/payroll-processing": [
-    { label: "Contribution processing", to: "/contribution-processing" },
-    { label: "Direct debit collections", to: "/admin/direct-debit-collections" },
+    { label: "Contribution processing", to: "/contributions" },
+    { label: "Direct debit collections", to: "/direct-debit-collections" },
   ],
-  "/contribution-processing": [
-    { label: "AA / MPAA cap screening", to: "/admin/aa-mpaa-screening" },
-    { label: "Contribution chasing", to: "/admin/contribution-chasing" },
+  "/contributions": [
+    { label: "Contribution chasing", to: "/contribution-chaser" },
+    { label: "PAYE / RTI", to: "/paye" },
   ],
-  "/admin/transfers-in": [
-    { label: "Bank statement upload", to: "/admin/bank-statement-upload" },
-    { label: "Contribution processing", to: "/contribution-processing" },
+  "/transfer": [
+    { label: "Bank statement upload", to: "/bank-upload" },
+    { label: "Contribution processing", to: "/contributions" },
   ],
   "/onboarding": [
     { label: "Onboarding progress tracker", to: "/onboarding-progress" },
-    { label: "Set up direct debit", to: "/admin/direct-debit-collections" },
+    { label: "Set up direct debit", to: "/direct-debit-collections" },
   ],
   "/drawdown": [
-    { label: "Death claim register", to: "/admin/death-claims" },
-    { label: "PAYE / RTI submission", to: "/admin/paye-rti" },
+    { label: "Death claim register", to: "/death-claims" },
+    { label: "PAYE / RTI submission", to: "/paye" },
   ],
 };
 

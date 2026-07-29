@@ -190,6 +190,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       items: [
         { title: "Bank statement upload", url: "/bank-upload", icon: Upload },
         { title: "Bank recon (CASS 7/8)", url: "/cass", icon: ShieldCheck },
+        { title: "CASS 7 daily recon", url: "/admin/cass7-daily-recon", icon: ShieldCheck },
         { title: "Cash breaks & breaches", url: "/cass-engine", icon: AlertTriangle },
         { title: "Unallocated cash / suspense", url: "/unallocated-cash", icon: Wallet },
         { title: "Direct debit collections", url: "/direct-debit-collections", icon: ArrowDownToLine },

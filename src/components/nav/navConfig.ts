@@ -173,10 +173,13 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
       label: "Operator console",
       items: [
         { title: "Operator console", url: "/admin/console", icon: LayoutDashboard },
+        { title: "Case workbench", url: "/admin/case-workbench", icon: ClipboardList },
+        { title: "Payments hub", url: "/admin/payments", icon: Send },
+        { title: "General ledger", url: "/admin/ledger", icon: Calculator },
+        { title: "Expected receipts", url: "/admin/expected-receipts", icon: ArrowDownToLine },
         { title: "Work queue (all cases)", url: "/admin", icon: ClipboardList },
         { title: "Four-eyes approvals", url: "/admin?tab=approvals", icon: ShieldCheck },
         { title: "SLA tracker", url: "/sla-tracker", icon: Timer },
-
         { title: "Cash warnings", url: "/cash-warnings", icon: Bell },
         { title: "Case inbox", url: "/cases", icon: ClipboardList },
         { title: "Roadmap & known gaps", url: "/admin/roadmap", icon: ClipboardList },
@@ -281,6 +284,9 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System & finance",
       items: [
+        { title: "Feature flags", url: "/admin/feature-flags", icon: Cog },
+        { title: "Reference data (HMRC)", url: "/admin/reference-data", icon: Database },
+        { title: "Domain event bus", url: "/admin/event-bus", icon: Network },
         { title: "System configuration", url: "/admin?tab=system-config", icon: Cog },
         { title: "White-label branding", url: "/branding", icon: Palette },
         { title: "Persona selector", url: "/personas", icon: UserCog },

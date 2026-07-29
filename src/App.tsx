@@ -10,6 +10,13 @@ import ClientProductsDashboard from "./components/ClientProductsDashboard";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import OperatorConsole from "./pages/admin/OperatorConsole";
+import PaymentsHub from "./pages/admin/PaymentsHub";
+import GeneralLedger from "./pages/admin/GeneralLedger";
+import CaseWorkbench from "./pages/admin/CaseWorkbench";
+import ReferenceData from "./pages/admin/ReferenceData";
+import ExpectedReceipts from "./pages/admin/ExpectedReceipts";
+import FeatureFlags from "./pages/admin/FeatureFlags";
+import EventBus from "./pages/admin/EventBus";
 import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
@@ -325,6 +332,13 @@ const AppContent = () => {
               <Route path="/invoicing" element={<RoleGate allow={['admin']}><Invoicing /></RoleGate>} />
               <Route path="/death-claims" element={<RoleGate allow={['adviser', 'admin']}><DeathClaims /></RoleGate>} />
               <Route path="/pension-sharing" element={<RoleGate allow={['adviser', 'admin']}><PensionSharingOrders /></RoleGate>} />
+              <Route path="/admin/payments" element={<RoleGate allow={['admin']}><PaymentsHub /></RoleGate>} />
+              <Route path="/admin/ledger" element={<RoleGate allow={['admin']}><GeneralLedger /></RoleGate>} />
+              <Route path="/admin/case-workbench" element={<RoleGate allow={['adviser','admin']}><CaseWorkbench /></RoleGate>} />
+              <Route path="/admin/reference-data" element={<RoleGate allow={['admin']}><ReferenceData /></RoleGate>} />
+              <Route path="/admin/expected-receipts" element={<RoleGate allow={['admin']}><ExpectedReceipts /></RoleGate>} />
+              <Route path="/admin/feature-flags" element={<RoleGate allow={['admin']}><FeatureFlags /></RoleGate>} />
+              <Route path="/admin/event-bus" element={<RoleGate allow={['admin']}><EventBus /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

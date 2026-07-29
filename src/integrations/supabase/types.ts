@@ -304,6 +304,56 @@ export type Database = {
         }
         Relationships: []
       }
+      api_credentials: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at: string | null
+          scopes: string[]
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash: string
+          key_prefix: string
+          label: string
+          last_used_at?: string | null
+          scopes?: string[]
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          key_hash?: string
+          key_prefix?: string
+          label?: string
+          last_used_at?: string | null
+          scopes?: string[]
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "api_credentials_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       api_keys: {
         Row: {
           created_at: string
@@ -361,6 +411,30 @@ export type Database = {
           id?: string
           questionnaire?: Json | null
           score?: number
+        }
+        Relationships: []
+      }
+      bank_calendar: {
+        Row: {
+          calendar_date: string
+          created_at: string
+          holiday_name: string | null
+          is_bacs_day: boolean
+          is_working_day: boolean
+        }
+        Insert: {
+          calendar_date: string
+          created_at?: string
+          holiday_name?: string | null
+          is_bacs_day?: boolean
+          is_working_day?: boolean
+        }
+        Update: {
+          calendar_date?: string
+          created_at?: string
+          holiday_name?: string | null
+          is_bacs_day?: boolean
+          is_working_day?: boolean
         }
         Relationships: []
       }
@@ -707,6 +781,191 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      case_documents: {
+        Row: {
+          case_id: string
+          created_at: string
+          file_name: string
+          file_size: number | null
+          file_url: string | null
+          id: string
+          mime_type: string | null
+          uploaded_by: string | null
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          file_name: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          uploaded_by?: string | null
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          file_name?: string
+          file_size?: number | null
+          file_url?: string | null
+          id?: string
+          mime_type?: string | null
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_events: {
+        Row: {
+          actor_id: string | null
+          case_id: string
+          created_at: string
+          detail: string | null
+          event_type: string
+          id: string
+          metadata: Json
+        }
+        Insert: {
+          actor_id?: string | null
+          case_id: string
+          created_at?: string
+          detail?: string | null
+          event_type: string
+          id?: string
+          metadata?: Json
+        }
+        Update: {
+          actor_id?: string | null
+          case_id?: string
+          created_at?: string
+          detail?: string | null
+          event_type?: string
+          id?: string
+          metadata?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_tasks: {
+        Row: {
+          case_id: string
+          created_at: string
+          done_at: string | null
+          done_by: string | null
+          id: string
+          is_done: boolean
+          seq: number
+          title: string
+        }
+        Insert: {
+          case_id: string
+          created_at?: string
+          done_at?: string | null
+          done_by?: string | null
+          id?: string
+          is_done?: boolean
+          seq?: number
+          title: string
+        }
+        Update: {
+          case_id?: string
+          created_at?: string
+          done_at?: string | null
+          done_by?: string | null
+          id?: string
+          is_done?: boolean
+          seq?: number
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cases: {
+        Row: {
+          assignee_id: string | null
+          case_ref: string
+          case_type: string
+          closed_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          metadata: Json
+          opened_by: string | null
+          priority: string
+          sla_due_at: string | null
+          status: string
+          subject_client_id: string | null
+          tenant_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          case_ref: string
+          case_type: string
+          closed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          opened_by?: string | null
+          priority?: string
+          sla_due_at?: string | null
+          status?: string
+          subject_client_id?: string | null
+          tenant_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          case_ref?: string
+          case_type?: string
+          closed_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          metadata?: Json
+          opened_by?: string | null
+          priority?: string
+          sla_due_at?: string | null
+          status?: string
+          subject_client_id?: string | null
+          tenant_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       cash_forecasts: {
         Row: {
@@ -1842,6 +2101,53 @@ export type Database = {
         }
         Relationships: []
       }
+      domain_events: {
+        Row: {
+          aggregate_id: string | null
+          aggregate_type: string | null
+          created_at: string
+          emitted_by: string | null
+          event_name: string
+          id: string
+          payload: Json
+          published: boolean
+          published_at: string | null
+          tenant_id: string | null
+        }
+        Insert: {
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          created_at?: string
+          emitted_by?: string | null
+          event_name: string
+          id?: string
+          payload?: Json
+          published?: boolean
+          published_at?: string | null
+          tenant_id?: string | null
+        }
+        Update: {
+          aggregate_id?: string | null
+          aggregate_type?: string | null
+          created_at?: string
+          emitted_by?: string | null
+          event_name?: string
+          id?: string
+          payload?: Json
+          published?: boolean
+          published_at?: string | null
+          tenant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domain_events_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dr_drills: {
         Row: {
           actual_rpo: number | null
@@ -2052,6 +2358,56 @@ export type Database = {
         }
         Relationships: []
       }
+      expected_receipts: {
+        Row: {
+          amount: number
+          client_id: string | null
+          created_at: string
+          expected_date: string
+          id: string
+          matched_bank_line_id: string | null
+          reference: string | null
+          source: string
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          client_id?: string | null
+          created_at?: string
+          expected_date: string
+          id?: string
+          matched_bank_line_id?: string | null
+          reference?: string | null
+          source: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string | null
+          created_at?: string
+          expected_date?: string
+          id?: string
+          matched_bank_line_id?: string | null
+          reference?: string | null
+          source?: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expected_receipts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fact_finds: {
         Row: {
           assets: Json | null
@@ -2090,6 +2446,44 @@ export type Database = {
           objectives?: string | null
         }
         Relationships: []
+      }
+      feature_flags: {
+        Row: {
+          config: Json
+          created_at: string
+          enabled: boolean
+          flag_key: string
+          id: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          flag_key: string
+          id?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          flag_key?: string
+          id?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feature_flags_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       fee_charges: {
         Row: {
@@ -3030,6 +3424,190 @@ export type Database = {
         }
         Relationships: []
       }
+      ledger_accounts: {
+        Row: {
+          account_code: string
+          account_name: string
+          account_type: string
+          client_id: string | null
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          tenant_id: string | null
+          updated_at: string
+          wrapper: string | null
+        }
+        Insert: {
+          account_code: string
+          account_name: string
+          account_type: string
+          client_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          tenant_id?: string | null
+          updated_at?: string
+          wrapper?: string | null
+        }
+        Update: {
+          account_code?: string
+          account_name?: string
+          account_type?: string
+          client_id?: string | null
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          tenant_id?: string | null
+          updated_at?: string
+          wrapper?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ledger_batches: {
+        Row: {
+          batch_ref: string
+          created_at: string
+          description: string | null
+          id: string
+          posted_at: string | null
+          posted_by: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          batch_ref: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          batch_ref?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          posted_at?: string | null
+          posted_by?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_batches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ledger_entries: {
+        Row: {
+          account_id: string
+          batch_id: string | null
+          client_id: string | null
+          created_at: string
+          credit: number
+          currency: string
+          debit: number
+          effective_date: string
+          id: string
+          narrative: string | null
+          reversal_of: string | null
+          source_id: string | null
+          source_type: string | null
+          tenant_id: string | null
+          value_date: string
+        }
+        Insert: {
+          account_id: string
+          batch_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          credit?: number
+          currency?: string
+          debit?: number
+          effective_date?: string
+          id?: string
+          narrative?: string | null
+          reversal_of?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          tenant_id?: string | null
+          value_date: string
+        }
+        Update: {
+          account_id?: string
+          batch_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          credit?: number
+          currency?: string
+          debit?: number
+          effective_date?: string
+          id?: string
+          narrative?: string | null
+          reversal_of?: string | null
+          source_id?: string | null
+          source_type?: string | null
+          tenant_id?: string | null
+          value_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "ledger_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "trial_balance"
+            referencedColumns: ["account_id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "ledger_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_reversal_of_fkey"
+            columns: ["reversal_of"]
+            isOneToOne: false
+            referencedRelation: "ledger_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lisa_bonus_claims: {
         Row: {
           account_id: string
@@ -3818,6 +4396,91 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_approvals: {
+        Row: {
+          approver_id: string
+          comment: string | null
+          created_at: string
+          decision: string
+          id: string
+          payment_id: string
+        }
+        Insert: {
+          approver_id: string
+          comment?: string | null
+          created_at?: string
+          decision: string
+          id?: string
+          payment_id: string
+        }
+        Update: {
+          approver_id?: string
+          comment?: string | null
+          created_at?: string
+          decision?: string
+          id?: string
+          payment_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_approvals_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payment_instructions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payment_batches: {
+        Row: {
+          batch_ref: string
+          created_at: string
+          file_url: string | null
+          id: string
+          item_count: number | null
+          payment_method: string
+          status: string
+          submitted_at: string | null
+          tenant_id: string | null
+          total_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          batch_ref: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          item_count?: number | null
+          payment_method: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          batch_ref?: string
+          created_at?: string
+          file_url?: string | null
+          id?: string
+          item_count?: number | null
+          payment_method?: string
+          status?: string
+          submitted_at?: string | null
+          tenant_id?: string | null
+          total_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_batches_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_initiations: {
         Row: {
           amount: number
@@ -3853,6 +4516,105 @@ export type Database = {
           status?: string
         }
         Relationships: []
+      }
+      payment_instructions: {
+        Row: {
+          amount: number
+          approved_by: string | null
+          batch_id: string | null
+          beneficiary_account: string | null
+          beneficiary_name: string | null
+          beneficiary_reference: string | null
+          beneficiary_sort_code: string | null
+          case_id: string | null
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          direction: string
+          id: string
+          ledger_entry_id: string | null
+          metadata: Json
+          payment_method: string | null
+          purpose: string
+          reconciled_at: string | null
+          released_at: string | null
+          requested_date: string | null
+          settled_at: string | null
+          status: string
+          tenant_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          approved_by?: string | null
+          batch_id?: string | null
+          beneficiary_account?: string | null
+          beneficiary_name?: string | null
+          beneficiary_reference?: string | null
+          beneficiary_sort_code?: string | null
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          direction: string
+          id?: string
+          ledger_entry_id?: string | null
+          metadata?: Json
+          payment_method?: string | null
+          purpose: string
+          reconciled_at?: string | null
+          released_at?: string | null
+          requested_date?: string | null
+          settled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          approved_by?: string | null
+          batch_id?: string | null
+          beneficiary_account?: string | null
+          beneficiary_name?: string | null
+          beneficiary_reference?: string | null
+          beneficiary_sort_code?: string | null
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          direction?: string
+          id?: string
+          ledger_entry_id?: string | null
+          metadata?: Json
+          payment_method?: string | null
+          purpose?: string
+          reconciled_at?: string | null
+          released_at?: string | null
+          requested_date?: string | null
+          settled_at?: string | null
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_instructions_ledger_entry_id_fkey"
+            columns: ["ledger_entry_id"]
+            isOneToOne: false
+            referencedRelation: "ledger_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payment_instructions_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       payroll_run_lines: {
         Row: {
@@ -4334,6 +5096,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reference_rates: {
+        Row: {
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          id: string
+          notes: string | null
+          rate_key: string
+          rate_value: number
+          tax_year: string
+          unit: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          notes?: string | null
+          rate_key: string
+          rate_value: number
+          tax_year: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          id?: string
+          notes?: string | null
+          rate_key?: string
+          rate_value?: number
+          tax_year?: string
+          unit?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       registration_log: {
         Row: {
           created_at: string
@@ -4682,38 +5483,65 @@ export type Database = {
       secure_messages: {
         Row: {
           body: string
+          case_id: string | null
           client_id: string
           created_at: string
+          from_role: string | null
+          from_user_id: string | null
           id: string
           read_at: string | null
           recipient: string
           sender: string
           subject: string | null
+          tenant_id: string | null
           thread_id: string | null
         }
         Insert: {
           body: string
+          case_id?: string | null
           client_id: string
           created_at?: string
+          from_role?: string | null
+          from_user_id?: string | null
           id?: string
           read_at?: string | null
           recipient: string
           sender: string
           subject?: string | null
+          tenant_id?: string | null
           thread_id?: string | null
         }
         Update: {
           body?: string
+          case_id?: string | null
           client_id?: string
           created_at?: string
+          from_role?: string | null
+          from_user_id?: string | null
           id?: string
           read_at?: string | null
           recipient?: string
           sender?: string
           subject?: string | null
+          tenant_id?: string | null
           thread_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "secure_messages_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "secure_messages_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       settlement_instructions: {
         Row: {
@@ -5135,6 +5963,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tenants: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+          name: string
+          slug: string
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name: string
+          slug: string
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+          name?: string
+          slug?: string
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       tpr_breaches: {
         Row: {
@@ -5995,6 +6856,27 @@ export type Database = {
           persistency_pct: number | null
         }
         Relationships: []
+      }
+      trial_balance: {
+        Row: {
+          account_code: string | null
+          account_id: string | null
+          account_name: string | null
+          account_type: string | null
+          balance: number | null
+          tenant_id: string | null
+          total_credit: number | null
+          total_debit: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_accounts_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

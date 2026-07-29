@@ -51,8 +51,17 @@ export default function CassDailyRecon() {
     );
   };
 
+  const SIGNOFF_KEY = "cass7:signoffs";
+  const [signedDates, setSignedDates] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(SIGNOFF_KEY) || "[]"); } catch { return []; }
+  });
+  const isSigned = signedDates.includes(date);
+
   const signOff = async () => {
     if (status !== "match") return toast({ title: "Cannot sign off with breaks", variant: "destructive" });
+    const next = Array.from(new Set([...signedDates, date])).slice(-90);
+    localStorage.setItem(SIGNOFF_KEY, JSON.stringify(next));
+    setSignedDates(next);
     toast({ title: "CASS 7 reconciliation signed off", description: `Balanced at £${ledgerTotal.toFixed(2)} on ${date}` });
   };
 
@@ -63,11 +72,25 @@ export default function CassDailyRecon() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><ShieldCheck className="h-6 w-6" /> CASS 7 daily reconciliation</h1>
           <p className="text-sm text-muted-foreground">Client-money bank balance vs client-money ledger. Any shortfall must be corrected same-day per CASS 7.15.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
+          {isSigned && <Badge className="bg-emerald-600 hover:bg-emerald-600"><CheckCircle2 className="h-3 w-3 mr-1" />Signed off</Badge>}
           <Button variant="outline" onClick={exportCsv}><FileDown className="h-4 w-4 mr-2" />Export CSV</Button>
-          <Button onClick={signOff} disabled={status !== "match"}>Sign off</Button>
+          <Button onClick={signOff} disabled={status !== "match" || isSigned}>{isSigned ? "Already signed" : "Sign off"}</Button>
         </div>
       </header>
+
+      {signedDates.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Recent sign-offs (last 14)</CardTitle></CardHeader>
+          <CardContent className="flex flex-wrap gap-1">
+            {signedDates.slice(-14).reverse().map(d => (
+              <Badge key={d} variant="outline" className="font-mono text-xs">
+                <CheckCircle2 className="h-3 w-3 mr-1 text-emerald-600" />{d}
+              </Badge>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
         <Card>

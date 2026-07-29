@@ -92,10 +92,10 @@ const modelPortfolios = [
 ]
 
 const rebalanceHistory = [
-  { id: 1, date: '2024-01-10', portfolio: 'Aggressive Growth', clientsAffected: 198, tradesGenerated: 594, status: 'completed', value: 1250000 },
-  { id: 2, date: '2024-01-03', portfolio: 'Balanced', clientsAffected: 487, tradesGenerated: 1461, status: 'completed', value: 3200000 },
-  { id: 3, date: '2023-12-28', portfolio: 'Income Focus', clientsAffected: 134, tradesGenerated: 268, status: 'completed', value: 890000 },
-  { id: 4, date: '2023-12-15', portfolio: 'Cautious Growth', clientsAffected: 312, tradesGenerated: 624, status: 'completed', value: 1100000 },
+  { id: 1, date: '2026-01-10', portfolio: 'Aggressive Growth', clientsAffected: 198, tradesGenerated: 594, status: 'completed', value: 1250000 },
+  { id: 2, date: '2026-01-03', portfolio: 'Balanced', clientsAffected: 487, tradesGenerated: 1461, status: 'completed', value: 3200000 },
+  { id: 3, date: '2025-12-28', portfolio: 'Income Focus', clientsAffected: 134, tradesGenerated: 268, status: 'completed', value: 890000 },
+  { id: 4, date: '2025-12-15', portfolio: 'Cautious Growth', clientsAffected: 312, tradesGenerated: 624, status: 'completed', value: 1100000 },
 ]
 
 const driftConfig: Record<string, { label: string; variant: string; icon: React.ElementType }> = {

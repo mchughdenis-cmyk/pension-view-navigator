@@ -30,24 +30,24 @@ import {
 } from '@/lib/documentUtils'
 
 const templates = [
-  { id: 1, name: 'Annual Benefit Statement', category: 'statutory', format: 'PDF', lastUsed: '2024-01-10', usageCount: 1247, status: 'active' },
-  { id: 2, name: 'Welcome Letter', category: 'onboarding', format: 'PDF', lastUsed: '2024-01-14', usageCount: 456, status: 'active' },
-  { id: 3, name: 'Transfer Confirmation', category: 'transfers', format: 'PDF', lastUsed: '2024-01-12', usageCount: 312, status: 'active' },
-  { id: 4, name: 'Drawdown Confirmation', category: 'drawdown', format: 'PDF', lastUsed: '2024-01-15', usageCount: 187, status: 'active' },
-  { id: 5, name: 'Fee Schedule Notification', category: 'fees', format: 'PDF', lastUsed: '2023-12-01', usageCount: 1247, status: 'active' },
-  { id: 6, name: 'KYC Reminder', category: 'compliance', format: 'Email', lastUsed: '2024-01-08', usageCount: 89, status: 'active' },
-  { id: 7, name: 'Risk Profile Review', category: 'compliance', format: 'PDF', lastUsed: '2023-11-15', usageCount: 534, status: 'active' },
-  { id: 8, name: 'SMPI Statement', category: 'statutory', format: 'PDF', lastUsed: '2024-01-10', usageCount: 1060, status: 'active' },
-  { id: 9, name: 'Death Benefit Nomination Confirmation', category: 'beneficiary', format: 'PDF', lastUsed: '2024-01-05', usageCount: 234, status: 'active' },
-  { id: 10, name: 'GDPR Data Export Cover Letter', category: 'compliance', format: 'DOCX', lastUsed: '2023-10-20', usageCount: 12, status: 'active' },
+  { id: 1, name: 'Annual Benefit Statement', category: 'statutory', format: 'PDF', lastUsed: '2026-01-10', usageCount: 1247, status: 'active' },
+  { id: 2, name: 'Welcome Letter', category: 'onboarding', format: 'PDF', lastUsed: '2026-01-14', usageCount: 456, status: 'active' },
+  { id: 3, name: 'Transfer Confirmation', category: 'transfers', format: 'PDF', lastUsed: '2026-01-12', usageCount: 312, status: 'active' },
+  { id: 4, name: 'Drawdown Confirmation', category: 'drawdown', format: 'PDF', lastUsed: '2026-01-15', usageCount: 187, status: 'active' },
+  { id: 5, name: 'Fee Schedule Notification', category: 'fees', format: 'PDF', lastUsed: '2025-12-01', usageCount: 1247, status: 'active' },
+  { id: 6, name: 'KYC Reminder', category: 'compliance', format: 'Email', lastUsed: '2026-01-08', usageCount: 89, status: 'active' },
+  { id: 7, name: 'Risk Profile Review', category: 'compliance', format: 'PDF', lastUsed: '2025-11-15', usageCount: 534, status: 'active' },
+  { id: 8, name: 'SMPI Statement', category: 'statutory', format: 'PDF', lastUsed: '2026-01-10', usageCount: 1060, status: 'active' },
+  { id: 9, name: 'Death Benefit Nomination Confirmation', category: 'beneficiary', format: 'PDF', lastUsed: '2026-01-05', usageCount: 234, status: 'active' },
+  { id: 10, name: 'GDPR Data Export Cover Letter', category: 'compliance', format: 'DOCX', lastUsed: '2025-10-20', usageCount: 12, status: 'active' },
 ]
 
 const recentDocuments = [
-  { id: 1, date: '2024-01-15', template: 'Drawdown Confirmation', client: 'David Thompson', format: 'PDF', sentVia: 'Email', status: 'sent' },
-  { id: 2, date: '2024-01-14', template: 'Welcome Letter', client: 'New Client Batch', format: 'PDF', sentVia: 'Post', status: 'printed' },
-  { id: 3, date: '2024-01-12', template: 'Transfer Confirmation', client: 'Emma Wilson', format: 'PDF', sentVia: 'Email', status: 'sent' },
-  { id: 4, date: '2024-01-10', template: 'Annual Benefit Statement', client: 'Bulk - 1,247 clients', format: 'PDF', sentVia: 'Email + Post', status: 'in_progress' },
-  { id: 5, date: '2024-01-08', template: 'KYC Reminder', client: '89 clients', format: 'Email', sentVia: 'Email', status: 'sent' },
+  { id: 1, date: '2026-01-15', template: 'Drawdown Confirmation', client: 'David Thompson', format: 'PDF', sentVia: 'Email', status: 'sent' },
+  { id: 2, date: '2026-01-14', template: 'Welcome Letter', client: 'New Client Batch', format: 'PDF', sentVia: 'Post', status: 'printed' },
+  { id: 3, date: '2026-01-12', template: 'Transfer Confirmation', client: 'Emma Wilson', format: 'PDF', sentVia: 'Email', status: 'sent' },
+  { id: 4, date: '2026-01-10', template: 'Annual Benefit Statement', client: 'Bulk - 1,247 clients', format: 'PDF', sentVia: 'Email + Post', status: 'in_progress' },
+  { id: 5, date: '2026-01-08', template: 'KYC Reminder', client: '89 clients', format: 'Email', sentVia: 'Email', status: 'sent' },
 ]
 
 const templateDownloadMap: Record<string, () => Promise<void>> = {

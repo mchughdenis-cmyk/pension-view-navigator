@@ -72,7 +72,7 @@ export default function CommercialProperty() {
   const cashflow = useMemo(() => {
     const map = new Map<string, { month: string; rent: number; expenses: number; net: number }>();
     const months = Array.from({ length: 12 }, (_, i) => {
-      const d = new Date("2024-11-01");
+      const d = new Date("2026-11-01");
       d.setMonth(d.getMonth() + i);
       return d.toISOString().slice(0, 7);
     });

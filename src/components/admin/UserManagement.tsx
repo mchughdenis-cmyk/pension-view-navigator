@@ -24,13 +24,13 @@ import { UserDialog, ConfirmDialog, type UserFormData } from './AdminDialogs'
 import { downloadCSV } from '@/lib/adminExportUtils'
 
 const initialUsers = [
-  { id: 1, name: 'Sarah Johnson', email: 'sarah.johnson@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2024-01-15 14:30', clients: 245, mfaEnabled: true },
-  { id: 2, name: 'Michael Brown', email: 'michael.brown@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2024-01-15 11:00', clients: 312, mfaEnabled: true },
-  { id: 3, name: 'Jennifer Davis', email: 'jennifer.davis@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2024-01-14 16:45', clients: 178, mfaEnabled: true },
-  { id: 4, name: 'Alex Turner', email: 'alex.turner@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2024-01-13 09:00', clients: 190, mfaEnabled: false },
-  { id: 5, name: 'Admin User', email: 'admin@airgead.com', role: 'admin', department: 'Management', status: 'active', lastLogin: '2024-01-15 08:00', clients: 0, mfaEnabled: true },
-  { id: 6, name: 'Jane Williams', email: 'jane.williams@airgead.com', role: 'compliance', department: 'Compliance', status: 'active', lastLogin: '2024-01-15 10:30', clients: 0, mfaEnabled: true },
-  { id: 7, name: 'Tom Harris', email: 'tom.harris@airgead.com', role: 'operations', department: 'Operations', status: 'suspended', lastLogin: '2024-01-05 16:00', clients: 0, mfaEnabled: false },
+  { id: 1, name: 'Sarah Johnson', email: 'sarah.johnson@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2026-01-15 14:30', clients: 245, mfaEnabled: true },
+  { id: 2, name: 'Michael Brown', email: 'michael.brown@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2026-01-15 11:00', clients: 312, mfaEnabled: true },
+  { id: 3, name: 'Jennifer Davis', email: 'jennifer.davis@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2026-01-14 16:45', clients: 178, mfaEnabled: true },
+  { id: 4, name: 'Alex Turner', email: 'alex.turner@airgead.com', role: 'adviser', department: 'Advisory', status: 'active', lastLogin: '2026-01-13 09:00', clients: 190, mfaEnabled: false },
+  { id: 5, name: 'Admin User', email: 'admin@airgead.com', role: 'admin', department: 'Management', status: 'active', lastLogin: '2026-01-15 08:00', clients: 0, mfaEnabled: true },
+  { id: 6, name: 'Jane Williams', email: 'jane.williams@airgead.com', role: 'compliance', department: 'Compliance', status: 'active', lastLogin: '2026-01-15 10:30', clients: 0, mfaEnabled: true },
+  { id: 7, name: 'Tom Harris', email: 'tom.harris@airgead.com', role: 'operations', department: 'Operations', status: 'suspended', lastLogin: '2026-01-05 16:00', clients: 0, mfaEnabled: false },
   { id: 8, name: 'Claire Morgan', email: 'claire.morgan@airgead.com', role: 'adviser', department: 'Advisory', status: 'pending', lastLogin: 'Never', clients: 0, mfaEnabled: false },
 ]
 

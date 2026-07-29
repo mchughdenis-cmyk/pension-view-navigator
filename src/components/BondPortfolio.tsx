@@ -66,10 +66,10 @@ export default function BondPortfolio({ bondType }: Props) {
     const withdrawn = policies.reduce((s, p) => s + p.cumulativeWithdrawals, 0)
     const gain = value + withdrawn - premiums
     const taxYearGain = events
-      .filter(e => e.date >= '2024-04-06' && e.date <= '2025-04-05')
+      .filter(e => e.date >= '2026-04-06' && e.date <= '2025-04-05')
       .reduce((s, e) => s + e.chargeableGain, 0)
     const taxYearTax = events
-      .filter(e => e.date >= '2024-04-06' && e.date <= '2025-04-05')
+      .filter(e => e.date >= '2026-04-06' && e.date <= '2025-04-05')
       .reduce((s, e) => s + e.netTaxDue, 0)
     return { value, premiums, withdrawn, gain, taxYearGain, taxYearTax }
   }, [policies, events])

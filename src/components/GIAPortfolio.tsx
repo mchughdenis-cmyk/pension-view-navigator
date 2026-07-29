@@ -52,8 +52,8 @@ export default function GIAPortfolio() {
     { date: '2025-02-05', type: 'Deposit', amount: 5000, description: 'Lump sum investment' },
     { date: '2025-01-20', type: 'Dividend', amount: 320.50, description: 'iShares MSCI World SRI dividend' },
     { date: '2025-01-10', type: 'Sell', amount: 3200, description: 'iShares Core MSCI World UCITS (partial)' },
-    { date: '2024-12-15', type: 'Buy', amount: -4000, description: 'Fundsmith Equity' },
-    { date: '2024-12-01', type: 'Deposit', amount: 2000, description: 'Monthly contribution' },
+    { date: '2026-12-15', type: 'Buy', amount: -4000, description: 'Fundsmith Equity' },
+    { date: '2026-12-01', type: 'Deposit', amount: 2000, description: 'Monthly contribution' },
   ])
 
   const totals = useMemo(() => {

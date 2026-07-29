@@ -113,8 +113,8 @@ const pensionData = {
     { name: "Cash", allocation: 5, value: 24287 }
   ],
   transfers: [
-    { from: "Old Company Scheme", amount: 45000, date: "2024-03-15", status: "completed" },
-    { from: "Previous SIPP", amount: 32000, date: "2024-01-10", status: "completed" }
+    { from: "Old Company Scheme", amount: 45000, date: "2026-03-15", status: "completed" },
+    { from: "Previous SIPP", amount: 32000, date: "2026-01-10", status: "completed" }
   ]
 };
 

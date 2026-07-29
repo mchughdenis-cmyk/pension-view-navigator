@@ -35,8 +35,8 @@ export default function ISAPortfolio() {
     { date: '2025-02-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
     { date: '2025-01-15', type: 'Dividend', amount: 145.20, description: 'Vanguard FTSE Global All Cap' },
     { date: '2025-01-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
-    { date: '2024-12-20', type: 'Buy', amount: -2000, description: 'iShares Core MSCI World UCITS' },
-    { date: '2024-12-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
+    { date: '2026-12-20', type: 'Buy', amount: -2000, description: 'iShares Core MSCI World UCITS' },
+    { date: '2026-12-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
   ])
   const [yearSubscribed, setYearSubscribed] = useState(12500)
 

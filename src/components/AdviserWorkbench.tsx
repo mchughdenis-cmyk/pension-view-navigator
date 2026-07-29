@@ -145,7 +145,7 @@ function CashflowPlanner({ clientId }: { clientId: string }) {
   const projection = (() => {
     let bal = Number(pot); const w = Number(withdraw); const g = Number(growth) / 100;
     const out: { year: number; balance: number }[] = [];
-    for (let y = 0; y <= years; y++) { out.push({ year: 2025 + y, balance: Math.max(0, bal) }); bal = bal * (1 + g) - w; }
+    for (let y = 0; y <= years; y++) { out.push({ year: 2026 + y, balance: Math.max(0, bal) }); bal = bal * (1 + g) - w; }
     return out;
   })();
   const exhaustion = projection.find((p) => p.balance <= 0);
@@ -159,7 +159,7 @@ function CashflowPlanner({ clientId }: { clientId: string }) {
           <div><Label>Annual withdrawal (£)</Label><Input type="number" value={withdraw} onChange={(e) => setWithdraw(e.target.value)} /></div>
           <div><Label>Net growth %</Label><Input type="number" value={growth} onChange={(e) => setGrowth(e.target.value)} /></div>
           <div className="rounded-lg border p-3 text-sm">
-            {exhaustion ? <p className="text-destructive">Pot depletes in {exhaustion.year} (age {exhaustion.year - 1965}).</p> : <p className="text-green-600">Pot sustains through {2025 + years}.</p>}
+            {exhaustion ? <p className="text-destructive">Pot depletes in {exhaustion.year} (age {exhaustion.year - 1965}).</p> : <p className="text-green-600">Pot sustains through {2026 + years}.</p>}
           </div>
         </div>
         <div className="rounded-lg border p-3 max-h-80 overflow-auto text-xs">

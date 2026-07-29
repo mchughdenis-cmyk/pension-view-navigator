@@ -159,6 +159,7 @@ export default function AdminView() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <Button variant="outline" size="sm" onClick={() => switchRole('client')}>
                 <User className="w-4 h-4 mr-2" />

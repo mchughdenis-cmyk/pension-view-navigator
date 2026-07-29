@@ -120,6 +120,10 @@ export function CommandPalette() {
 
         <CommandGroup heading="Quick actions">
           <CommandItem onSelect={() => go('/admin/console')}><ArrowRight className="mr-2 h-4 w-4" />Open operator console</CommandItem>
+          <CommandItem onSelect={() => go('/admin/payments?new=1')} keywords={["payment","new","create"]}><ArrowRight className="mr-2 h-4 w-4" />New payment instruction</CommandItem>
+          <CommandItem onSelect={() => go('/admin/corporate-actions?new=1')} keywords={["dividend","split","corporate action"]}><ArrowRight className="mr-2 h-4 w-4" />New corporate action</CommandItem>
+          <CommandItem onSelect={() => go('/admin/expected-receipts?new=1')} keywords={["receipt","expected","cash in"]}><ArrowRight className="mr-2 h-4 w-4" />Add expected receipt</CommandItem>
+          <CommandItem onSelect={() => go('/admin/cass7-daily-recon')} keywords={["cass","reconcile","recon"]}><ArrowRight className="mr-2 h-4 w-4" />CASS 7 daily reconciliation</CommandItem>
           <CommandItem onSelect={() => go('/payroll-processing')}><ArrowRight className="mr-2 h-4 w-4" />Start payroll run</CommandItem>
           <CommandItem onSelect={() => go('/bank-upload')}><ArrowRight className="mr-2 h-4 w-4" />Upload bank file</CommandItem>
           <CommandItem onSelect={() => go('/cases')}><ArrowRight className="mr-2 h-4 w-4" />Open case inbox</CommandItem>

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
-import { Plus, CalendarDays } from "lucide-react";
+import { Plus, CalendarDays, FileSpreadsheet } from "lucide-react";
+import { downloadCSV } from "@/lib/adminExportUtils";
 
 type CA = {
   id: string;
@@ -72,6 +74,27 @@ export default function CorporateActions() {
   };
   useEffect(() => { load(); }, []);
 
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setOpen(true);
+      searchParams.delete("new");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const exportCsv = () => {
+    downloadCSV(
+      "corporate-actions",
+      ["Symbol", "ISIN", "Event", "Ex date", "Record date", "Pay date", "Election deadline", "Rate", "Ratio", "Status"],
+      filtered.map((r) => [
+        r.symbol, r.isin ?? "", r.action_type,
+        r.ex_date ?? "", r.record_date ?? "", r.payment_date ?? "", r.election_deadline ?? "",
+        r.rate != null ? Number(r.rate).toFixed(4) : "", r.ratio ?? "", r.status,
+      ]),
+    );
+  };
+
   const filtered = useMemo(() =>
     rows.filter(r =>
       (status === "all" || r.status === status) &&
@@ -116,8 +139,10 @@ export default function CorporateActions() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><CalendarDays className="h-6 w-6" /> Corporate actions calendar</h1>
           <p className="text-sm text-muted-foreground">Dividends, splits, rights and tenders across the book — with election tracking.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add event</Button></DialogTrigger>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={exportCsv}><FileSpreadsheet className="h-4 w-4 mr-2" />Export CSV</Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />Add event</Button></DialogTrigger>
           <DialogContent className="max-w-lg">
             <DialogHeader><DialogTitle>New corporate action</DialogTitle></DialogHeader>
             <div className="grid gap-3">
@@ -162,6 +187,7 @@ export default function CorporateActions() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">

@@ -167,7 +167,7 @@ export default function DrawdownJourney() {
         <div className="flex items-start justify-between gap-4">
           <div className="text-center space-y-2 flex-1">
             <h1 className="text-3xl font-bold">Pension Drawdown Journey</h1>
-            <p className="text-muted-foreground">UK 2024/25 — flexible drawdown, UFPLS, PCLS with full tax calculations</p>
+            <p className="text-muted-foreground">UK 2026/27 — flexible drawdown, UFPLS, PCLS with full tax calculations</p>
           </div>
           <Button
             variant="outline"
@@ -571,7 +571,7 @@ export default function DrawdownJourney() {
           {/* Step 3: Tax breakdown */}
           <TabsContent value="step3">
             <Card>
-              <CardHeader><CardTitle>UK 2024/25 Tax Breakdown</CardTitle></CardHeader>
+              <CardHeader><CardTitle>UK 2026/27 Tax Breakdown</CardTitle></CardHeader>
               <CardContent className="space-y-3">
                 {(() => {
                   const tax = mode === "UFPLS" ? ufplsCalc.tax : fadCalc.tax;

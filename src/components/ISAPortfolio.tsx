@@ -19,7 +19,7 @@ interface Tx { date: string; type: string; amount: number; description: string }
 
 export default function ISAPortfolio() {
   const { toast } = useToast()
-  const [selectedYear, setSelectedYear] = useState('2025/26')
+  const [selectedYear, setSelectedYear] = useState('2026/27')
   const [dealOpen, setDealOpen] = useState(false)
   const [transferOpen, setTransferOpen] = useState(false)
 
@@ -35,16 +35,16 @@ export default function ISAPortfolio() {
     { date: '2025-02-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
     { date: '2025-01-15', type: 'Dividend', amount: 145.20, description: 'Vanguard FTSE Global All Cap' },
     { date: '2025-01-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
-    { date: '2024-12-20', type: 'Buy', amount: -2000, description: 'iShares Core MSCI World UCITS' },
-    { date: '2024-12-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
+    { date: '2026-12-20', type: 'Buy', amount: -2000, description: 'iShares Core MSCI World UCITS' },
+    { date: '2026-12-01', type: 'Contribution', amount: 1000, description: 'Monthly standing order' },
   ])
   const [yearSubscribed, setYearSubscribed] = useState(12500)
 
   const taxYearHistory = [
-    { year: '2025/26', allowance: 20000, subscribed: yearSubscribed, status: 'current' as const },
-    { year: '2024/25', allowance: 20000, subscribed: 20000, status: 'complete' as const },
-    { year: '2023/24', allowance: 20000, subscribed: 18200, status: 'complete' as const },
-    { year: '2022/23', allowance: 20000, subscribed: 15000, status: 'complete' as const },
+    { year: '2026/27', allowance: 20000, subscribed: yearSubscribed, status: 'current' as const },
+    { year: '2026/27', allowance: 20000, subscribed: 20000, status: 'complete' as const },
+    { year: '2026/27', allowance: 20000, subscribed: 18200, status: 'complete' as const },
+    { year: '2026/27', allowance: 20000, subscribed: 15000, status: 'complete' as const },
     { year: '2021/22', allowance: 20000, subscribed: 20000, status: 'complete' as const },
     { year: '2020/21', allowance: 20000, subscribed: 9500, status: 'complete' as const },
   ]
@@ -135,7 +135,7 @@ export default function ISAPortfolio() {
 
   async function downloadTaxPack() {
     await exportAnnualTaxPack({
-      clientName: 'Demo Client', taxYear: '2024/25', band: 'higher',
+      clientName: 'Demo Client', taxYear: '2026/27', band: 'higher',
       giaDisposals: [], giaDividends: 0,
       isaDividends: ytdDividends, isaSubscription: usedAllowance, isaAllowance: annualAllowance,
     })

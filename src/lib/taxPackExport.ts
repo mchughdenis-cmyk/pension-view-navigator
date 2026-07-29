@@ -4,8 +4,8 @@ import {
 } from 'docx'
 import { saveAs } from 'file-saver'
 import type { Disposal } from './cgt'
-import { estimateCgt, CGT_ALLOWANCE_2024_25 } from './cgt'
-import { estimateDividendTax, DIVIDEND_ALLOWANCE_2024_25, type TaxBand } from './dividendTax'
+import { estimateCgt, CGT_ALLOWANCE_2026_27 } from './cgt'
+import { estimateDividendTax, DIVIDEND_ALLOWANCE_2026_27, type TaxBand } from './dividendTax'
 
 const border = { style: BorderStyle.SINGLE, size: 4, color: 'CCCCCC' }
 const cellBorders = { top: border, bottom: border, left: border, right: border }
@@ -110,7 +110,7 @@ export async function exportAnnualTaxPack(opts: {
             ['Gross gains', `£${cgt.gross.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
             ['Losses', `£${cgt.losses.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
             ['Net gain', `£${cgt.netGain.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
-            [`Annual exempt amount (£${CGT_ALLOWANCE_2024_25.toLocaleString()})`, `£${cgt.allowanceUsed.toLocaleString(undefined, { maximumFractionDigits: 2 })} used`],
+            [`Annual exempt amount (£${CGT_ALLOWANCE_2026_27.toLocaleString()})`, `£${cgt.allowanceUsed.toLocaleString(undefined, { maximumFractionDigits: 2 })} used`],
             ['Taxable gain', `£${cgt.taxable.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
             [`CGT liability @ ${(cgt.rate * 100).toFixed(0)}%`, `£${cgt.liability.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
           ].map(([k, v], i) => new TableRow({
@@ -125,7 +125,7 @@ export async function exportAnnualTaxPack(opts: {
           columnWidths: [5860, 3500],
           rows: [
             ['Gross dividends received (GIA)', `£${divTax.gross.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
-            [`Dividend allowance (£${DIVIDEND_ALLOWANCE_2024_25})`, `£${divTax.allowance.toLocaleString(undefined, { maximumFractionDigits: 2 })} used`],
+            [`Dividend allowance (£${DIVIDEND_ALLOWANCE_2026_27})`, `£${divTax.allowance.toLocaleString(undefined, { maximumFractionDigits: 2 })} used`],
             ['Taxable dividends', `£${divTax.taxable.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
             [`Dividend tax @ ${(divTax.rate * 100).toFixed(2)}% (${divTax.band} rate)`, `£${divTax.liability.toLocaleString(undefined, { maximumFractionDigits: 2 })}`],
           ].map(([k, v], i) => new TableRow({

@@ -101,8 +101,8 @@ const pensionData = {
     usedThisYear: 40400,
     carryForward: [
       { year: "2021/22", available: 22000 },
-      { year: "2022/23", available: 18500 },
-      { year: "2023/24", available: 15200 }
+      { year: "2026/27", available: 18500 },
+      { year: "2026/27", available: 15200 }
     ]
   },
   investments: [
@@ -113,8 +113,8 @@ const pensionData = {
     { name: "Cash", allocation: 5, value: 24287 }
   ],
   transfers: [
-    { from: "Old Company Scheme", amount: 45000, date: "2024-03-15", status: "completed" },
-    { from: "Previous SIPP", amount: 32000, date: "2024-01-10", status: "completed" }
+    { from: "Old Company Scheme", amount: 45000, date: "2026-03-15", status: "completed" },
+    { from: "Previous SIPP", amount: 32000, date: "2026-01-10", status: "completed" }
   ]
 };
 

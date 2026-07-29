@@ -44,7 +44,7 @@ interface TaxBreakdown {
   net: number;
 }
 
-// UK Tax calculations for 2024/25 tax year
+// UK Tax calculations for 2026/27 tax year
 const calculateTax = (annualGross: number, taxCode: string): TaxBreakdown => {
   // Extract personal allowance from tax code (e.g., 1257L = £12,570)
   const codeNumber = parseInt(taxCode.replace(/[^0-9]/g, '')) || 1257;
@@ -53,7 +53,7 @@ const calculateTax = (annualGross: number, taxCode: string): TaxBreakdown => {
   // Calculate taxable income
   const taxableIncome = Math.max(0, annualGross - personalAllowance);
   
-  // UK Income Tax bands 2024/25
+  // UK Income Tax bands 2026/27
   let tax = 0;
   if (taxableIncome > 0) {
     // Basic rate (20%) - £0 to £37,700
@@ -144,9 +144,9 @@ export default function DripFeedDrawdown() {
       name: 'Regular Income',
       amount: 2000,
       frequency: 'monthly',
-      startDate: '2024-01-01',
+      startDate: '2026-01-01',
       status: 'active',
-      nextPayment: '2024-09-01',
+      nextPayment: '2026-09-01',
       totalPaid: 16000,
       remainingPayments: 180
     },
@@ -155,7 +155,7 @@ export default function DripFeedDrawdown() {
       name: 'Holiday Fund',
       amount: 5000,
       frequency: 'annually',
-      startDate: '2024-06-01',
+      startDate: '2026-06-01',
       endDate: '2029-06-01',
       status: 'scheduled',
       nextPayment: '2025-06-01',
@@ -167,10 +167,10 @@ export default function DripFeedDrawdown() {
       name: 'Emergency Fund Top-up',
       amount: 1500,
       frequency: 'quarterly',
-      startDate: '2024-03-01',
+      startDate: '2026-03-01',
       endDate: '2026-03-01',
       status: 'paused',
-      nextPayment: '2024-12-01',
+      nextPayment: '2026-12-01',
       totalPaid: 4500,
       remainingPayments: 5
     }

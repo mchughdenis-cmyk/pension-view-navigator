@@ -52,7 +52,7 @@ export function ChatAssistant({ compact, embedded, className }: Props) {
             </div>
             <div>
               <div className="text-sm font-semibold leading-tight">Navigator</div>
-              <div className="text-[11px] text-muted-foreground">UK pension assistant · 2024/25</div>
+              <div className="text-[11px] text-muted-foreground">UK pension assistant · 2026/27</div>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export function ChatAssistant({ compact, embedded, className }: Props) {
         {empty && (
           <div className="space-y-3">
             <div className="text-sm text-muted-foreground">
-              Hi 👋 I can answer questions about your pension, UK 2024/25 tax rules, and how to use this app.
+              Hi 👋 I can answer questions about your pension, UK 2026/27 tax rules, and how to use this app.
               I provide guidance, not regulated financial advice.
             </div>
             <div className="flex flex-wrap gap-2">

@@ -107,7 +107,7 @@ export default function InstantDeposit() {
       net_amount: calc.net,
       tax_relief: calc.taxRelief,
       relief_method: reliefKey === "net_pay" ? "net_pay" : reliefKey === "employer" ? "employer" : "ras",
-      tax_year: "2024/25",
+      tax_year: "2026/27",
       status: "received",
       reference: `DEP-${Date.now()}`,
       notes: `From ${source.bankName} ${mask(source.accountNumber)} via Open Banking`,
@@ -124,7 +124,7 @@ export default function InstantDeposit() {
         reference: `DEP-${Date.now()}`,
         status: "settled",
         effective_date: new Date().toISOString().slice(0, 10),
-        tax_year: "2024/25",
+        tax_year: "2026/27",
         tax_relief_amount: calc.taxRelief,
       } as any);
     }

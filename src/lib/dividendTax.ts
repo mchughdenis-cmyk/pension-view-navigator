@@ -1,7 +1,7 @@
-// UK dividend tax — 2024/25 rates.
+// UK dividend tax — 2026/27 rates.
 // Dividend allowance: £500. Rates: 8.75% basic / 33.75% higher / 39.35% additional.
 
-export const DIVIDEND_ALLOWANCE_2024_25 = 500;
+export const DIVIDEND_ALLOWANCE_2026_27 = 500;
 
 export const DIVIDEND_RATES = {
   basic: 0.0875,
@@ -23,7 +23,7 @@ export interface DividendTaxResult {
 export function estimateDividendTax(
   grossDividends: number,
   band: TaxBand = "higher",
-  allowance: number = DIVIDEND_ALLOWANCE_2024_25,
+  allowance: number = DIVIDEND_ALLOWANCE_2026_27,
 ): DividendTaxResult {
   const taxable = Math.max(0, grossDividends - allowance);
   const rate = DIVIDEND_RATES[band];

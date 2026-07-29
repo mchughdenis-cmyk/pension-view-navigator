@@ -35,7 +35,7 @@ const formatDate = (date: string) => {
 
 // Mock data for the annual summary
 const annualSummaryData = {
-  taxYear: "2023/24",
+  taxYear: "2026/27",
   generatedDate: new Date().toISOString(),
   client: {
     name: "John Smith",
@@ -83,18 +83,18 @@ const annualSummaryData = {
     }
   ],
   transactions: [
-    { date: "2023-04-15", type: "Contribution", provider: "Aviva", amount: 2000 },
-    { date: "2023-05-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
-    { date: "2023-06-10", type: "Drawdown", provider: "Prudential", amount: -300 },
-    { date: "2023-07-15", type: "Contribution", provider: "Aviva", amount: 2000 },
-    { date: "2023-08-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
-    { date: "2023-09-10", type: "Drawdown", provider: "Prudential", amount: -300 },
-    { date: "2023-10-15", type: "Contribution", provider: "Aviva", amount: 2200 },
-    { date: "2023-11-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
-    { date: "2023-12-10", type: "Drawdown", provider: "Prudential", amount: -300 },
-    { date: "2024-01-15", type: "Contribution", provider: "Aviva", amount: 2200 },
-    { date: "2024-02-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
-    { date: "2024-03-10", type: "Drawdown", provider: "Prudential", amount: -300 }
+    { date: "2025-04-15", type: "Contribution", provider: "Aviva", amount: 2000 },
+    { date: "2025-05-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
+    { date: "2025-06-10", type: "Drawdown", provider: "Prudential", amount: -300 },
+    { date: "2025-07-15", type: "Contribution", provider: "Aviva", amount: 2000 },
+    { date: "2025-08-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
+    { date: "2025-09-10", type: "Drawdown", provider: "Prudential", amount: -300 },
+    { date: "2025-10-15", type: "Contribution", provider: "Aviva", amount: 2200 },
+    { date: "2025-11-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
+    { date: "2025-12-10", type: "Drawdown", provider: "Prudential", amount: -300 },
+    { date: "2026-01-15", type: "Contribution", provider: "Aviva", amount: 2200 },
+    { date: "2026-02-20", type: "Contribution", provider: "Legal & General", amount: 8000 },
+    { date: "2026-03-10", type: "Drawdown", provider: "Prudential", amount: -300 }
   ]
 };
 

@@ -68,7 +68,7 @@ const MockAssistant = () => (
       <div className="flex gap-2"><Bot className="h-5 w-5 text-primary shrink-0 mt-0.5" />
         <div className="bg-primary/10 border border-primary/20 rounded-lg p-2.5 text-sm max-w-[85%]">
           Yes — you can take up to £104,375 as PCLS from your £417,500 pot (25% rule) tax-free without triggering MPAA. Taking £40k as PCLS leaves £64,375 of tax-free cash. You'd still have full £60k annual allowance.
-          <div className="mt-2 flex gap-1"><Badge variant="outline" className="text-[10px]">PCLS rules</Badge><Badge variant="outline" className="text-[10px]">2024/25 tax year</Badge></div>
+          <div className="mt-2 flex gap-1"><Badge variant="outline" className="text-[10px]">PCLS rules</Badge><Badge variant="outline" className="text-[10px]">2026/27 tax year</Badge></div>
         </div>
       </div>
       <div className="flex gap-2"><User className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
@@ -168,7 +168,7 @@ const MockCockpit = () => (
 const MockHMRC = () => (
   <div className="p-4 space-y-3 bg-background">
     <div className="rounded-lg border bg-card p-3">
-      <div className="flex justify-between items-center mb-2"><div className="text-sm font-medium">Event reporting</div><Badge variant="outline" className="text-[10px]">2024/25</Badge></div>
+      <div className="flex justify-between items-center mb-2"><div className="text-sm font-medium">Event reporting</div><Badge variant="outline" className="text-[10px]">2026/27</Badge></div>
       <div className="space-y-2 text-xs">
         {[["BCE 1 – Drawdown designation","£103,150","Submitted"],["BCE 5A – Age 75 test","Pending","Scheduled"],["RTI / FPS submission","£28,000","Submitted"]].map(([t,a,s])=>(
           <div key={t} className="flex justify-between items-center py-1.5 border-b last:border-0">
@@ -190,7 +190,7 @@ const MockHMRC = () => (
 
 const STEPS = [
   { icon: LayoutDashboard, title: "Client dashboard", body: "A single holistic view of pot value, allowances, contributions and projections — the day-one home for every client.", tag: "Client", Mock: MockDashboard },
-  { icon: Sparkles, title: "Ask Navigator (AI)", body: "Conversational AI grounded in the client's own data and UK 2024/25 tax rules. Answers questions, drafts illustrations and surfaces risk.", tag: "AI", Mock: MockAssistant },
+  { icon: Sparkles, title: "Ask Navigator (AI)", body: "Conversational AI grounded in the client's own data and UK 2026/27 tax rules. Answers questions, drafts illustrations and surfaces risk.", tag: "AI", Mock: MockAssistant },
   { icon: TrendingUp, title: "Monte Carlo projection", body: "10,000-scenario stochastic modelling with a cone-of-outcomes fan chart — including post-2027 IHT-on-pensions impact.", tag: "Modelling", Mock: MockProjection },
   { icon: Workflow, title: "Drawdown planner", body: "PCLS, UFPLS, flexi-access and drip-feed drawdown — with live tax, MPAA and IHT impact previews.", tag: "Drawdown", Mock: MockDrawdown },
   { icon: FileText, title: "Pension passport", body: "A single-page summary used for transfers, KYC and beneficiary nominations — exportable as branded PDF/Word.", tag: "Document", Mock: MockPassport },

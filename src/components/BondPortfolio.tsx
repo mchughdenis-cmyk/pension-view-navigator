@@ -66,10 +66,10 @@ export default function BondPortfolio({ bondType }: Props) {
     const withdrawn = policies.reduce((s, p) => s + p.cumulativeWithdrawals, 0)
     const gain = value + withdrawn - premiums
     const taxYearGain = events
-      .filter(e => e.date >= '2024-04-06' && e.date <= '2025-04-05')
+      .filter(e => e.date >= '2026-04-06' && e.date <= '2025-04-05')
       .reduce((s, e) => s + e.chargeableGain, 0)
     const taxYearTax = events
-      .filter(e => e.date >= '2024-04-06' && e.date <= '2025-04-05')
+      .filter(e => e.date >= '2026-04-06' && e.date <= '2025-04-05')
       .reduce((s, e) => s + e.netTaxDue, 0)
     return { value, premiums, withdrawn, gain, taxYearGain, taxYearTax }
   }, [policies, events])
@@ -175,7 +175,7 @@ export default function BondPortfolio({ bondType }: Props) {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">2024/25 Tax Due</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">2026/27 Tax Due</CardTitle></CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${totals.taxYearTax > 0 ? 'text-destructive' : 'text-foreground'}`}>
                 £{totals.taxYearTax.toFixed(0)}

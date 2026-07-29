@@ -23,18 +23,18 @@ import {
 
 const reports = [
   // HMRC Returns
-  { id: 1, category: 'hmrc', name: 'Event Report', description: 'Report pension scheme events to HMRC', frequency: 'Annual', deadline: '2024-01-31', status: 'submitted', lastRun: '2024-01-15', taxYear: '2023-24', recordCount: 342 },
-  { id: 2, category: 'hmrc', name: 'Annual Return of Information', description: 'Member contributions and benefit crystallisation', frequency: 'Annual', deadline: '2024-01-31', status: 'in_progress', lastRun: null, taxYear: '2023-24', recordCount: 1247 },
-  { id: 3, category: 'hmrc', name: 'Accounting for Tax (AFT)', description: 'Tax charges on unauthorised payments', frequency: 'Quarterly', deadline: '2024-02-14', status: 'not_started', lastRun: '2023-11-14', taxYear: '2023-24 Q3', recordCount: 0 },
-  { id: 4, category: 'hmrc', name: 'Pension Scheme Return', description: 'Scheme registration and membership data', frequency: 'Annual', deadline: '2024-02-01', status: 'submitted', lastRun: '2024-01-20', taxYear: '2023-24', recordCount: 1 },
+  { id: 1, category: 'hmrc', name: 'Event Report', description: 'Report pension scheme events to HMRC', frequency: 'Annual', deadline: '2026-01-31', status: 'submitted', lastRun: '2026-01-15', taxYear: '2025-24', recordCount: 342 },
+  { id: 2, category: 'hmrc', name: 'Annual Return of Information', description: 'Member contributions and benefit crystallisation', frequency: 'Annual', deadline: '2026-01-31', status: 'in_progress', lastRun: null, taxYear: '2025-24', recordCount: 1247 },
+  { id: 3, category: 'hmrc', name: 'Accounting for Tax (AFT)', description: 'Tax charges on unauthorised payments', frequency: 'Quarterly', deadline: '2026-02-14', status: 'not_started', lastRun: '2025-11-14', taxYear: '2025-24 Q3', recordCount: 0 },
+  { id: 4, category: 'hmrc', name: 'Pension Scheme Return', description: 'Scheme registration and membership data', frequency: 'Annual', deadline: '2026-02-01', status: 'submitted', lastRun: '2026-01-20', taxYear: '2025-24', recordCount: 1 },
   // FCA Returns
-  { id: 5, category: 'fca', name: 'RMAR Return', description: 'Retail Mediation Activities Return', frequency: 'Quarterly', deadline: '2024-03-31', status: 'not_started', lastRun: '2023-12-28', taxYear: 'Q1 2024', recordCount: null },
-  { id: 6, category: 'fca', name: 'Client Asset Return (CASS)', description: 'Client money and custody assets', frequency: 'Annual', deadline: '2024-06-30', status: 'not_started', lastRun: '2023-06-28', taxYear: '2023-24', recordCount: null },
-  { id: 7, category: 'fca', name: 'SUP 16 Annual Return', description: 'Annual controller/close links data', frequency: 'Annual', deadline: '2024-04-30', status: 'not_started', lastRun: '2023-04-28', taxYear: '2023-24', recordCount: null },
+  { id: 5, category: 'fca', name: 'RMAR Return', description: 'Retail Mediation Activities Return', frequency: 'Quarterly', deadline: '2026-03-31', status: 'not_started', lastRun: '2025-12-28', taxYear: 'Q1 2024', recordCount: null },
+  { id: 6, category: 'fca', name: 'Client Asset Return (CASS)', description: 'Client money and custody assets', frequency: 'Annual', deadline: '2026-06-30', status: 'not_started', lastRun: '2025-06-28', taxYear: '2025-24', recordCount: null },
+  { id: 7, category: 'fca', name: 'SUP 16 Annual Return', description: 'Annual controller/close links data', frequency: 'Annual', deadline: '2026-04-30', status: 'not_started', lastRun: '2025-04-28', taxYear: '2025-24', recordCount: null },
   // SMPI
-  { id: 8, category: 'smpi', name: 'Statutory Money Purchase Illustration', description: 'Annual benefit statement for DC members', frequency: 'Annual', deadline: '2024-09-30', status: 'in_progress', lastRun: null, taxYear: '2024', recordCount: 1060 },
+  { id: 8, category: 'smpi', name: 'Statutory Money Purchase Illustration', description: 'Annual benefit statement for DC members', frequency: 'Annual', deadline: '2026-09-30', status: 'in_progress', lastRun: null, taxYear: '2024', recordCount: 1060 },
   // Pensions Dashboard
-  { id: 9, category: 'dashboard', name: 'Pensions Dashboard Connection', description: 'Data feed to Pensions Dashboard Programme', frequency: 'Real-time', deadline: 'Ongoing', status: 'active', lastRun: '2024-01-15', taxYear: 'N/A', recordCount: 1247 },
+  { id: 9, category: 'dashboard', name: 'Pensions Dashboard Connection', description: 'Data feed to Pensions Dashboard Programme', frequency: 'Real-time', deadline: 'Ongoing', status: 'active', lastRun: '2026-01-15', taxYear: 'N/A', recordCount: 1247 },
 ]
 
 const statusConfig: Record<string, { label: string; variant: string; icon: React.ElementType }> = {

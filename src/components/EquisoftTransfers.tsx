@@ -96,7 +96,7 @@ const fmt = (n: number) => new Intl.NumberFormat("en-GB", { style: "currency", c
 function seed(): EquisoftTransfer[] {
   const now = Date.now()
   const t1: EquisoftTransfer = {
-    id: crypto.randomUUID(), equisoft_ref: "EQS-2025-100451", direction: "inbound",
+    id: crypto.randomUUID(), equisoft_ref: "EQS-2026-100451", direction: "inbound",
     client_name: "Margaret Hughes", client_ref: "CL-00214",
     ceding_provider: "Hargreaves Lansdown SIPP", receiving_provider: "Airgead SIPP",
     custodian: "Pershing", wrapper: "SIPP",
@@ -111,7 +111,7 @@ function seed(): EquisoftTransfer[] {
     ],
   }
   const t2: EquisoftTransfer = {
-    id: crypto.randomUUID(), equisoft_ref: "EQS-2025-100462", direction: "inbound",
+    id: crypto.randomUUID(), equisoft_ref: "EQS-2026-100462", direction: "inbound",
     client_name: "David Okafor", client_ref: "CL-00318",
     ceding_provider: "AJ Bell SIPP", receiving_provider: "Airgead SIPP",
     custodian: "SEI", wrapper: "SIPP",
@@ -124,7 +124,7 @@ function seed(): EquisoftTransfer[] {
     ],
   }
   const t3: EquisoftTransfer = {
-    id: crypto.randomUUID(), equisoft_ref: "EQS-2025-100470", direction: "outbound",
+    id: crypto.randomUUID(), equisoft_ref: "EQS-2026-100470", direction: "outbound",
     client_name: "Priya Shah", client_ref: "CL-00125",
     ceding_provider: "Airgead SIPP", receiving_provider: "Quilter Cheviot",
     custodian: "Pershing", wrapper: "SIPP",

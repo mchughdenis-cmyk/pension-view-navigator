@@ -106,7 +106,7 @@ export default function PensionPassport() {
             new Table({
               width: { size: 9000, type: WidthType.DXA }, columnWidths: [4500, 4500],
               rows: [
-                row("Full State Pension (2024/25)", "£221.20/week (£11,502/year)"),
+                row("Full State Pension (2026/27)", "£221.20/week (£11,502/year)"),
                 row("NI qualifying years needed", "35"),
                 row("State Pension age", age && age >= 50 ? "67" : "68 (subject to review)"),
               ],

@@ -58,7 +58,7 @@ export default function IntegrationsHub() {
       category: 'payments',
       status: 'connected',
       icon: <CreditCard className="w-6 h-6" />,
-      lastSync: '2024-01-20 14:30',
+      lastSync: '2026-01-20 14:30',
       apiVersion: 'v3.2',
       features: ['Visa', 'Mastercard', 'Amex', '3D Secure', 'Recurring Payments']
     },
@@ -69,7 +69,7 @@ export default function IntegrationsHub() {
       category: 'payments',
       status: 'connected',
       icon: <ArrowRightLeft className="w-6 h-6" />,
-      lastSync: '2024-01-20 09:00',
+      lastSync: '2026-01-20 09:00',
       apiVersion: 'v2.1',
       features: ['BACS', 'Faster Payments', 'CHAPS', 'Bulk Payments', 'Payment Status']
     },
@@ -80,7 +80,7 @@ export default function IntegrationsHub() {
       category: 'payments',
       status: 'connected',
       icon: <Building2 className="w-6 h-6" />,
-      lastSync: '2024-01-20 08:00',
+      lastSync: '2026-01-20 08:00',
       apiVersion: 'v1.5',
       features: ['DDI Setup', 'Mandate Management', 'Failed DD Handling', 'AUDDIS', 'ARUDD']
     },
@@ -91,7 +91,7 @@ export default function IntegrationsHub() {
       category: 'compliance',
       status: 'connected',
       icon: <Shield className="w-6 h-6" />,
-      lastSync: '2024-01-20 15:45',
+      lastSync: '2026-01-20 15:45',
       apiVersion: 'v4.0',
       features: ['ID Verification', 'PEP Screening', 'Sanctions Check', 'Address Verification', 'Document Verification']
     },
@@ -102,7 +102,7 @@ export default function IntegrationsHub() {
       category: 'investments',
       status: 'connected',
       icon: <BarChart3 className="w-6 h-6" />,
-      lastSync: '2024-01-20 16:00',
+      lastSync: '2026-01-20 16:00',
       apiVersion: 'v3.8',
       features: ['Fund Data', 'Star Ratings', 'Performance Data', 'Holdings', 'Risk Metrics']
     },
@@ -113,7 +113,7 @@ export default function IntegrationsHub() {
       category: 'compliance',
       status: 'connected',
       icon: <FileText className="w-6 h-6" />,
-      lastSync: '2024-01-19 23:00',
+      lastSync: '2026-01-19 23:00',
       apiVersion: 'v2.0',
       features: ['Relief at Source', 'Event Reports', 'AFT Returns', 'PSR Reporting']
     },
@@ -144,7 +144,7 @@ export default function IntegrationsHub() {
       category: 'transfers',
       status: 'connected',
       icon: <ArrowRightLeft className="w-6 h-6" />,
-      lastSync: '2024-01-20 12:00',
+      lastSync: '2026-01-20 12:00',
       apiVersion: 'v3.0',
       features: ['ORigo ID', 'Transfer Messaging', 'Status Tracking', 'Bulk Transfers', 'Ceding/Receiving']
     }

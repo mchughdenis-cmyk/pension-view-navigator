@@ -39,7 +39,7 @@ export default function HMRCReporting() {
     <div className="container mx-auto p-6 space-y-6">
       <PageHeader title="HMRC Reporting" description="RAS reclaims, Event Reports, AFT, PSR, RTI/PAYE — sandbox-backed end-to-end." />
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <StatCard label="RAS reclaims" value={groupCount('ras_reclaim')} sub="2024/25" />
+        <StatCard label="RAS reclaims" value={groupCount('ras_reclaim')} sub="2026/27" />
         <StatCard label="Event reports" value={groupCount('event_report')} />
         <StatCard label="AFT" value={groupCount('aft')} />
         <StatCard label="PSR" value={groupCount('psr')} />

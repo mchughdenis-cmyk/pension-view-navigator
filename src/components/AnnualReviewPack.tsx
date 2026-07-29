@@ -228,7 +228,7 @@ export default function AnnualReviewPack() {
       P(`Stated objectives: ${suitability?.objectives ?? "Long-term capital growth and tax-efficient retirement income provision."}`),
       P("The recorded ATR has been reviewed against the current portfolio allocation. The portfolio remains consistent with the client's risk profile, capacity for loss, and time horizon (FCA COBS 9.2)."),
 
-      H1("4. UK allowances and tax position (2024/25)"),
+      H1("4. UK allowances and tax position (2026/27)"),
       kv([
         ["Annual Allowance", formatGBP(allowance)],
         ["AA used this tax year", formatGBP(Number(client.annual_allowance_used || 0))],

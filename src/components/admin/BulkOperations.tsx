@@ -19,14 +19,14 @@ import {
 } from 'lucide-react'
 
 const bulkOperations = [
-  { id: 1, name: 'Quarterly Fee Collection', type: 'fees', lastRun: '2024-01-01', nextRun: '2024-04-01', clientsAffected: 1247, status: 'completed', duration: '12 mins' },
-  { id: 2, name: 'Portfolio Rebalance - All Models', type: 'rebalance', lastRun: '2024-01-10', nextRun: '2024-04-10', clientsAffected: 1131, status: 'completed', duration: '45 mins' },
-  { id: 3, name: 'SMPI Statement Generation', type: 'documents', lastRun: '2024-01-10', nextRun: '2024-09-01', clientsAffected: 1060, status: 'in_progress', duration: 'Running...' },
-  { id: 4, name: 'Annual Benefit Statements', type: 'documents', lastRun: '2023-09-01', nextRun: '2024-09-01', clientsAffected: 1247, status: 'scheduled', duration: '~30 mins' },
-  { id: 5, name: 'KYC Batch Reverification', type: 'compliance', lastRun: '2024-01-08', nextRun: '2024-02-08', clientsAffected: 89, status: 'completed', duration: '8 mins' },
-  { id: 6, name: 'Daily Reconciliation', type: 'reconciliation', lastRun: '2024-01-15', nextRun: '2024-01-16', clientsAffected: 1247, status: 'completed', duration: '5 mins' },
-  { id: 7, name: 'Adviser Fee Collection', type: 'fees', lastRun: '2024-01-01', nextRun: '2024-04-01', clientsAffected: 1247, status: 'completed', duration: '8 mins' },
-  { id: 8, name: 'Dividend Processing', type: 'corporate_actions', lastRun: '2024-01-15', nextRun: 'As needed', clientsAffected: 487, status: 'completed', duration: '15 mins' },
+  { id: 1, name: 'Quarterly Fee Collection', type: 'fees', lastRun: '2026-01-01', nextRun: '2026-04-01', clientsAffected: 1247, status: 'completed', duration: '12 mins' },
+  { id: 2, name: 'Portfolio Rebalance - All Models', type: 'rebalance', lastRun: '2026-01-10', nextRun: '2026-04-10', clientsAffected: 1131, status: 'completed', duration: '45 mins' },
+  { id: 3, name: 'SMPI Statement Generation', type: 'documents', lastRun: '2026-01-10', nextRun: '2026-09-01', clientsAffected: 1060, status: 'in_progress', duration: 'Running...' },
+  { id: 4, name: 'Annual Benefit Statements', type: 'documents', lastRun: '2025-09-01', nextRun: '2026-09-01', clientsAffected: 1247, status: 'scheduled', duration: '~30 mins' },
+  { id: 5, name: 'KYC Batch Reverification', type: 'compliance', lastRun: '2026-01-08', nextRun: '2026-02-08', clientsAffected: 89, status: 'completed', duration: '8 mins' },
+  { id: 6, name: 'Daily Reconciliation', type: 'reconciliation', lastRun: '2026-01-15', nextRun: '2026-01-16', clientsAffected: 1247, status: 'completed', duration: '5 mins' },
+  { id: 7, name: 'Adviser Fee Collection', type: 'fees', lastRun: '2026-01-01', nextRun: '2026-04-01', clientsAffected: 1247, status: 'completed', duration: '8 mins' },
+  { id: 8, name: 'Dividend Processing', type: 'corporate_actions', lastRun: '2026-01-15', nextRun: 'As needed', clientsAffected: 487, status: 'completed', duration: '15 mins' },
 ]
 
 const statusConfig: Record<string, { variant: string; icon: React.ElementType }> = {

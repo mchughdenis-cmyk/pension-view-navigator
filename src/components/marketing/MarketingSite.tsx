@@ -304,7 +304,7 @@ export function MarketingLayout() {
               <li>FCA-aligned operating model</li>
               <li>HMRC reporting & RTI</li>
               <li>CASS-aware reconciliation</li>
-              <li>UK 2024/25 tax rules</li>
+              <li>UK 2026/27 tax rules</li>
             </ul>
           </div>
         </div>
@@ -567,7 +567,7 @@ export function MarketingHome() {
             { icon: TrendingUp, title: "Monte Carlo & drawdown", desc: "10,000-scenario projections, fan-chart visualisation, drip-feed drawdown, UFPLS, PCLS and post-2027 IHT modelling." },
             { icon: Building2, title: "Employer portal & bulk ops", desc: "5-step employer setup wizard, contribution matching visualiser, bulk file uploads and PAYE/RTI reporting." },
             { icon: Users, title: "Multi-portal architecture", desc: "Distinct workspaces for clients, advisers, employers and administrators — with cross-portal notification routing." },
-            { icon: Sparkles, title: "Ask Navigator (AI)", desc: "Embedded AI assistant grounded in the client's own data and UK 2024/25 tax rules." },
+            { icon: Sparkles, title: "Ask Navigator (AI)", desc: "Embedded AI assistant grounded in the client's own data and UK 2026/27 tax rules." },
             { icon: ShieldCheck, title: "Compliance & audit", desc: "HMRC RTI, LSA / LSDBA, CASS reconciliation, vulnerable client register and a full immutable audit trail." },
             { icon: PiggyBank, title: "Every wrapper", desc: "SIPP, SSAS, Stocks & Shares ISA, GIA and bespoke schemes — in a single ledger with CGT and allowance tracking." },
             { icon: ScrollText, title: "Operations cockpit", desc: "Real-time SLA monitoring, exceptions, dealing desk, bulk bank reconciliation and document vault." },
@@ -1006,7 +1006,7 @@ export function MarketingExpertise() {
               </h2>
               <p className="mt-4 text-muted-foreground">
                 Embedded inside the client and adviser portals, Ask Navigator answers UK pension
-                queries grounded in 2024/25 tax rules and the user's own portfolio context.
+                queries grounded in 2026/27 tax rules and the user's own portfolio context.
               </p>
               <div className="mt-6">
                 <Button asChild><Link to="/assistant">Try Ask Navigator</Link></Button>

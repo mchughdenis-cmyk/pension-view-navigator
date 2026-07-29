@@ -22,15 +22,15 @@ import {
 const welcomePackData = {
   clientName: "John Smith",
   advisorName: "Sarah Johnson",
-  welcomeDate: "2024-07-25",
+  welcomeDate: "2026-07-25",
   pensionValue: 485750,
   contributions: [
-    { provider: "Aviva Personal Pension", amount: 8400, date: "2024-07-01", type: "Regular" },
-    { provider: "Legal & General SIPP", amount: 32000, date: "2024-06-15", type: "Annual" }
+    { provider: "Aviva Personal Pension", amount: 8400, date: "2026-07-01", type: "Regular" },
+    { provider: "Legal & General SIPP", amount: 32000, date: "2026-06-15", type: "Annual" }
   ],
   transfers: [
-    { from: "Old Company Scheme", amount: 45000, date: "2024-03-15", status: "Completed" },
-    { from: "Previous SIPP", amount: 32000, date: "2024-01-10", status: "Completed" }
+    { from: "Old Company Scheme", amount: 45000, date: "2026-03-15", status: "Completed" },
+    { from: "Previous SIPP", amount: 32000, date: "2026-01-10", status: "Completed" }
   ],
   futureProjections: {
     age55: { conservative: 520000, balanced: 585000, growth: 665000 },
@@ -156,7 +156,7 @@ export default function DigitalWelcomePack() {
                     <div>
                       <h3 className="font-semibold mb-2">3. Annual Allowance</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        The annual allowance for pension contributions is £60,000 (2024/25). Contributions above this limit may result in tax charges. 
+                        The annual allowance for pension contributions is £60,000 (2026/27). Contributions above this limit may result in tax charges. 
                         Unused allowance from the previous 3 years can be carried forward.
                       </p>
                     </div>

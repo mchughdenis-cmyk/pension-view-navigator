@@ -50,8 +50,8 @@ export default function InstrumentTransfer() {
       currentValue: 85420,
       fromProvider: 'Hargreaves Lansdown',
       status: 'completed',
-      dateInitiated: '2024-01-15',
-      estimatedCompletion: '2024-02-15',
+      dateInitiated: '2026-01-15',
+      estimatedCompletion: '2026-02-15',
       progressPercentage: 100,
       notes: 'Transfer completed successfully'
     },
@@ -63,8 +63,8 @@ export default function InstrumentTransfer() {
       currentValue: 42350,
       fromProvider: 'AJ Bell',
       status: 'in-progress',
-      dateInitiated: '2024-02-01',
-      estimatedCompletion: '2024-03-01',
+      dateInitiated: '2026-02-01',
+      estimatedCompletion: '2026-03-01',
       progressPercentage: 65,
       notes: 'Awaiting provider confirmation'
     },
@@ -76,8 +76,8 @@ export default function InstrumentTransfer() {
       currentValue: 125600,
       fromProvider: 'Fidelity',
       status: 'in-progress',
-      dateInitiated: '2024-02-10',
-      estimatedCompletion: '2024-03-10',
+      dateInitiated: '2026-02-10',
+      estimatedCompletion: '2026-03-10',
       progressPercentage: 40,
       notes: 'Documentation received, processing transfer'
     },
@@ -89,8 +89,8 @@ export default function InstrumentTransfer() {
       currentValue: 67890,
       fromProvider: 'Standard Life',
       status: 'pending',
-      dateInitiated: '2024-02-20',
-      estimatedCompletion: '2024-03-20',
+      dateInitiated: '2026-02-20',
+      estimatedCompletion: '2026-03-20',
       progressPercentage: 15,
       notes: 'Awaiting initial documentation'
     },
@@ -102,8 +102,8 @@ export default function InstrumentTransfer() {
       currentValue: 98750,
       fromProvider: 'Hargreaves Lansdown',
       status: 'delayed',
-      dateInitiated: '2024-01-20',
-      estimatedCompletion: '2024-02-20',
+      dateInitiated: '2026-01-20',
+      estimatedCompletion: '2026-02-20',
       progressPercentage: 55,
       notes: 'Delayed due to missing certificates from provider'
     }

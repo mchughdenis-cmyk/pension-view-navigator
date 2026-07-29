@@ -1,7 +1,7 @@
-// UK CGT engine — share matching rules for 2024/25.
+// UK CGT engine — share matching rules for 2026/27.
 // Order of matching: (1) same-day, (2) bed & breakfast (30 days after),
 // (3) s104 pooled holding (average cost).
-// CGT annual exempt amount 2024/25: £3,000. Rates: 10% (basic) / 20% (higher).
+// CGT annual exempt amount 2026/27: £3,000. Rates: 10% (basic) / 20% (higher).
 
 export interface Lot {
   id: string;
@@ -27,7 +27,7 @@ export interface S104Pool {
   cost: number;
 }
 
-export const CGT_ALLOWANCE_2024_25 = 3000;
+export const CGT_ALLOWANCE_2026_27 = 3000;
 export const CGT_RATE_BASIC = 0.10;
 export const CGT_RATE_HIGHER = 0.20;
 
@@ -82,7 +82,7 @@ export function matchDisposal(opts: {
 export function estimateCgt(
   disposals: Disposal[],
   taxBand: "basic" | "higher" = "higher",
-  allowance = CGT_ALLOWANCE_2024_25,
+  allowance = CGT_ALLOWANCE_2026_27,
 ): {
   gross: number;
   losses: number;

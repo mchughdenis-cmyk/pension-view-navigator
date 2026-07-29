@@ -1,5 +1,5 @@
 /**
- * UK pensions Annual Allowance calculations (2025/26 basis).
+ * UK pensions Annual Allowance calculations (2026/27 basis).
  * Pure functions — no side effects, fully unit-testable.
  */
 

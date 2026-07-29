@@ -26,20 +26,20 @@ const formatCurrency = (amount: number) =>
   new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 2 }).format(amount)
 
 const reconciliations = [
-  { id: 1, date: '2024-01-15', type: 'Cash', account: 'Client Money Account', internalBalance: 42750000, externalBalance: 42750000, difference: 0, status: 'matched', items: 1247 },
-  { id: 2, date: '2024-01-15', type: 'Stock', account: 'Nominee Holdings', internalBalance: 38450000, externalBalance: 38452340, difference: 2340, status: 'break', items: 3842 },
-  { id: 3, date: '2024-01-14', type: 'Cash', account: 'Dealing Account', internalBalance: 1250000, externalBalance: 1250000, difference: 0, status: 'matched', items: 156 },
-  { id: 4, date: '2024-01-14', type: 'Stock', account: 'Crest Holdings', internalBalance: 15670000, externalBalance: 15670000, difference: 0, status: 'matched', items: 2104 },
-  { id: 5, date: '2024-01-13', type: 'Cash', account: 'Tax Reclaim', internalBalance: 87500, externalBalance: 85200, difference: -2300, status: 'investigating', items: 45 },
+  { id: 1, date: '2026-01-15', type: 'Cash', account: 'Client Money Account', internalBalance: 42750000, externalBalance: 42750000, difference: 0, status: 'matched', items: 1247 },
+  { id: 2, date: '2026-01-15', type: 'Stock', account: 'Nominee Holdings', internalBalance: 38450000, externalBalance: 38452340, difference: 2340, status: 'break', items: 3842 },
+  { id: 3, date: '2026-01-14', type: 'Cash', account: 'Dealing Account', internalBalance: 1250000, externalBalance: 1250000, difference: 0, status: 'matched', items: 156 },
+  { id: 4, date: '2026-01-14', type: 'Stock', account: 'Crest Holdings', internalBalance: 15670000, externalBalance: 15670000, difference: 0, status: 'matched', items: 2104 },
+  { id: 5, date: '2026-01-13', type: 'Cash', account: 'Tax Reclaim', internalBalance: 87500, externalBalance: 85200, difference: -2300, status: 'investigating', items: 45 },
 ]
 
 const corporateActions = [
-  { id: 1, date: '2024-01-20', type: 'Dividend', security: 'Vanguard FTSE All-World ETF', exDate: '2024-01-18', payDate: '2024-01-25', rate: '£0.42 per share', affectedClients: 487, totalValue: 89400, status: 'pending' },
-  { id: 2, date: '2024-01-15', type: 'Dividend', security: 'iShares UK Equity Index', exDate: '2024-01-12', payDate: '2024-01-19', rate: '£0.18 per share', affectedClients: 312, totalValue: 34200, status: 'processing' },
-  { id: 3, date: '2024-01-10', type: 'Stock Split', security: 'Tesla Inc (TSLA)', exDate: '2024-01-08', payDate: '2024-01-10', rate: '3:1 split', affectedClients: 45, totalValue: 0, status: 'completed' },
-  { id: 4, date: '2024-01-05', type: 'Rights Issue', security: 'Barclays PLC', exDate: '2024-01-03', payDate: '2024-01-20', rate: '1 for 5 @ £1.45', affectedClients: 156, totalValue: 45240, status: 'action_required' },
-  { id: 5, date: '2024-01-02', type: 'Dividend', security: 'L&G UK Index Trust', exDate: '2023-12-28', payDate: '2024-01-05', rate: '£0.25 per unit', affectedClients: 534, totalValue: 67800, status: 'completed' },
-  { id: 6, date: '2023-12-20', type: 'Merger', security: 'Vodafone Group / Three UK', exDate: '2024-02-01', payDate: 'TBC', rate: '0.8 new shares per old', affectedClients: 89, totalValue: 0, status: 'announced' },
+  { id: 1, date: '2026-01-20', type: 'Dividend', security: 'Vanguard FTSE All-World ETF', exDate: '2026-01-18', payDate: '2026-01-25', rate: '£0.42 per share', affectedClients: 487, totalValue: 89400, status: 'pending' },
+  { id: 2, date: '2026-01-15', type: 'Dividend', security: 'iShares UK Equity Index', exDate: '2026-01-12', payDate: '2026-01-19', rate: '£0.18 per share', affectedClients: 312, totalValue: 34200, status: 'processing' },
+  { id: 3, date: '2026-01-10', type: 'Stock Split', security: 'Tesla Inc (TSLA)', exDate: '2026-01-08', payDate: '2026-01-10', rate: '3:1 split', affectedClients: 45, totalValue: 0, status: 'completed' },
+  { id: 4, date: '2026-01-05', type: 'Rights Issue', security: 'Barclays PLC', exDate: '2026-01-03', payDate: '2026-01-20', rate: '1 for 5 @ £1.45', affectedClients: 156, totalValue: 45240, status: 'action_required' },
+  { id: 5, date: '2026-01-02', type: 'Dividend', security: 'L&G UK Index Trust', exDate: '2025-12-28', payDate: '2026-01-05', rate: '£0.25 per unit', affectedClients: 534, totalValue: 67800, status: 'completed' },
+  { id: 6, date: '2025-12-20', type: 'Merger', security: 'Vodafone Group / Three UK', exDate: '2026-02-01', payDate: 'TBC', rate: '0.8 new shares per old', affectedClients: 89, totalValue: 0, status: 'announced' },
 ]
 
 const statusConfig: Record<string, { variant: string; icon: React.ElementType }> = {

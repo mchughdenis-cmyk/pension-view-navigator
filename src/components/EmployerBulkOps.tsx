@@ -80,7 +80,7 @@ export default function EmployerBulkOps() {
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
                 <label className="text-sm">Tax year</label>
-                <Input className="w-32" defaultValue="2024/25" />
+                <Input className="w-32" defaultValue="2026/27" />
               </div>
               <Button onClick={runGen} disabled={running}>Generate 47 statements</Button>
               {running && <Progress value={genProgress} />}

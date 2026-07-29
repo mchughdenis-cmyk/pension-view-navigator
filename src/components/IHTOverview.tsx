@@ -15,7 +15,7 @@ import { Plus, Trash2, AlertTriangle, Info, ScrollText, Home, PiggyBank, Briefca
 import { downloadIHTIllustration } from '@/lib/ihtIllustration'
 import { toast } from 'sonner'
 
-// IHT 2024/25 → post-April 2027 reform
+// IHT 2026/27 → post-April 2027 reform
 // From 6 April 2027, most unused pension funds and death benefits will be included
 // in the deceased's estate for IHT purposes (HM Treasury, Oct 2024 / consultation 2025).
 const NRB = 325_000          // Nil-Rate Band

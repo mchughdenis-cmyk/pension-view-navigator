@@ -47,7 +47,7 @@ export default function BedAndISADialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2"><ArrowRightLeft className="w-5 h-5" /> Bed &amp; ISA</DialogTitle>
           <DialogDescription>
-            Sell from your GIA and immediately re-buy the same fund inside your ISA, using your remaining 2025/26 allowance.
+            Sell from your GIA and immediately re-buy the same fund inside your ISA, using your remaining 2026/27 allowance.
             This crystallises any CGT but shelters the holding from future tax.
           </DialogDescription>
         </DialogHeader>

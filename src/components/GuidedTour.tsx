@@ -13,7 +13,7 @@ interface Step {
 
 const TOUR: Step[] = [
   { route: "/dashboard", title: "Client dashboard", body: "Holistic view of pot, allowances, and projections — the day-one home for every client." },
-  { route: "/assistant", title: "Ask Navigator", body: "Conversational AI grounded in the client's own data and UK 2024/25 tax rules." },
+  { route: "/assistant", title: "Ask Navigator", body: "Conversational AI grounded in the client's own data and UK 2026/27 tax rules." },
   { route: "/projection", title: "Monte Carlo projection", body: "10,000-scenario stochastic modelling with cone-of-outcomes visualisation." },
   { route: "/drawdown", title: "Drawdown planner", body: "PCLS, UFPLS and flexi-access modelling with tax and IHT impact." },
   { route: "/passport", title: "Pension passport", body: "A single-page summary for transfers, KYC, and beneficiaries." },

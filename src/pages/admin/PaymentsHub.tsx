@@ -37,6 +37,19 @@ type Payment = {
   beneficiary_account?: string | null;
 };
 
+type PaymentFile = {
+  id: string;
+  file_name: string;
+  file_kind: string;
+  storage_path: string;
+  batch_reference: string | null;
+  payment_count: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
+};
+
+
 const statusColour: Record<string, string> = {
   draft: "secondary",
   pending_approval: "warning",

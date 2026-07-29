@@ -56,9 +56,9 @@ export default function ContributionManager() {
               <Input type="number" value={current} onChange={(e) => setCurrent(Number(e.target.value))} />
             </div>
             <div className="grid grid-cols-3 gap-2">
-              <div><Label className="text-xs">2023/24</Label><Input type="number" value={prev1} onChange={(e) => setPrev1(Number(e.target.value))} /></div>
-              <div><Label className="text-xs">2022/23</Label><Input type="number" value={prev2} onChange={(e) => setPrev2(Number(e.target.value))} /></div>
-              <div><Label className="text-xs">2021/22</Label><Input type="number" value={prev3} onChange={(e) => setPrev3(Number(e.target.value))} /></div>
+              <div><Label className="text-xs">2025/26</Label><Input type="number" value={prev1} onChange={(e) => setPrev1(Number(e.target.value))} /></div>
+              <div><Label className="text-xs">2024/25</Label><Input type="number" value={prev2} onChange={(e) => setPrev2(Number(e.target.value))} /></div>
+              <div><Label className="text-xs">2023/24</Label><Input type="number" value={prev3} onChange={(e) => setPrev3(Number(e.target.value))} /></div>
             </div>
             <div>
               <Label>Adjusted income (for taper)</Label>

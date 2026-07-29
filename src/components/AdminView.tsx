@@ -34,6 +34,8 @@ export default function AdminView() {
   const { firmId, firm, firms } = useFirm()
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [adviserFilter, setAdviserFilter] = useState<string>('all')
+  const [scope, setScope] = useState<'all' | 'firm'>('all')
 
   const handleSignOut = () => {
     window.location.href = '/'
@@ -53,7 +55,7 @@ export default function AdminView() {
         .from('clients')
         .select('id, first_name, last_name, email, status, risk_profile, adviser, annual_allowance_used, firm_id')
         .order('last_name')
-      if (firmId) cq = cq.eq('firm_id', firmId)
+      if (scope === 'firm' && firmId) cq = cq.eq('firm_id', firmId)
       const { data: cs } = await cq
       const ids = (cs ?? []).map((c: any) => c.id)
       const totals: Record<string, number> = {}
@@ -89,7 +91,7 @@ export default function AdminView() {
       })
       setAdvisers(Array.from(byAdviser, ([name, v]) => ({ name, ...v })))
     })()
-  }, [firmId])
+  }, [firmId, scope])
 
   const adminStats = useMemo(() => {
     const totalAUM = allClients.reduce((s, c) => s + c.portfolioValue, 0)
@@ -128,7 +130,8 @@ export default function AdminView() {
                          client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.adviser.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || client.status === statusFilter
-    return matchesSearch && matchesStatus
+    const matchesAdviser = adviserFilter === 'all' || client.adviser === adviserFilter
+    return matchesSearch && matchesStatus && matchesAdviser
   })
 
   return (
@@ -139,9 +142,23 @@ export default function AdminView() {
           <div className="flex flex-wrap justify-between items-start gap-4 py-4">
             <div className="min-w-0 flex-1 basis-72">
               <h1 className="text-2xl font-bold text-foreground">Admin Portal</h1>
-              <p className="text-muted-foreground truncate">{firm ? `${firm.name} · ${adminStats.totalClients} client${adminStats.totalClients === 1 ? '' : 's'}` : `${user?.name} - System Administrator`}</p>
-              <Badge variant="outline" className="mt-1">Admin View</Badge>
-            </div>
+              <p className="text-muted-foreground truncate">
+                {scope === 'all'
+                  ? `All firms · ${adminStats.totalClients} client${adminStats.totalClients === 1 ? '' : 's'} across ${adminStats.totalAdvisers} adviser${adminStats.totalAdvisers === 1 ? '' : 's'}`
+                  : firm
+                    ? `${firm.name} · ${adminStats.totalClients} client${adminStats.totalClients === 1 ? '' : 's'}`
+                    : `${user?.name} - System Administrator`}
+              </p>
+              <div className="flex items-center gap-2 mt-1">
+                <Badge variant="outline">Admin View</Badge>
+                <Select value={scope} onValueChange={(v) => setScope(v as 'all' | 'firm')}>
+                  <SelectTrigger className="h-7 w-[170px] text-xs"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All firms (global)</SelectItem>
+                    <SelectItem value="firm" disabled={!firmId}>Current firm only</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             <div className="flex flex-wrap items-center gap-2 shrink-0">
               <Button variant="outline" size="sm" onClick={() => switchRole('client')}>
                 <User className="w-4 h-4 mr-2" />

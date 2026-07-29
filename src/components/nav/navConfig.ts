@@ -252,6 +252,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Origo message tracker", url: "/origo", icon: Send },
         { title: "Audit trail", url: "/audit", icon: ScrollText },
         { title: "Cost & charges", url: "/costs", icon: Calculator },
+        { title: "Reg reporting calendar", url: "/admin/reg-calendar", icon: FileSignature },
       ],
     },
     {
@@ -280,6 +281,8 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Communications", url: "/comms", icon: MessageSquare },
         { title: "Adviser workbench", url: "/workbench", icon: Briefcase },
         { title: "Annual review pack", url: "/annual-review", icon: FileSignature },
+        { title: "Cash forecast (T+1 to T+5)", url: "/admin/cash-forecast", icon: Calculator },
+        { title: "Adviser fee reconciliation", url: "/admin/adviser-fees", icon: Receipt },
       ],
     },
     {

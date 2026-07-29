@@ -219,6 +219,12 @@ export default function PaymentsHub() {
           >
             <FileDown className="h-4 w-4 mr-2" />Export Bacs XML
           </Button>
+          <Button variant="outline" onClick={exportCsv}>
+            <FileSpreadsheet className="h-4 w-4 mr-2" />Export CSV
+          </Button>
+          <Button variant="outline" onClick={bulkApprove} disabled={selected.size === 0}>
+            <ShieldCheck className="h-4 w-4 mr-2" />Approve selected ({selected.size})
+          </Button>
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild><Button><Plus className="h-4 w-4 mr-2" />New payment</Button></DialogTrigger>
           <DialogContent className="max-w-lg">

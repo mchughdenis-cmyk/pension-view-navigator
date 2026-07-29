@@ -11,6 +11,7 @@ import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import OperatorConsole from "./pages/admin/OperatorConsole";
 import PaymentsHub from "./pages/admin/PaymentsHub";
+import PaymentFiles from "./pages/admin/PaymentFiles";
 import GeneralLedger from "./pages/admin/GeneralLedger";
 import CaseWorkbench from "./pages/admin/CaseWorkbench";
 import ReferenceData from "./pages/admin/ReferenceData";
@@ -338,6 +339,7 @@ const AppContent = () => {
               <Route path="/death-claims" element={<RoleGate allow={['adviser', 'admin']}><DeathClaims /></RoleGate>} />
               <Route path="/pension-sharing" element={<RoleGate allow={['adviser', 'admin']}><PensionSharingOrders /></RoleGate>} />
               <Route path="/admin/payments" element={<RoleGate allow={['admin']}><PaymentsHub /></RoleGate>} />
+              <Route path="/admin/payment-files" element={<RoleGate allow={['admin']}><PaymentFiles /></RoleGate>} />
               <Route path="/admin/ledger" element={<RoleGate allow={['admin']}><GeneralLedger /></RoleGate>} />
               <Route path="/admin/case-workbench" element={<RoleGate allow={['adviser','admin']}><CaseWorkbench /></RoleGate>} />
               <Route path="/admin/reference-data" element={<RoleGate allow={['admin']}><ReferenceData /></RoleGate>} />

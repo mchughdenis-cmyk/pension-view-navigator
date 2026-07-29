@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -488,13 +488,18 @@ export default function PaymentsHub() {
       </Card>
 
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-base">
-            <FolderArchive className="h-4 w-4" />Payment file store
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Every bank file generated is retained in the secure payment-files store: the ISO 20022 pain.001 Bacs file and the matching PaymentBatchReport XML.
-          </p>
+        <CardHeader className="flex flex-row items-start justify-between gap-4">
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <FolderArchive className="h-4 w-4" />Payment file store
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Every bank file generated is retained in the secure payment-files store: the ISO 20022 pain.001 Bacs file and the matching PaymentBatchReport XML.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/admin/payment-files">Open file store</Link>
+          </Button>
         </CardHeader>
         <CardContent>
           <Table>

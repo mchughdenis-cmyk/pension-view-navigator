@@ -208,34 +208,8 @@ export default function PaymentsHub() {
           <p className="text-sm text-muted-foreground">Outbound instructions with four-eyes approval, batching and settlement.</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const eligible = rows.filter(r => ["approved", "released"].includes(r.status));
-              if (eligible.length === 0) return toast({ title: "Nothing to export", description: "Approve at least one payment to build a Bacs file." });
-              downloadBacsXml(
-                eligible.map(r => ({
-                  id: r.id,
-                  amount: Number(r.amount),
-                  currency: r.currency,
-                  beneficiary_name: r.beneficiary_name,
-                  beneficiary_sort_code: r.beneficiary_sort_code ?? "",
-                  beneficiary_account: r.beneficiary_account ?? "",
-                  beneficiary_reference: r.beneficiary_reference,
-                  payment_method: r.payment_method,
-                  purpose: r.purpose,
-                })),
-                {
-                  debtorName: "Airgead SIPP Trustees",
-                  debtorSortCode: "20-00-00",
-                  debtorAccount: "12345678",
-                  executionDate: new Date().toISOString().slice(0, 10),
-                },
-              );
-              toast({ title: "Bacs pain.001 XML downloaded", description: `${eligible.length} payment(s) exported.` });
-            }}
-          >
-            <FileDown className="h-4 w-4 mr-2" />Export Bacs XML
+          <Button variant="outline" onClick={createPaymentFile} disabled={generating}>
+            <FileDown className="h-4 w-4 mr-2" />{generating ? "Creating…" : "Create bank payment file"}
           </Button>
           <Button variant="outline" onClick={exportCsv}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />Export CSV

@@ -64,6 +64,11 @@ export default function PaymentsHub() {
   });
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchParams, setSearchParams] = useSearchParams();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
+  }, []);
 
   const load = async () => {
     setLoading(true);
@@ -119,13 +124,24 @@ export default function PaymentsHub() {
     const { data: u } = await supabase.auth.getUser();
     const uid = u.user?.id;
     if (!uid) return toast({ title: "Sign in required", variant: "destructive" });
-    const ids = Array.from(selected).filter((id) => rows.find((r) => r.id === id)?.status === "pending_approval");
-    if (ids.length === 0) return toast({ title: "Nothing to approve" });
+    const all = Array.from(selected).filter((id) => rows.find((r) => r.id === id)?.status === "pending_approval");
+    const ownBlocked = all.filter((id) => rows.find((r) => r.id === id)?.created_by === uid);
+    const ids = all.filter((id) => rows.find((r) => r.id === id)?.created_by !== uid);
+    if (ids.length === 0) {
+      return toast({
+        title: "Four-eyes lock",
+        description: ownBlocked.length > 0 ? "You cannot approve payments you created." : "Nothing to approve.",
+        variant: "destructive",
+      });
+    }
     const approvals = ids.map((id) => ({ payment_id: id, approver_id: uid, decision: "approved" as const }));
     const { error: ae } = await supabase.from("payment_approvals").insert(approvals);
     if (ae) return toast({ title: "Approval failed", description: ae.message, variant: "destructive" });
     await supabase.from("payment_instructions").update({ status: "approved", approved_by: uid }).in("id", ids);
-    toast({ title: `${ids.length} payment(s) approved` });
+    toast({
+      title: `${ids.length} payment(s) approved`,
+      description: ownBlocked.length > 0 ? `${ownBlocked.length} skipped (four-eyes lock).` : undefined,
+    });
     setSelected(new Set());
     load();
   };
@@ -358,9 +374,15 @@ export default function PaymentsHub() {
                     <TableCell><Badge variant={statusColour[r.status] as any}>{r.status.replace(/_/g," ")}</Badge></TableCell>
                     <TableCell className="text-right space-x-1">
                       {r.status === "pending_approval" && (
-                        <Button size="sm" variant="outline" onClick={() => approve(r.id)}>
-                          <ShieldCheck className="h-3.5 w-3.5 mr-1" />Approve
-                        </Button>
+                        r.created_by && r.created_by === currentUserId ? (
+                          <Button size="sm" variant="outline" disabled title="Four-eyes lock: you created this payment">
+                            <ShieldCheck className="h-3.5 w-3.5 mr-1" />Locked
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="outline" onClick={() => approve(r.id)}>
+                            <ShieldCheck className="h-3.5 w-3.5 mr-1" />Approve
+                          </Button>
+                        )
                       )}
                       {r.status === "approved" && (
                         <Button size="sm" onClick={() => release(r.id)}>

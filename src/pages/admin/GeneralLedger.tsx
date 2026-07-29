@@ -72,8 +72,34 @@ export default function GeneralLedger() {
         <Card><CardHeader className="pb-2"><CardTitle className="text-xs uppercase text-muted-foreground">Trial balance</CardTitle></CardHeader>
           <CardContent>
             <Badge variant={inBalance ? "default" : "destructive"}>{inBalance ? "In balance" : "Out of balance"}</Badge>
+            <div className="text-xs text-muted-foreground mt-1">Δ £{Math.abs(totalDebit - totalCredit).toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
           </CardContent></Card>
       </div>
+
+      {/* Trial balance strip by account type */}
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-sm">Balances by account type</CardTitle></CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+            {(() => {
+              const types = Array.from(new Set(tb.map(r => r.account_type)));
+              return types.map(t => {
+                const bal = tb.filter(r => r.account_type === t).reduce((s, r) => s + Number(r.balance), 0);
+                const dr = tb.filter(r => r.account_type === t).reduce((s, r) => s + Number(r.total_debit), 0);
+                const cr = tb.filter(r => r.account_type === t).reduce((s, r) => s + Number(r.total_credit), 0);
+                return (
+                  <div key={t} className="rounded border p-3 space-y-1">
+                    <div className="text-xs uppercase text-muted-foreground capitalize">{t.replace(/_/g, " ")}</div>
+                    <div className="text-lg font-bold tabular-nums">£{bal.toLocaleString()}</div>
+                    <div className="text-[10px] text-muted-foreground tabular-nums">Dr £{dr.toLocaleString()} · Cr £{cr.toLocaleString()}</div>
+                  </div>
+                );
+              });
+            })()}
+            {tb.length === 0 && <div className="text-sm text-muted-foreground col-span-6">No accounts yet.</div>}
+          </div>
+        </CardContent>
+      </Card>
 
       <Tabs defaultValue="tb">
         <TabsList>

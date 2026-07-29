@@ -97,7 +97,96 @@ export default function PaymentsHub() {
     setRows((data as Payment[]) ?? []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  const loadFiles = async () => {
+    const { data } = await supabase
+      .from("payment_files")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setFiles((data as PaymentFile[]) ?? []);
+  };
+  useEffect(() => { load(); loadFiles(); }, []);
+
+  /**
+   * Builds the bank payment file set for approved payments:
+   *  1. ISO 20022 pain.001 Bacs/FPS file
+   *  2. PaymentBatchReport XML (provider reconciliation format)
+   * Both are stored in the private payment-files document store and downloaded.
+   */
+  const createPaymentFile = async () => {
+    const eligible = rows.filter(r => ["approved", "released"].includes(r.status));
+    if (eligible.length === 0) {
+      return toast({ title: "Nothing to send", description: "Approve at least one payment to build a bank file." });
+    }
+    setGenerating(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const batchRef = `BATCH-${Date.now()}`;
+      const total = eligible.reduce((s, r) => s + Number(r.amount), 0);
+      const ids = eligible.map(r => r.id);
+
+      const bacsXml = generateBacsPain001Xml(
+        eligible.map(r => ({
+          id: r.id,
+          amount: Number(r.amount),
+          currency: r.currency,
+          beneficiary_name: r.beneficiary_name,
+          beneficiary_sort_code: r.beneficiary_sort_code ?? "",
+          beneficiary_account: r.beneficiary_account ?? "",
+          beneficiary_reference: r.beneficiary_reference,
+          payment_method: r.payment_method,
+          purpose: r.purpose,
+        })),
+        {
+          debtorName: "Airgead SIPP Trustees",
+          debtorSortCode: "20-00-00",
+          debtorAccount: "12345678",
+          msgId: batchRef,
+          executionDate: today,
+        },
+      );
+      const bacsName = `bacs-pain001-${batchRef}.xml`;
+
+      const reportXml = generatePaymentBatchReportXml(
+        eligible.map(r => ({
+          id: r.id,
+          amount: Number(r.amount),
+          policy_reference: r.beneficiary_reference,
+          member_name: r.beneficiary_name,
+          transaction_type: "Payroll : Member Income",
+          transaction_code: "Income",
+          date: r.requested_date ?? today,
+          transaction_reference: r.beneficiary_reference ?? r.id.slice(0, 8),
+          gross_amount: Number(r.amount),
+          tax_amount: 0,
+        })),
+      );
+      const reportName = paymentBatchReportFilename();
+
+      await storePaymentFile({
+        fileName: bacsName, content: bacsXml, fileKind: "bacs_pain001",
+        batchReference: batchRef, paymentIds: ids, totalAmount: total,
+      });
+      await storePaymentFile({
+        fileName: reportName, content: reportXml, fileKind: "payment_batch_report",
+        batchReference: batchRef, paymentIds: ids, totalAmount: total,
+      });
+
+      downloadText(bacsName, bacsXml);
+      downloadText(reportName, reportXml);
+
+      toast({
+        title: "Bank payment file created",
+        description: `${eligible.length} payment(s) · Bacs pain.001 + PaymentBatchReport stored in the payment file store.`,
+      });
+      loadFiles();
+    } catch (e) {
+      toast({ title: "File creation failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
 
   // Auto-open new-payment dialog via ?new=1 (command palette action)
   useEffect(() => {

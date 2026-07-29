@@ -13,8 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, ShieldCheck, Send, XCircle, FileDown, FileSpreadsheet } from "lucide-react";
-import { downloadBacsXml } from "@/lib/bacsXml";
+import { Plus, ShieldCheck, Send, XCircle, FileDown, FileSpreadsheet, Download, FolderArchive } from "lucide-react";
+import { generateBacsPain001Xml } from "@/lib/bacsXml";
+import { generatePaymentBatchReportXml, paymentBatchReportFilename } from "@/lib/paymentBatchReport";
+import { storePaymentFile, downloadText, downloadStoredPaymentFile } from "@/lib/paymentFileStore";
 import { downloadCSV } from "@/lib/adminExportUtils";
 import { paymentInstructionSchema } from "@/lib/validation";
 
@@ -34,6 +36,19 @@ type Payment = {
   beneficiary_sort_code?: string | null;
   beneficiary_account?: string | null;
 };
+
+type PaymentFile = {
+  id: string;
+  file_name: string;
+  file_kind: string;
+  storage_path: string;
+  batch_reference: string | null;
+  payment_count: number;
+  total_amount: number;
+  status: string;
+  created_at: string;
+};
+
 
 const statusColour: Record<string, string> = {
   draft: "secondary",
@@ -65,6 +80,8 @@ export default function PaymentsHub() {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [searchParams, setSearchParams] = useSearchParams();
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [files, setFiles] = useState<PaymentFile[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setCurrentUserId(data.user?.id ?? null));
@@ -80,7 +97,96 @@ export default function PaymentsHub() {
     setRows((data as Payment[]) ?? []);
     setLoading(false);
   };
-  useEffect(() => { load(); }, []);
+  const loadFiles = async () => {
+    const { data } = await supabase
+      .from("payment_files")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setFiles((data as PaymentFile[]) ?? []);
+  };
+  useEffect(() => { load(); loadFiles(); }, []);
+
+  /**
+   * Builds the bank payment file set for approved payments:
+   *  1. ISO 20022 pain.001 Bacs/FPS file
+   *  2. PaymentBatchReport XML (provider reconciliation format)
+   * Both are stored in the private payment-files document store and downloaded.
+   */
+  const createPaymentFile = async () => {
+    const eligible = rows.filter(r => ["approved", "released"].includes(r.status));
+    if (eligible.length === 0) {
+      return toast({ title: "Nothing to send", description: "Approve at least one payment to build a bank file." });
+    }
+    setGenerating(true);
+    try {
+      const today = new Date().toISOString().slice(0, 10);
+      const batchRef = `BATCH-${Date.now()}`;
+      const total = eligible.reduce((s, r) => s + Number(r.amount), 0);
+      const ids = eligible.map(r => r.id);
+
+      const bacsXml = generateBacsPain001Xml(
+        eligible.map(r => ({
+          id: r.id,
+          amount: Number(r.amount),
+          currency: r.currency,
+          beneficiary_name: r.beneficiary_name,
+          beneficiary_sort_code: r.beneficiary_sort_code ?? "",
+          beneficiary_account: r.beneficiary_account ?? "",
+          beneficiary_reference: r.beneficiary_reference,
+          payment_method: r.payment_method,
+          purpose: r.purpose,
+        })),
+        {
+          debtorName: "Airgead SIPP Trustees",
+          debtorSortCode: "20-00-00",
+          debtorAccount: "12345678",
+          msgId: batchRef,
+          executionDate: today,
+        },
+      );
+      const bacsName = `bacs-pain001-${batchRef}.xml`;
+
+      const reportXml = generatePaymentBatchReportXml(
+        eligible.map(r => ({
+          id: r.id,
+          amount: Number(r.amount),
+          policy_reference: r.beneficiary_reference,
+          member_name: r.beneficiary_name,
+          transaction_type: "Payroll : Member Income",
+          transaction_code: "Income",
+          date: r.requested_date ?? today,
+          transaction_reference: r.beneficiary_reference ?? r.id.slice(0, 8),
+          gross_amount: Number(r.amount),
+          tax_amount: 0,
+        })),
+      );
+      const reportName = paymentBatchReportFilename();
+
+      await storePaymentFile({
+        fileName: bacsName, content: bacsXml, fileKind: "bacs_pain001",
+        batchReference: batchRef, paymentIds: ids, totalAmount: total,
+      });
+      await storePaymentFile({
+        fileName: reportName, content: reportXml, fileKind: "payment_batch_report",
+        batchReference: batchRef, paymentIds: ids, totalAmount: total,
+      });
+
+      downloadText(bacsName, bacsXml);
+      downloadText(reportName, reportXml);
+
+      toast({
+        title: "Bank payment file created",
+        description: `${eligible.length} payment(s) · Bacs pain.001 + PaymentBatchReport stored in the payment file store.`,
+      });
+      loadFiles();
+    } catch (e) {
+      toast({ title: "File creation failed", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setGenerating(false);
+    }
+  };
+
 
   // Auto-open new-payment dialog via ?new=1 (command palette action)
   useEffect(() => {
@@ -206,34 +312,8 @@ export default function PaymentsHub() {
           <p className="text-sm text-muted-foreground">Outbound instructions with four-eyes approval, batching and settlement.</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              const eligible = rows.filter(r => ["approved", "released"].includes(r.status));
-              if (eligible.length === 0) return toast({ title: "Nothing to export", description: "Approve at least one payment to build a Bacs file." });
-              downloadBacsXml(
-                eligible.map(r => ({
-                  id: r.id,
-                  amount: Number(r.amount),
-                  currency: r.currency,
-                  beneficiary_name: r.beneficiary_name,
-                  beneficiary_sort_code: r.beneficiary_sort_code ?? "",
-                  beneficiary_account: r.beneficiary_account ?? "",
-                  beneficiary_reference: r.beneficiary_reference,
-                  payment_method: r.payment_method,
-                  purpose: r.purpose,
-                })),
-                {
-                  debtorName: "Airgead SIPP Trustees",
-                  debtorSortCode: "20-00-00",
-                  debtorAccount: "12345678",
-                  executionDate: new Date().toISOString().slice(0, 10),
-                },
-              );
-              toast({ title: "Bacs pain.001 XML downloaded", description: `${eligible.length} payment(s) exported.` });
-            }}
-          >
-            <FileDown className="h-4 w-4 mr-2" />Export Bacs XML
+          <Button variant="outline" onClick={createPaymentFile} disabled={generating}>
+            <FileDown className="h-4 w-4 mr-2" />{generating ? "Creating…" : "Create bank payment file"}
           </Button>
           <Button variant="outline" onClick={exportCsv}>
             <FileSpreadsheet className="h-4 w-4 mr-2" />Export CSV
@@ -404,6 +484,68 @@ export default function PaymentsHub() {
             </Table>
           )}
           <p className="text-xs text-muted-foreground mt-4">Four-eyes control: the payment creator cannot approve their own instruction.</p>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FolderArchive className="h-4 w-4" />Payment file store
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Every bank file generated is retained in the secure payment-files store: the ISO 20022 pain.001 Bacs file and the matching PaymentBatchReport XML.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>File</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Batch</TableHead>
+                <TableHead className="text-right">Payments</TableHead>
+                <TableHead className="text-right">Value</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {files.map(f => (
+                <TableRow key={f.id}>
+                  <TableCell className="font-medium break-all">{f.file_name}</TableCell>
+                  <TableCell className="text-xs">
+                    {f.file_kind === "bacs_pain001" ? "Bacs pain.001" : "PaymentBatchReport"}
+                  </TableCell>
+                  <TableCell className="text-xs">{f.batch_reference ?? "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums">{f.payment_count}</TableCell>
+                  <TableCell className="text-right tabular-nums">£{Number(f.total_amount).toLocaleString()}</TableCell>
+                  <TableCell className="text-xs">{new Date(f.created_at).toLocaleString("en-GB")}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await downloadStoredPaymentFile(f.storage_path, f.file_name);
+                        } catch (e) {
+                          toast({ title: "Download failed", description: (e as Error).message, variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1" />Download
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {files.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                    No payment files created yet.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
     </div>

@@ -1,4 +1,4 @@
-// UK investment bond tax engine — 2024/25 rules.
+// UK investment bond tax engine — 2026/27 rules.
 // Covers ONSHORE (UK life office) and OFFSHORE (non-UK life office) bonds.
 //
 // Common features:

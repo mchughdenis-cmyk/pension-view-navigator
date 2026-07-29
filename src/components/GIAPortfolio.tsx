@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast'
 import BuySellDialog, { type Holding, type DealResult } from './BuySellDialog'
 import BedAndISADialog from './BedAndISADialog'
 import TransferInDialog, { applyTransferToHoldings, type TransferInResult } from './TransferInDialog'
-import { matchDisposal, estimateCgt, addToPool, type Disposal, type S104Pool, CGT_ALLOWANCE_2024_25 } from '@/lib/cgt'
+import { matchDisposal, estimateCgt, addToPool, type Disposal, type S104Pool, CGT_ALLOWANCE_2026_27 } from '@/lib/cgt'
 import { estimateDividendTax } from '@/lib/dividendTax'
 import { exportAnnualTaxPack } from '@/lib/taxPackExport'
 
@@ -65,7 +65,7 @@ export default function GIAPortfolio() {
   const dividendsYtd = transactions.filter(t => t.type === 'Dividend' && t.date.startsWith('2025')).reduce((s, t) => s + t.amount, 0)
   const cgtSummary = useMemo(() => estimateCgt(disposals, 'higher'), [disposals])
   const dividendTax = useMemo(() => estimateDividendTax(dividendsYtd, 'higher'), [dividendsYtd])
-  const cgtExceeded = cgtSummary.netGain > CGT_ALLOWANCE_2024_25
+  const cgtExceeded = cgtSummary.netGain > CGT_ALLOWANCE_2026_27
 
   function applyDeal(d: DealResult) {
     setHoldings(prev => {
@@ -130,7 +130,7 @@ export default function GIAPortfolio() {
 
   async function downloadTaxPack() {
     await exportAnnualTaxPack({
-      clientName: 'Demo Client', taxYear: '2024/25', band: 'higher',
+      clientName: 'Demo Client', taxYear: '2026/27', band: 'higher',
       giaDisposals: disposals, giaDividends: dividendsYtd,
       isaDividends: 0, isaSubscription: 12500, isaAllowance: 20000,
     })
@@ -216,7 +216,7 @@ export default function GIAPortfolio() {
                 £{Math.round(cgtSummary.netGain).toLocaleString()}
               </div>
               <p className="text-xs text-muted-foreground">
-                {cgtExceeded ? `Exceeds £${CGT_ALLOWANCE_2024_25.toLocaleString()} allowance` : `£${(CGT_ALLOWANCE_2024_25 - cgtSummary.netGain).toLocaleString()} remaining`}
+                {cgtExceeded ? `Exceeds £${CGT_ALLOWANCE_2026_27.toLocaleString()} allowance` : `£${(CGT_ALLOWANCE_2026_27 - cgtSummary.netGain).toLocaleString()} remaining`}
               </p>
             </CardContent>
           </Card>
@@ -229,7 +229,7 @@ export default function GIAPortfolio() {
               <div>
                 <p className="font-medium text-destructive">Capital Gains Tax Allowance Exceeded</p>
                 <p className="text-sm text-muted-foreground">
-                  Net realised gain of £{Math.round(cgtSummary.netGain).toLocaleString()} exceeds the £{CGT_ALLOWANCE_2024_25.toLocaleString()} annual exempt amount.
+                  Net realised gain of £{Math.round(cgtSummary.netGain).toLocaleString()} exceeds the £{CGT_ALLOWANCE_2026_27.toLocaleString()} annual exempt amount.
                   Estimated CGT liability: £{cgtSummary.liability.toFixed(0)} (at {(cgtSummary.rate * 100).toFixed(0)}% higher rate)
                 </p>
               </div>

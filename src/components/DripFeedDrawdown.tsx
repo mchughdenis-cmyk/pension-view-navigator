@@ -44,7 +44,7 @@ interface TaxBreakdown {
   net: number;
 }
 
-// UK Tax calculations for 2024/25 tax year
+// UK Tax calculations for 2026/27 tax year
 const calculateTax = (annualGross: number, taxCode: string): TaxBreakdown => {
   // Extract personal allowance from tax code (e.g., 1257L = £12,570)
   const codeNumber = parseInt(taxCode.replace(/[^0-9]/g, '')) || 1257;
@@ -53,7 +53,7 @@ const calculateTax = (annualGross: number, taxCode: string): TaxBreakdown => {
   // Calculate taxable income
   const taxableIncome = Math.max(0, annualGross - personalAllowance);
   
-  // UK Income Tax bands 2024/25
+  // UK Income Tax bands 2026/27
   let tax = 0;
   if (taxableIncome > 0) {
     // Basic rate (20%) - £0 to £37,700

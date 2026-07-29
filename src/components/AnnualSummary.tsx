@@ -35,7 +35,7 @@ const formatDate = (date: string) => {
 
 // Mock data for the annual summary
 const annualSummaryData = {
-  taxYear: "2023/24",
+  taxYear: "2026/27",
   generatedDate: new Date().toISOString(),
   client: {
     name: "John Smith",

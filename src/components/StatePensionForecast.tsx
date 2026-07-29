@@ -9,10 +9,10 @@ import { PageHeader } from "@/components/nav/PageHeader";
 import { formatGBP } from "@/lib/pensionCalculations";
 import { Crown, ExternalLink } from "lucide-react";
 
-const FULL_NSP_WEEKLY = 221.20; // 2024/25 full new State Pension
+const FULL_NSP_WEEKLY = 221.20; // 2026/27 full new State Pension
 const QUALIFYING_YEARS_FULL = 35;
 const SPA = 67; // assumed
-const TAX_YEAR = "2024/25";
+const TAX_YEAR = "2026/27";
 
 export default function StatePensionForecast() {
   const [age, setAge] = useState(45);
@@ -27,7 +27,7 @@ export default function StatePensionForecast() {
   const shortfallYears = QUALIFYING_YEARS_FULL - projectedYears;
   const gapsToFill = Math.max(0, QUALIFYING_YEARS_FULL - qualifyingYears - (stillWorking ? yearsToSPA : 0));
 
-  // Class 3 voluntary NICs 2024/25 = £17.45/week = £907.40/year
+  // Class 3 voluntary NICs 2026/27 = £17.45/week = £907.40/year
   const voluntaryCostPerYear = 907.40;
   const additionalWeeklyPerYear = FULL_NSP_WEEKLY / QUALIFYING_YEARS_FULL;
   const additionalAnnualPerYearOfNIC = additionalWeeklyPerYear * 52;

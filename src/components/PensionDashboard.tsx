@@ -101,8 +101,8 @@ const pensionData = {
     usedThisYear: 40400,
     carryForward: [
       { year: "2021/22", available: 22000 },
-      { year: "2022/23", available: 18500 },
-      { year: "2023/24", available: 15200 }
+      { year: "2026/27", available: 18500 },
+      { year: "2026/27", available: 15200 }
     ]
   },
   investments: [

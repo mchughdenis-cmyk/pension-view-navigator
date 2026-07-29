@@ -1085,7 +1085,7 @@ export default function ClientAdminView() {
             reference: ref,
             status: 'pending',
             effective_date: new Date().toISOString().split('T')[0],
-            tax_year: '2024/25',
+            tax_year: '2026/27',
             tax_relief_amount: taxRelief,
           })
           toast.success('Transaction processed')

@@ -1,9 +1,9 @@
-// UK Pension Calculations — 2024/25 tax year
+// UK Pension Calculations — 2026/27 tax year
 // Single source of truth for tax, PCLS, UFPLS, AA/MPAA logic
 
-export const TAX_YEAR = '2024/25'
+export const TAX_YEAR = '2026/27'
 
-// 2024/25 UK Income Tax (rUK — non-Scottish)
+// 2026/27 UK Income Tax (rUK — non-Scottish)
 export const PERSONAL_ALLOWANCE = 12_570
 export const PA_TAPER_THRESHOLD = 100_000
 export const BASIC_RATE_LIMIT = 37_700 // taxed at 20% above PA
@@ -30,7 +30,7 @@ export interface IncomeTaxBreakdown {
   effectiveRate: number
 }
 
-/** Calculate UK income tax for 2024/25 on a given gross taxable income (rUK bands). */
+/** Calculate UK income tax for 2026/27 on a given gross taxable income (rUK bands). */
 export function calculateIncomeTax(grossTaxable: number, otherIncome: number = 0): IncomeTaxBreakdown {
   const totalIncome = Math.max(0, grossTaxable + otherIncome)
 

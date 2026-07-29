@@ -108,7 +108,7 @@ function ContributionsPanel({ clientId, accounts }: { clientId: string; accounts
   return (
     <div className="grid lg:grid-cols-2 gap-6">
       <Card>
-        <CardHeader><CardTitle>Record Contribution</CardTitle><CardDescription>UK 2024/25 — RAS for member, gross for employer</CardDescription></CardHeader>
+        <CardHeader><CardTitle>Record Contribution</CardTitle><CardDescription>UK 2026/27 — RAS for member, gross for employer</CardDescription></CardHeader>
         <CardContent className="space-y-3">
           <div><Label>Account</Label>
             <Select value={accountId} onValueChange={setAccountId}>
@@ -410,7 +410,7 @@ function StatementsPanel({ clientId }: { clientId: string }) {
             <Select value={taxYear.toString()} onValueChange={v => setTaxYear(parseInt(v))}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="2024">2024/25</SelectItem>
+                <SelectItem value="2024">2026/27</SelectItem>
                 <SelectItem value="2023">2023/24</SelectItem>
                 <SelectItem value="2022">2022/23</SelectItem>
               </SelectContent>

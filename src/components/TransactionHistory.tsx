@@ -18,7 +18,7 @@ type Direction = "all" | "in" | "out";
 const MONEY_IN = ["contribution", "transfer_in", "interest", "dividend"];
 const MONEY_OUT = ["pcls", "ufpls_taxable", "drawdown", "tax_withheld", "bank_transfer", "fee", "transfer_out"];
 
-const TAX_YEARS = ["all", "2024/25", "2023/24", "2022/23"];
+const TAX_YEARS = ["all", "2026/27", "2026/27", "2026/27"];
 
 export default function TransactionHistory() {
   const { clients } = useClients();
@@ -27,7 +27,7 @@ export default function TransactionHistory() {
 
   const [rows, setRows] = useState<any[]>([]);
   const [contribs, setContribs] = useState<any[]>([]);
-  const [taxYear, setTaxYear] = useState("2024/25");
+  const [taxYear, setTaxYear] = useState("2026/27");
   const [direction, setDirection] = useState<Direction>("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);

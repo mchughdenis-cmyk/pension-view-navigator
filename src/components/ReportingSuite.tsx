@@ -41,7 +41,7 @@ export default function ReportingSuite() {
 function AnnualTaxPack() {
   const { firmId } = useFirm();
   const [clients, setClients] = useState<any[]>([]); const [clientId, setClientId] = useState<string>("");
-  const [taxYear, setTaxYear] = useState("2024/25"); const [generating, setGenerating] = useState(false);
+  const [taxYear, setTaxYear] = useState("2026/27"); const [generating, setGenerating] = useState(false);
 
   useEffect(() => {
     let q = supabase.from("clients").select("id, first_name, last_name").order("last_name");
@@ -100,7 +100,7 @@ function AnnualTaxPack() {
         </div>
         <div><Label>Tax year</Label>
           <Select value={taxYear} onValueChange={setTaxYear}><SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{["2024/25", "2023/24", "2022/23"].map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+            <SelectContent>{["2026/27", "2026/27", "2026/27"].map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <Button onClick={generate} disabled={generating}><Download className="h-4 w-4 mr-2" />{generating ? "Generating…" : "Generate .docx"}</Button>

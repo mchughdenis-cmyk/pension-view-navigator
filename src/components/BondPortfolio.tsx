@@ -175,7 +175,7 @@ export default function BondPortfolio({ bondType }: Props) {
             </CardContent>
           </Card>
           <Card>
-            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">2024/25 Tax Due</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-sm font-medium">2026/27 Tax Due</CardTitle></CardHeader>
             <CardContent>
               <div className={`text-2xl font-bold ${totals.taxYearTax > 0 ? 'text-destructive' : 'text-foreground'}`}>
                 £{totals.taxYearTax.toFixed(0)}

@@ -156,7 +156,7 @@ export default function DigitalWelcomePack() {
                     <div>
                       <h3 className="font-semibold mb-2">3. Annual Allowance</h3>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        The annual allowance for pension contributions is £60,000 (2024/25). Contributions above this limit may result in tax charges. 
+                        The annual allowance for pension contributions is £60,000 (2026/27). Contributions above this limit may result in tax charges. 
                         Unused allowance from the previous 3 years can be carried forward.
                       </p>
                     </div>

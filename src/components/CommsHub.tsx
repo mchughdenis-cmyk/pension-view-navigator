@@ -79,7 +79,7 @@ function TemplateEngine() {
     .replace(/\{\{account_number\}\}/g, "ACC-XXXX")
     .replace(/\{\{amount\}\}/g, "10,000")
     .replace(/\{\{net\}\}/g, "8,000")
-    .replace(/\{\{tax_year\}\}/g, "2024/25")
+    .replace(/\{\{tax_year\}\}/g, "2026/27")
     .replace(/\{\{value\}\}/g, "150,000");
 
   const onTpl = (k: string) => { setTplKey(k); setBody(TEMPLATES.find((t) => t.key === k)?.body ?? ""); };
@@ -202,7 +202,7 @@ function BulkStatementRun() {
     setRunning(true); setProgress(0);
     const { data: cs } = await supabase.from("clients").select("id, first_name, last_name, email");
     const list = cs ?? [];
-    const subject = "Annual benefit statement 2024/25";
+    const subject = "Annual benefit statement 2026/27";
     const rows = list.map((c) => ({ client_id: c.id, sender: "System", recipient: "Client", subject, body: `Dear ${c.first_name}, your annual statement is attached.` }));
     for (let i = 0; i < rows.length; i += 25) {
       await supabase.from("secure_messages").insert(rows.slice(i, i + 25) as any);

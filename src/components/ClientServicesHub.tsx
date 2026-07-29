@@ -129,7 +129,7 @@ function ContributionWizard({ client }: { client?: Client }) {
     const { data: acc } = await supabase.from("client_accounts").select("id").eq("client_id", client.id).eq("account_type", "SIPP").maybeSingle();
     const { error } = await supabase.from("contributions").insert({
       client_id: client.id, account_id: acc?.id, contribution_type: type, gross_amount: grossN,
-      net_amount: net, tax_relief: taxRelief, relief_method: relief, tax_year: "2024/25", status: "received",
+      net_amount: net, tax_relief: taxRelief, relief_method: relief, tax_year: "2026/27", status: "received",
     });
     setSubmitting(false);
     if (error) toast.error(error.message); else toast.success(`Contribution of £${grossN.toLocaleString()} recorded`);

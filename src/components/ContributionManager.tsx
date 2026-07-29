@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/nav/PageHeader";
 import { formatGBP } from "@/lib/pensionCalculations";
 import { Calculator, AlertTriangle, CheckCircle2 } from "lucide-react";
 
-const AA = 60000;     // 2024/25 Annual Allowance
+const AA = 60000;     // 2026/27 Annual Allowance
 const MPAA = 10000;   // Money Purchase Annual Allowance
 const TAPER_THRESHOLD = 260000; // Adjusted income threshold
 
@@ -42,7 +42,7 @@ export default function ContributionManager() {
     <div className="space-y-6 max-w-5xl">
       <PageHeader
         title="Contribution manager"
-        description="Track Annual Allowance (£60,000), tapering, MPAA, and 3-year carry-forward for 2024/25."
+        description="Track Annual Allowance (£60,000), tapering, MPAA, and 3-year carry-forward for 2026/27."
       />
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -52,7 +52,7 @@ export default function ContributionManager() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <Label>Contribution this year (2024/25)</Label>
+              <Label>Contribution this year (2026/27)</Label>
               <Input type="number" value={current} onChange={(e) => setCurrent(Number(e.target.value))} />
             </div>
             <div className="grid grid-cols-3 gap-2">
@@ -75,7 +75,7 @@ export default function ContributionManager() {
         <Card>
           <CardHeader>
             <CardTitle>Allowance summary</CardTitle>
-            <CardDescription>2024/25 effective limits and carry-forward.</CardDescription>
+            <CardDescription>2026/27 effective limits and carry-forward.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-3 text-sm">

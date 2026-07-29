@@ -62,6 +62,8 @@ export default function PaymentsHub() {
     payment_method: "faster_payments",
     requested_date: new Date().toISOString().slice(0, 10),
   });
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const load = async () => {
     setLoading(true);
@@ -75,18 +77,35 @@ export default function PaymentsHub() {
   };
   useEffect(() => { load(); }, []);
 
+  // Auto-open new-payment dialog via ?new=1 (command palette action)
+  useEffect(() => {
+    if (searchParams.get("new") === "1") {
+      setOpen(true);
+      searchParams.delete("new");
+      setSearchParams(searchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
   const createPayment = async () => {
+    const parsed = paymentInstructionSchema.safeParse({
+      ...form,
+      amount: Number(form.amount || 0),
+    });
+    if (!parsed.success) {
+      const msg = parsed.error.issues.map((i) => `${i.path.join(".")}: ${i.message}`).join(" • ");
+      return toast({ title: "Validation failed", description: msg, variant: "destructive" });
+    }
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("payment_instructions").insert({
       direction: "outbound",
-      purpose: form.purpose,
-      amount: Number(form.amount || 0),
-      beneficiary_name: form.beneficiary_name,
-      beneficiary_sort_code: form.beneficiary_sort_code,
-      beneficiary_account: form.beneficiary_account,
-      beneficiary_reference: form.beneficiary_reference,
-      payment_method: form.payment_method,
-      requested_date: form.requested_date,
+      purpose: parsed.data.purpose,
+      amount: parsed.data.amount,
+      beneficiary_name: parsed.data.beneficiary_name,
+      beneficiary_sort_code: parsed.data.beneficiary_sort_code,
+      beneficiary_account: parsed.data.beneficiary_account,
+      beneficiary_reference: parsed.data.beneficiary_reference,
+      payment_method: parsed.data.payment_method,
+      requested_date: parsed.data.requested_date,
       status: "pending_approval",
       created_by: u.user?.id ?? null,
     });
@@ -94,6 +113,39 @@ export default function PaymentsHub() {
     toast({ title: "Payment queued for approval" });
     setOpen(false);
     load();
+  };
+
+  const bulkApprove = async () => {
+    const { data: u } = await supabase.auth.getUser();
+    const uid = u.user?.id;
+    if (!uid) return toast({ title: "Sign in required", variant: "destructive" });
+    const ids = Array.from(selected).filter((id) => rows.find((r) => r.id === id)?.status === "pending_approval");
+    if (ids.length === 0) return toast({ title: "Nothing to approve" });
+    const approvals = ids.map((id) => ({ payment_id: id, approver_id: uid, decision: "approved" as const }));
+    const { error: ae } = await supabase.from("payment_approvals").insert(approvals);
+    if (ae) return toast({ title: "Approval failed", description: ae.message, variant: "destructive" });
+    await supabase.from("payment_instructions").update({ status: "approved", approved_by: uid }).in("id", ids);
+    toast({ title: `${ids.length} payment(s) approved` });
+    setSelected(new Set());
+    load();
+  };
+
+  const exportCsv = () => {
+    downloadCSV(
+      "payments",
+      ["Beneficiary", "Sort code", "Account", "Reference", "Purpose", "Method", "Amount (£)", "Status", "Requested"],
+      filteredRows().map((r) => [
+        r.beneficiary_name ?? "",
+        r.beneficiary_sort_code ?? "",
+        r.beneficiary_account ?? "",
+        r.beneficiary_reference ?? "",
+        r.purpose,
+        r.payment_method ?? "",
+        Number(r.amount).toFixed(2),
+        r.status,
+        r.requested_date ?? "",
+      ]),
+    );
   };
 
   const approve = async (id: string) => {

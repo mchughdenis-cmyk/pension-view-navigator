@@ -1202,29 +1202,52 @@ export function MarketingMarket() {
           Most providers trade off pensions depth against modern technology. We don't accept the
           trade-off.
         </p>
-        <div className="mt-10 rounded-xl border border-border bg-card p-6 md:p-10">
-          <div className="relative aspect-[16/10] w-full">
-            {/* Axes */}
-            <div className="absolute inset-0 grid grid-cols-2 grid-rows-2">
-              <div className="border-r border-b border-border" />
-              <div className="border-b border-border" />
-              <div className="border-r border-border" />
-              <div />
+        <div className="mt-10 rounded-2xl border border-border bg-gradient-to-br from-card to-muted/30 p-6 md:p-8 shadow-sm">
+          <div className="relative w-full h-[440px]">
+            {/* Quadrant background */}
+            <div className="absolute inset-12 grid grid-cols-2 grid-rows-2 rounded-lg overflow-hidden border border-border/60">
+              <div className="border-r border-b border-border/60 bg-background/40 p-3 text-[10px] uppercase tracking-widest text-muted-foreground/70">Modern · Shallow</div>
+              <div className="border-b border-border/60 bg-primary/5 p-3 text-right text-[10px] uppercase tracking-widest text-primary/80 font-semibold">Modern · Deep · Target</div>
+              <div className="border-r border-border/60 bg-background/40 p-3 flex items-end text-[10px] uppercase tracking-widest text-muted-foreground/70">Legacy · Shallow</div>
+              <div className="bg-background/40 p-3 flex items-end justify-end text-[10px] uppercase tracking-widest text-muted-foreground/70">Legacy · Deep</div>
             </div>
-            <div className="absolute -left-2 top-1/2 -translate-y-1/2 -rotate-90 text-xs uppercase tracking-wider text-muted-foreground">Modern technology →</div>
-            <div className="absolute left-1/2 -bottom-6 -translate-x-1/2 text-xs uppercase tracking-wider text-muted-foreground">Pensions depth →</div>
+
+            {/* Axis crosshair */}
+            <div className="absolute left-12 right-12 top-1/2 h-px bg-border" />
+            <div className="absolute top-12 bottom-12 left-1/2 w-px bg-border" />
+
+            {/* Axis labels */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-0 text-[11px] font-semibold uppercase tracking-wider text-foreground">Modern technology ↑</div>
+            <div className="absolute left-1/2 -translate-x-1/2 bottom-0 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Legacy stack</div>
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-wider text-foreground">Pensions depth →</div>
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">← Shallow</div>
+
             {/* Markers */}
             {[
-              { left: "12%", top: "70%", label: "Spreadsheet + back-office", muted: true },
-              { left: "38%", top: "55%", label: "Generic platforms", muted: true },
-              { left: "65%", top: "62%", label: "Legacy SIPP operators", muted: true },
-              { left: "78%", top: "18%", label: "Pension Navigator", muted: false },
+              { x: 26, y: 74, label: "Spreadsheets + back-office", sub: "Manual, brittle", align: "right" as const },
+              { x: 38, y: 34, label: "Generic wealth platforms", sub: "Modern UX, thin pensions", align: "right" as const },
+              { x: 70, y: 66, label: "Legacy SIPP operators", sub: "Deep, dated tech", align: "left" as const },
+              { x: 80, y: 24, label: "Pension Navigator", sub: "Deep pensions · modern stack", align: "left" as const, hero: true },
             ].map((m) => (
-              <div key={m.label} className="absolute -translate-x-1/2 -translate-y-1/2" style={{ left: m.left, top: m.top }}>
-                <div className={`h-3 w-3 rounded-full mx-auto ${m.muted ? "bg-muted-foreground/60" : "bg-primary ring-4 ring-primary/20"}`} />
-                <div className={`mt-2 text-xs whitespace-nowrap ${m.muted ? "text-muted-foreground" : "font-semibold text-primary"}`}>{m.label}</div>
+              <div key={m.label} className="absolute" style={{ left: `${m.x}%`, top: `${m.y}%`, transform: "translate(-50%, -50%)" }}>
+                <div className="relative flex items-center gap-2" style={{ flexDirection: m.align === "left" ? "row-reverse" : "row" }}>
+                  <div className={m.hero
+                    ? "h-4 w-4 rounded-full bg-primary ring-8 ring-primary/15 shadow-lg shadow-primary/30 shrink-0"
+                    : "h-2.5 w-2.5 rounded-full bg-muted-foreground/70 ring-4 ring-muted-foreground/10 shrink-0"} />
+                  <div className={m.align === "left" ? "text-right" : "text-left"}>
+                    <div className={m.hero ? "text-sm font-bold text-primary whitespace-nowrap" : "text-xs font-semibold text-foreground whitespace-nowrap"}>{m.label}</div>
+                    <div className="text-[10px] text-muted-foreground whitespace-nowrap">{m.sub}</div>
+                  </div>
+                </div>
               </div>
             ))}
+          </div>
+
+          {/* Legend */}
+          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground border-t border-border pt-4">
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-primary/20" /> Pension Navigator</div>
+            <div className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full bg-muted-foreground/70" /> Competitor category</div>
+            <div className="ml-auto text-[11px]">Positioning based on 2026 provider assessment</div>
           </div>
         </div>
       </Section>

@@ -18,7 +18,7 @@ type Direction = "all" | "in" | "out";
 const MONEY_IN = ["contribution", "transfer_in", "interest", "dividend"];
 const MONEY_OUT = ["pcls", "ufpls_taxable", "drawdown", "tax_withheld", "bank_transfer", "fee", "transfer_out"];
 
-const TAX_YEARS = ["all", "2026/27", "2026/27", "2026/27"];
+const TAX_YEARS = ["all", "2026/27", "2025/26", "2024/25"];
 
 export default function TransactionHistory() {
   const { clients } = useClients();

@@ -100,7 +100,7 @@ function AnnualTaxPack() {
         </div>
         <div><Label>Tax year</Label>
           <Select value={taxYear} onValueChange={setTaxYear}><SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{["2026/27", "2026/27", "2026/27"].map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
+            <SelectContent>{["2026/27", "2025/26", "2024/25"].map((y) => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
           </Select>
         </div>
         <Button onClick={generate} disabled={generating}><Download className="h-4 w-4 mr-2" />{generating ? "Generating…" : "Generate .docx"}</Button>

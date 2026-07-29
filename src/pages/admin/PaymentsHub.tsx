@@ -134,7 +134,7 @@ export default function PaymentsHub() {
     downloadCSV(
       "payments",
       ["Beneficiary", "Sort code", "Account", "Reference", "Purpose", "Method", "Amount (£)", "Status", "Requested"],
-      filteredRows().map((r) => [
+      filteredRows(rows, tab).map((r) => [
         r.beneficiary_name ?? "",
         r.beneficiary_sort_code ?? "",
         r.beneficiary_account ?? "",
@@ -172,11 +172,12 @@ export default function PaymentsHub() {
     load();
   };
 
-  const filtered = tab === "all" ? rows :
-    tab === "pending" ? rows.filter(r => r.status === "pending_approval") :
-    tab === "approved" ? rows.filter(r => ["approved", "released"].includes(r.status)) :
-    tab === "settled" ? rows.filter(r => ["settled", "reconciled"].includes(r.status)) :
-    rows;
+  const filteredRows = (rs: Payment[], t: string) =>
+    t === "pending" ? rs.filter(r => r.status === "pending_approval") :
+    t === "approved" ? rs.filter(r => ["approved", "released"].includes(r.status)) :
+    t === "settled" ? rs.filter(r => ["settled", "reconciled"].includes(r.status)) :
+    rs;
+  const filtered = useMemo(() => filteredRows(rows, tab), [rows, tab]);
 
   const totalPending = rows.filter(r => r.status === "pending_approval").reduce((s, r) => s + Number(r.amount), 0);
   const totalReleased = rows.filter(r => r.status === "released").reduce((s, r) => s + Number(r.amount), 0);

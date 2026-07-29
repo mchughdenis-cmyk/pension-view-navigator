@@ -221,6 +221,7 @@ export default function PaymentsHub() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">

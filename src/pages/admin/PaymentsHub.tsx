@@ -314,6 +314,17 @@ export default function PaymentsHub() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8">
+                    <Checkbox
+                      checked={filtered.length > 0 && filtered.every((r) => selected.has(r.id))}
+                      onCheckedChange={(c) => {
+                        const next = new Set(selected);
+                        if (c) filtered.forEach((r) => next.add(r.id));
+                        else filtered.forEach((r) => next.delete(r.id));
+                        setSelected(next);
+                      }}
+                    />
+                  </TableHead>
                   <TableHead>Beneficiary</TableHead>
                   <TableHead>Purpose</TableHead>
                   <TableHead>Method</TableHead>
@@ -326,6 +337,16 @@ export default function PaymentsHub() {
               <TableBody>
                 {filtered.map(r => (
                   <TableRow key={r.id}>
+                    <TableCell>
+                      <Checkbox
+                        checked={selected.has(r.id)}
+                        onCheckedChange={(c) => {
+                          const next = new Set(selected);
+                          if (c) next.add(r.id); else next.delete(r.id);
+                          setSelected(next);
+                        }}
+                      />
+                    </TableCell>
                     <TableCell>
                       <div className="font-medium">{r.beneficiary_name || "—"}</div>
                       <div className="text-xs text-muted-foreground">{r.beneficiary_reference}</div>
@@ -355,7 +376,7 @@ export default function PaymentsHub() {
                   </TableRow>
                 ))}
                 {filtered.length === 0 && (
-                  <TableRow><TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">No payments in this view.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={8} className="text-center text-sm text-muted-foreground py-8">No payments in this view.</TableCell></TableRow>
                 )}
               </TableBody>
             </Table>

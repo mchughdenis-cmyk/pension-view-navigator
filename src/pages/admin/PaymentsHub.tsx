@@ -486,6 +486,68 @@ export default function PaymentsHub() {
           <p className="text-xs text-muted-foreground mt-4">Four-eyes control: the payment creator cannot approve their own instruction.</p>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-base">
+            <FolderArchive className="h-4 w-4" />Payment file store
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Every bank file generated is retained in the secure payment-files store: the ISO 20022 pain.001 Bacs file and the matching PaymentBatchReport XML.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>File</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Batch</TableHead>
+                <TableHead className="text-right">Payments</TableHead>
+                <TableHead className="text-right">Value</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {files.map(f => (
+                <TableRow key={f.id}>
+                  <TableCell className="font-medium break-all">{f.file_name}</TableCell>
+                  <TableCell className="text-xs">
+                    {f.file_kind === "bacs_pain001" ? "Bacs pain.001" : "PaymentBatchReport"}
+                  </TableCell>
+                  <TableCell className="text-xs">{f.batch_reference ?? "—"}</TableCell>
+                  <TableCell className="text-right tabular-nums">{f.payment_count}</TableCell>
+                  <TableCell className="text-right tabular-nums">£{Number(f.total_amount).toLocaleString()}</TableCell>
+                  <TableCell className="text-xs">{new Date(f.created_at).toLocaleString("en-GB")}</TableCell>
+                  <TableCell className="text-right">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          await downloadStoredPaymentFile(f.storage_path, f.file_name);
+                        } catch (e) {
+                          toast({ title: "Download failed", description: (e as Error).message, variant: "destructive" });
+                        }
+                      }}
+                    >
+                      <Download className="h-3.5 w-3.5 mr-1" />Download
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+              {files.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center text-sm text-muted-foreground py-8">
+                    No payment files created yet.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
     </div>
   );
 }

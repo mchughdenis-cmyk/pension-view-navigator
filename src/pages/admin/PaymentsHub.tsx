@@ -13,8 +13,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/hooks/use-toast";
-import { Plus, ShieldCheck, Send, XCircle, FileDown, FileSpreadsheet } from "lucide-react";
-import { downloadBacsXml } from "@/lib/bacsXml";
+import { Plus, ShieldCheck, Send, XCircle, FileDown, FileSpreadsheet, Download, FolderArchive } from "lucide-react";
+import { generateBacsPain001Xml } from "@/lib/bacsXml";
+import { generatePaymentBatchReportXml, paymentBatchReportFilename } from "@/lib/paymentBatchReport";
+import { storePaymentFile, downloadText, downloadStoredPaymentFile } from "@/lib/paymentFileStore";
 import { downloadCSV } from "@/lib/adminExportUtils";
 import { paymentInstructionSchema } from "@/lib/validation";
 

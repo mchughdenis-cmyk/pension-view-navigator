@@ -4580,6 +4580,57 @@ export type Database = {
           },
         ]
       }
+      payment_files: {
+        Row: {
+          batch_reference: string | null
+          content_type: string
+          created_at: string
+          created_by: string | null
+          currency: string
+          file_kind: string
+          file_name: string
+          id: string
+          payment_count: number
+          payment_ids: string[]
+          status: string
+          storage_path: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          batch_reference?: string | null
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          file_kind?: string
+          file_name: string
+          id?: string
+          payment_count?: number
+          payment_ids?: string[]
+          status?: string
+          storage_path: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          batch_reference?: string | null
+          content_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          file_kind?: string
+          file_name?: string
+          id?: string
+          payment_count?: number
+          payment_ids?: string[]
+          status?: string
+          storage_path?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_initiations: {
         Row: {
           amount: number

@@ -19,6 +19,9 @@ import FeatureFlags from "./pages/admin/FeatureFlags";
 import EventBus from "./pages/admin/EventBus";
 import CorporateActions from "./pages/admin/CorporateActions";
 import CassDailyRecon from "./pages/admin/CassDailyRecon";
+import CashForecast from "./pages/admin/CashForecast";
+import AdviserFeeRecon from "./pages/admin/AdviserFeeRecon";
+import RegCalendar from "./pages/admin/RegCalendar";
 import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
@@ -343,6 +346,9 @@ const AppContent = () => {
               <Route path="/admin/event-bus" element={<RoleGate allow={['admin']}><EventBus /></RoleGate>} />
               <Route path="/admin/corporate-actions" element={<RoleGate allow={['admin']}><CorporateActions /></RoleGate>} />
               <Route path="/admin/cass7-daily-recon" element={<RoleGate allow={['admin']}><CassDailyRecon /></RoleGate>} />
+              <Route path="/admin/cash-forecast" element={<RoleGate allow={['admin']}><CashForecast /></RoleGate>} />
+              <Route path="/admin/adviser-fees" element={<RoleGate allow={['admin']}><AdviserFeeRecon /></RoleGate>} />
+              <Route path="/admin/reg-calendar" element={<RoleGate allow={['admin']}><RegCalendar /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

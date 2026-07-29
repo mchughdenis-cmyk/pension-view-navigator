@@ -17,6 +17,7 @@ import ReferenceData from "./pages/admin/ReferenceData";
 import ExpectedReceipts from "./pages/admin/ExpectedReceipts";
 import FeatureFlags from "./pages/admin/FeatureFlags";
 import EventBus from "./pages/admin/EventBus";
+import CorporateActions from "./pages/admin/CorporateActions";
 import NotFound from "./pages/NotFound";
 import PensionIllustration from "./components/PensionIllustration";
 import DigitalWelcomePack from "./components/DigitalWelcomePack";
@@ -339,6 +340,7 @@ const AppContent = () => {
               <Route path="/admin/expected-receipts" element={<RoleGate allow={['admin']}><ExpectedReceipts /></RoleGate>} />
               <Route path="/admin/feature-flags" element={<RoleGate allow={['admin']}><FeatureFlags /></RoleGate>} />
               <Route path="/admin/event-bus" element={<RoleGate allow={['admin']}><EventBus /></RoleGate>} />
+              <Route path="/admin/corporate-actions" element={<RoleGate allow={['admin']}><CorporateActions /></RoleGate>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </AppShell>

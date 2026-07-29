@@ -139,7 +139,6 @@ export default function CorporateActions() {
           <h1 className="text-2xl font-bold flex items-center gap-2"><CalendarDays className="h-6 w-6" /> Corporate actions calendar</h1>
           <p className="text-sm text-muted-foreground">Dividends, splits, rights and tenders across the book — with election tracking.</p>
         </div>
-        </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={exportCsv}><FileSpreadsheet className="h-4 w-4 mr-2" />Export CSV</Button>
           <Dialog open={open} onOpenChange={setOpen}>
@@ -188,6 +187,7 @@ export default function CorporateActions() {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3">

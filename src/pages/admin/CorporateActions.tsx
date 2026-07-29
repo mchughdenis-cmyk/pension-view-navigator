@@ -13,20 +13,19 @@ import { Plus, CalendarDays } from "lucide-react";
 
 type CA = {
   id: string;
-  event_type: string;
-  security_name: string;
+  action_type: string;
+  symbol: string;
+  description: string | null;
   isin: string | null;
-  sedol: string | null;
-  announcement_date: string | null;
   ex_date: string | null;
   record_date: string | null;
   payment_date: string | null;
+  election_deadline: string | null;
   ratio: string | null;
-  cash_rate: number | null;
+  rate: number | null;
   currency: string | null;
   status: string;
-  mandatory: boolean;
-  notes: string | null;
+  voluntary: boolean;
 };
 
 const EVENT_TYPES = [
@@ -36,6 +35,8 @@ const EVENT_TYPES = [
 ];
 const STATUSES = ["announced", "election_open", "election_closed", "processed", "cancelled"];
 
+const today = () => new Date().toISOString().slice(0, 10);
+
 export default function CorporateActions() {
   const [rows, setRows] = useState<CA[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,19 +44,18 @@ export default function CorporateActions() {
   const [type, setType] = useState("all");
   const [open, setOpen] = useState(false);
   const empty = {
-    event_type: "cash_dividend",
-    security_name: "",
+    action_type: "cash_dividend",
+    symbol: "",
+    description: "",
     isin: "",
-    sedol: "",
-    announcement_date: new Date().toISOString().slice(0, 10),
     ex_date: "",
     record_date: "",
     payment_date: "",
+    election_deadline: "",
     ratio: "",
-    cash_rate: "",
+    rate: "",
     status: "announced",
-    mandatory: true,
-    notes: "",
+    voluntary: false,
   };
   const [form, setForm] = useState(empty);
 
@@ -67,7 +67,7 @@ export default function CorporateActions() {
       .order("ex_date", { ascending: true, nullsFirst: false })
       .limit(500);
     if (error) toast({ title: "Load failed", description: error.message, variant: "destructive" });
-    setRows((data as CA[]) ?? []);
+    setRows((data ?? []) as CA[]);
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -75,20 +75,27 @@ export default function CorporateActions() {
   const filtered = useMemo(() =>
     rows.filter(r =>
       (status === "all" || r.status === status) &&
-      (type === "all" || r.event_type === type),
+      (type === "all" || r.action_type === type),
     ), [rows, status, type]);
 
-  const upcoming = rows.filter(r => r.ex_date && r.ex_date >= new Date().toISOString().slice(0, 10)).length;
+  const upcoming = rows.filter(r => r.ex_date && r.ex_date >= today()).length;
   const elections = rows.filter(r => r.status === "election_open").length;
-  const dueToday = rows.filter(r => r.payment_date === new Date().toISOString().slice(0, 10)).length;
+  const dueToday = rows.filter(r => r.payment_date === today()).length;
 
   const create = async () => {
     const payload = {
-      ...form,
-      cash_rate: form.cash_rate ? Number(form.cash_rate) : null,
+      action_type: form.action_type,
+      symbol: form.symbol,
+      description: form.description || null,
+      isin: form.isin || null,
       ex_date: form.ex_date || null,
       record_date: form.record_date || null,
       payment_date: form.payment_date || null,
+      election_deadline: form.election_deadline || null,
+      ratio: form.ratio || null,
+      rate: form.rate ? Number(form.rate) : null,
+      status: form.status,
+      voluntary: form.voluntary,
     };
     const { error } = await supabase.from("corporate_actions").insert(payload);
     if (error) return toast({ title: "Create failed", description: error.message, variant: "destructive" });
@@ -117,7 +124,7 @@ export default function CorporateActions() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Event type</Label>
-                  <Select value={form.event_type} onValueChange={v => setForm({ ...form, event_type: v })}>
+                  <Select value={form.action_type} onValueChange={v => setForm({ ...form, action_type: v })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>{EVENT_TYPES.map(t => <SelectItem key={t} value={t}>{t.replace(/_/g, " ")}</SelectItem>)}</SelectContent>
                   </Select>
@@ -130,25 +137,28 @@ export default function CorporateActions() {
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label>Security name</Label>
-                <Input value={form.security_name} onChange={e => setForm({ ...form, security_name: e.target.value })} />
-              </div>
               <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Symbol / ticker</Label>
+                  <Input value={form.symbol} onChange={e => setForm({ ...form, symbol: e.target.value })} placeholder="SHEL.L" />
+                </div>
                 <div><Label>ISIN</Label><Input value={form.isin} onChange={e => setForm({ ...form, isin: e.target.value })} /></div>
-                <div><Label>SEDOL</Label><Input value={form.sedol} onChange={e => setForm({ ...form, sedol: e.target.value })} /></div>
+              </div>
+              <div>
+                <Label>Description</Label>
+                <Input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Shell plc Q2 interim dividend" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Ex date</Label><Input type="date" value={form.ex_date} onChange={e => setForm({ ...form, ex_date: e.target.value })} /></div>
                 <div><Label>Record date</Label><Input type="date" value={form.record_date} onChange={e => setForm({ ...form, record_date: e.target.value })} /></div>
                 <div><Label>Payment date</Label><Input type="date" value={form.payment_date} onChange={e => setForm({ ...form, payment_date: e.target.value })} /></div>
-                <div><Label>Announcement</Label><Input type="date" value={form.announcement_date} onChange={e => setForm({ ...form, announcement_date: e.target.value })} /></div>
+                <div><Label>Election deadline</Label><Input type="date" value={form.election_deadline} onChange={e => setForm({ ...form, election_deadline: e.target.value })} /></div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><Label>Ratio (e.g. 1:5)</Label><Input value={form.ratio} onChange={e => setForm({ ...form, ratio: e.target.value })} /></div>
-                <div><Label>Cash rate (£/share)</Label><Input type="number" step="0.0001" value={form.cash_rate} onChange={e => setForm({ ...form, cash_rate: e.target.value })} /></div>
+                <div><Label>Rate (£/share)</Label><Input type="number" step="0.0001" value={form.rate} onChange={e => setForm({ ...form, rate: e.target.value })} /></div>
               </div>
-              <Button onClick={create} disabled={!form.security_name}>Add corporate action</Button>
+              <Button onClick={create} disabled={!form.symbol}>Add corporate action</Button>
             </div>
           </DialogContent>
         </Dialog>
@@ -167,9 +177,7 @@ export default function CorporateActions() {
 
       <Card>
         <CardHeader className="flex flex-row items-center gap-3">
-          <div className="flex-1">
-            <CardTitle>Events</CardTitle>
-          </div>
+          <div className="flex-1"><CardTitle>Events</CardTitle></div>
           <Select value={status} onValueChange={setStatus}>
             <SelectTrigger className="w-44"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
@@ -204,18 +212,18 @@ export default function CorporateActions() {
                 {filtered.map(r => (
                   <TableRow key={r.id}>
                     <TableCell>
-                      <div className="font-medium">{r.security_name}</div>
-                      <div className="text-xs text-muted-foreground">{r.isin || r.sedol}</div>
+                      <div className="font-medium">{r.symbol}</div>
+                      <div className="text-xs text-muted-foreground">{r.isin || r.description}</div>
                     </TableCell>
                     <TableCell className="capitalize">
-                      {r.event_type.replace(/_/g, " ")}
-                      {!r.mandatory && <Badge variant="outline" className="ml-2">voluntary</Badge>}
+                      {r.action_type.replace(/_/g, " ")}
+                      {r.voluntary && <Badge variant="outline" className="ml-2">voluntary</Badge>}
                     </TableCell>
                     <TableCell>{r.ex_date || "—"}</TableCell>
                     <TableCell>{r.record_date || "—"}</TableCell>
                     <TableCell>{r.payment_date || "—"}</TableCell>
                     <TableCell className="text-right tabular-nums">
-                      {r.cash_rate ? `£${Number(r.cash_rate).toFixed(4)}` : r.ratio || "—"}
+                      {r.rate ? `£${Number(r.rate).toFixed(4)}` : r.ratio || "—"}
                     </TableCell>
                     <TableCell><Badge>{r.status.replace(/_/g, " ")}</Badge></TableCell>
                     <TableCell className="text-right">

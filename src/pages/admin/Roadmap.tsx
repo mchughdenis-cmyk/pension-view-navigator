@@ -17,6 +17,13 @@ const rows: { area: string; status: Status; note: string }[] = [
   { area: "Full audit export (immutable, signed)", status: "Partial", note: "Audit trail present, no signed export." },
   { area: "Performance at 100k+ members", status: "Unverified", note: "No load testing." },
   { area: "DR / RPO/RTO documentation", status: "Missing", note: "Not published." },
+  { area: "Live bank connectivity for payment files", status: "Not connected", note: "Files generated and archived; transmission is manual." },
+  { area: "Payment return files (pain.002 / ARUDD)", status: "Missing", note: "Rejections handled manually today." },
+  { area: "Print & postal fulfilment", status: "Not connected", note: "Documents generated and stored; despatch handled outside." },
+  { area: "Correspondence template version control", status: "Partial", note: "No compliance approval workflow on templates." },
+  { area: "Configurable workflow designer", status: "Missing", note: "Case types and steps are code-defined." },
+  { area: "Penetration test / control attestation", status: "Not done", note: "No independent assurance recorded." },
+
 ];
 
 const tone: Record<Status, string> = {

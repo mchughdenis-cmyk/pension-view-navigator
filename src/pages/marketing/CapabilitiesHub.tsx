@@ -26,10 +26,12 @@ export default function CapabilitiesHub() {
           What a full pension administration system has to do — and where we stand
         </h1>
         <p className="text-muted-foreground">
-          Twelve administration domains, from member onboarding to CASS reconciliation and the fee run.
-          Each page sets out the workflow, the rules it has to satisfy, the screens that deliver it and
-          what is still on the roadmap. Nothing is dressed up: partial means partial.
+          Sixteen administration domains, from member onboarding to CASS reconciliation, the fee run
+          and the controls that sit around them. Each page sets out the workflow, the rules it has to
+          satisfy, the screens that deliver it and what is still on the roadmap. Nothing is dressed up:
+          partial means partial.
         </p>
+
         <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
           <span><strong className="text-foreground">{counts.live ?? 0}</strong> live</span>
           <span><strong className="text-foreground">{counts.partial ?? 0}</strong> partial</span>

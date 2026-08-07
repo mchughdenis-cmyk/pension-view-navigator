@@ -397,7 +397,135 @@ export const capabilities: Capability[] = [
       "Automated fee rebates and negotiated adviser tariffs at firm level.",
     ],
   },
+  {
+    slug: "case-management",
+    title: "Case management, workflow & controls",
+    positioning: "Every piece of work as a tracked case, with service levels, approvals and an audit history.",
+    maturity: "live",
+    what: [
+      "Work arrives from journeys, uploads and events, and is opened as a case with a type, owner and priority.",
+      "The operator console shows the day's queue by age, service level risk and value at stake.",
+      "Cases are assigned, reassigned and escalated, with every action written to the audit history.",
+      "Four-eyes approval holds sensitive items — payments, payroll releases and reconciliation sign-off — until a second administrator approves.",
+      "Service level tracking measures turnaround against published standards and highlights breaches before they happen.",
+    ],
+    rules: [
+      "Segregation of duties on money movement and reconciliation sign-off",
+      "Documented service standards per case type with breach reporting",
+      "Full, immutable action history against every case",
+      "Consumer Duty expectations on timeliness and fair outcomes",
+    ],
+    screens: [
+      { label: "Operator console", to: "/admin/console" },
+      { label: "Case workbench", to: "/admin/case-workbench" },
+      { label: "Case inbox", to: "/cases" },
+      { label: "Work queue (all cases)", to: "/admin" },
+      { label: "SLA tracker", to: "/sla-tracker" },
+      { label: "Audit trail", to: "/audit" },
+    ],
+    roadmap: [
+      "Cross-module four-eyes queue — approvals are enforced on payments, payroll and reconciliation today, and are being extended to every case type.",
+      "Configurable workflow designer so firms can define their own case types and steps without a release.",
+    ],
+  },
+  {
+    slug: "payments",
+    title: "Payments, money movement & accounting",
+    positioning: "From instruction to bank file to ledger posting, with approval and an archived audit copy.",
+    maturity: "live",
+    what: [
+      "Payment instructions are raised from benefits, transfers out, fees and supplier costs, with beneficiary bank detail validated on entry.",
+      "Instructions are approved under four eyes before any file is produced.",
+      "Bacs and ISO 20022 payment files are generated together with a PaymentBatchReport XML and stored in a dedicated payment file archive.",
+      "Every movement posts double entry to the general ledger, with a trial balance strip proving the book balances.",
+      "The cash forecast projects T+1 to T+5 requirements so the client money account is funded ahead of the run.",
+      "Failed and returned payments are routed back as cases for investigation and re-issue.",
+    ],
+    rules: [
+      "Segregation of duties between preparation and authorisation of payments",
+      "Bacs three working day cycle and ISO 20022 pain.001 message structure",
+      "Client money paid only where properly due, with same-day shortfall funding",
+      "Double entry postings retained for audit with a daily trial balance",
+    ],
+    screens: [
+      { label: "Payments hub", to: "/admin/payments" },
+      { label: "Payment file store", to: "/admin/payment-files" },
+      { label: "General ledger", to: "/admin/ledger" },
+      { label: "Cash forecast (T+1 to T+5)", to: "/admin/cash-forecast" },
+      { label: "Expected receipts", to: "/admin/expected-receipts" },
+      { label: "Unallocated cash", to: "/unallocated-cash" },
+    ],
+    roadmap: [
+      "Live bank connectivity — files are produced and archived in the system today, transmission to the bank is performed outside it.",
+      "Automated ingestion of pain.002 and ARUDD / AWACS return files to close the loop on rejected payments.",
+    ],
+  },
+  {
+    slug: "communications",
+    title: "Communications, documents & records",
+    positioning: "Member and adviser correspondence produced, issued and retained against the record.",
+    maturity: "partial",
+    what: [
+      "Templated correspondence covers welcome packs, statements, illustrations, review packs and transfer confirmations.",
+      "Documents are generated as branded Word and PDF output and filed in the document vault against the member.",
+      "Secure messaging carries adviser and member conversations, with notification routing rules deciding who is told what.",
+      "Saved illustrations are stored in the adviser's own library and can be emailed to a member.",
+      "Every generated document and issued message leaves an audit record showing what went out, when and to whom.",
+    ],
+    rules: [
+      "Disclosure documents issued in a durable medium",
+      "Record retention across the required periods with retrieval on request",
+      "Consumer Duty communications testing — clear, fair and not misleading",
+      "Evidence of issue retained against the member record",
+    ],
+    screens: [
+      { label: "Communications hub", to: "/comms" },
+      { label: "Document vault", to: "/documents" },
+      { label: "Digital welcome pack", to: "/welcome-pack" },
+      { label: "Benefit statements", to: "/benefit-statements" },
+      { label: "Saved illustrations", to: "/saved-illustrations" },
+      { label: "Annual review pack", to: "/annual-review" },
+      { label: "Audit trail", to: "/audit" },
+    ],
+    roadmap: [
+      "Production print and postal fulfilment — documents are generated and stored today, physical despatch is handled outside the system.",
+      "Template version control with compliance approval before a template goes live.",
+    ],
+  },
+  {
+    slug: "governance",
+    title: "Data governance, security & access administration",
+    positioning: "Who can see what, how data quality is proven, and how it is all evidenced.",
+    maturity: "partial",
+    what: [
+      "Firm, adviser and scheme hierarchy determines the book of business each user can reach.",
+      "Role-based access separates client, adviser and administrator views, with route level enforcement and row level rules in the database.",
+      "User administration covers invitation, role assignment and removal, with a registration log of every account created.",
+      "Data quality scoring measures member record completeness against the Pensions Regulator expectations and lists the records to fix.",
+      "A privacy centre handles subject access, rectification and erasure requests, and the audit log records every read and change of note.",
+    ],
+    rules: [
+      "UK GDPR lawful basis, subject rights and retention schedules",
+      "Least privilege access with roles held separately from user profiles",
+      "Pensions Regulator common and scheme-specific data scoring",
+      "Audit evidence retained for regulatory inspection",
+    ],
+    screens: [
+      { label: "Firm hierarchy", to: "/firms" },
+      { label: "Registration log", to: "/admin/registrations" },
+      { label: "Data quality dashboard", to: "/data-quality" },
+      { label: "Privacy centre", to: "/privacy" },
+      { label: "Audit log", to: "/audit-log" },
+      { label: "System configuration", to: "/admin" },
+    ],
+    roadmap: [
+      "Enterprise single sign-on and SCIM user provisioning for institutional tenants.",
+      "Independently evidenced security assurance — penetration testing and a formal control attestation.",
+      "Signed, immutable audit export for regulator and auditor use.",
+    ],
+  },
 ];
+
 
 export const getCapability = (slug?: string) =>
   capabilities.find((c) => c.slug === slug);
@@ -461,9 +589,9 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   contributions: {
     headline: "Run a payroll, collect the money and reclaim the tax across one book of business.",
     steps: [
-      { label: "Open the payroll run", detail: "Book-level run created for the pay period.", to: "/payroll" },
-      { label: "Validate and review variance", detail: "Missing members, cap breaches and swings flagged before release.", to: "/payroll" },
-      { label: "Four-eyes approval", detail: "Second administrator approves the schedule.", to: "/payroll" },
+      { label: "Open the payroll run", detail: "Book-level run created for the pay period.", to: "/payroll-processing" },
+      { label: "Validate and review variance", detail: "Missing members, cap breaches and swings flagged before release.", to: "/payroll-processing" },
+      { label: "Four-eyes approval", detail: "Second administrator approves the schedule.", to: "/payroll-processing" },
       { label: "Collect by direct debit", detail: "Bacs three-day cycle tracked to settlement.", to: "/direct-debit-collections" },
       { label: "Allocate contributions", detail: "Money matched to expected receipts and posted to member accounts.", to: "/contributions" },
       { label: "Build the RAS claim", detail: "Net-paid contributions become an interim HMRC claim.", to: "/hmrc" },
@@ -561,8 +689,8 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     headline: "Crystallise benefits, pay a PCLS and see allowance headroom update instantly.",
     steps: [
       { label: "Quote the retirement options", detail: "Full and partial crystallisation compared.", to: "/retirement-quotes" },
-      { label: "Test the allowances", detail: "LSA and LSDBA usage checked before the event.", to: "/lsa-tracking" },
-      { label: "Record the BCE", detail: "Amount crystallised, lump sum and date captured.", to: "/crystallisation" },
+      { label: "Test the allowances", detail: "LSA and LSDBA usage checked before the event.", to: "/lsa" },
+      { label: "Record the BCE", detail: "Amount crystallised, lump sum and date captured.", to: "/lsa" },
       { label: "Pay the PCLS", detail: "Lump sum instruction raised in the payments hub.", to: "/admin/payments" },
       { label: "Designate the balance", detail: "Remainder moves into flexi-access drawdown.", to: "/drawdown" },
       { label: "Report the event", detail: "Event appears on the APSS event report.", to: "/hmrc" },
@@ -583,7 +711,7 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     headline: "Set up flexi-access drawdown and pay the first taxed income run.",
     steps: [
       { label: "Run the drawdown journey", detail: "Risk warnings, disclosures and income choice.", to: "/drawdown" },
-      { label: "Produce the illustration", detail: "COBS 13 key features illustration generated as a PDF.", to: "/illustrations" },
+      { label: "Produce the illustration", detail: "COBS 13 key features illustration generated as a PDF.", to: "/illustration" },
       { label: "Schedule the income", detail: "Frequency, amount and pay dates set.", to: "/drawdown" },
       { label: "Run the pension payroll", detail: "PAYE applied under the member tax code.", to: "/paye" },
       { label: "Pay the members", detail: "Bank file created and stored in the payment file vault.", to: "/admin/payment-files" },
@@ -615,9 +743,9 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     steps: [
       { label: "Log the notification", detail: "Case opened with date of death and informant.", to: "/death-claims" },
       { label: "Verify documents", detail: "Death certificate and probate evidence recorded.", to: "/death-claims" },
-      { label: "Check nominations", detail: "Expression of wish reviewed against current family position.", to: "/nominations" },
+      { label: "Check nominations", detail: "Expression of wish reviewed against current family position.", to: "/beneficiaries" },
       { label: "Apply trustee discretion", detail: "Decision minuted with reasons.", to: "/death-claims" },
-      { label: "Test the LSDBA", detail: "Allowance usage calculated where a lump sum is paid.", to: "/lsa-tracking" },
+      { label: "Test the LSDBA", detail: "Allowance usage calculated where a lump sum is paid.", to: "/lsa" },
       { label: "Settle to beneficiaries", detail: "Beneficiary drawdown accounts opened or lump sums paid.", to: "/admin/payments" },
     ],
     connectors: [
@@ -658,11 +786,11 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   illustrations: {
     headline: "Produce every member-facing projection from one calculation engine.",
     steps: [
-      { label: "Choose the illustration type", detail: "KFI, retirement figures, wake-up pack or SMPI.", to: "/illustrations" },
-      { label: "Model accumulation", detail: "Contributions, transfers and charges projected forward.", to: "/illustrations" },
+      { label: "Choose the illustration type", detail: "KFI, retirement figures, wake-up pack or SMPI.", to: "/illustration" },
+      { label: "Model accumulation", detail: "Contributions, transfers and charges projected forward.", to: "/illustration" },
       { label: "Model decumulation", detail: "PCLS, drawdown or annuity compared side by side.", to: "/drawdown" },
-      { label: "Generate the PDF", detail: "Branded document produced with assumptions disclosed.", to: "/illustrations" },
-      { label: "Save to the adviser store", detail: "Illustration filed against the member with an email address.", to: "/illustrations" },
+      { label: "Generate the PDF", detail: "Branded document produced with assumptions disclosed.", to: "/illustration" },
+      { label: "Save to the adviser store", detail: "Illustration filed against the member with an email address.", to: "/illustration" },
       { label: "Issue statutory statements", detail: "SMPI and wake-up packs run across the book.", to: "/reporting" },
     ],
     connectors: [
@@ -680,10 +808,10 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   cass: {
     headline: "Complete a full day of client money and asset checks with sign-off.",
     steps: [
-      { label: "Load the bank statement", detail: "Bank file uploaded at book-of-business level.", to: "/bank-recon" },
+      { label: "Load the bank statement", detail: "Bank file uploaded at book-of-business level.", to: "/bank-upload" },
       { label: "Match and allocate", detail: "Receipts matched to expectations, residue to suspense.", to: "/unallocated-cash" },
-      { label: "Run the internal reconciliation", detail: "Requirement compared with resource.", to: "/cass7" },
-      { label: "Resolve any shortfall", detail: "Same-day funding recorded where needed.", to: "/cass7" },
+      { label: "Run the internal reconciliation", detail: "Requirement compared with resource.", to: "/admin/cass7-daily-recon" },
+      { label: "Resolve any shortfall", detail: "Same-day funding recorded where needed.", to: "/admin/cass7-daily-recon" },
       { label: "Reconcile custody assets", detail: "CASS 8 position checks and break management.", to: "/cass-engine" },
       { label: "Sign off and log breaches", detail: "Daily sign-off retained, breaches registered.", to: "/breach-register" },
     ],
@@ -754,6 +882,113 @@ export const capabilityDemos: Record<string, DemoJourney> = {
       },
     ],
   },
+  "case-management": {
+    headline: "Take a day's work from queue to closure with service levels and approvals enforced.",
+    steps: [
+      { label: "Open the operator console", detail: "Today's work ranked by age, risk and value.", to: "/admin/console" },
+      { label: "Pick up a case", detail: "Case assigned with type, owner and target date.", to: "/admin/case-workbench" },
+      { label: "Work the checklist", detail: "Each step recorded with evidence against the case.", to: "/cases" },
+      { label: "Send for approval", detail: "Sensitive actions held for a second administrator.", to: "/admin/payments" },
+      { label: "Watch the service level", detail: "SLA tracker shows breach risk before the deadline.", to: "/sla-tracker" },
+      { label: "Close with an audit trail", detail: "Full action history retained for inspection.", to: "/audit" },
+    ],
+    connectors: [
+      {
+        name: "Domain event bus",
+        protocol: "Internal event stream (simulated)",
+        messages: [
+          "contribution.received — case CS-2026-0311 auto-created",
+          "case.assigned — routed to the contributions desk",
+          "approval.requested — second administrator notified",
+          "case.closed — SLA met at 1.4 days against a 3 day standard",
+        ],
+      },
+    ],
+  },
+  payments: {
+    headline: "Raise, approve, file and post a payment run without leaving the platform.",
+    steps: [
+      { label: "Raise the instructions", detail: "Benefit, transfer out and fee payments queued.", to: "/admin/payments" },
+      { label: "Approve under four eyes", detail: "Second administrator authorises the batch.", to: "/admin/payments" },
+      { label: "Generate the bank files", detail: "Bacs and PaymentBatchReport XML produced together.", to: "/admin/payment-files" },
+      { label: "Post to the ledger", detail: "Double entry raised and the trial balance agreed.", to: "/admin/ledger" },
+      { label: "Check the funding", detail: "Cash forecast confirms T+1 to T+5 requirements.", to: "/admin/cash-forecast" },
+      { label: "Handle returns", detail: "Rejected credits routed back as cases to re-issue.", to: "/unallocated-cash" },
+    ],
+    connectors: [
+      {
+        name: "Bank payment channel",
+        protocol: "ISO 20022 pain.001 / pain.002 (simulated)",
+        messages: [
+          "pain.001 batch PB-2026-0812 generated — 6 credits, GBP 41,905.00",
+          "PaymentBatchReport XML archived alongside the payment file",
+          "pain.002 acknowledgement — 5 accepted, 1 rejected (invalid sort code)",
+          "Rejected credit returned to the payments hub as a case",
+        ],
+      },
+      {
+        name: "Accounting export",
+        protocol: "Nominal journal feed (simulated)",
+        messages: [
+          "Journal batch JNL-2026-08-0044 exported — debits equal credits",
+          "Trial balance agreed to the client money position",
+        ],
+      },
+    ],
+  },
+  communications: {
+    headline: "Produce a member document, issue it and prove it was sent.",
+    steps: [
+      { label: "Choose the template", detail: "Welcome pack, statement, illustration or review pack.", to: "/comms" },
+      { label: "Generate the document", detail: "Branded Word or PDF output built from live data.", to: "/benefit-statements" },
+      { label: "File it against the member", detail: "Stored in the document vault with a version.", to: "/documents" },
+      { label: "Issue securely", detail: "Secure message or email with routing rules applied.", to: "/comms" },
+      { label: "Save to the adviser library", detail: "Illustrations kept for later reference.", to: "/saved-illustrations" },
+      { label: "Evidence the issue", detail: "Audit trail shows what went out, when and to whom.", to: "/audit" },
+    ],
+    connectors: [
+      {
+        name: "Email delivery service",
+        protocol: "Transactional email API (simulated)",
+        messages: [
+          "Annual statement queued for 3 members",
+          "202 Accepted — message IDs returned",
+          "Delivery receipts recorded against each member record",
+        ],
+      },
+      {
+        name: "Print and fulfilment",
+        protocol: "Print stream handover (simulated)",
+        messages: [
+          "Print file assembled for members with no digital preference",
+          "Handover manifest generated for the fulfilment house",
+        ],
+      },
+    ],
+  },
+  governance: {
+    headline: "Show who can see what, how clean the data is and how it is all evidenced.",
+    steps: [
+      { label: "Review the hierarchy", detail: "Firms, advisers and schemes define the book each user sees.", to: "/firms" },
+      { label: "Check account creation", detail: "Registration log lists every account and its role.", to: "/admin/registrations" },
+      { label: "Score the data", detail: "Member record completeness measured and gaps listed.", to: "/data-quality" },
+      { label: "Handle a privacy request", detail: "Subject access and erasure handled in the privacy centre.", to: "/privacy" },
+      { label: "Inspect the audit log", detail: "Reads and changes retained for regulator review.", to: "/audit-log" },
+      { label: "Confirm configuration", detail: "System settings and role rules reviewed.", to: "/admin" },
+    ],
+    connectors: [
+      {
+        name: "Identity provider",
+        protocol: "SAML / SCIM (simulated)",
+        messages: [
+          "SSO assertion accepted for an administrator account",
+          "SCIM provisioning payload creates the user with the operations role",
+          "Deprovisioning removes access and closes the session",
+        ],
+      },
+    ],
+  },
 };
+
 
 export const getCapabilityDemo = (slug?: string) => (slug ? capabilityDemos[slug] : undefined);

@@ -89,6 +89,8 @@ import {
   MarketingLayout, MarketingHome, MarketingAbout, MarketingPlatform,
   MarketingExpertise, MarketingMarket, MarketingContact,
 } from "./components/marketing/MarketingSite";
+import CapabilitiesHub from "./pages/marketing/CapabilitiesHub";
+import CapabilityDetail from "./pages/marketing/CapabilityDetail";
 
 const queryClient = new QueryClient();
 

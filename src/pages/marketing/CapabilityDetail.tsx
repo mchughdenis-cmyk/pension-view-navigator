@@ -2,7 +2,8 @@ import { Link, useParams, Navigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, ExternalLink, Lock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { capabilities, getCapability, MATURITY_DESCRIPTION } from "@/data/capabilities";
+import { capabilities, getCapability, getCapabilityDemo, MATURITY_DESCRIPTION } from "@/data/capabilities";
+import DemoJourneyPanel from "@/components/marketing/DemoJourneyPanel";
 import { MaturityBadge } from "./CapabilitiesHub";
 
 export default function CapabilityDetail() {
@@ -12,6 +13,7 @@ export default function CapabilityDetail() {
 
   const idx = capabilities.findIndex((c) => c.slug === cap.slug);
   const next = capabilities[(idx + 1) % capabilities.length];
+  const demo = getCapabilityDemo(cap.slug);
 
   return (
     <div className="max-w-5xl mx-auto px-4 sm:px-6 py-12 space-y-10">
@@ -43,6 +45,8 @@ export default function CapabilityDetail() {
         </CardContent>
       </Card>
 
+      <DemoJourneyPanel slug={cap.slug} demo={demo} />
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader><CardTitle>Rules and limits applied</CardTitle></CardHeader>
@@ -56,7 +60,7 @@ export default function CapabilityDetail() {
         </Card>
 
         <Card>
-          <CardHeader><CardTitle>Still to come</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Production connections still to come</CardTitle></CardHeader>
           <CardContent>
             {cap.roadmap.length ? (
               <ul className="space-y-2 text-sm text-muted-foreground">

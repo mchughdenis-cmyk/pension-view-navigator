@@ -218,6 +218,12 @@ const AppContent = () => {
           <Route path="contact" element={<MarketingContact />} />
         </Route>
 
+        {/* Public capability showcase */}
+        <Route path="/capabilities" element={<MarketingLayout />}>
+          <Route index element={<CapabilitiesHub />} />
+          <Route path=":slug" element={<CapabilityDetail />} />
+        </Route>
+
 
         {/* App routes — wrapped in shell */}
         <Route path="*" element={

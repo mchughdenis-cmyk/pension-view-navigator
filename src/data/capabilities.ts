@@ -882,6 +882,113 @@ export const capabilityDemos: Record<string, DemoJourney> = {
       },
     ],
   },
+  "case-management": {
+    headline: "Take a day's work from queue to closure with service levels and approvals enforced.",
+    steps: [
+      { label: "Open the operator console", detail: "Today's work ranked by age, risk and value.", to: "/admin/console" },
+      { label: "Pick up a case", detail: "Case assigned with type, owner and target date.", to: "/admin/case-workbench" },
+      { label: "Work the checklist", detail: "Each step recorded with evidence against the case.", to: "/cases" },
+      { label: "Send for approval", detail: "Sensitive actions held for a second administrator.", to: "/admin/payments" },
+      { label: "Watch the service level", detail: "SLA tracker shows breach risk before the deadline.", to: "/sla-tracker" },
+      { label: "Close with an audit trail", detail: "Full action history retained for inspection.", to: "/audit" },
+    ],
+    connectors: [
+      {
+        name: "Domain event bus",
+        protocol: "Internal event stream (simulated)",
+        messages: [
+          "contribution.received — case CS-2026-0311 auto-created",
+          "case.assigned — routed to the contributions desk",
+          "approval.requested — second administrator notified",
+          "case.closed — SLA met at 1.4 days against a 3 day standard",
+        ],
+      },
+    ],
+  },
+  payments: {
+    headline: "Raise, approve, file and post a payment run without leaving the platform.",
+    steps: [
+      { label: "Raise the instructions", detail: "Benefit, transfer out and fee payments queued.", to: "/admin/payments" },
+      { label: "Approve under four eyes", detail: "Second administrator authorises the batch.", to: "/admin/payments" },
+      { label: "Generate the bank files", detail: "Bacs and PaymentBatchReport XML produced together.", to: "/admin/payment-files" },
+      { label: "Post to the ledger", detail: "Double entry raised and the trial balance agreed.", to: "/admin/ledger" },
+      { label: "Check the funding", detail: "Cash forecast confirms T+1 to T+5 requirements.", to: "/admin/cash-forecast" },
+      { label: "Handle returns", detail: "Rejected credits routed back as cases to re-issue.", to: "/unallocated-cash" },
+    ],
+    connectors: [
+      {
+        name: "Bank payment channel",
+        protocol: "ISO 20022 pain.001 / pain.002 (simulated)",
+        messages: [
+          "pain.001 batch PB-2026-0812 generated — 6 credits, GBP 41,905.00",
+          "PaymentBatchReport XML archived alongside the payment file",
+          "pain.002 acknowledgement — 5 accepted, 1 rejected (invalid sort code)",
+          "Rejected credit returned to the payments hub as a case",
+        ],
+      },
+      {
+        name: "Accounting export",
+        protocol: "Nominal journal feed (simulated)",
+        messages: [
+          "Journal batch JNL-2026-08-0044 exported — debits equal credits",
+          "Trial balance agreed to the client money position",
+        ],
+      },
+    ],
+  },
+  communications: {
+    headline: "Produce a member document, issue it and prove it was sent.",
+    steps: [
+      { label: "Choose the template", detail: "Welcome pack, statement, illustration or review pack.", to: "/comms" },
+      { label: "Generate the document", detail: "Branded Word or PDF output built from live data.", to: "/benefit-statements" },
+      { label: "File it against the member", detail: "Stored in the document vault with a version.", to: "/documents" },
+      { label: "Issue securely", detail: "Secure message or email with routing rules applied.", to: "/comms" },
+      { label: "Save to the adviser library", detail: "Illustrations kept for later reference.", to: "/saved-illustrations" },
+      { label: "Evidence the issue", detail: "Audit trail shows what went out, when and to whom.", to: "/audit" },
+    ],
+    connectors: [
+      {
+        name: "Email delivery service",
+        protocol: "Transactional email API (simulated)",
+        messages: [
+          "Annual statement queued for 3 members",
+          "202 Accepted — message IDs returned",
+          "Delivery receipts recorded against each member record",
+        ],
+      },
+      {
+        name: "Print and fulfilment",
+        protocol: "Print stream handover (simulated)",
+        messages: [
+          "Print file assembled for members with no digital preference",
+          "Handover manifest generated for the fulfilment house",
+        ],
+      },
+    ],
+  },
+  governance: {
+    headline: "Show who can see what, how clean the data is and how it is all evidenced.",
+    steps: [
+      { label: "Review the hierarchy", detail: "Firms, advisers and schemes define the book each user sees.", to: "/firms" },
+      { label: "Check account creation", detail: "Registration log lists every account and its role.", to: "/admin/registrations" },
+      { label: "Score the data", detail: "Member record completeness measured and gaps listed.", to: "/data-quality" },
+      { label: "Handle a privacy request", detail: "Subject access and erasure handled in the privacy centre.", to: "/privacy" },
+      { label: "Inspect the audit log", detail: "Reads and changes retained for regulator review.", to: "/audit-log" },
+      { label: "Confirm configuration", detail: "System settings and role rules reviewed.", to: "/admin" },
+    ],
+    connectors: [
+      {
+        name: "Identity provider",
+        protocol: "SAML / SCIM (simulated)",
+        messages: [
+          "SSO assertion accepted for an administrator account",
+          "SCIM provisioning payload creates the user with the operations role",
+          "Deprovisioning removes access and closes the session",
+        ],
+      },
+    ],
+  },
 };
+
 
 export const getCapabilityDemo = (slug?: string) => (slug ? capabilityDemos[slug] : undefined);

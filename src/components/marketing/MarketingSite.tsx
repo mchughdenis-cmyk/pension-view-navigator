@@ -187,6 +187,7 @@ const navLinks = [
   { to: "/site", label: "Home", end: true },
   { to: "/site/about", label: "About" },
   { to: "/site/platform", label: "Platform" },
+  { to: "/capabilities", label: "Capabilities" },
   { to: "/site/expertise", label: "Expertise" },
   { to: "/site/market", label: "Market position" },
   { to: "/site/contact", label: "Contact" },

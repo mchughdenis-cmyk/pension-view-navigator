@@ -89,6 +89,8 @@ import {
   MarketingLayout, MarketingHome, MarketingAbout, MarketingPlatform,
   MarketingExpertise, MarketingMarket, MarketingContact,
 } from "./components/marketing/MarketingSite";
+import CapabilitiesHub from "./pages/marketing/CapabilitiesHub";
+import CapabilityDetail from "./pages/marketing/CapabilityDetail";
 
 const queryClient = new QueryClient();
 
@@ -216,6 +218,12 @@ const AppContent = () => {
           <Route path="expertise" element={<MarketingExpertise />} />
           <Route path="market" element={<MarketingMarket />} />
           <Route path="contact" element={<MarketingContact />} />
+        </Route>
+
+        {/* Public capability showcase */}
+        <Route path="/capabilities" element={<MarketingLayout />}>
+          <Route index element={<CapabilitiesHub />} />
+          <Route path=":slug" element={<CapabilityDetail />} />
         </Route>
 
 

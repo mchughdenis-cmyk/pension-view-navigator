@@ -24,7 +24,7 @@ export const MATURITY_LABEL: Record<Maturity, string> = {
 };
 
 export const MATURITY_DESCRIPTION: Record<Maturity, string> = {
-  live: "Working end to end in the product today.",
+  live: "Demonstrable end to end today, with external interfaces simulated where noted.",
   partial: "Core workflow is present; some steps are simplified or manual.",
   roadmap: "Designed and specified, not yet built.",
 };

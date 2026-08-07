@@ -1,91 +1,64 @@
-# Reposition as an Administration-First Platform
+# Capability showcase sub-site
 
-Goal: Without touching functionality, restructure the marketing surface, landing route, and shell chrome so a visitor immediately reads this as a **pension administration system** — with Client and Adviser portals presented as complementary modules rather than co-equal apps. Also surface a candid "Roadmap / Known gaps" panel so shortcomings are visible, not hidden.
+A public, client-facing sub-site at `/capabilities` that walks a prospect through the twelve administration domains, one narrative page each, with an honest maturity label per area. Live screens stay behind sign-in.
 
-## 1. Public marketing site (`/`) — reframe the story
+## Structure
 
-Rework `src/components/marketing/MarketingSite.tsx` and `SystemOverview.tsx` around one thesis: *"The administration engine behind modern SIPP, ISA and GIA books — with member and adviser portals included."*
+```text
+/capabilities                      Hub: 12 capability cards, maturity legend
+/capabilities/:slug                Narrative page per capability area
+```
 
-- **New hero**: headline "Pension Administration, End-to-End" + subline naming the daily desk (bank recon, contributions, transfers, drawdown, payroll, PAYE/RAS, CASS). Two CTAs: *Launch Admin Desk* (primary → `/admin`) and *See Client & Adviser Portals* (secondary → anchor).
-- **"What the admin does today" band**: 4 columns mirroring the Admin Desk groups — Book-of-business daily desk / Client-level daily desk / Member management / Compliance & regulation. Each lists the real routes so it reads as a spec sheet, not marketing fluff.
-- **Portals as modules**: demote the current three-equal-cards layout (`SystemOverview` roleCards). Replace with an "Admin core + two portals" diagram: a large Admin card, and two smaller *Client portal* / *Adviser portal* cards beneath, captioned "included".
-- **Scoreboard strip**: reuse `MarketScoreboard` but relabel to admin-centric metrics (edge functions, tables, daily-desk workflows, E2E tests, seeded clients) instead of generic feature counts.
-- **Trust row**: CASS 7/8, HMRC RAS/RTI, TPR contribution monitoring, Origo, Bacs — as labelled chips.
+The twelve areas (slugs):
 
-## 2. Landing / redirect behaviour
+1. Scheme & member lifecycle — `lifecycle`
+2. Contributions — `contributions`
+3. Transfers in & out — `transfers`
+4. Investment dealing & custody — `dealing`
+5. Benefit crystallisation — `crystallisation`
+6. Drawdown administration — `drawdown`
+7. Death benefits — `death-benefits`
+8. Tax reporting — `tax-reporting`
+9. Illustrations — `illustrations`
+10. Reconciliation & CASS — `cass`
+11. Regulatory reporting — `regulatory`
+12. Fee & charging engine — `fees`
 
-- Keep auth intact. For unauthenticated `/`, default the marketing hero CTA to the Admin Desk demo (`/admin`) rather than `/dashboard`, so first impression = administration.
-- After sign-in, keep the role-based landing already fixed (admin → `/admin`, adviser → `/workbench`, client → `/client-services`).
+## What each capability page contains
 
-## 3. App shell chrome — signal "administration platform"
+- Title, one-line positioning, maturity badge.
+- **What it does** — plain-English summary of the workflow end to end.
+- **Rules covered** — the specific UK rules the area implements (e.g. relief at source, tapered AA and MPAA, carry forward, LSA £268,275 / LSDBA £1,073,100, COBS 13 KFI, COBS 19.4, COBS 19.9 wake-up, SMPI, CASS 7/8, DISP).
+- **In the system** — bullet list of the actual screens/processes that deliver it, each with an "Open live screen" link.
+- **Where we're going** — roadmap notes for anything not yet complete.
 
-`src/components/nav/AppShell.tsx` + `AppSidebar.tsx`:
-- Brand block: keep "Pension Navigator by Airgead" but add a small pill under it — `Administration Platform` — visible in all three views. Reinforces framing even inside Client/Adviser views.
-- Header: add a subtle "Environment" chip (Demo / Live) next to `FirmSwitcher` so it reads as an operations console.
-- Sidebar footer: rename the role selector label from a bare dropdown to "Viewing as:" so switching views feels like an admin capability, not a mode toggle.
+Only rules and screens that exist in this build are described; no invented metrics, client names or performance claims.
 
-## 4. Admin Desk landing (`/admin`) — hero it
+## Maturity labels
 
-`PensionAdminDashboard` currently drops straight into tabs. Add a compact top band:
-- Left: "Daily admin desk" title + today's date + operator name.
-- Right: 4 KPI tiles pulled from existing data (unallocated cash count, cases awaiting four-eyes, contributions due this week, transfers in-flight). Reuses queries already in child components — no new logic, just surface them.
-- Below: the existing tabbed content unchanged.
+Three states, shown as badges on both hub and detail pages, with a legend explaining them:
 
-This makes screenshots of `/admin` self-evidently an admin console.
+- **Live** — working end to end in the product today.
+- **Partial** — core workflow present, some steps manual or simplified (for example custodian reconciliation recorded as a note rather than a live custodian feed; Origo integration demonstrated via the state machine rather than a production Origo link).
+- **Roadmap** — designed but not built (for example RegData/GABRIEL return submission, DISP complaints register).
 
-## 5. Portal framing pages
+Exact per-area labelling is set from a read of each corresponding screen during the build so the labels are accurate rather than assumed.
 
-- **Client portal** (`ClientServicesHub`): add a one-line banner "Member self-service portal — part of Pension Navigator administration".
-- **Adviser portal** (`AdviserWorkbench`): same treatment — "Adviser workbench — part of Pension Navigator administration".
+## Access behaviour
 
-Small change, but every screenshot now anchors back to the admin story.
+- `/capabilities` and all detail pages are public — reachable without a session, listed alongside the existing marketing routes.
+- Every "Open live screen" link points at the real in-app route. Because the auth gate protects those routes, an unauthenticated visitor is sent to sign-in and returned to the screen after login. Links are visually marked as sign-in required so the client isn't surprised.
+- A single "Book a walkthrough" call to action per page routes to the existing contact form.
 
-## 6. Design tokens — subtle "operations console" polish
+## Navigation
 
-`src/index.css` only (no component colour edits):
-- Tighten the primary to a deeper navy (institutional feel) and introduce a `--surface-muted` for KPI tiles.
-- Add a `--brand-accent` amber for status/alert chips used by the new KPI band.
-- Keep dark mode working; no hardcoded colours in components.
+- Add "Capabilities" to the marketing site navigation.
+- Hub links back to the marketing home; detail pages have previous/next links so the whole set can be presented in sequence.
 
-## 7. "Roadmap & known gaps" — surface shortcomings honestly
+## Technical notes
 
-Add a new marketing section **and** an in-app `/admin/roadmap` page listing what's partial or missing, so this is transparent rather than buried. Content drawn from the existing conversation history:
-
-| Area | Status | Note |
-|---|---|---|
-| Unit tests for `src/lib/` | Missing | Only 4 Playwright E2E specs today |
-| Four-eyes queue | Partial | Present in Payroll only; not cross-module |
-| Corporate actions processor | Stub | Edge function exists, no UI workflow |
-| RAS monthly reclaim submission | Partial | Calculation yes, HMRC submission stub |
-| Death benefits end-to-end | Partial | Claims page exists; payout workflow light |
-| Origo transfer state machine | Partial | Happy path only; exception handling thin |
-| Pensions Dashboards Programme (PDP) | Not connected | Integration surface only |
-| Accessibility (WCAG 2.2 AA) audit | Not done | No formal audit recorded |
-| SSO / SCIM for enterprise tenants | Missing | Supabase auth only |
-| Full audit export (immutable, signed) | Partial | Audit trail present, no signed export |
-| Performance at 100k+ members | Unverified | No load testing |
-| DR / RPO/RTO documentation | Missing | Not published |
-
-Rendered as a candid two-column table on marketing + as an in-app card list at `/admin/roadmap` linked from the sidebar footer.
-
-## 8. SEO & head metadata
-
-`index.html`: update `<title>` and `<meta description>` to lead with "Pension administration platform" + "Client and adviser portals included". Update OG/Twitter tags to match. Single H1 on marketing = the new hero headline.
-
-## Out of scope (explicit)
-- No changes to business logic, calculations, RLS, edge functions, or database schema.
-- No changes to existing routes' functionality — only chrome, copy, layout, tokens, and one new read-only `/admin/roadmap` page.
-- No new dependencies.
-
-## Files touched (approx.)
-- `src/components/marketing/MarketingSite.tsx`, `MarketScoreboard.tsx`
-- `src/components/SystemOverview.tsx`
-- `src/components/nav/AppShell.tsx`, `AppSidebar.tsx`
-- `src/components/PensionAdminDashboard.tsx` (add KPI band wrapper only)
-- `src/components/ClientServicesHub.tsx`, `AdviserWorkbench.tsx` (one banner each)
-- `src/index.css` (tokens only)
-- `index.html` (meta)
-- New: `src/pages/admin/Roadmap.tsx` + route in `App.tsx` + nav entry in `navConfig.ts`
-
-## Open question before I build
-Do you want the **Roadmap / Known gaps** panel visible on the **public marketing site** (fully transparent to prospects), or **in-app only** at `/admin/roadmap` (transparent to operators, not prospects)?
+- New public route branch in `src/App.tsx` alongside `/site`, outside `AuthGate`.
+- Content lives in one typed data file (`src/data/capabilities.ts`): slug, title, summary, maturity, rules covered, linked screens with route + label, roadmap notes. Two components render it — a hub and a detail page — so adding or re-labelling an area is a data edit.
+- Styling reuses the existing marketing design tokens and shadcn primitives; no new colour values.
+- SEO: unique title and meta description per capability page, single H1, semantic sections.
+- No database changes, no changes to existing app screens or business logic.

@@ -589,9 +589,9 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   contributions: {
     headline: "Run a payroll, collect the money and reclaim the tax across one book of business.",
     steps: [
-      { label: "Open the payroll run", detail: "Book-level run created for the pay period.", to: "/payroll" },
-      { label: "Validate and review variance", detail: "Missing members, cap breaches and swings flagged before release.", to: "/payroll" },
-      { label: "Four-eyes approval", detail: "Second administrator approves the schedule.", to: "/payroll" },
+      { label: "Open the payroll run", detail: "Book-level run created for the pay period.", to: "/payroll-processing" },
+      { label: "Validate and review variance", detail: "Missing members, cap breaches and swings flagged before release.", to: "/payroll-processing" },
+      { label: "Four-eyes approval", detail: "Second administrator approves the schedule.", to: "/payroll-processing" },
       { label: "Collect by direct debit", detail: "Bacs three-day cycle tracked to settlement.", to: "/direct-debit-collections" },
       { label: "Allocate contributions", detail: "Money matched to expected receipts and posted to member accounts.", to: "/contributions" },
       { label: "Build the RAS claim", detail: "Net-paid contributions become an interim HMRC claim.", to: "/hmrc" },
@@ -689,8 +689,8 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     headline: "Crystallise benefits, pay a PCLS and see allowance headroom update instantly.",
     steps: [
       { label: "Quote the retirement options", detail: "Full and partial crystallisation compared.", to: "/retirement-quotes" },
-      { label: "Test the allowances", detail: "LSA and LSDBA usage checked before the event.", to: "/lsa-tracking" },
-      { label: "Record the BCE", detail: "Amount crystallised, lump sum and date captured.", to: "/crystallisation" },
+      { label: "Test the allowances", detail: "LSA and LSDBA usage checked before the event.", to: "/lsa" },
+      { label: "Record the BCE", detail: "Amount crystallised, lump sum and date captured.", to: "/lsa" },
       { label: "Pay the PCLS", detail: "Lump sum instruction raised in the payments hub.", to: "/admin/payments" },
       { label: "Designate the balance", detail: "Remainder moves into flexi-access drawdown.", to: "/drawdown" },
       { label: "Report the event", detail: "Event appears on the APSS event report.", to: "/hmrc" },
@@ -711,7 +711,7 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     headline: "Set up flexi-access drawdown and pay the first taxed income run.",
     steps: [
       { label: "Run the drawdown journey", detail: "Risk warnings, disclosures and income choice.", to: "/drawdown" },
-      { label: "Produce the illustration", detail: "COBS 13 key features illustration generated as a PDF.", to: "/illustrations" },
+      { label: "Produce the illustration", detail: "COBS 13 key features illustration generated as a PDF.", to: "/illustration" },
       { label: "Schedule the income", detail: "Frequency, amount and pay dates set.", to: "/drawdown" },
       { label: "Run the pension payroll", detail: "PAYE applied under the member tax code.", to: "/paye" },
       { label: "Pay the members", detail: "Bank file created and stored in the payment file vault.", to: "/admin/payment-files" },
@@ -743,9 +743,9 @@ export const capabilityDemos: Record<string, DemoJourney> = {
     steps: [
       { label: "Log the notification", detail: "Case opened with date of death and informant.", to: "/death-claims" },
       { label: "Verify documents", detail: "Death certificate and probate evidence recorded.", to: "/death-claims" },
-      { label: "Check nominations", detail: "Expression of wish reviewed against current family position.", to: "/nominations" },
+      { label: "Check nominations", detail: "Expression of wish reviewed against current family position.", to: "/beneficiaries" },
       { label: "Apply trustee discretion", detail: "Decision minuted with reasons.", to: "/death-claims" },
-      { label: "Test the LSDBA", detail: "Allowance usage calculated where a lump sum is paid.", to: "/lsa-tracking" },
+      { label: "Test the LSDBA", detail: "Allowance usage calculated where a lump sum is paid.", to: "/lsa" },
       { label: "Settle to beneficiaries", detail: "Beneficiary drawdown accounts opened or lump sums paid.", to: "/admin/payments" },
     ],
     connectors: [
@@ -786,11 +786,11 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   illustrations: {
     headline: "Produce every member-facing projection from one calculation engine.",
     steps: [
-      { label: "Choose the illustration type", detail: "KFI, retirement figures, wake-up pack or SMPI.", to: "/illustrations" },
-      { label: "Model accumulation", detail: "Contributions, transfers and charges projected forward.", to: "/illustrations" },
+      { label: "Choose the illustration type", detail: "KFI, retirement figures, wake-up pack or SMPI.", to: "/illustration" },
+      { label: "Model accumulation", detail: "Contributions, transfers and charges projected forward.", to: "/illustration" },
       { label: "Model decumulation", detail: "PCLS, drawdown or annuity compared side by side.", to: "/drawdown" },
-      { label: "Generate the PDF", detail: "Branded document produced with assumptions disclosed.", to: "/illustrations" },
-      { label: "Save to the adviser store", detail: "Illustration filed against the member with an email address.", to: "/illustrations" },
+      { label: "Generate the PDF", detail: "Branded document produced with assumptions disclosed.", to: "/illustration" },
+      { label: "Save to the adviser store", detail: "Illustration filed against the member with an email address.", to: "/illustration" },
       { label: "Issue statutory statements", detail: "SMPI and wake-up packs run across the book.", to: "/reporting" },
     ],
     connectors: [
@@ -808,10 +808,10 @@ export const capabilityDemos: Record<string, DemoJourney> = {
   cass: {
     headline: "Complete a full day of client money and asset checks with sign-off.",
     steps: [
-      { label: "Load the bank statement", detail: "Bank file uploaded at book-of-business level.", to: "/bank-recon" },
+      { label: "Load the bank statement", detail: "Bank file uploaded at book-of-business level.", to: "/bank-upload" },
       { label: "Match and allocate", detail: "Receipts matched to expectations, residue to suspense.", to: "/unallocated-cash" },
-      { label: "Run the internal reconciliation", detail: "Requirement compared with resource.", to: "/cass7" },
-      { label: "Resolve any shortfall", detail: "Same-day funding recorded where needed.", to: "/cass7" },
+      { label: "Run the internal reconciliation", detail: "Requirement compared with resource.", to: "/admin/cass7-daily-recon" },
+      { label: "Resolve any shortfall", detail: "Same-day funding recorded where needed.", to: "/admin/cass7-daily-recon" },
       { label: "Reconcile custody assets", detail: "CASS 8 position checks and break management.", to: "/cass-engine" },
       { label: "Sign off and log breaches", detail: "Daily sign-off retained, breaches registered.", to: "/breach-register" },
     ],

@@ -65,8 +65,8 @@ export default function Roadmap() {
         <CardContent>
           <div className="space-y-6">
             {priorities.map((priority) => (
-              <section key={priority} aria-labelledby={priority.replaceAll(" ", "-").toLowerCase()}>
-                <h2 id={priority.replaceAll(" ", "-").toLowerCase()} className="mb-2 text-sm font-semibold text-foreground">{priority}</h2>
+              <section key={priority} aria-labelledby={priority.replace(/ /g, "-").toLowerCase()}>
+                <h2 id={priority.replace(/ /g, "-").toLowerCase()} className="mb-2 text-sm font-semibold text-foreground">{priority}</h2>
                 <div className="divide-y">
                   {rows.filter((row) => row.priority === priority).map((r) => (
                     <div key={r.area} className="grid grid-cols-1 sm:grid-cols-[1fr_140px_2fr] items-start gap-3 py-3">

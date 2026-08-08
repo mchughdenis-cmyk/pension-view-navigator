@@ -9,7 +9,6 @@ Make the roadmap tab the single transparent view of the capability showcase’s 
 - **Live Origo Options connection** — the transfer state machine is demonstrable, but live network exchange and exception handling are not connected.
 - **Pensions Dashboards Programme integration** — add live find/view data exchange and downstream exception handling.
 - **Live custodian and platform feeds** — replace uploaded/recorded positions with scheduled position and transaction feeds.
-- **Straight-through dealing connectivity** — FIX or equivalent broker routing, acknowledgements, fills and allocations.
 - **Live bank connectivity** — retrieve statements and transmit approved payment files through supported bank channels.
 - **Payment return-file ingestion** — automate pain.002, ARUDD and AWACS processing, reconciliation and re-issue.
 - **Direct HMRC gateway submissions** — cover Managing Pension Schemes, RTI and relief-at-source submissions with acknowledgements and retry handling.

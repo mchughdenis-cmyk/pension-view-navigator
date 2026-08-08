@@ -530,9 +530,9 @@ export function MarketingHome() {
         </p>
         <div className="mt-8 grid md:grid-cols-3 gap-4">
           {[
-            { s: "Partial", items: ["Four-eyes queue (payroll only today)", "RAS monthly reclaim submission", "Death benefits payout workflow", "Origo transfer exception handling", "Immutable signed audit export"] },
-            { s: "Missing", items: ["Unit tests for src/lib/", "SSO / SCIM for enterprise tenants", "DR / RPO/RTO documentation", "WCAG 2.2 AA audit"] },
-            { s: "Not connected", items: ["Pensions Dashboards Programme (PDP)", "Load-tested at 100k+ members", "Corporate actions UI workflow"] },
+            { s: "Priority 1", items: ["Live Origo Options connection", "Live custodian and platform feeds", "Live bank connectivity", "Payment return-file ingestion", "Direct HMRC gateway submissions", "Automated scheme registration filing", "Pensions Dashboards Programme (PDP)"] },
+            { s: "Partial", items: ["Four-eyes queue (payroll only today)", "RAS monthly reclaim submission", "Death benefits payout workflow", "Immutable signed audit export"] },
+            { s: "Assurance", items: ["SSO / SCIM for enterprise tenants", "WCAG 2.2 AA audit", "Load testing at 100k+ members", "DR / RPO/RTO documentation"] },
           ].map((col) => (
             <Card key={col.s}>
               <CardHeader className="pb-3">

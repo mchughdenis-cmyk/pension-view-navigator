@@ -267,6 +267,7 @@ export default function ProbateValuation() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Badge variant="secondary">{summary.rows.find((r) => r.holding.id === h.id)?.basis}</Badge>
+                    {h.source === "external" && <Badge variant="outline">Externally held{h.provider ? ` — ${h.provider}` : ""}</Badge>}
                     <span className="text-muted-foreground">{summary.rows.find((r) => r.holding.id === h.id)?.basisReason}</span>
                   </div>
                   <div className="flex items-center gap-4">
@@ -302,7 +303,7 @@ export default function ProbateValuation() {
                   {summary.rows.map((r) => (
                     <tr key={r.holding.id} className="border-b last:border-0">
                       <td className="py-2">{r.holding.name}</td>
-                      <td className="capitalize">{r.holding.ownership}</td>
+                      <td className="capitalize">{r.holding.ownership}{r.holding.source === "external" ? " · external" : ""}</td>
                       <td className="text-right">{r.holding.units.toLocaleString()}</td>
                       <td className="text-right">{r.quarterUp != null ? r.quarterUp.toFixed(4) : "—"}</td>
                       <td className="text-right">{r.midMarket != null ? r.midMarket.toFixed(4) : "—"}</td>

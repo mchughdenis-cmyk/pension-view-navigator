@@ -11,12 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/nav/PageHeader";
 import { formatGBP } from "@/lib/pensionCalculations";
-import { Plus, Trash2, Download, Info, Scale, FileSpreadsheet } from "lucide-react";
+import { Plus, Trash2, Download, Info, Scale, FileSpreadsheet, Upload, FileText, AlertTriangle } from "lucide-react";
+import { parseHoldingsFile, CSV_TEMPLATE, XML_TEMPLATE } from "@/lib/probateImport";
 import { toast } from "sonner";
 import {
   ProbateHolding,
   valuePortfolio,
   downloadProbateValuation,
+  downloadExecutorReport,
   exportProbateCSV,
 } from "@/lib/probateValuation";
 
@@ -42,6 +44,37 @@ export default function ProbateValuation() {
   const [dateOfDeath, setDateOfDeath] = useState(new Date().toISOString().slice(0, 10));
   const [reference, setReference] = useState("PV-2026-0184");
   const [holdings, setHoldings] = useState<ProbateHolding[]>(seed);
+  const [executorName, setExecutorName] = useState("The Executors of the Estate");
+  const [preparedBy, setPreparedBy] = useState("Airgead Pension Navigator — Client Administration");
+  const [contactEmail, setContactEmail] = useState("probate@airgead.co.uk");
+  const [importIssues, setImportIssues] = useState<{ errors: string[]; warnings: string[] }>({ errors: [], warnings: [] });
+  const [provider, setProvider] = useState("");
+  const [replaceOnImport, setReplaceOnImport] = useState(false);
+
+  const download = (content: string, filename: string, mime: string) => {
+    const url = URL.createObjectURL(new Blob([content], { type: mime }));
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleUpload = async (file: File | undefined) => {
+    if (!file) return;
+    const text = await file.text();
+    const result = parseHoldingsFile(file.name, text);
+    setImportIssues({ errors: result.errors, warnings: result.warnings });
+    if (!result.holdings.length) {
+      toast.error("No holdings could be imported — see the messages below.");
+      return;
+    }
+    const tagged = result.holdings.map((h) => ({
+      ...h,
+      source: "external" as const,
+      provider: h.provider || provider || undefined,
+    }));
+    setHoldings((prev) => (replaceOnImport ? tagged : [...prev, ...tagged]));
+    toast.success(`${tagged.length} externally-held holdings imported`);
+  };
 
   const summary = useMemo(() => valuePortfolio(holdings), [holdings]);
 
@@ -73,8 +106,14 @@ export default function ProbateValuation() {
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={downloadCSV}><FileSpreadsheet className="h-4 w-4 mr-2" />CSV schedule</Button>
-            <Button onClick={() => { downloadProbateValuation({ deceasedName, dateOfDeath, reference, summary }); toast.success("Probate valuation PDF generated"); }}>
-              <Download className="h-4 w-4 mr-2" />Valuation report
+            <Button variant="outline" onClick={() => { downloadProbateValuation({ deceasedName, dateOfDeath, reference, summary }); toast.success("Working valuation PDF generated"); }}>
+              <Download className="h-4 w-4 mr-2" />Working schedule
+            </Button>
+            <Button onClick={() => {
+              downloadExecutorReport({ deceasedName, dateOfDeath, reference, summary, executorName, preparedBy, contactEmail, firmName: "Airgead" });
+              toast.success("Executor report generated");
+            }}>
+              <FileText className="h-4 w-4 mr-2" />Executor report
             </Button>
           </div>
         }
@@ -89,6 +128,53 @@ export default function ProbateValuation() {
           <div><Label>Deceased</Label><Input value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} /></div>
           <div><Label>Date of death</Label><Input type="date" value={dateOfDeath} onChange={(e) => setDateOfDeath(e.target.value)} /></div>
           <div><Label>Case reference</Label><Input value={reference} onChange={(e) => setReference(e.target.value)} /></div>
+          <div><Label>Report addressed to</Label><Input value={executorName} onChange={(e) => setExecutorName(e.target.value)} /></div>
+          <div><Label>Prepared by</Label><Input value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} /></div>
+          <div><Label>Contact for executors</Label><Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} /></div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2"><Upload className="h-4 w-4" />Upload externally-held assets</CardTitle>
+          <CardDescription>
+            Import holdings the client holds away from the platform from a CSV or XML file. Imported lines are flagged as externally held and shown separately in the executor report.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label>Holdings file (.csv or .xml)</Label>
+              <Input type="file" accept=".csv,.xml,.txt,text/csv,text/xml,application/xml"
+                onChange={(e) => { handleUpload(e.target.files?.[0]); e.currentTarget.value = ""; }} />
+            </div>
+            <div><Label>Provider / custodian (optional)</Label><Input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="e.g. Hargreaves Lansdown" /></div>
+            <div className="flex items-center gap-2 pt-6">
+              <Switch checked={replaceOnImport} onCheckedChange={setReplaceOnImport} />
+              <Label className="text-xs">Replace existing holdings instead of adding</Label>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => download(CSV_TEMPLATE, "probate-holdings-template.csv", "text/csv;charset=utf-8")}>
+              <Download className="h-4 w-4 mr-2" />CSV template
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => download(XML_TEMPLATE, "probate-holdings-template.xml", "application/xml")}>
+              <Download className="h-4 w-4 mr-2" />XML template
+            </Button>
+            <span className="text-xs text-muted-foreground self-center">
+              Required columns: Name and Units. Optional: SEDOL/ISIN, Type, Ownership, Low, High, Bid, Offer, NAV, ExDividend, DividendPerUnit, AccruedIncome.
+            </span>
+          </div>
+          {(importIssues.errors.length > 0 || importIssues.warnings.length > 0) && (
+            <Alert variant={importIssues.errors.length ? "destructive" : "default"}>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Import checks</AlertTitle>
+              <AlertDescription className="text-xs space-y-1">
+                {importIssues.errors.map((e, i) => <p key={`e${i}`}>• {e}</p>)}
+                {importIssues.warnings.map((w, i) => <p key={`w${i}`}>• {w}</p>)}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
@@ -181,6 +267,7 @@ export default function ProbateValuation() {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex flex-wrap items-center gap-2 text-xs">
                     <Badge variant="secondary">{summary.rows.find((r) => r.holding.id === h.id)?.basis}</Badge>
+                    {h.source === "external" && <Badge variant="outline">Externally held{h.provider ? ` — ${h.provider}` : ""}</Badge>}
                     <span className="text-muted-foreground">{summary.rows.find((r) => r.holding.id === h.id)?.basisReason}</span>
                   </div>
                   <div className="flex items-center gap-4">
@@ -216,7 +303,7 @@ export default function ProbateValuation() {
                   {summary.rows.map((r) => (
                     <tr key={r.holding.id} className="border-b last:border-0">
                       <td className="py-2">{r.holding.name}</td>
-                      <td className="capitalize">{r.holding.ownership}</td>
+                      <td className="capitalize">{r.holding.ownership}{r.holding.source === "external" ? " · external" : ""}</td>
                       <td className="text-right">{r.holding.units.toLocaleString()}</td>
                       <td className="text-right">{r.quarterUp != null ? r.quarterUp.toFixed(4) : "—"}</td>
                       <td className="text-right">{r.midMarket != null ? r.midMarket.toFixed(4) : "—"}</td>

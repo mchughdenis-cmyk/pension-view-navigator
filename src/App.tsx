@@ -84,6 +84,7 @@ import SSASModule from "./components/SSASModule";
 import CommercialProperty from "./components/CommercialProperty";
 import MarketLeaderHub from "./components/MarketLeaderHub";
 import IHTOverview from "./components/IHTOverview";
+import ProbateValuation from "./components/ProbateValuation";
 import MobileClientApp from "./components/MobileClientApp";
 import {
   MarketingLayout, MarketingHome, MarketingAbout, MarketingPlatform,
@@ -302,6 +303,7 @@ const AppContent = () => {
               <Route path="/property" element={<RoleGate allow={['adviser', 'admin']}><CommercialProperty /></RoleGate>} />
               <Route path="/advanced" element={<RoleGate allow={['adviser', 'admin']}><MarketLeaderHub /></RoleGate>} />
               <Route path="/iht" element={<RoleGate allow={['client', 'adviser', 'admin']}><IHTOverview /></RoleGate>} />
+              <Route path="/probate-valuation" element={<RoleGate allow={['adviser', 'admin']}><ProbateValuation /></RoleGate>} />
               <Route path="/branding" element={<RoleGate allow={['admin']}><WhiteLabelBranding /></RoleGate>} />
               <Route path="/life-events" element={<LifeEventsEngine />} />
               <Route path="/employer-match" element={<EmployerMatchingVisualiser />} />

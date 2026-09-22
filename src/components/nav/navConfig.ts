@@ -112,6 +112,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "Reporting suite", url: "/reporting", icon: FileText },
         { title: "Communications", url: "/comms", icon: MessageSquare },
         { title: "IHT planning", url: "/iht", icon: ScrollText },
+        { title: "Probate valuation", url: "/probate-valuation", icon: Calculator },
       ],
     },
     {
@@ -236,6 +237,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
         { title: "AA / carry-forward", url: "/contributions", icon: Calculator },
         { title: "LSA / LSDBA / BCE", url: "/lsa", icon: ShieldCheck },
         { title: "IHT planning", url: "/iht", icon: ScrollText },
+        { title: "Probate valuation", url: "/probate-valuation", icon: Calculator },
         { title: "Transaction history", url: "/transactions", icon: History },
       ],
     },

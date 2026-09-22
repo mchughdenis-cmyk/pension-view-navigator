@@ -106,8 +106,14 @@ export default function ProbateValuation() {
         actions={
           <div className="flex gap-2">
             <Button variant="outline" onClick={downloadCSV}><FileSpreadsheet className="h-4 w-4 mr-2" />CSV schedule</Button>
-            <Button onClick={() => { downloadProbateValuation({ deceasedName, dateOfDeath, reference, summary }); toast.success("Probate valuation PDF generated"); }}>
-              <Download className="h-4 w-4 mr-2" />Valuation report
+            <Button variant="outline" onClick={() => { downloadProbateValuation({ deceasedName, dateOfDeath, reference, summary }); toast.success("Working valuation PDF generated"); }}>
+              <Download className="h-4 w-4 mr-2" />Working schedule
+            </Button>
+            <Button onClick={() => {
+              downloadExecutorReport({ deceasedName, dateOfDeath, reference, summary, executorName, preparedBy, contactEmail, firmName: "Airgead" });
+              toast.success("Executor report generated");
+            }}>
+              <FileText className="h-4 w-4 mr-2" />Executor report
             </Button>
           </div>
         }

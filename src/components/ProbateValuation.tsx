@@ -128,6 +128,53 @@ export default function ProbateValuation() {
           <div><Label>Deceased</Label><Input value={deceasedName} onChange={(e) => setDeceasedName(e.target.value)} /></div>
           <div><Label>Date of death</Label><Input type="date" value={dateOfDeath} onChange={(e) => setDateOfDeath(e.target.value)} /></div>
           <div><Label>Case reference</Label><Input value={reference} onChange={(e) => setReference(e.target.value)} /></div>
+          <div><Label>Report addressed to</Label><Input value={executorName} onChange={(e) => setExecutorName(e.target.value)} /></div>
+          <div><Label>Prepared by</Label><Input value={preparedBy} onChange={(e) => setPreparedBy(e.target.value)} /></div>
+          <div><Label>Contact for executors</Label><Input value={contactEmail} onChange={(e) => setContactEmail(e.target.value)} /></div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2"><Upload className="h-4 w-4" />Upload externally-held assets</CardTitle>
+          <CardDescription>
+            Import holdings the client holds away from the platform from a CSV or XML file. Imported lines are flagged as externally held and shown separately in the executor report.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid md:grid-cols-3 gap-4">
+            <div>
+              <Label>Holdings file (.csv or .xml)</Label>
+              <Input type="file" accept=".csv,.xml,.txt,text/csv,text/xml,application/xml"
+                onChange={(e) => { handleUpload(e.target.files?.[0]); e.currentTarget.value = ""; }} />
+            </div>
+            <div><Label>Provider / custodian (optional)</Label><Input value={provider} onChange={(e) => setProvider(e.target.value)} placeholder="e.g. Hargreaves Lansdown" /></div>
+            <div className="flex items-center gap-2 pt-6">
+              <Switch checked={replaceOnImport} onCheckedChange={setReplaceOnImport} />
+              <Label className="text-xs">Replace existing holdings instead of adding</Label>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => download(CSV_TEMPLATE, "probate-holdings-template.csv", "text/csv;charset=utf-8")}>
+              <Download className="h-4 w-4 mr-2" />CSV template
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => download(XML_TEMPLATE, "probate-holdings-template.xml", "application/xml")}>
+              <Download className="h-4 w-4 mr-2" />XML template
+            </Button>
+            <span className="text-xs text-muted-foreground self-center">
+              Required columns: Name and Units. Optional: SEDOL/ISIN, Type, Ownership, Low, High, Bid, Offer, NAV, ExDividend, DividendPerUnit, AccruedIncome.
+            </span>
+          </div>
+          {(importIssues.errors.length > 0 || importIssues.warnings.length > 0) && (
+            <Alert variant={importIssues.errors.length ? "destructive" : "default"}>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertTitle>Import checks</AlertTitle>
+              <AlertDescription className="text-xs space-y-1">
+                {importIssues.errors.map((e, i) => <p key={`e${i}`}>• {e}</p>)}
+                {importIssues.warnings.map((w, i) => <p key={`w${i}`}>• {w}</p>)}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

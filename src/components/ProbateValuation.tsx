@@ -11,12 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageHeader } from "@/components/nav/PageHeader";
 import { formatGBP } from "@/lib/pensionCalculations";
-import { Plus, Trash2, Download, Info, Scale, FileSpreadsheet } from "lucide-react";
+import { Plus, Trash2, Download, Info, Scale, FileSpreadsheet, Upload, FileText, AlertTriangle } from "lucide-react";
+import { parseHoldingsFile, CSV_TEMPLATE, XML_TEMPLATE } from "@/lib/probateImport";
 import { toast } from "sonner";
 import {
   ProbateHolding,
   valuePortfolio,
   downloadProbateValuation,
+  downloadExecutorReport,
   exportProbateCSV,
 } from "@/lib/probateValuation";
 

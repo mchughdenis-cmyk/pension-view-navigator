@@ -44,6 +44,37 @@ export default function ProbateValuation() {
   const [dateOfDeath, setDateOfDeath] = useState(new Date().toISOString().slice(0, 10));
   const [reference, setReference] = useState("PV-2026-0184");
   const [holdings, setHoldings] = useState<ProbateHolding[]>(seed);
+  const [executorName, setExecutorName] = useState("The Executors of the Estate");
+  const [preparedBy, setPreparedBy] = useState("Airgead Pension Navigator — Client Administration");
+  const [contactEmail, setContactEmail] = useState("probate@airgead.co.uk");
+  const [importIssues, setImportIssues] = useState<{ errors: string[]; warnings: string[] }>({ errors: [], warnings: [] });
+  const [provider, setProvider] = useState("");
+  const [replaceOnImport, setReplaceOnImport] = useState(false);
+
+  const download = (content: string, filename: string, mime: string) => {
+    const url = URL.createObjectURL(new Blob([content], { type: mime }));
+    const a = document.createElement("a");
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleUpload = async (file: File | undefined) => {
+    if (!file) return;
+    const text = await file.text();
+    const result = parseHoldingsFile(file.name, text);
+    setImportIssues({ errors: result.errors, warnings: result.warnings });
+    if (!result.holdings.length) {
+      toast.error("No holdings could be imported — see the messages below.");
+      return;
+    }
+    const tagged = result.holdings.map((h) => ({
+      ...h,
+      source: "external" as const,
+      provider: h.provider || provider || undefined,
+    }));
+    setHoldings((prev) => (replaceOnImport ? tagged : [...prev, ...tagged]));
+    toast.success(`${tagged.length} externally-held holdings imported`);
+  };
 
   const summary = useMemo(() => valuePortfolio(holdings), [holdings]);
 

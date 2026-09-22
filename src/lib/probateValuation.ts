@@ -32,6 +32,10 @@ export interface ProbateHolding {
   dividendPerUnit?: number;
   /** Accrued income on accumulation units (total £) */
   accruedIncome?: number;
+  /** Where the holding is administered — platform records or an external provider */
+  source?: "platform" | "external";
+  /** Provider / custodian name for externally-held assets */
+  provider?: string;
 }
 
 export interface HoldingValuation {

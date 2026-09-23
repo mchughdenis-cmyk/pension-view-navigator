@@ -17,6 +17,7 @@ import CaseWorkbench from "./pages/admin/CaseWorkbench";
 import ReferenceData from "./pages/admin/ReferenceData";
 import ExpectedReceipts from "./pages/admin/ExpectedReceipts";
 import FeatureFlags from "./pages/admin/FeatureFlags";
+import OnboardingConfigPage from "./pages/admin/OnboardingConfig";
 import EventBus from "./pages/admin/EventBus";
 import CorporateActions from "./pages/admin/CorporateActions";
 import CassDailyRecon from "./pages/admin/CassDailyRecon";
@@ -354,6 +355,7 @@ const AppContent = () => {
               <Route path="/admin/case-workbench" element={<RoleGate allow={['adviser','admin']}><CaseWorkbench /></RoleGate>} />
               <Route path="/admin/reference-data" element={<RoleGate allow={['admin']}><ReferenceData /></RoleGate>} />
               <Route path="/admin/expected-receipts" element={<RoleGate allow={['admin']}><ExpectedReceipts /></RoleGate>} />
+              <Route path="/admin/onboarding-config" element={<RoleGate allow={['admin']}><OnboardingConfigPage /></RoleGate>} />
               <Route path="/admin/feature-flags" element={<RoleGate allow={['admin']}><FeatureFlags /></RoleGate>} />
               <Route path="/admin/event-bus" element={<RoleGate allow={['admin']}><EventBus /></RoleGate>} />
               <Route path="/admin/corporate-actions" element={<RoleGate allow={['admin']}><CorporateActions /></RoleGate>} />

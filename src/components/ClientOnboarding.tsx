@@ -12,6 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, User, Calculator, Target, FileText, CreditCard, Shield, ShieldCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import RealisticKYC from "@/components/RealisticKYC";
+import { Textarea } from "@/components/ui/textarea";
+import { useFirm } from "@/contexts/FirmContext";
+import { useOnboardingConfig, STANDARD_FIELDS } from "@/lib/onboardingConfig";
 
 const steps = [
   { id: 1, title: "Welcome", icon: User, description: "Personal information" },
@@ -57,6 +60,58 @@ const ClientOnboarding = () => {
   });
 
   const { toast } = useToast();
+  const { firmId } = useFirm();
+  const { config } = useOnboardingConfig(firmId);
+  const [custom, setCustom] = useState<Record<string, any>>({});
+  const show = (k: string) => config.standard[k]?.visible !== false;
+  const lbl = (k: string, d: string) => {
+    const l = config.standard[k]?.label || d;
+    const req = config.standard[k]?.required && show(k);
+    return req ? `${l} *` : l;
+  };
+  const stepOk = (step: number) => {
+    const std = STANDARD_FIELDS.filter(f => f.step === step && config.standard[f.key]?.visible && config.standard[f.key]?.required)
+      .every(f => !!(formData as any)[f.key]);
+    const cus = config.custom.filter(f => f.step === step && f.required)
+      .every(f => f.type === 'checkbox' ? custom[f.id] === true : !!String(custom[f.id] ?? '').trim());
+    return std && cus;
+  };
+  const renderCustom = (step: number) => {
+    const fields = config.custom.filter(f => f.step === step);
+    if (!fields.length) return null;
+    return (
+      <div className="mt-6 space-y-4 border-t pt-6">
+        <h3 className="text-sm font-semibold text-muted-foreground">Additional information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {fields.map(f => (
+            <div key={f.id} className={`space-y-2 ${f.type === 'textarea' ? 'md:col-span-2' : ''}`}>
+              {f.type === 'checkbox' ? (
+                <div className="flex items-center gap-2">
+                  <Checkbox id={f.id} checked={!!custom[f.id]} onCheckedChange={v => setCustom(c => ({ ...c, [f.id]: v === true }))} />
+                  <Label htmlFor={f.id}>{f.label}{f.required ? ' *' : ''}</Label>
+                </div>
+              ) : (
+                <>
+                  <Label htmlFor={f.id}>{f.label}{f.required ? ' *' : ''}</Label>
+                  {f.type === 'select' ? (
+                    <Select value={custom[f.id] ?? ''} onValueChange={v => setCustom(c => ({ ...c, [f.id]: v }))}>
+                      <SelectTrigger id={f.id}><SelectValue placeholder="Select" /></SelectTrigger>
+                      <SelectContent>{(f.options ?? []).map(o => <SelectItem key={o} value={o}>{o}</SelectItem>)}</SelectContent>
+                    </Select>
+                  ) : f.type === 'textarea' ? (
+                    <Textarea id={f.id} value={custom[f.id] ?? ''} onChange={e => setCustom(c => ({ ...c, [f.id]: e.target.value }))} />
+                  ) : (
+                    <Input id={f.id} type={f.type} value={custom[f.id] ?? ''} onChange={e => setCustom(c => ({ ...c, [f.id]: e.target.value }))} />
+                  )}
+                </>
+              )}
+              {f.helpText && <p className="text-xs text-muted-foreground">{f.helpText}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -576,11 +631,9 @@ const ClientOnboarding = () => {
   const isStepComplete = (stepNumber: number) => {
     switch (stepNumber) {
       case 1:
-        return formData.firstName && formData.lastName && formData.email && formData.dateOfBirth;
       case 2:
-        return formData.annualIncome && formData.employmentStatus && formData.existingPensions;
       case 3:
-        return formData.retirementAge && formData.monthlyContribution;
+        return stepOk(stepNumber);
       case 4:
         return formData.riskTolerance;
       case 5:
@@ -649,6 +702,7 @@ const ClientOnboarding = () => {
           <Card className="mb-8">
             <CardContent className="p-8">
               {renderStepContent()}
+              {currentStep <= 3 && renderCustom(currentStep)}
             </CardContent>
           </Card>
 

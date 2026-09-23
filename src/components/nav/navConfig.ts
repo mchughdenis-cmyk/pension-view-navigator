@@ -291,6 +291,7 @@ export const NAV_BY_ROLE: Record<Role, NavGroup[]> = {
     {
       label: "System & finance",
       items: [
+        { title: "Onboarding journey settings", url: "/admin/onboarding-config", icon: Cog },
         { title: "Feature flags", url: "/admin/feature-flags", icon: Cog },
         { title: "Reference data (HMRC)", url: "/admin/reference-data", icon: Database },
         { title: "Domain event bus", url: "/admin/event-bus", icon: Network },

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,16 +117,18 @@ const ClientOnboarding = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const order = config.stepOrder ?? [1, 2, 3, 4, 5, 6, 7];
+  const orderedSteps = order.map(id => steps.find(s => s.id === id)!).filter(Boolean);
+  const pos = Math.max(0, order.indexOf(currentStep));
+  const isLast = pos === order.length - 1;
+  useEffect(() => { setCurrentStep(order[0]); }, [order.join(',')]);
+
   const nextStep = () => {
-    if (currentStep < 7) {
-      setCurrentStep(currentStep + 1);
-    }
+    if (!isLast) setCurrentStep(order[pos + 1]);
   };
 
   const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (pos > 0) setCurrentStep(order[pos - 1]);
   };
 
   const handleSubmit = () => {
@@ -657,9 +659,9 @@ const ClientOnboarding = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <h1 className="text-3xl font-bold">Client Onboarding</h1>
-              <Badge variant="outline">Step {currentStep} of 7</Badge>
+              <Badge variant="outline">Step {pos + 1} of {order.length}</Badge>
             </div>
-            <Progress value={((currentStep - 1) / (steps.length - 1)) * 100} className="mb-6 h-2" />
+            <Progress value={(pos / (order.length - 1)) * 100} className="mb-6 h-2" />
 
             {/* Step Navigation — continuous track spanning all steps */}
             <div className="relative">
@@ -668,15 +670,15 @@ const ClientOnboarding = () => {
               <div
                 className="absolute left-5 top-5 h-0.5 bg-primary -z-0 transition-all"
                 style={{
-                  width: `calc((100% - 2.5rem) * ${(currentStep - 1) / (steps.length - 1)})`,
+                  width: `calc((100% - 2.5rem) * ${pos / (order.length - 1)})`,
                 }}
                 aria-hidden="true"
               />
               <div className="relative flex items-start justify-between gap-2">
-                {steps.map((step) => {
+                {orderedSteps.map((step, i) => {
                   const Icon = step.icon;
                   const isActive = currentStep === step.id;
-                  const isCompleted = currentStep > step.id || isStepComplete(step.id);
+                  const isCompleted = pos > i || isStepComplete(step.id);
 
                   return (
                     <div key={step.id} className="flex flex-col items-center text-center flex-1 min-w-0">
@@ -711,12 +713,12 @@ const ClientOnboarding = () => {
             <Button 
               variant="outline" 
               onClick={prevStep} 
-              disabled={currentStep === 1}
+              disabled={pos === 0}
             >
               Previous
             </Button>
             
-            {currentStep < 7 ? (
+            {!isLast ? (
               <Button 
                 onClick={nextStep} 
                 disabled={!canProceed}

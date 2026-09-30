@@ -6,13 +6,13 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Lock, Plus, Save, Trash2, RotateCcw } from "lucide-react";
+import { Lock, Plus, Save, Trash2, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
 import { toast } from "sonner";
 import { useFirm } from "@/contexts/FirmContext";
 import { useRole } from "@/contexts/RoleContext";
 import {
   STANDARD_FIELDS, STEP_NAMES, CustomField, FieldType, OnboardingConfig,
-  defaultConfig, loadOnboardingConfig, saveOnboardingConfig, normalise,
+  JOURNEY_STEPS, defaultConfig, loadOnboardingConfig, saveOnboardingConfig, normalise,
 } from "@/lib/onboardingConfig";
 
 const DEFAULT = "__default__";
@@ -36,6 +36,17 @@ export default function OnboardingConfigPage() {
   const addCustom = () => setCfg(c => ({
     ...c, custom: [...c.custom, { id: crypto.randomUUID(), label: "New question", type: "text", step: 1, required: false }],
   }));
+
+  const moveStep = (i: number, d: -1 | 1) => setCfg(c => {
+    const o = [...c.stepOrder]; const j = i + d;
+    if (j < 0 || j >= o.length - 1) return c;
+    [o[i], o[j]] = [o[j], o[i]]; return { ...c, stepOrder: o };
+  });
+  const moveCustom = (id: string, d: -1 | 1) => setCfg(c => {
+    const a = [...c.custom]; const i = a.findIndex(f => f.id === id); const j = i + d;
+    if (j < 0 || j >= a.length) return c;
+    [a[i], a[j]] = [a[j], a[i]]; return { ...c, custom: a };
+  });
 
   const save = async () => {
     const bad = cfg.custom.find(f => !f.label.trim() || (f.type === "select" && !(f.options?.length)));
@@ -71,6 +82,32 @@ export default function OnboardingConfigPage() {
           <Button onClick={save} disabled={saving}><Save className="h-4 w-4 mr-2" />Save</Button>
         </div>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Journey order</CardTitle>
+          <CardDescription>Reorder the steps to match the firm's operating model. The contribution and submission step always comes last.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {cfg.stepOrder.map((id, i) => {
+            const locked = id === 7;
+            return (
+              <div key={id} className="flex items-center gap-3 p-2 border rounded-md">
+                <Badge variant="outline" className="w-8 justify-center">{i + 1}</Badge>
+                <span className="flex-1 text-sm">{JOURNEY_STEPS[id]}</span>
+                {locked ? (
+                  <Badge variant="secondary"><Lock className="h-3 w-3 mr-1" />Always last</Badge>
+                ) : (
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" aria-label="Move up" disabled={i === 0} onClick={() => moveStep(i, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" aria-label="Move down" disabled={i >= cfg.stepOrder.length - 2} onClick={() => moveStep(i, 1)}><ArrowDown className="h-4 w-4" /></Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -111,7 +148,7 @@ export default function OnboardingConfigPage() {
         <CardHeader className="flex flex-row items-start justify-between">
           <div>
             <CardTitle className="text-base">Firm-specific questions</CardTitle>
-            <CardDescription>Add extra questions to any of the first three steps.</CardDescription>
+            <CardDescription>Add extra questions to any of the first three steps. Use the arrows to set the order they appear in.</CardDescription>
           </div>
           <Button size="sm" onClick={addCustom}><Plus className="h-4 w-4 mr-1" />Add question</Button>
         </CardHeader>
@@ -133,10 +170,12 @@ export default function OnboardingConfigPage() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{[1, 2, 3].map(s => <SelectItem key={s} value={String(s)}>{STEP_NAMES[s]}</SelectItem>)}</SelectContent>
                 </Select></div>
-              <label className="col-span-6 md:col-span-2 flex items-center gap-2 text-sm pb-2">
+              <label className="col-span-6 md:col-span-1 flex items-center gap-2 text-sm pb-2">
                 <Switch checked={f.required} onCheckedChange={v => setCustom(f.id, { required: v })} />Required
               </label>
-              <div className="col-span-6 md:col-span-1 flex justify-end">
+              <div className="col-span-6 md:col-span-2 flex justify-end">
+                <Button variant="ghost" size="icon" aria-label="Move up" onClick={() => moveCustom(f.id, -1)}><ArrowUp className="h-4 w-4" /></Button>
+                <Button variant="ghost" size="icon" aria-label="Move down" onClick={() => moveCustom(f.id, 1)}><ArrowDown className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" onClick={() => setCfg(c => ({ ...c, custom: c.custom.filter(x => x.id !== f.id) }))}><Trash2 className="h-4 w-4" /></Button>
               </div>
               {f.type === "select" && (

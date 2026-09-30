@@ -27,7 +27,15 @@ export interface CustomField {
 export interface OnboardingConfig {
   standard: Record<string, StandardFieldSetting>;
   custom: CustomField[];
+  /** Journey step order (ids 1-7). Step 7 (contribution & submit) is always last. */
+  stepOrder: number[];
 }
+
+export const JOURNEY_STEPS: Record<number, string> = {
+  1: "Personal information", 2: "Financial details", 3: "Goals & objectives", 4: "Risk assessment",
+  5: "Product selection", 6: "Identity verification (KYC/AML)", 7: "Initial contribution & submit",
+};
+export const DEFAULT_STEP_ORDER = [1, 2, 3, 4, 5, 6, 7];
 
 export const STEP_NAMES: Record<number, string> = { 1: "Personal information", 2: "Financial details", 3: "Goals & objectives" };
 
@@ -49,6 +57,7 @@ export const STANDARD_FIELDS: StandardField[] = [
 export const defaultConfig = (): OnboardingConfig => ({
   standard: Object.fromEntries(STANDARD_FIELDS.map(f => [f.key, { visible: true, required: true }])),
   custom: [],
+  stepOrder: [...DEFAULT_STEP_ORDER],
 });
 
 /** Enforce locked mandatory fields regardless of stored config */
@@ -59,7 +68,11 @@ export function normalise(cfg: Partial<OnboardingConfig> | null | undefined): On
     if (f.mandatory) standard[f.key] = { ...standard[f.key], visible: true, required: true };
     else if (!standard[f.key].visible) standard[f.key] = { ...standard[f.key], required: false };
   }
-  return { standard, custom: Array.isArray(cfg?.custom) ? cfg!.custom : [] };
+  const raw = Array.isArray(cfg?.stepOrder) ? cfg!.stepOrder.filter(n => n >= 1 && n <= 6) : [];
+  const stepOrder = [...new Set(raw)];
+  for (const n of [1, 2, 3, 4, 5, 6]) if (!stepOrder.includes(n)) stepOrder.push(n);
+  stepOrder.push(7);
+  return { standard, custom: Array.isArray(cfg?.custom) ? cfg!.custom : [], stepOrder };
 }
 
 export const configKey = (firmId: string | null) => `onboarding_config:${firmId ?? "default"}`;

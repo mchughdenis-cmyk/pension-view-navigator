@@ -170,10 +170,10 @@ export default function OnboardingConfigPage() {
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{[1, 2, 3].map(s => <SelectItem key={s} value={String(s)}>{STEP_NAMES[s]}</SelectItem>)}</SelectContent>
                 </Select></div>
-              <label className="col-span-6 md:col-span-2 flex items-center gap-2 text-sm pb-2">
+              <label className="col-span-6 md:col-span-1 flex items-center gap-2 text-sm pb-2">
                 <Switch checked={f.required} onCheckedChange={v => setCustom(f.id, { required: v })} />Required
               </label>
-              <div className="col-span-6 md:col-span-1 flex justify-end">
+              <div className="col-span-6 md:col-span-2 flex justify-end">
                 <Button variant="ghost" size="icon" aria-label="Move up" onClick={() => moveCustom(f.id, -1)}><ArrowUp className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" aria-label="Move down" onClick={() => moveCustom(f.id, 1)}><ArrowDown className="h-4 w-4" /></Button>
                 <Button variant="ghost" size="icon" onClick={() => setCfg(c => ({ ...c, custom: c.custom.filter(x => x.id !== f.id) }))}><Trash2 className="h-4 w-4" /></Button>
